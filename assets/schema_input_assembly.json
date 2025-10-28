@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/seqsubmit/main/assets/schema_input.json",
+    "$id": "https://raw.githubusercontent.com/nf-core/seqsubmit/main/assets/schema_input_assembly.json",
     "title": "nf-core/seqsubmit pipeline - params.input schema",
     "description": "Schema for the file provided with params.input",
     "type": "array",
@@ -34,10 +34,10 @@
                 "description": "Reads sequence file"
             },
             "coverage": {
-                "type": "float",
-                "description": "Mean coverage"
+                "type": "number",
+                "description": "Mean assembly coverage"
             }
         },
-        "required": ["sample", "fasta", "accession"]
+        "required": ["id", "fasta"]
     }
 }
