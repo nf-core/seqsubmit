@@ -1,7 +1,7 @@
 #!/bin/bash
 
 nextflow main.nf \
-   -profile singularity \
-   --input assets/samplesheet.csv \
+   -profile docker \
+   --input assets/samplesheet_test_missing_coverage.csv \
    --outdir test_output \
-   --ena_genome_study_accession PRJEB98843 
+   --ena_genome_study_accession PRJEB98843

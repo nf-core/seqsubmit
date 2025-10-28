@@ -5,6 +5,7 @@
 */
 include { GENOME_UPLOAD          } from '../modules/local/genome_upload'
 include { ENA_WEBIN_CLI          } from '../modules/local/ena_webin_cli'
+include { CALCULATE_COVERAGE     } from '../modules/local/calculate_coverage'
 
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
@@ -41,22 +42,53 @@ workflow GENOMESUBMIT {
             // genome_coverage is at index 9 (10th column in the row)
             def coverage = row[9]
             has_coverage: coverage != null && coverage != '' && coverage != []
-            needs_coverage: true
+            needs_coverage: coverage == null || coverage == '' || coverage == []
         }
         .set { ch_coverage_split }
 
-    // Log warning for samples missing coverage
-    ch_coverage_split.needs_coverage
-        .subscribe { row ->
-            def sample_name = row[0]
-            def coverage = row[9]
-            if (coverage == null || coverage == '' || coverage == []) {
-                log.warn "Sample ${sample_name} is missing genome_coverage - value will be left empty in submission"
+    // For samples missing coverage, calculate it
+    ch_samples_needing_coverage = ch_coverage_split.needs_coverage
+        .map { row ->
+            def sample_id = row[0]
+            // Extract just the sample ID if it's in [id:xxx] format
+            if (sample_id instanceof Map) {
+                sample_id = sample_id.id
+            } else if (sample_id.toString().contains('[id:')) {
+                def match = sample_id.toString() =~ /\[id:([^\]]+)\]/
+                if (match) {
+                    sample_id = match[0][1]
+                }
             }
+            def meta = [id: sample_id]
+            def fasta_file = file(row[1])
+            log.warn "Sample ${sample_id} is missing genome_coverage - calculating coverage using CALCULATE_COVERAGE module"
+            [ meta, fasta_file, row ]  // Pass the full row along for later merging
         }
 
-    // Create TSV with metadata fields
-    ch_remaining_tsv = ch_samplesheet
+    // Calculate coverage for samples that need it
+    CALCULATE_COVERAGE(
+        ch_samples_needing_coverage.map { meta, fasta, row -> [meta, fasta] }
+    )
+    ch_versions = ch_versions.mix( CALCULATE_COVERAGE.out.versions.first() )
+
+    // Merge calculated coverage back into the row data
+    ch_calculated_coverage = ch_samples_needing_coverage
+        .map { meta, fasta, row -> [meta.id, row] }
+        .join(
+            CALCULATE_COVERAGE.out.coverage.map { meta, cov -> [meta.id, cov] }
+        )
+        .map { sample_id, row, calculated_cov ->
+            // Update the coverage value in the row (index 9)
+            row[9] = calculated_cov
+            row
+        }
+
+    // Combine samples with original coverage and calculated coverage
+    ch_all_samples_with_coverage = ch_coverage_split.has_coverage
+        .mix(ch_calculated_coverage)
+
+    // Create TSV with metadata fields (now with coverage values for all samples)
+    ch_remaining_tsv = ch_all_samples_with_coverage
         .map { row ->
             def cleanRow = row.collect { item ->
                 item instanceof List && item.isEmpty() ? '' : item.toString()

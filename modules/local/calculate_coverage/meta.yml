@@ -1,0 +1,41 @@
+name: calculate_coverage
+description: Calculate genome coverage for MAGs/bins (dummy implementation for testing)
+keywords:
+  - coverage
+  - genome coverage
+  - mags
+  - bins
+tools:
+  - calculate_coverage:
+      description: |
+        Dummy coverage calculator that returns a fixed value of 100500 for testing purposes.
+        This will be replaced with CoverM in the future.
+      documentation: https://github.com/nf-core/seqsubmit
+      licence: ["MIT"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information.
+        e.g. [ id:'test_sample' ]
+  - fasta:
+      type: file
+      description: FASTA file containing the MAG/bin assembly
+      pattern: "*.{fasta,fna,fas,fa,fa.gz,fasta.gz}"
+
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [ id:'test_sample' ]
+  - coverage:
+      type: value
+      description: Calculated genome coverage value
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+
+authors:
+  - "@ribaribaworking"
