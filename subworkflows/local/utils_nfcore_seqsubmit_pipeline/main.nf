@@ -96,8 +96,15 @@ workflow PIPELINE_INITIALISATION {
     // Create channel from input file provided through params.input
     //
 
-    ch_samplesheet = channel
-        .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
+    if ( params.input_genome ) {
+        ch_samplesheet = Channel
+            .fromList(samplesheetToList(params.input_genome, "${projectDir}/assets/schema_input_genome.json"))
+    } else if ( params.input_assembly ) {
+        ch_samplesheet = Channel
+            .fromList(samplesheetToList(params.input_assembly, "${projectDir}/assets/schema_input_assembly.json"))
+    } else {
+        error("No input was found. Please, point to the location of your samplesheet using --input_genome or --input_assembly")
+    }
 
     emit:
     samplesheet = ch_samplesheet

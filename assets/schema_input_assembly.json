@@ -1,0 +1,43 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/seqsubmit/main/assets/schema_input.json",
+    "title": "nf-core/seqsubmit pipeline - params.input schema",
+    "description": "Schema for the file provided with params.input",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "id": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "ID name must be provided and cannot contain spaces",
+                "meta": ["id"]
+            },
+            "fasta": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?a\\.gz$",
+                "errorMessage": "FASTA file must be provided, cannot contain spaces and must have extension '.fa.gz' or '.fasta.gz'",
+                "description": "Metagenomic assembly sequence file"
+            },
+            "accession": {
+                "type": "string",
+                "description": "FASTQ ENA accession"
+            },
+            "fastq": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
+                "errorMessage": "FASTA file must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
+                "description": "Reads sequence file"
+            },
+            "coverage": {
+                "type": "string",
+                "description": "Coverage"
+            }
+        },
+        "required": ["sample", "fasta", "accession"]
+    }
+}
