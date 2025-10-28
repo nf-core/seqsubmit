@@ -53,6 +53,20 @@
                 "type": "number",
                 "description": "MAG/bin coverage value"
             },
+            "raw_fastq1": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.(fastq|fq)(\\.gz)?$",
+                "errorMessage": "Raw FASTQ file for read 1 must have extension '.fastq.gz', '.fq.gz', '.fastq', or '.fq'",
+                "description": "Raw sequencing reads file 1 (for coverage calculation)"
+            },
+            "raw_fastq2": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.(fastq|fq)(\\.gz)?$",
+                "errorMessage": "Raw FASTQ file for read 2 must have extension '.fastq.gz', '.fq.gz', '.fastq', or '.fq'",
+                "description": "Raw sequencing reads file 2 (for coverage calculation, optional for single-end)"
+            },
             "metagenome": {
                 "type": "string",
                 "description": "ENA accepted metagenome name"

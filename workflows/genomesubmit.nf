@@ -5,7 +5,7 @@
 */
 include { GENOME_UPLOAD          } from '../modules/local/genome_upload'
 include { ENA_WEBIN_CLI          } from '../modules/local/ena_webin_cli'
-include { CALCULATE_COVERAGE     } from '../modules/local/calculate_coverage'
+include { COVERM_GENOME          } from '../modules/nf-core/coverm/genome/main'
 
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
@@ -46,11 +46,12 @@ workflow GENOMESUBMIT {
         }
         .set { ch_coverage_split }
 
-    // For samples missing coverage, calculate it
+    // For samples missing coverage, check if reads are available
+    // raw_fastq1 is at index 10, raw_fastq2 is at index 11 (after adding new columns)
     ch_samples_needing_coverage = ch_coverage_split.needs_coverage
-        .map { row ->
+        .branch { row ->
             def sample_id = row[0]
-            // Extract just the sample ID if it's in [id:xxx] format
+            // Extract sample ID if in [id:xxx] format
             if (sample_id instanceof Map) {
                 sample_id = sample_id.id
             } else if (sample_id.toString().contains('[id:')) {
@@ -59,29 +60,93 @@ workflow GENOMESUBMIT {
                     sample_id = match[0][1]
                 }
             }
-            def meta = [id: sample_id]
-            def fasta_file = file(row[1])
-            log.warn "Sample ${sample_id} is missing genome_coverage - calculating coverage using CALCULATE_COVERAGE module"
-            [ meta, fasta_file, row ]  // Pass the full row along for later merging
+
+            def has_fastq1 = row[10] != null && row[10] != '' && row[10] != []
+            def has_fastq2 = row[11] != null && row[11] != '' && row[11] != []
+
+            with_reads: has_fastq1  // Has at least read 1
+            without_reads: true     // No reads available
         }
 
-    // Calculate coverage for samples that need it
-    CALCULATE_COVERAGE(
-        ch_samples_needing_coverage.map { meta, fasta, row -> [meta, fasta] }
-    )
-    ch_versions = ch_versions.mix( CALCULATE_COVERAGE.out.versions.first() )
+    // Branch 1: Samples WITH reads - use COVERM_GENOME
+    ch_samples_with_reads = ch_samples_needing_coverage.with_reads
+        .map { row ->
+            def sample_id = row[0]
+            if (sample_id instanceof Map) {
+                sample_id = sample_id.id
+            } else if (sample_id.toString().contains('[id:')) {
+                def match = sample_id.toString() =~ /\[id:([^\]]+)\]/
+                if (match) {
+                    sample_id = match[0][1]
+                }
+            }
 
-    // Merge calculated coverage back into the row data
-    ch_calculated_coverage = ch_samples_needing_coverage
-        .map { meta, fasta, row -> [meta.id, row] }
+            def has_fastq2 = row[11] != null && row[11] != '' && row[11] != []
+            def meta = [id: sample_id, single_end: !has_fastq2]
+            def fasta_file = file(row[1])
+            def fastq1 = file(row[10])
+            def fastq2 = has_fastq2 ? file(row[11]) : []
+            def reads = has_fastq2 ? [fastq1, fastq2] : [fastq1]
+
+            log.info "Sample ${sample_id} is missing genome_coverage - calculating with CoverM using provided reads"
+            [ meta, reads, fasta_file, row ]
+        }
+
+    // Run COVERM_GENOME for samples with reads
+    COVERM_GENOME(
+        ch_samples_with_reads.map { meta, reads, fasta, row -> [meta, reads] },
+        ch_samples_with_reads.map { meta, reads, fasta, row -> [[id: 'reference'], fasta] },
+        false,        // bam_input = false (we have FASTQ)
+        false,        // interleaved = false
+        'file'        // ref_mode = file (single FASTA per sample)
+    )
+    ch_versions = ch_versions.mix( COVERM_GENOME.out.versions.first() )
+
+    // Parse CoverM TSV output to extract coverage value
+    ch_coverm_results = ch_samples_with_reads
+        .map { meta, reads, fasta, row -> [meta.id, row] }
         .join(
-            CALCULATE_COVERAGE.out.coverage.map { meta, cov -> [meta.id, cov] }
+            COVERM_GENOME.out.coverage.map { meta, tsv ->
+                // Parse the TSV file to extract mean coverage value
+                // CoverM output format: "Genome\tSample Mean" (malformed header) or "Genome\tSample\tMean"
+                // Data line: "genome_name\t25.1329"
+                def coverage_value = 0.0
+                def lines = tsv.text.split('\n')
+                if (lines.size() > 1) {
+                    // Skip header, parse data line
+                    def data_line = lines[1].split('\t')
+                    if (data_line.size() > 1) {
+                        // The last column contains the coverage value
+                        coverage_value = data_line[-1].trim() as Double
+                    }
+                }
+                [meta.id, coverage_value]
+            }
         )
         .map { sample_id, row, calculated_cov ->
-            // Update the coverage value in the row (index 9)
             row[9] = calculated_cov
             row
         }
+
+    // Branch 2: Samples WITHOUT reads - leave coverage empty
+    ch_samples_without_reads = ch_samples_needing_coverage.without_reads
+        .map { row ->
+            def sample_id = row[0]
+            if (sample_id instanceof Map) {
+                sample_id = sample_id.id
+            } else if (sample_id.toString().contains('[id:')) {
+                def match = sample_id.toString() =~ /\[id:([^\]]+)\]/
+                if (match) {
+                    sample_id = match[0][1]
+                }
+            }
+            log.warn "Sample ${sample_id} is missing genome_coverage and no reads provided - coverage will be empty in submission"
+            // Keep coverage empty (don't modify row[9])
+            row
+        }
+
+    // Combine all calculated coverage results (only CoverM results, no dummy values)
+    ch_calculated_coverage = ch_coverm_results.mix(ch_samples_without_reads)
 
     // Combine samples with original coverage and calculated coverage
     ch_all_samples_with_coverage = ch_coverage_split.has_coverage
@@ -108,7 +173,20 @@ workflow GENOMESUBMIT {
                 cleanRow[1] = file(cleanRow[1]).name
             }
 
-            cleanRow.join('\t')
+            // IMPORTANT: Exclude raw_fastq1 (index 10) and raw_fastq2 (index 11) from the TSV
+            // genome_uploader expects: genome_name, genome_path, accessions, assembly_software,
+            // binning_software, binning_parameters, stats_generation_software, completeness,
+            // contamination, genome_coverage, metagenome, co-assembly, broad_environment,
+            // local_environment, environmental_medium, rRNA_presence, NCBI_lineage
+            def tsvRow = []
+            cleanRow.eachWithIndex { item, idx ->
+                // Skip indices 10 and 11 (raw_fastq1 and raw_fastq2)
+                if (idx != 10 && idx != 11) {
+                    tsvRow << item
+                }
+            }
+
+            tsvRow.join('\t')
         }
         .collectFile(
             name: 'submission_metadata.tsv',
