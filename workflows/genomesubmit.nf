@@ -35,6 +35,26 @@ workflow GENOMESUBMIT {
             [ row[0], file(row[1]) ]
         }
 
+    // Check for missing genome_coverage and split samples
+    ch_samplesheet
+        .branch { row ->
+            // genome_coverage is at index 9 (10th column in the row)
+            def coverage = row[9]
+            has_coverage: coverage != null && coverage != '' && coverage != []
+            needs_coverage: true
+        }
+        .set { ch_coverage_split }
+
+    // Log warning for samples missing coverage
+    ch_coverage_split.needs_coverage
+        .subscribe { row ->
+            def sample_name = row[0]
+            def coverage = row[9]
+            if (coverage == null || coverage == '' || coverage == []) {
+                log.warn "Sample ${sample_name} is missing genome_coverage - value will be left empty in submission"
+            }
+        }
+
     // Create TSV with metadata fields
     ch_remaining_tsv = ch_samplesheet
         .map { row ->
