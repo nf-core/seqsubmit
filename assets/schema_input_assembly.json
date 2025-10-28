@@ -34,8 +34,8 @@
                 "description": "Reads sequence file"
             },
             "coverage": {
-                "type": "string",
-                "description": "Coverage"
+                "type": "float",
+                "description": "Mean coverage"
             }
         },
         "required": ["sample", "fasta", "accession"]
