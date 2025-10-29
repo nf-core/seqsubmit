@@ -1,0 +1,26 @@
+{
+    "Run validate with no failures": {
+        "content": [
+            [
+                "versions.yml:md5,a38fb03bead632d71062a101d7889ded"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.04.8"
+        },
+        "timestamp": "2025-10-29T14:09:00.202532371"
+    },
+    "Run push with no failures": {
+        "content": [
+            [
+                "versions.yml:md5,a38fb03bead632d71062a101d7889ded"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.04.8"
+        },
+        "timestamp": "2025-10-29T14:01:42.491885321"
+    }
+}

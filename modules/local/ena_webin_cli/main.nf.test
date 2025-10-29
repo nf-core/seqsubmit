@@ -1,0 +1,86 @@
+nextflow_process {
+
+    name "Test Process ENA_WEBIN_CLI"
+    script "modules/local/ena_webin_cli/main.nf"
+    process "ENA_WEBIN_CLI"
+
+    test("Run validate with no failures") {
+
+        when {
+            params {
+                webincli_submit = false
+            }
+            process {
+                """
+                input[0] = Channel.of(
+                    tuple(
+                        [id: 'lachnospira_eligens'],
+                        file("https://github.com/nf-core/test-datasets/raw/refs/heads/seqsubmit/test_data/bins/bin_lachnospira_eligens.fa.gz", checkIfExists: true),
+                        file("https://github.com/nf-core/test-datasets/raw/refs/heads/seqsubmit/test_data/lachnospira_eligens.manifest", checkIfExists: true)
+                    )
+                )
+                """
+            }
+        }
+
+        then {
+            assertAll {
+                assert process.success
+                assert process.out.upload_status[0][1] == 'success'
+                assert path(process.out.webin_report[0][1]).readLines()[0].contains("Submission(s) validated successfully")
+                assert snapshot(process.out.versions).match()
+            }
+        }
+
+    }
+
+    test("Run push with no failures") {
+        setup {
+            run("GENERATE_TEST_DATA") {
+                script "./setup_test.nf"
+                process {
+                    """
+                    input[0] = Channel.of(
+                        file("https://github.com/nf-core/test-datasets/raw/refs/heads/seqsubmit/test_data/lachnospira_eligens.manifest", checkIfExists: true)
+                    )
+                    """
+                }
+            }
+
+        }
+
+        when {
+            params {
+                webincli_submit = true
+                test_upload = true
+            }
+            process {
+                """
+                def fasta = file("https://github.com/nf-core/test-datasets/raw/refs/heads/seqsubmit/test_data/bins/bin_lachnospira_eligens.fa.gz", checkIfExists: true)
+
+                input[0] = GENERATE_TEST_DATA.out.test_manifest.map { manifest ->
+                    tuple(
+                        [id: 'lachnospira_eligens'],
+                        fasta,
+                        file(manifest)
+                    )
+                }
+                """
+            }
+        }
+
+        then {
+            assertAll {
+                assert process.success
+                assert process.out.upload_status[0][1] == 'success'
+                assert snapshot(process.out.versions).match()
+                assert path(process.out.webin_report[0][1]).readLines()[1].contains("Submission(s) validated successfully")
+                assert path(process.out.webin_report[0][1]).readLines()[5].contains("The submission has been completed successfully")
+                assert path(process.out.webin_report[0][1]).readLines()[6].contains("This was a TEST submission(s)")
+
+            }
+        }
+
+    }
+
+}
