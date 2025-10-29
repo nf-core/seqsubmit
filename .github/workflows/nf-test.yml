@@ -17,6 +17,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  WEBIN_ACCOUNT: ${{ secrets.WEBIN_ACCOUNT }}
+  WEBIN_PASSWORD: ${{ secrets.WEBIN_PASSWORD }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   NFT_VER: "0.9.3"
   NFT_WORKDIR: "~"
@@ -81,6 +83,8 @@ jobs:
           - "25.04.0"
           - "latest-everything"
     env:
+      WEBIN_ACCOUNT: ${{ secrets.WEBIN_ACCOUNT }}
+      WEBIN_PASSWORD: ${{ secrets.WEBIN_PASSWORD }}
       NXF_ANSI_LOG: false
       TOTAL_SHARDS: ${{ needs.nf-test-changes.outputs.total_shards }}
 
