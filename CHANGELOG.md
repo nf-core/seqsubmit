@@ -9,6 +9,9 @@ Initial release of nf-core/seqsubmit, created with the [nf-core](https://nf-co.r
 
 ### `Added`
 
+- [#12](https://github.com/nf-core/seqsubmit/pull/12)
+  - Add initial version of `GENERATE_ASSEMBLY_MANIFEST` (by @fxquah)
+
 - [#2](https://github.com/nf-core/proteinfamilies/pull/2)
   - Added initial versions of local modules for `GENOME_UPLOAD` and `ENA_WEBIN_CLI`. (by @KateSakharova and @vagkaratzas)
   - Added initial version of the `GENOMESUBMIT` workflow. (by @KateSakharova and @vagkaratzas)

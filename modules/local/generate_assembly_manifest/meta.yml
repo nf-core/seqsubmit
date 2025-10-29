@@ -1,0 +1,50 @@
+name: "generate_assembly_manifest"
+description: Generate manifest files for genome assemblies using assembly-uploader
+keywords:
+  - ena
+  - manifest
+  - upload
+tools:
+  - assembly-uploader:
+      description: Make a manifest file for each assembly.
+        Co-assemblies cannot be generated from a mix of private and public runs -
+        all runs used in a co-assembly must have the same privacy status (all private or all public).
+      documentation: https://github.com/EBI-Metagenomics/assembly_uploader/
+      licence: ["Apache License"]
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information.
+          e.g. [ id:'test', single_end:false ]
+    - assembly_fasta:
+        type: file
+        description: Genome assembly FASTA file.
+    - data_csv:
+        type: file
+        description: |
+          CSV file containing metadata -
+          runs (comma-separated and in quotes, example: "SRR1234,SRR5678"),
+          coverage, assembler, version, filepath and optionally sample.
+    - assembly_study:
+        type: value
+        description: |
+          Pre-existing study ID to submit to if available.
+          Must exist in the webin account.
+
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information.
+        e.g. [ id:'test', single_end:false ]
+  - manifest:
+      type: file
+      description: Manifest file required for submission with webin-cli.
+  - versions:
+      type: file
+      description: File containing software versions.
+      pattern: "versions.yml"
+
+authors:
+  - "@fxquah"
