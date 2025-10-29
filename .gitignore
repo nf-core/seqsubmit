@@ -8,4 +8,4 @@ testing*
 *.pyc
 null/
 
-test_output
+test_coverM_output
