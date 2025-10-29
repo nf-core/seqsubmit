@@ -81,6 +81,8 @@ jobs:
           - "25.04.0"
           - "latest-everything"
     env:
+      WEBIN_ACCOUNT: ${{ secrets.WEBIN_ACCOUNT }}
+      WEBIN_PASSWORD: ${{ secrets.WEBIN_PASSWORD }}
       NXF_ANSI_LOG: false
       TOTAL_SHARDS: ${{ needs.nf-test-changes.outputs.total_shards }}
 
