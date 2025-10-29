@@ -9,3 +9,5 @@ testing*
 null/
 .idea/
 test_data
+.nf-test/
+.nf-test.log
