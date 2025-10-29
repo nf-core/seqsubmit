@@ -1,0 +1,66 @@
+Changes in component 'nf-core/fastavalidator'
+'modules/nf-core/fastavalidator/environment.yml' is unchanged
+'modules/nf-core/fastavalidator/meta.yml' is unchanged
+Changes in 'fastavalidator/main.nf':
+--- modules/nf-core/fastavalidator/main.nf
++++ modules/nf-core/fastavalidator/main.nf
+@@ -27,25 +27,48 @@
+         || echo "Errors from fasta_validate printed to ${prefix}.error.log"
+ 
+     if [ \$(cat "${prefix}.error.log" | wc -l) -gt 0 ]; then
+-        echo "Validation failed..."
++        echo "py_fasta_validator Validation failed..."
+ 
+         cat \\
+             "${prefix}.error.log"
+     else
+-        echo "Validation successful..."
++        echo "py_fasta_validator Validation successful..."
+ 
+-        mv \\
+-            "${prefix}.error.log" \\
+-            fasta_validate.stderr
++        ##Count contigs (> headers). Require >1.
++        echo "[INFO] Checking contig count..."
+ 
+-        echo "Validation successful..." \\
+-            > "${prefix}.success.log"
++        if [[ "${fasta}" == *.gz ]]; then
++            CONTIGS=\$(zgrep -c '^>' "${fasta}" || true)
++        else
++            CONTIGS=\$(grep  -c '^>' "${fasta}" || true)
++        fi
++
++        echo "[INFO] Contigs detected: \${CONTIGS}" >> "${prefix}.error.log"
++
++        if [ "\${CONTIGS}" -lt 2 ]; then
++            echo "Validation failed..."
++            echo "[ERROR] Assembly has <2 contigs. Require more than 1 contig." >> "${prefix}.error.log"
++            cat \\
++                "${prefix}.error.log"
++        else
++            echo "[OK] Contig check passed (>1 contig)" >> "${prefix}.error.log"
++            echo "Validation successful..."
++
++            mv \\
++                "${prefix}.error.log" \\
++                fasta_validate.stderr
++
++            echo "Validation successful..." \\
++                > "${prefix}.success.log"
++        
++        fi
+     fi
+ 
+     cat <<-END_VERSIONS > versions.yml
+     "${task.process}":
+         py_fasta_validator: \$(py_fasta_validator -v | sed 's/.* version //')
+     END_VERSIONS
++
+     """
+ 
+     stub:
+
+'modules/nf-core/fastavalidator/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/fastavalidator/tests/main.nf.test' is unchanged
+************************************************************
