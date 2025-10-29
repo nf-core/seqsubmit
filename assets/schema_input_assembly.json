@@ -46,6 +46,6 @@
                 "description": "FASTQ ENA accession"
             }
         },
-        "required": ["id", "fasta"]
+        "required": ["id", "fasta", "accession"]
     }
 }

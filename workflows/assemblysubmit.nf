@@ -39,14 +39,14 @@ workflow ASSEMBLYSUBMIT {
                     [ row[0] + [ single_end:true ], file(row[1]), file(row[2]) ]
                 }
             } else { // If reads not available
-                [ row[0], file(row[1]) ] 
+                [ row[0], file(row[1]) ]
             }
        }
         .branch { tuple ->
             no_reads: tuple.size() == 2 // Channel with no reads
             reads: tuple.size() >= 3 // Channel with reads
         }
-        
+
         ch_assemblies.reads.view()
 
     COVERM_CONTIG (
