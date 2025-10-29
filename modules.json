@@ -5,20 +5,32 @@
         "https://github.com/nf-core/modules.git": {
             "modules": {
                 "nf-core": {
+                    "barrnap": {
+                        "branch": "master",
+                        "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
+                        "installed_by": ["modules"]
+                    },
                     "coverm/contig": {
                         "branch": "master",
                         "git_sha": "27e31681fdbf1e511257355a236037a8cd9c2b2e",
                         "installed_by": ["modules"]
                     },
                     "fastavalidator": {
-                        "branch": "master",
-                        "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
-                        "installed_by": ["modules"],
-                        "patch": "modules/nf-core/fastavalidator/fastavalidator.diff"
+                      "branch": "master",
+                      "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
+                      "installed_by": [
+                        "modules"
+                      ],
+                      "patch": "modules/nf-core/fastavalidator/fastavalidator.diff"
                     },
                     "multiqc": {
                         "branch": "master",
                         "git_sha": "af27af1be706e6a2bb8fe454175b0cdf77f47b49",
+                        "installed_by": ["modules"]
+                    },
+                    "trnascanse": {
+                        "branch": "master",
+                        "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
                         "installed_by": ["modules"]
                     }
                 }
