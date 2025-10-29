@@ -53,6 +53,10 @@ process ENA_WEBIN_CLI {
         # there was attempt to re-submit already submitted genome
         export STATUS="success"
         true
+    elif grep -q "Submission(s) validated successfully" "${prefix}_webin-cli.report"; then
+        # we ran with -validate flag
+        export STATUS="success"
+        true
     else
         export STATUS="failed"
         false
