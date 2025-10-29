@@ -262,5 +262,14 @@
         {
             "$ref": "#/$defs/pipeline_options"
         }
-    ]
+    ],
+    "properties": {
+        "db_zenodo_id": {
+            "type": "string",
+            "default": 14897628
+        },
+        "db_zenodo_path": {
+            "type": "string"
+        }
+    }
 }

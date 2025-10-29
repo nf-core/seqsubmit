@@ -35,18 +35,30 @@ workflow GENOMESUBMIT {
         def col7 = row[6]
         def col8 = row[7]
         def col9 = row[8]
-        def missing = (!col7 || !col8 || !col9 || col7 == [] || col8 == [] || col9 == [])
-        incomplete: missing
-        complete: !missing
+        def checkM2_missing = (!col7 || !col8 || !col9 || col7 == [] || col8 == [] || col9 == [])
+        incomplete: checkM2_missing
+        complete: !checkM2_missing
     }
-    // Run checkM2 database download if any completeness/contamination values are provided
-    CHECKM2_DATABASEDOWNLOAD(params.db_zenodo_id)
+    // Run checkM2 database download if any completeness/contamination values are missing & no db path provided
+    if (params.db_zenodo_path == null) {
+        CHECKM2_DATABASEDOWNLOAD(params.db_zenodo_id)
+        ch_check2_db = CHECKM2_DATABASEDOWNLOAD.out.database
+    }
+    else {
+        // Create a tuple that matches the expected structure from CHECKM2_DATABASEDOWNLOAD
+        ch_check2_db = Channel.of(
+            [
+                [id: "db_zenodo_meta"],
+                file(params.db_zenodo_path),
+            ]
+        )
+    }
 
     CHECKM2_PREDICT(
         branched.incomplete.map { row ->
             [row[0], file(row[1])]
         },
-        CHECKM2_DATABASEDOWNLOAD.out.database,
+        ch_check2_db,
     )
 
 
