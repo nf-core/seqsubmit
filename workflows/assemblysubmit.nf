@@ -5,7 +5,9 @@
 */
 
 include { COVERM_CONTIG              } from '../modules/nf-core/coverm/contig/main'
+include { FASTAVALIDATOR             } from '../modules/nf-core/fastavalidator/main'
 include { GENERATE_ASSEMBLY_MANIFEST } from '../modules/local/generate_assembly_manifest/main'
+include { REGISTERSTUDY              } from '../modules/local/registerstudy/main'
 include { ENA_WEBIN_CLI              } from '../modules/local/ena_webin_cli'
 
 include { MULTIQC                    } from '../modules/nf-core/multiqc/main'
@@ -43,6 +45,7 @@ workflow ASSEMBLYSUBMIT {
                 [ row[0], file(row[1]) ]
             }
        }
+        .set { fasta_reads_ch }
         .branch { tuple ->
             no_reads: tuple.size() == 2 // Channel with no reads
             reads: tuple.size() >= 3 // Channel with reads
@@ -57,6 +60,20 @@ workflow ASSEMBLYSUBMIT {
         []
     )
 
+    FASTAVALIDATOR (
+        fasta_reads_ch.map { tuple -> [ tuple[0], tuple[1] ] },
+        "true" // is_metagenome flag
+    )
+    
+    validated_logs = FASTAVALIDATOR.out.success_log
+
+    validated_samples = fasta_reads_ch.join(validated_logs)
+
+    REGISTERSTUDY(
+        [[id:"study"], params.ena_genome_study_accession, params.centre_name, params.library ]
+    )
+
+    
     //
     // Collate and save software versions
     //
