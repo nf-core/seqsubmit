@@ -1,7 +1,7 @@
 process GENERATE_TEST_DATA {
     label 'process_low'
     container "quay.io/biocontainers/ena-webin-cli:9.0.1--hdfd78af_1"
-    
+
     input:
     path(manifest_template)
 
