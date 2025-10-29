@@ -12,6 +12,13 @@ include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pi
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 
+include { CATPACK_PREPARE } from '../modules/nf-core/catpack/prepare/main'
+include { CATPACK_DOWNLOAD } from '../modules/nf-core/catpack/download/main'
+include { CATPACK_ADDNAMES } from '../modules/nf-core/catpack/addnames/main'
+include { CATPACK_BINS } from '../modules/nf-core/catpack/bins/main'
+include { CATPACK_SUMMARISE } from '../modules/nf-core/catpack/summarise/main'
+include { UNTAR } from '../modules/nf-core/untar/main'
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -29,11 +36,123 @@ workflow GENOMESUBMIT {
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
 
-    // Create channel with meta and fasta
-    ch_mags = ch_samplesheet
-        .map { row ->
-            [ row[0], file(row[1]) ]
+    // adapted from:
+    // - https://github.com/nf-core/mag/blob/b0bc5cae64fdd7fa6aec76f270b2daf7882ed84b/subworkflows/local/catpack/main.nf#L15
+    // - https://github.com/nf-core/seqsubmit/pull/19/files
+
+    branched = ch_samplesheet.branch { row_items ->
+        def lineage = row_items[16]
+        def check_lineage_missing = (!lineage || lineage == [])
+        incomplete: check_lineage_missing
+        complete: !check_lineage_missing
+    }
+
+    // Download catpack database if any lineage values are missing & no db path provided
+    if (params.cat_db_path & file(params.cat_db_path).exists()) {
+        if (params.cat_db_path.endsWith('.tar.gz')) {
+            UNTAR([[id: 'cat_db'], file(params.cat_db, checkIfExists: true)])
+            ch_versions = ch_versions.mix(UNTAR.out.versions)
+
+            ch_cat_db_dir = UNTAR.out.untar
         }
+        else {
+            ch_cat_db_dir = Channel.fromPath(params.cat_db, checkIfExists: true, type: 'dir')
+                .map { dir -> [[id: 'cat_db'], dir] }
+                .first()
+        }
+
+        ch_cat_db = ch_cat_db_dir.multiMap { meta, dir ->
+            db: [meta, file(dir / 'db', checkIfExists: true)]
+            taxonomy: [meta, file(dir / 'tax', checkIfExists: true)]
+        }
+    }
+    else {
+        CATPACK_DOWNLOAD([[id: 'cat_db_nr'], 'nr'])
+        ch_versions = ch_versions.mix(CATPACK_DOWNLOAD.out.versions)
+
+        CATPACK_PREPARE(
+            CATPACK_DOWNLOAD.out.fasta,
+            CATPACK_DOWNLOAD.out.names.map { _meta, names -> names },
+            CATPACK_DOWNLOAD.out.nodes.map { _meta, nodes -> nodes },
+            CATPACK_DOWNLOAD.out.acc2tax.map { _meta, acc2tax -> acc2tax },
+        )
+        ch_versions = ch_versions.mix(CATPACK_PREPARE.out.versions)
+        ch_cat_db = CATPACK_PREPARE.out
+    }
+
+    CATPACK_BINS(
+        ch_bins,
+        ch_cat_db.db,
+        ch_cat_db.taxonomy,
+        [[:], []],
+        [[:], []],
+        '.fa',
+    )
+    ch_versions = ch_versions.mix(CATPACK_BINS.out.versions)
+
+    CATPACK_ADDNAMES(CATPACK_BINS.out.bin2classification, ch_cat_db.taxonomy)
+    ch_versions = ch_versions.mix(CATPACK_ADDNAMES.out.versions)
+
+    bin_summary = CATPACK_ADDNAMES.out.txt
+        .map { _meta, summary -> summary }
+        .collectFile(
+            name: 'bat_summary.tsv',
+            storeDir: "${params.outdir}/Taxonomy/CAT/",
+            keepHeader: true,
+        )
+
+    if (!params.cat_allow_unofficial_lineages) {
+        CATPACK_SUMMARISE(CATPACK_ADDNAMES.out.txt, [[:], []])
+        ch_versions = ch_versions.mix(CATPACK_SUMMARISE.out.versions)
+    }
+
+    // CHECKM2_PREDICT(
+    //     branched.incomplete.map { row ->
+    //         [row[0], file(row[1])]
+    //     },
+    //     ch_check2_db,
+    // )
+
+
+    // checkm2_ver = CHECKM2_PREDICT.out.versions
+    //     .map { yml ->
+    //         yml.readLines()[1].split(': ')[1]
+    //     }
+    //     .map { ver -> "CheckM2_v" + ver }
+
+
+    // // Join CheckM2 results with incomplete samples and fill in completeness/contamination
+    // ch_checkm2_filled = CHECKM2_PREDICT.out.checkm2_tsv
+    //     .map { meta, tsv ->
+    //         def rows = tsv.splitCsv(sep: '\t', header: true)
+    //         // CheckM2 output has one row per genome, extract first row
+    //         def row = rows[0]
+    //         [meta.id, row.Completeness, row.Contamination]
+    //     }
+    //     .combine(checkm2_ver)
+    //     .cross(branched.incomplete.map { row -> [row[0].id, row] })
+    //     .map { checkm2_result, incomplete_row ->
+    //         def id = checkm2_result[0]
+    //         def completeness = checkm2_result[1]
+    //         def contamination = checkm2_result[2]
+    //         def tool_ver = checkm2_result[3]
+    //         def row = incomplete_row[1]
+
+    //         // Fill in col 7 (completeness) and col 8 (contamination)
+    //         row[6] = tool_ver
+    //         row[7] = completeness
+    //         row[8] = contamination
+
+    //         row
+    //     }
+
+    // Combine filled incomplete samples with complete samples
+    // ch_samplesheet = branched.complete.mix(ch_checkm2_filled)
+
+    // Create channel with meta and fasta
+    ch_mags = ch_samplesheet.map { row ->
+        [row[0], file(row[1])]
+    }
 
     // Create TSV with metadata fields
     ch_remaining_tsv = ch_samplesheet
