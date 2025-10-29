@@ -12,9 +12,9 @@ process FASTAVALIDATOR {
     val(is_metagenome)
 
     output:
-    tuple val(meta), path('*.success.log')  , emit: success_log , optional: true
-    tuple val(meta), path('*.error.log')    , emit: error_log   , optional: true
-    path "versions.yml"                     , emit: versions
+    tuple val(meta), path('*.success.log'), emit: success_log , optional: true
+    tuple val(meta), path('*.error.log')  , emit: error_log   , optional: true
+    path "versions.yml"                   , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
