@@ -4,14 +4,15 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { COVERM_CONTIG          } from '../modules/nf-core/coverm/contig/main'
-include { ENA_WEBIN_CLI          } from '../modules/local/ena_webin_cli'
+include { COVERM_CONTIG              } from '../modules/nf-core/coverm/contig/main'
+include { GENERATE_ASSEMBLY_MANIFEST } from '../modules/local/generate_assembly_manifest/main'
+include { ENA_WEBIN_CLI              } from '../modules/local/ena_webin_cli'
 
-include { MULTIQC                } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap       } from 'plugin/nf-schema'
-include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
+include { MULTIQC                    } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap           } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc       } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML     } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText     } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
