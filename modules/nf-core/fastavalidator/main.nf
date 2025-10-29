@@ -9,6 +9,7 @@ process FASTAVALIDATOR {
 
     input:
     tuple val(meta), path(fasta)
+    val(is_metagenome)
 
     output:
     tuple val(meta), path('*.success.log')  , emit: success_log , optional: true
@@ -25,50 +26,46 @@ process FASTAVALIDATOR {
         -f $fasta \\
         2> "${prefix}.error.log" \\
         || echo "Errors from fasta_validate printed to ${prefix}.error.log"
+    
+    # One more check: count contigs. More than 1 contig required.
+    echo "[INFO] Checking contig count..."
 
-    if [ \$(cat "${prefix}.error.log" | wc -l) -gt 0 ]; then
-        echo "py_fasta_validator Validation failed..."
-
-        cat \\
-            "${prefix}.error.log"
-    else
-        echo "py_fasta_validator Validation successful..."
-
-        ##Count contigs (> headers). Require >1.
-        echo "[INFO] Checking contig count..."
-
+    if [ "${is_metagenome}" = true ]; then
         if [[ "${fasta}" == *.gz ]]; then
             CONTIGS=\$(zgrep -c '^>' "${fasta}" || true)
         else
             CONTIGS=\$(grep  -c '^>' "${fasta}" || true)
         fi
 
-        echo "[INFO] Contigs detected: \${CONTIGS}" >> "${prefix}.error.log"
+        echo "[INFO] Contigs detected: \${CONTIGS}"
 
         if [ "\${CONTIGS}" -lt 2 ]; then
-            echo "Validation failed..."
-            echo "[ERROR] Assembly has <2 contigs. Require more than 1 contig." >> "${prefix}.error.log"
-            cat \\
-                "${prefix}.error.log"
-        else
-            echo "[OK] Contig check passed (>1 contig)" >> "${prefix}.error.log"
-            echo "Validation successful..."
-
-            mv \\
-                "${prefix}.error.log" \\
-                fasta_validate.stderr
-
-            echo "Validation successful..." \\
-                > "${prefix}.success.log"
-        
+            echo "[ERROR] Assembly has \${CONTIGS} contig(s)." >> "${prefix}.error.log"
+            echo "[ERROR] More than one contig required." >> "${prefix}.error.log"
         fi
+    
+    fi
+
+    if [ \$(cat "${prefix}.error.log" | wc -l) -gt 0 ]; then
+        echo "Validation failed..."
+
+        cat \\
+            "${prefix}.error.log"
+    else
+        echo "Validation successful..."
+
+        mv \\
+            "${prefix}.error.log" \\
+            fasta_validate.stderr
+
+        echo "Validation successful..." \\
+            > "${prefix}.success.log"
     fi
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         py_fasta_validator: \$(py_fasta_validator -v | sed 's/.* version //')
     END_VERSIONS
-
     """
 
     stub:

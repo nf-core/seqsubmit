@@ -93,11 +93,11 @@
                             "id": "test",
                             "single_end": false
                         },
-                        "test.error.log:md5,7fac9760b4aa1a875e92f998a2b5a891"
+                        "test.error.log:md5,772091b11ff0a7378e9e7d2abd993f5a"
                     ]
                 ],
                 "2": [
-                    "versions.yml:md5,a235af03fe25b005fa1ed1818e31a4b9"
+                    "versions.yml:md5,05aa059840b3b4dd6d88bc1e4bf976d7"
                 ],
                 "error_log": [
                     [
@@ -105,21 +105,21 @@
                             "id": "test",
                             "single_end": false
                         },
-                        "test.error.log:md5,7fac9760b4aa1a875e92f998a2b5a891"
+                        "test.error.log:md5,772091b11ff0a7378e9e7d2abd993f5a"
                     ]
                 ],
                 "success_log": [
                     
                 ],
                 "versions": [
-                    "versions.yml:md5,a235af03fe25b005fa1ed1818e31a4b9"
+                    "versions.yml:md5,05aa059840b3b4dd6d88bc1e4bf976d7"
                 ]
             }
         ],
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "25.10.0"
+            "nf-test": "0.9.0",
+            "nextflow": "25.04.1"
         },
-        "timestamp": "2025-10-28T22:53:33.554167"
+        "timestamp": "2025-10-29T12:03:33.964183"
     }
 }

@@ -30,6 +30,9 @@ input:
         description: Input fasta file
         pattern: "*.fasta"
         ontologies: []
+  - - is_metagenome:
+        type: boolean
+        description: True if the fasta file is from a metagenome. Enables number of contigs check.
 output:
   success_log:
     - - meta:
