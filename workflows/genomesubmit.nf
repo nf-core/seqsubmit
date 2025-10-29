@@ -40,16 +40,15 @@ workflow GENOMESUBMIT {
         complete: !checkM2_missing
     }
     // Run checkM2 database download if any completeness/contamination values are missing & no db path provided
-    if (params.db_zenodo_path == null) {
-        CHECKM2_DATABASEDOWNLOAD(params.db_zenodo_id)
+    if (!params.checkm2_db_zenodo_path || !file(params.checkm2_db_zenodo_path).exists()) {
+        CHECKM2_DATABASEDOWNLOAD(params.checkm2_db_zenodo_id)
         ch_check2_db = CHECKM2_DATABASEDOWNLOAD.out.database
     }
     else {
-        // Create a tuple that matches the expected structure from CHECKM2_DATABASEDOWNLOAD
         ch_check2_db = Channel.of(
             [
                 [id: "db_zenodo_meta"],
-                file(params.db_zenodo_path),
+                file(params.checkm2_db_zenodo_path),
             ]
         )
     }

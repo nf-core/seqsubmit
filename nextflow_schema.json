@@ -264,11 +264,11 @@
         }
     ],
     "properties": {
-        "db_zenodo_id": {
+        "checkm2_db_zenodo_id": {
             "type": "string",
             "default": 14897628
         },
-        "db_zenodo_path": {
+        "checkm2_db_zenodo_path": {
             "type": "string"
         }
     }
