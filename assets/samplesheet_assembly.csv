@@ -1,3 +1,2 @@
-id,fasta
-lachnospira_eligens,https://github.com/nf-core/test-datasets/raw/seqsubmit/test_data/bins/bin_lachnospira_eligens.fa.gz
-lachnospiraceae,https://github.com/nf-core/test-datasets/raw/seqsubmit/test_data/bins/bin_lachnospiraceae.fa.gz
+id,fasta,fastq_1,fastq_2
+contigs_1,https://github.com/nf-core/test-datasets/raw/seqsubmit/test_data/contigs.fasta.gz,ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR011/ERR011322/ERR011322_1.fastq.gz,ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR011/ERR011322/ERR011322_2.fastq.gz

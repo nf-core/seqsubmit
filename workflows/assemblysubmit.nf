@@ -29,86 +29,32 @@ workflow ASSEMBLYSUBMIT {
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
 
-    // Create channel with meta and fasta
+    // Create channel with meta and fasta -and reads if available
     ch_assemblies = ch_samplesheet
         .map { row ->
-            [ row[0], file(row[1]) ]
-        }
-
-    ch_assemblies.view()
-    
-//    ch_assemblies.reads ? COVERM_CONTIG (
-//        ch_assemblies.reads,
-//        ch_assemblies.fasta,
-//        [],
-//        []
-//    )
-
-    // Create TSV with metadata fields
-    ch_remaining_tsv = ch_samplesheet
-        .map { row ->
-            def cleanRow = row.collect { item ->
-                item instanceof List && item.isEmpty() ? '' : item.toString()
-            }
-
-            // Parse the genome_name column (index 0) to extract just the ID
-            if (cleanRow.size() > 0 && cleanRow[0].contains('[id:') && cleanRow[0].contains(']')) {
-                // Extract the ID from [id:lachnospiraceae] format
-                def match = cleanRow[0] =~ /\[id:([^\]]+)\]/
-                if (match) {
-                    cleanRow[0] = match[0][1]
+            if (row[2]) { // If reads available
+                if (row[3]) { // If paired end reads
+                    [ row[0] + [ single_end:false ], file(row[1]), [ file(row[2]), file(row[3]) ] ]
+                } else { // If single end
+                    [ row[0] + [ single_end:true ], file(row[1]), file(row[2]) ]
                 }
+            } else { // If reads not available
+                [ row[0], file(row[1]) ] 
             }
-
-            // Parse the genome_path column (index 1), to show path to file in current directory
-            if (cleanRow.size() > 1 && cleanRow[1].contains('/')) {
-                cleanRow[1] = file(cleanRow[1]).name
-            }
-
-            cleanRow.join('\t')
+       }
+        .branch { tuple ->
+            no_reads: tuple.size() == 2 // Channel with no reads
+            reads: tuple.size() >= 3 // Channel with reads
         }
-        .collectFile(
-            name: 'submission_metadata.tsv',
-            newLine: true,
-            seed: {
-                def headers = [
-                    'genome_name', 'genome_path', 'accessions',
-                    'assembly_software', 'binning_software', 'binning_parameters',
-                    'stats_generation_software', 'completeness', 'contamination',
-                    'genome_coverage', 'metagenome', 'co-assembly', 'broad_environment',
-                    'local_environment', 'environmental_medium', 'rRNA_presence', 'NCBI_lineage'
-                ]
-                headers.join('\t')
-            }
-        )
+        
+        ch_assemblies.reads.view()
 
-    ch_mags_collected = ch_mags
-        .map { meta, file -> file }
-        .collect()
-        .map { files ->
-            [
-                [id: 'all_files'],
-                files
-            ]
-        }
-
-    GENOME_UPLOAD(
-        ch_mags_collected,
-        ch_remaining_tsv.first(),
-        mags_or_bins_flag
+    COVERM_CONTIG (
+        ch_assemblies.reads.map { meta, fasta, reads -> [ meta, reads ] },
+        ch_assemblies.reads.map { meta, fasta, reads -> [ meta, fasta ] },
+        [],
+        []
     )
-    ch_versions = ch_versions.mix( GENOME_UPLOAD.out.versions )
-
-    manifests_ch = GENOME_UPLOAD.out.manifests.flatten()
-        .map { manifest ->
-            def prefix = manifest.name.replaceAll(/_\d+\.manifest$/, '')
-            def meta = [id: prefix]
-            [ meta, manifest ]
-    }
-    combined_ch = ch_mags.join(manifests_ch)
-
-    ENA_WEBIN_CLI( combined_ch )
-    ch_versions = ch_versions.mix( ENA_WEBIN_CLI.out.versions.first() )
 
     //
     // Collate and save software versions

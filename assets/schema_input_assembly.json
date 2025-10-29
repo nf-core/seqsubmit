@@ -21,21 +21,29 @@
                 "errorMessage": "FASTA file must be provided, cannot contain spaces and must have extension '.fa.gz' or '.fasta.gz'",
                 "description": "Metagenomic assembly sequence file"
             },
-            "accession": {
-                "type": "string",
-                "description": "FASTQ ENA accession"
-            },
-            "fastq": {
+            "fastq_1": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FASTA file must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
+                "errorMessage": "FastQ file for reads 1 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
+                "description": "Reads sequence file"
+            },
+            "fastq_2": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
+                "errorMessage": "FastQ file for reads  cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
                 "description": "Reads sequence file"
             },
             "coverage": {
                 "type": "number",
                 "description": "Mean assembly coverage"
+            },
+            "accession": {
+                "type": "string",
+                "description": "FASTQ ENA accession"
             }
         },
         "required": ["id", "fasta"]
