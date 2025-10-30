@@ -42,6 +42,27 @@
                 }
             }
         },
+        "rna_detection_options": {
+            "title": "RNA detection options",
+            "type": "object",
+            "fa_icon": "fas fa-university",
+            "description": "Parameters used to make a decision about presence/absence of RNA in data",
+            "help_text": "ENA requires a boolean value (True/False) defining RNA. Decision of presence/absence of RNA is based on number of rRNA and tRNA. If both values are bigger than their corresponding limits - RNA is present (True), otherwise - not (False).",
+            "properties": {
+                "rrna_limit": {
+                    "type": "number",
+                    "description": "Minimum number of rRNA.",
+                    "default": 80,
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "trna_limit": {
+                    "type": "number",
+                    "description": "Minimum number of tRNA.",
+                    "default": 18,
+                    "fa_icon": "fas fa-users-cog"
+                }
+            }
+        },
         "institutional_config_options": {
             "title": "Institutional config options",
             "type": "object",
@@ -263,6 +284,9 @@
     "allOf": [
         {
             "$ref": "#/$defs/input_output_options"
+        },
+        {
+            "$ref": "#/$defs/rna_detection_options"
         },
         {
             "$ref": "#/$defs/institutional_config_options"

@@ -19,7 +19,6 @@ include { GENOMESUBMIT            } from './workflows/genomesubmit'
 include { ASSEMBLYSUBMIT          } from './workflows/assemblysubmit'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_seqsubmit_pipeline'
-include { RNA_DETECTION           } from './subworkflows/local/rna_detection'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     NAMED WORKFLOWS FOR PIPELINE
@@ -40,7 +39,7 @@ workflow NFCORE_SEQSUBMIT {
     // WORKFLOW: Run pipeline
     //
     // Depending on the input type (mags/bins or metagenomic_assemblies), one or the another workflow will be triggered
-    if ((params.mode == "mags") || (params.mode == "bins")) {
+    if (params.mode == "mags" || params.mode == "bins") {
         GENOMESUBMIT (
             samplesheet,
             params.mode
@@ -52,6 +51,7 @@ workflow NFCORE_SEQSUBMIT {
         )
         ch_multiqc_report = ASSEMBLYSUBMIT.out.multiqc_report
     }
+
 
     emit:
     multiqc_report = ch_multiqc_report // channel: /path/to/multiqc_report.html

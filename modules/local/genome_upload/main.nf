@@ -1,14 +1,14 @@
 process GENOME_UPLOAD {
-    tag "$meta.id"
+    tag "${mags_or_bins_flag}"
     label 'process_low'
 
-    container "community.wave.seqera.io/library/pip_genome-uploader:e2815984bcdc3e83"
+    container "quay.io/biocontainers/genome-uploader:2.5.1--pyhdfd78af_1"
 
     secret 'WEBIN_ACCOUNT'
     secret 'WEBIN_PASSWORD'
 
     input:
-    tuple val(meta), path(mags)
+    path(mags)
     path(table_for_upload)
     val(mags_or_bins_flag)
 
