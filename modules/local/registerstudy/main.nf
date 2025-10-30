@@ -10,8 +10,8 @@ process REGISTERSTUDY {
 
 
     output:
-    tuple val(meta), env(STUDY_ID), emit: study_accession
-    path "versions.yml"           , emit: versions
+    tuple val(meta), env("STUDY_ID"), emit: study_accession
+    path "versions.yml"             , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
