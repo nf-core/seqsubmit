@@ -25,55 +25,140 @@ include { methodsDescriptionText     } from '../subworkflows/local/utils_nfcore_
 workflow ASSEMBLYSUBMIT {
 
     take:
-    ch_samplesheet // channel: samplesheet read in from --input
+    ch_samplesheet // channel: samplesheet read in from --input_assembly
 
     main:
+    ch_versions = channel.empty()
+    ch_multiqc_files = channel.empty()
 
-    ch_versions = Channel.empty()
-    ch_multiqc_files = Channel.empty()
-
-    // Create channel with meta and fasta -and reads if available
-    ch_assemblies = ch_samplesheet
+    // Create assembly channel with proper metadata structure
+    assembly_fasta = ch_samplesheet
         .map { row ->
-            if (row[2]) { // If reads available
-                if (row[3]) { // If paired end reads
-                    [ row[0] + [ single_end:false ], file(row[1]), [ file(row[2]), file(row[3]) ] ]
-                } else { // If single end
-                    [ row[0] + [ single_end:true ], file(row[1]), file(row[2]) ]
-                }
-            } else { // If reads not available
-                [ row[0], file(row[1]) ]
-            }
-       }
-        .set { fasta_reads_ch }
-        .branch { tuple ->
-            no_reads: tuple.size() == 2 // Channel with no reads
-            reads: tuple.size() >= 3 // Channel with reads
+            def meta = [
+                id: row[0].id,
+                single_end: row[3] ? false : true,
+                coverage: row[4] ?: null,
+                run_accession: row[5],
+                assembler: row[6],
+                assembler_version: row[7]
+            ]
+            [meta, file(row[1])]
         }
 
-        ch_assemblies.reads.view()
+    reads_fastq = ch_samplesheet
+        .filter { row -> row[2] && row[2] != "" } // Check if fastq_1 exists and is not empty
+        .map { row ->
+            def meta = [
+                id: row[0].id,
+                single_end: row[3] ? false : true,
+                coverage: row[4] ?: null,
+                run_accession: row[5],
+                assembler: row[6],
+                assembler_version: row[7]
+            ]
+            
+            if (row[3] && row[3] != "") { // If paired end reads
+                [meta, [file(row[2]), file(row[3])]]
+            } else { // If single end
+                [meta, file(row[2])]
+            }
+        }
 
-    COVERM_CONTIG (
-        ch_assemblies.reads.map { meta, fasta, reads -> [ meta, reads ] },
-        ch_assemblies.reads.map { meta, fasta, reads -> [ meta, fasta ] },
-        [],
-        []
-    )
-
+    // Check fasta files are properly formatted
     FASTAVALIDATOR (
-        fasta_reads_ch.map { tuple -> [ tuple[0], tuple[1] ] },
+        assembly_fasta,
         "true" // is_metagenome flag
     )
+    validated_fastas = assembly_fasta.join(FASTAVALIDATOR.out.success_log)
+        .map { meta, fasta, _log ->
+            [meta, fasta]
+        }
+
+    // For assemblies without coverage, calculate coverage with CoverM
+    validated_fastas.filter { meta, _fasta -> meta.coverage == null }
+        .join(reads_fastq)
+        .multiMap { meta, fasta, fastq ->
+            assembly: [ meta, fasta ]
+            reads: [ meta, fastq ]
+        }
+        .set { coverm_input }
+    COVERM_CONTIG (
+        coverm_input.reads,
+        coverm_input.assembly,
+        false, // bam_input
+        false  // interleaved
+    )
+
+    // Calculate average coverage using map operator
+    average_coverage_ch = COVERM_CONTIG.out.coverage
+        .map { meta, coverage_file ->
+            // Read the file and calculate average
+            def lines = coverage_file.readLines()
+            def coverages = lines[1..-1].collect { line -> 
+                line.split('\t')[1] as Double 
+            }
+            def average = coverages.sum() / coverages.size()
+            return [meta, average]
+        }
     
-    validated_logs = FASTAVALIDATOR.out.success_log
+    // View the results
+    average_coverage_ch.view { meta, avg -> 
+        "Sample ${meta.id}: Average coverage = ${avg}" 
+    }
 
-    validated_samples = fasta_reads_ch.join(validated_logs)
+    // Update metadata with calculated coverage
+    updated_meta_ch = average_coverage_ch
+        .map { meta, avg_coverage ->
+            def updated_meta = meta.clone()
+            updated_meta.coverage = avg_coverage
+            [updated_meta]
+        }
 
+    // Combine assemblies with updated metadata (for samples that had coverage calculated)
+    // and assemblies that already had coverage
+    assemblies_with_coverage = validated_fastas
+        .filter { meta, _fasta -> meta.coverage != null }
+        .map { meta, fasta -> [meta.id, meta, fasta] }
+        .mix(
+            updated_meta_ch
+                .join(validated_fastas.filter { meta, _fasta -> meta.coverage == null })
+                .map { meta, fasta -> [meta.id, meta, fasta] }
+        )
+
+    assembly_metadata_csv = assemblies_with_coverage
+        .map { _assembly_id, meta, fasta ->
+            def header = 'Runs,Coverage,Assembler,Version,Filepath,Sample'
+            def row = [
+                meta.run_accession ?: '',
+                meta.coverage ?: '',
+                meta.assembler ?: '',
+                meta.assembler_version ?: '',
+                fasta.baseName,
+                ''
+            ].join(',')
+            
+            def content = "${header}\n${row}"
+            def csv_file = file("${meta.id}_assembly_metadata.csv")
+            csv_file.text = content
+            
+            [meta, csv_file]
+        }
+
+    // TODO only register study if it's not provided
     REGISTERSTUDY(
         [[id:"study"], params.ena_genome_study_accession, params.centre_name, params.library ]
     )
 
+    // Generate assembly manifest files and submit them to ENA
+    GENERATE_ASSEMBLY_MANIFEST(
+        validated_fastas.join(assembly_metadata_csv),
+        REGISTERSTUDY.out.study_accession.first()
+    )
     
+    ENA_WEBIN_CLI(
+        validated_fastas.join(GENERATE_ASSEMBLY_MANIFEST.out.manifest)
+    )
+
     //
     // Collate and save software versions
     //
@@ -89,24 +174,24 @@ workflow ASSEMBLYSUBMIT {
     //
     // MODULE: MultiQC
     //
-    ch_multiqc_config        = Channel.fromPath(
+    ch_multiqc_config        = channel.fromPath(
         "$projectDir/assets/multiqc_config.yml", checkIfExists: true)
     ch_multiqc_custom_config = params.multiqc_config ?
-        Channel.fromPath(params.multiqc_config, checkIfExists: true) :
-        Channel.empty()
+        channel.fromPath(params.multiqc_config, checkIfExists: true) :
+        channel.empty()
     ch_multiqc_logo          = params.multiqc_logo ?
-        Channel.fromPath(params.multiqc_logo, checkIfExists: true) :
-        Channel.empty()
+        channel.fromPath(params.multiqc_logo, checkIfExists: true) :
+        channel.empty()
 
     summary_params      = paramsSummaryMap(
         workflow, parameters_schema: "nextflow_schema.json")
-    ch_workflow_summary = Channel.value(paramsSummaryMultiqc(summary_params))
+    ch_workflow_summary = channel.value(paramsSummaryMultiqc(summary_params))
     ch_multiqc_files = ch_multiqc_files.mix(
         ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     ch_multiqc_custom_methods_description = params.multiqc_methods_description ?
         file(params.multiqc_methods_description, checkIfExists: true) :
         file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
-    ch_methods_description                = Channel.value(
+    ch_methods_description                = channel.value(
         methodsDescriptionText(ch_multiqc_custom_methods_description))
 
     ch_multiqc_files = ch_multiqc_files.mix(ch_collated_versions)
