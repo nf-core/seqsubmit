@@ -107,34 +107,35 @@ workflow ASSEMBLYSUBMIT {
     }
 
     // Update metadata with calculated coverage
-    updated_meta_ch = average_coverage_ch
-        .map { meta, avg_coverage ->
+    validated_fastas
+        .filter { meta, _fasta -> meta.coverage == null }
+        .join( average_coverage_ch )
+        .map { meta, fasta, avg_coverage ->
             def updated_meta = meta.clone()
             updated_meta.coverage = avg_coverage
-            [updated_meta]
+            [updated_meta, fasta]
         }
+        .set { assemblies_with_added_cov_ch }
 
     // Combine assemblies with updated metadata (for samples that had coverage calculated)
     // and assemblies that already had coverage
     assemblies_with_coverage = validated_fastas
         .filter { meta, _fasta -> meta.coverage != null }
-        .map { meta, fasta -> [meta.id, meta, fasta] }
-        .mix(
-            updated_meta_ch
-                .join(validated_fastas.filter { meta, _fasta -> meta.coverage == null })
-                .map { meta, fasta -> [meta.id, meta, fasta] }
-        )
+        .mix( assemblies_with_added_cov_ch )
+        .view( { meta, _fasta -> 
+            "Sample ${meta.id}: Final coverage = ${meta.coverage}" 
+        } )
 
     assembly_metadata_csv = assemblies_with_coverage
-        .map { _assembly_id, meta, fasta ->
+        .map { meta, fasta ->
             def header = 'Runs,Coverage,Assembler,Version,Filepath,Sample'
             def row = [
                 meta.run_accession ?: '',
                 meta.coverage ?: '',
                 meta.assembler ?: '',
                 meta.assembler_version ?: '',
-                fasta.baseName,
-                ''
+                fasta.name,
+                ''    // Sample column left empty because co assemblies are not supported
             ].join(',')
             
             def content = "${header}\n${row}"
@@ -146,13 +147,13 @@ workflow ASSEMBLYSUBMIT {
 
     // TODO only register study if it's not provided
     REGISTERSTUDY(
-        [[id:"study"], params.ena_genome_study_accession, params.centre_name, params.library ]
+        [[id:"study"], params.ena_raw_reads_study_accession, params.centre_name, params.library ]
     )
 
     // Generate assembly manifest files and submit them to ENA
     GENERATE_ASSEMBLY_MANIFEST(
-        validated_fastas.join(assembly_metadata_csv),
-        REGISTERSTUDY.out.study_accession.first()
+        assemblies_with_coverage.join(assembly_metadata_csv),
+        REGISTERSTUDY.out.study_accession.map { _meta, accession -> accession }
     )
     
     ENA_WEBIN_CLI(
