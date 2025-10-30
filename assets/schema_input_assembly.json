@@ -1,51 +1,114 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/seqsubmit/main/assets/schema_input_assembly.json",
-    "title": "nf-core/seqsubmit pipeline - params.input schema",
-    "description": "Schema for the file provided with params.input",
+    "title": "nf-core/seqsubmit pipeline - params.input_assembly schema",
+    "description": "Schema for the sample sheet provided with params.input_assembly",
     "type": "array",
     "items": {
         "type": "object",
         "properties": {
-            "id": {
-                "type": "string",
-                "pattern": "^\\S+$",
-                "errorMessage": "ID name must be provided and cannot contain spaces",
-                "meta": ["id"]
-            },
-            "fasta": {
+        "id": {
+            "type": "string",
+            "pattern": "^\\S+$",
+            "errorMessage": "Assembly ID must be provided and cannot contain spaces",
+            "meta": ["id"]
+        },
+        "fasta": {
+            "type": "string",
+            "format": "file-path",
+            "exists": true,
+            "pattern": "^\\S+\\.(fa|fasta|fas|fna)(\\.gz)?$",
+            "errorMessage": "FASTA file must be provided and have extension '.fa', '.fasta', '.fas', '.fna' (optionally gzipped)",
+            "description": "Metagenomic assembly FASTA file"
+        },
+        "fastq_1": {
+            "anyOf": [
+            {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?a\\.gz$",
-                "errorMessage": "FASTA file must be provided, cannot contain spaces and must have extension '.fa.gz' or '.fasta.gz'",
-                "description": "Metagenomic assembly sequence file"
+                "pattern": "^\\S+\\.(fq|fastq)(\\.gz)?$"
             },
+            {
+                "type": "string",
+                "maxLength": 0
+            }
+            ],
+            "errorMessage": "FASTQ file must have extension '.fq' or '.fastq' (optionally gzipped)",
+            "description": "Forward reads if paired-end or single-end reads FASTQ file"
+        },
+        "fastq_2": {
+            "anyOf": [
+            {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^\\S+\\.(fq|fastq)(\\.gz)?$"
+            },
+            {
+                "type": "string",
+                "maxLength": 0
+            }
+            ],
+            "errorMessage": "FASTQ file for reverse reads must have extension '.fq' or '.fastq' (optionally gzipped)",
+            "description": "Reverse reads FASTQ file if paired-end. Leave empty for single-end reads"
+        },
+        "coverage": {
+            "anyOf": [
+            {
+                "type": "number",
+                "minimum": 0
+            },
+            {
+                "type": "string",
+                "maxLength": 0
+            }
+            ],
+            "errorMessage": "Coverage must be a positive number or empty", 
+            "description": "Estimated value of assembly coverage"
+        },
+        "run_accession": {
+            "type": "string",
+            "pattern": "^\\S+$",
+            "errorMessage": "Accession must be provided and cannot contain spaces",
+            "description": "Accession of the run used to generate the assembly"
+        },
+        "assembler": {
+            "type": "string",
+            "pattern": "^\\S+$",
+            "errorMessage": "Assembler must be provided and cannot contain spaces",
+            "description": "Name of the assembler software used to generate the assembly"
+        },
+        "assembler_version": {
+            "type": "string",
+            "pattern": "^\\S+$",
+            "errorMessage": "Assembler version must be provided and cannot contain spaces",
+            "description": "Version of the assembler software used to generate the assembly"
+        }
+        },
+        "required": ["id", "fasta", "accession", "assembler", "assembler_version"],
+        "anyOf": [
+        {
+            "properties": {
             "fastq_1": {
                 "type": "string",
-                "format": "file-path",
-                "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 1 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
-                "description": "Reads sequence file"
+                "minLength": 1
+            }
             },
-            "fastq_2": {
-                "type": "string",
-                "format": "file-path",
-                "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads  cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
-                "description": "Reads sequence file"
-            },
+            "required": ["fastq_1"]
+        },
+        {
+            "properties": {
             "coverage": {
                 "type": "number",
-                "description": "Mean assembly coverage"
-            },
-            "accession": {
-                "type": "string",
-                "description": "FASTQ ENA accession"
+                "minimum": 0
             }
-        },
-        "required": ["id", "fasta", "accession"]
+            },
+            "required": ["coverage"]
+        }
+        ],
+        "errorMessage": {
+        "anyOf": "Either reads or coverage must be provided in the sample sheet for each assembly"
+        }
     }
 }
