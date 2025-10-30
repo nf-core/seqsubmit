@@ -80,13 +80,16 @@
             "description": "Name of the assembler software used to generate the assembly"
         },
         "assembler_version": {
-            "type": "string",
+            "anyOf": [
+                {"type": "string"},
+                {"type": "number"}
+            ],
             "pattern": "^\\S+$",
             "errorMessage": "Assembler version must be provided and cannot contain spaces",
             "description": "Version of the assembler software used to generate the assembly"
         }
         },
-        "required": ["id", "fasta", "accession", "assembler", "assembler_version"],
+        "required": ["id", "fasta", "run_accession", "assembler", "assembler_version"],
         "anyOf": [
         {
             "properties": {
