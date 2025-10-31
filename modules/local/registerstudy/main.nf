@@ -3,7 +3,7 @@ process REGISTERSTUDY {
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
-    container "community.wave.seqera.io/library/pip_assembly-uploader:28d20c7cae062d31"
+    container "community.wave.seqera.io/library/pip_assembly-uploader:2a65298c0161c561"
 
     input:
     tuple val(meta), val(study), val(center), val(library)

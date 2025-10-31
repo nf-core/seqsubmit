@@ -2,7 +2,7 @@ process GENERATE_ASSEMBLY_MANIFEST {
     tag "$meta.id"
     label 'process_single'
 
-    container "community.wave.seqera.io/library/pip_assembly-uploader:28d20c7cae062d31"
+    container "community.wave.seqera.io/library/pip_assembly-uploader:2a65298c0161c561"
 
     input:
     tuple val(meta), path(assembly_fasta), path(data_csv)
