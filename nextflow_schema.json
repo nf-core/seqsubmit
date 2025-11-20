@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/seqsubmit/main/nextflow_schema.json",
     "title": "nf-core/seqsubmit pipeline parameters",
-    "description": "Submit sequences, assmeblies, mags, etc., to publich archives",
+    "description": "Submit sequences, assemblies, MAGs, etc., to public archives",
     "type": "object",
     "$defs": {
         "input_output_options": {
