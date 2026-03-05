@@ -25,7 +25,7 @@ include { methodsDescriptionText     } from '../subworkflows/local/utils_nfcore_
 workflow ASSEMBLYSUBMIT {
 
     take:
-    ch_samplesheet // channel: samplesheet read in from --assemblies_samplesheet
+    ch_samplesheet // channel: samplesheet read in from --input
 
     main:
     ch_versions = channel.empty()

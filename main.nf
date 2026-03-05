@@ -38,7 +38,7 @@ workflow NFCORE_SEQSUBMIT {
     //
     // WORKFLOW: Run pipeline
     //
-    // Depending on the input type (mags/bins or assemblies), one or the another workflow will be triggered
+    // Depending on the input type (mags/bins or metagenomic_assemblies), one or the another workflow will be triggered
     if (params.mode == "mags") {
         GENOMESUBMIT (
             samplesheet,
@@ -51,7 +51,7 @@ workflow NFCORE_SEQSUBMIT {
             "bins"
         )
         ch_multiqc_report = GENOMESUBMIT.out.multiqc_report
-    } else if (params.mode == "assemblies") {
+    } else if (params.mode == "metagenomic_assemblies") {
         ASSEMBLYSUBMIT (
             samplesheet
         )

@@ -219,8 +219,8 @@
                     "type": "string",
                     "default": null,
                     "description": "Type of upload",
-                    "help_text": "Different types of data require specific upload steps. That mode controls what upload workflow to run depending on type of data (mags/bins/assemblies)",
-                    "enum": ["mags", "bins", "assemblies"]
+                    "help_text": "Different types of data require specific upload steps. That mode controls what upload workflow to run depending on type of data (mags/bins/metagenomic_assemblies)",
+                    "enum": ["mags", "bins", "metagenomic_assemblies"]
                 },
                 "test_upload": {
                     "type": "boolean",

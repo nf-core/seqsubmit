@@ -27,7 +27,7 @@ Pipeline will have several modes
 
 - `mags` for MAGs submission with **genome_submitter** wf
 - `bins` for bins submission with **genome_submitter** wf
-- `assemblies` for assembly submission with **assembly_submitter** wf
+- `metagenomic_assemblies` for assembly submission with **assembly_submitter** wf
 
 ## Requirements
 

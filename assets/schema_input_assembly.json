@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/seqsubmit/main/assets/schema_input_assembly.json",
     "title": "nf-core/seqsubmit pipeline - params.input schema",
-    "description": "Schema for the sample sheet provided with params.input if params.mode is set to 'assemblies'",
+    "description": "Schema for the sample sheet provided with params.input if params.mode is set to 'metagenomic_assemblies'",
     "type": "array",
     "items": {
         "type": "object",
