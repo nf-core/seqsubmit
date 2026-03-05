@@ -18,14 +18,14 @@ include { methodsDescriptionText     } from '../subworkflows/local/utils_nfcore_
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    RUN MAIN WORKFLOW
+    RUN THE WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
 workflow ASSEMBLYSUBMIT {
 
     take:
-    ch_samplesheet // channel: samplesheet read in from --input_assembly
+    ch_samplesheet // channel: samplesheet read in from --assemblies_samplesheet
 
     main:
     ch_versions = channel.empty()
@@ -57,9 +57,11 @@ workflow ASSEMBLYSUBMIT {
                 assembler_version: row[7]
             ]
             
-            if (row[3] && row[3] != "") { // If paired end reads
+            if (row[3] && row[3] != "") { 
+                // If paired end reads
                 [meta, [file(row[2]), file(row[3])]]
-            } else { // If single end
+            } else { 
+                // If single end
                 [meta, file(row[2])]
             }
         }
@@ -69,10 +71,13 @@ workflow ASSEMBLYSUBMIT {
         assembly_fasta,
         "true" // is_metagenome flag
     )
+    // TODO add some logging here to track discarded assemblies
     validated_fastas = assembly_fasta.join(FASTAVALIDATOR.out.success_log)
         .map { meta, fasta, _log ->
             [meta, fasta]
         }
+
+    // TODO add human decontamination step
 
     // For assemblies without coverage, calculate coverage with CoverM
     validated_fastas.filter { meta, _fasta -> meta.coverage == null }
@@ -100,11 +105,6 @@ workflow ASSEMBLYSUBMIT {
             def average = coverages.sum() / coverages.size()
             return [meta, average]
         }
-    
-    // View the results
-    average_coverage_ch.view { meta, avg -> 
-        "Sample ${meta.id}: Average coverage = ${avg}" 
-    }
 
     // Update metadata with calculated coverage
     validated_fastas
@@ -125,6 +125,8 @@ workflow ASSEMBLYSUBMIT {
         .view( { meta, _fasta -> 
             "Sample ${meta.id}: Final coverage = ${meta.coverage}" 
         } )
+
+    // TODO add validation step to check number of lines in CSV matches number of assemblies
 
     assembly_metadata_csv = assemblies_with_coverage
         .map { meta, fasta ->

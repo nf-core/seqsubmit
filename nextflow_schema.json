@@ -12,22 +12,10 @@
             "description": "Define where the pipeline should find input data and save output data.",
             "required": ["outdir"],
             "properties": {
-                "input_genome": {
+                "input": {
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
-                    "schema": "assets/schema_input_genome.json",
-                    "mimetype": "text/csv",
-                    "pattern": "^\\S+\\.csv$",
-                    "description": "Path to comma-separated file containing information about the samples in the experiment.",
-                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/seqsubmit/usage#samplesheet-input).",
-                    "fa_icon": "fas fa-file-csv"
-                },
-                "input_assembly": {
-                    "type": "string",
-                    "format": "file-path",
-                    "exists": true,
-                    "schema": "assets/schema_input_assembly.json",
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.csv$",
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
@@ -229,10 +217,10 @@
                 },
                 "mode": {
                     "type": "string",
-                    "default": "mags",
+                    "default": null,
                     "description": "Type of upload",
-                    "help_text": "Different types of data require specific upload steps. That mode controls what upload workflow to run depending on type of data (mags/bins/contigs)",
-                    "enum": ["mags", "bins", "contigs"]
+                    "help_text": "Different types of data require specific upload steps. That mode controls what upload workflow to run depending on type of data (mags/bins/assemblies)",
+                    "enum": ["mags", "bins", "assemblies"]
                 },
                 "test_upload": {
                     "type": "boolean",
