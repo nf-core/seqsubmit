@@ -13,21 +13,75 @@
                 "errorMessage": "Sample name must be provided and cannot contain spaces",
                 "meta": ["id"]
             },
-            "fastq_1": {
+            "fasta": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?a\\.gz$",
+                "errorMessage": "FASTA file for sequences 1 must be provided, cannot contain spaces and must have extension '.fa.gz' or '.fasta.gz'",
+                "description": "MAG/bin sequence file"
             },
-            "fastq_2": {
+            "accession": {
                 "type": "string",
-                "format": "file-path",
-                "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "description": "Run or assembly ENA accession"
+            },
+            "assembly_software": {
+                "type": "string",
+                "description": "Tool name and version that was used to assemble data"
+            },
+            "binning_software": {
+                "type": "string",
+                "description": "Tool name and version that was used to bin data"
+            },
+            "binning_parameters": {
+                "type": "string",
+                "description": "Arguments used to bin data different from default"
+            },
+            "stats_generation_software": {
+                "type": "string",
+                "description": "Tool(s) used to estimate completeness and contamination"
+            },
+            "completeness": {
+                "type": "number",
+                "description": "MAG/bin completeness value"
+            },
+            "contamination": {
+                "type": "number",
+                "description": "MAG/bin contamination value"
+            },
+            "genome_coverage": {
+                "type": "number",
+                "description": "MAG/bin coverage value"
+            },
+            "metagenome": {
+                "type": "string",
+                "description": "ENA accepted metagenome name"
+            },
+            "co-assembly": {
+                "type": "boolean",
+                "description": "True if data was co-assembled, False otherwise"
+            },
+            "broad_environment": {
+                "type": "string",
+                "description": "broad ecological context of a sample"
+            },
+            "local_environment": {
+                "type": "string",
+                "description": "local ecological context"
+            },
+            "environmental_medium": {
+                "type": "string",
+                "description": "material displaced by the sample"
+            },
+            "rRNA_presence": {
+                "type": "boolean",
+                "description": "True/False if rRNA genes detected"
+            },
+            "NCBI_lineage": {
+                "type": "string",
+                "description": "full NCBI lineage - format: x;y;z"
             }
         },
-        "required": ["sample", "fastq_1"]
+        "required": ["sample", "fasta"]
     }
 }

@@ -1,0 +1,72 @@
+{
+    "registerstudy - report - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        ""
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,ea872d341a2054fde3b2c8f06bbf8177"
+                ],
+                "study_accession": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        ""
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,ea872d341a2054fde3b2c8f06bbf8177"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.0"
+        },
+        "timestamp": "2025-10-28T16:35:02.331026"
+    },
+    "registerstudy - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        ""
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,049c28351d1fd639673904f17b95c213"
+                ],
+                "study_accession": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        ""
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,049c28351d1fd639673904f17b95c213"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.0"
+        },
+        "timestamp": "2025-10-29T10:59:32.499098"
+    }
+}

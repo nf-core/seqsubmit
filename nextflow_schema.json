@@ -199,6 +199,54 @@
                     "description": "Display hidden parameters in the help message (only works when --help or --help_full are provided)."
                 }
             }
+        },
+        "pipeline_options": {
+            "title": "Pipeline flow control parameters",
+            "type": "object",
+            "description": "Use these parameters to control the flow of the pipeline execution.",
+            "properties": {
+                "centre_name": {
+                    "type": "string",
+                    "description": "The center name of the submitter (mandatory for broker accounts).",
+                    "help": "ena-webin-cli argument -centerName: the center name of the submitter (mandatory for broker accounts)."
+                },
+                "upload_tpa": {
+                    "type": "boolean",
+                    "description": "Flag to control type of assembly study (third party assembly or not)",
+                    "default": true,
+                    "help": "Use this flag if the study is a third party assembly (TPA). Default: true"
+                },
+                "mode": {
+                    "type": "string",
+                    "default": "mags",
+                    "description": "Type of upload",
+                    "help_text": "Different types of data require specific upload steps. That mode controls what upload workflow to run depending on type of data (mags/bins/contigs)",
+                    "enum": ["mags", "bins", "contigs"]
+                },
+                "test_upload": {
+                    "type": "boolean",
+                    "description": "Upload to TEST server instead of LIVE",
+                    "default": true,
+                    "help": "Use that flag for development purposes or for validation of your submissions. Submission would be done to TEST ENA server instead of LIVE server. TEST server holds data 24h and removes afterwords. LIVE server does not have option to modify your submission, you can only suppress data and re-upload"
+                },
+                "upload_force": {
+                    "type": "boolean",
+                    "description": "Flag to control upload retries",
+                    "default": true,
+                    "help": "Forces reset of sample xmls generation. This is useful if you changed something in your tsv table, or if ENA metadata haven't been downloaded correctly (you can check this in ENA_backup.json). Default: true"
+                },
+                "ena_genome_study_accession": {
+                    "type": "string",
+                    "description": "ENA study accession (PRJ/ERP) to submit MAGs/bins",
+                    "help_text": "Current implementation of pipeline requires to pre-register ENA project (PRJ/ERP) where you want to upload data to. Documentation how to register study: https://ena-docs.readthedocs.io/en/latest/submit/study.html"
+                },
+                "webincli_submit": {
+                    "type": "boolean",
+                    "description": "Submit or validate",
+                    "default": true,
+                    "help": "Flag to run submission or validation. Submission (true) will run upload of data with ena-webin-cli. Validation (false) validates correctness of input files, it does not do submission. Default: true (submit)"
+                }
+            }
         }
     },
     "allOf": [
@@ -210,6 +258,9 @@
         },
         {
             "$ref": "#/$defs/generic_options"
+        },
+        {
+            "$ref": "#/$defs/pipeline_options"
         }
     ]
 }

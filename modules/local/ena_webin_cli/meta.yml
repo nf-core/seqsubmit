@@ -1,0 +1,48 @@
+name: ena_webin_cli
+description: ENA data submission tool using Webin account details
+keywords:
+  - ena
+  - submission
+  - upload
+  - webin
+tools:
+  - ena_webin_cli:
+      description: |
+        Data submissions to ENA can be made using the Webin command line submission interface (Webin-CLI). Webin submission account credentials are required to use the program.
+      documentation: https://github.com/enasequence/webin-cli
+      licence: ["Apache License"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information.
+  - submission_item:
+      type: file
+      description: |
+        Target FASTA file for submission (mag/bin/assembly)
+  - manifest:
+      type: file
+      description: |
+        Submission manifest
+
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [ id:'test', single_end:false ]
+  - webin_report:
+      type: file
+      description: Submission report
+      pattern: "*webin-cli.report"
+  - STATUS:
+      type: bool
+      description: Submission status success(true) or failed(false
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+
+authors:
+  - "@KateSakharova"
+  - "@ochkalova"

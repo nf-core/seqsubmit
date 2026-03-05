@@ -1,0 +1,70 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: "registerstudy"
+description: This module registers a study and project and generates accessions that will be used for metagenomic assembly uploads in ENA. The study generated will reference reads from an already public project.
+keywords:
+  - assembly
+  - register
+  - study
+tools:
+  - "registerstudy":
+      description: "Nextflow module to register study/project to upload primary metagenome and metatranscriptome
+        assemblies to ENA on a per-study basis. The scripts generate xmls to register a new study and create manifests
+        necessary for submission of assemblies using webin-cli."
+      homepage: "https://github.com/EBI-Metagenomics/assembly_uploader"
+      documentation: "https://github.com/EBI-Metagenomics/assembly_uploader"
+      tool_dev_url: "None"
+      doi: ""
+      licence: ["Apache-2.0"]
+      identifier: null
+
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'sample1' ]`
+    - study:
+        type: value
+        description: |
+          Study accession with raw reads public in ENA.
+          Example: "PRJNA312520"
+
+    - center:
+        type: value
+        description: |
+          Name of the sequencing or submitting center.
+          Example: "Wellcome Sanger Institute"
+
+  - library:
+      type: value
+      description: |
+        Library information associated with the study.
+        Example: "metagenome"
+      enum:
+        - metagenome
+        - metatranscriptome
+
+output:
+  study_accession:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1' ]`
+      - study:
+          type: value
+          description: |
+            Study accession registered in ENA.
+            Example: "PRJEB312520"
+  versions:
+    - "versions.yml":
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: "http://edamontology.org/format_3750" # YAML
+
+authors:
+  - "@alisha246"
+maintainers:
+  - "@alisha246"

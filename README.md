@@ -21,7 +21,35 @@
 
 ## Introduction
 
-**nf-core/seqsubmit** is a bioinformatics pipeline that ...
+**nf-core/seqsubmit** is a bioinformatics pipeline that submits data to public archives such as [ENA](https://www.ebi.ac.uk/ena/browser/home)
+
+Pipeline will have several modes
+
+- `mags` for MAGs submission with **genome_submitter** wf
+- `bins` for bins submission with **genome_submitter** wf
+- `assemblies` for assembly submission with **assembly_submitter** wf
+
+## Requirements
+
+- Webin account registered https://www.ebi.ac.uk/ena/submit/webin/login
+- Raw reads submitted into [INSDC](https://www.insdc.org/)
+
+Setup your environment secrets before running the pipeline:
+
+`nextflow secrets set WEBIN_ACCOUNT "Webin-XXX"`
+
+`nextflow secrets set WEBIN_PASSWORD "XXX"`
+
+Make sure you update with your authorised credentials.
+
+## genome_submitter
+
+Workflow to submit MAGs and/or bins to ENA.
+
+It takes input `samplesheet.csv` with fields required for [genome_uploader](https://github.com/EBI-Metagenomics/genome_uploader). Fields described in [docs](https://github.com/EBI-Metagenomics/genome_uploader/blob/main/README.md#input-tsv-and-fields).
+For now workflow converts CSV into required TSV.
+
+_Future implementation will consider missing fields (for example completeness and contamination) and would run steps to fill in the gaps._
 
 <!-- TODO nf-core:
    Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
@@ -40,18 +68,13 @@
 
 <!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
      Explain what rows and columns represent. For instance (please edit as appropriate):
-
 First, prepare a samplesheet with your input data that looks as follows:
-
 `samplesheet.csv`:
-
 ```csv
 sample,fastq_1,fastq_2
 CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
 ```
-
 Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
-
 -->
 
 Now, you can run the pipeline using:
@@ -70,19 +93,17 @@ nextflow run nf-core/seqsubmit \
 
 For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/seqsubmit/usage) and the [parameter documentation](https://nf-co.re/seqsubmit/parameters).
 
+<!-- TODO nf-core:
 ## Pipeline output
 
 To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/seqsubmit/results) tab on the nf-core website pipeline page.
 For more details about the output files and reports, please refer to the
 [output documentation](https://nf-co.re/seqsubmit/output).
+-->
 
 ## Credits
 
-nf-core/seqsubmit was originally written by Martin Beracochea, Ekaterina Sakharova, Sofiia Ochkalova, Evangelos Karatzas.
-
-We thank the following people for their extensive assistance in the development of this pipeline:
-
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
+nf-core/seqsubmit was originally written by [Martin Beracochea](https://github.com/mberacochea), [Ekaterina Sakharova](https://github.com/KateSakharova), [Sofiia Ochkalova](https://github.com/ochkalova), [Evangelos Karatzas](https://github.com/vagkaratzas).
 
 ## Contributions and Support
 
@@ -93,9 +114,19 @@ For further information or help, don't hesitate to get in touch on the [Slack `#
 ## Citations
 
 <!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
+
 <!-- If you use nf-core/seqsubmit for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
 
 <!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
+
+If you use this pipeline please make sure to cite all used software.
+This pipeline uses code and infrastructure developed and maintained by the [nf-core](https://nf-co.re) community, reused here under the [MIT license](https://github.com/nf-core/tools/blob/main/LICENSE).
+
+> **MGnify: the microbiome sequence data analysis resource in 2023**
+>
+> Richardson L, Allen B, Baldi G, Beracochea M, Bileschi ML, Burdett T, et al.
+>
+> Vol. 51, Nucleic Acids Research. Oxford University Press (OUP); 2022. p. D753–9. Available from: http://dx.doi.org/10.1093/nar/gkac1080
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 

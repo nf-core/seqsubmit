@@ -1,0 +1,73 @@
+nextflow_process {
+
+    name "Test Process GENERATE_ASSEMBLY_MANIFEST"
+    script "../main.nf"
+    process "GENERATE_ASSEMBLY_MANIFEST"
+
+    tag "modules"
+    tag "modules_"
+    tag "generate_assembly_manifest"
+
+    test("GENERATE_ASSEMBLY_MANIFEST completes with expected outputs") {
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test' ],
+                    file(params.pipelines_testdata_base_path + "/test_data/contigs.fasta.gz", checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + "/samplesheets/samplesheet_generatemanifest.csv", checkIfExists: true)
+                ]
+                input[1] = "PRJ12345"
+                """
+
+            }
+        }
+
+        then {
+            assert process.success
+            assertAll(
+                { assert snapshot(
+                    process.out,
+                    path(process.out.versions[0]).yaml
+                ).match() },
+                { assert process.out.manifest.size() == 1 },
+                { assert process.out.manifest[0][1].toString().endsWith(".manifest") },
+                {
+                    def manifestContent = path(process.out.manifest[0][1]).text
+                    assert manifestContent.contains("PRJ12345") : "PRJ12345 not found in manifest file"
+                }
+            )
+        }
+
+    }
+
+    test("GENERATE_ASSEMBLY_MANIFEST completes with expected outputs - stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test' ],
+                    file('test_contigs.fastq.gz'),
+                    file('test_samplesheet_generatemanifest.csv')
+                ]
+                input[1] = "PRJ12345"
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assertAll(
+                { assert snapshot(
+                    process.out,
+                    path(process.out.versions[0]).yaml
+                ).match() }
+            )
+        }
+
+    }
+
+}

@@ -15,7 +15,8 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { SEQSUBMIT  } from './workflows/seqsubmit'
+include { SEQSUBMIT               } from './workflows/seqsubmit'
+include { GENOMESUBMIT            } from './workflows/genomesubmit'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 /*
@@ -33,15 +34,27 @@ workflow NFCORE_SEQSUBMIT {
     samplesheet // channel: samplesheet read in from --input
 
     main:
-
+    ch_multiqc_report = Channel.empty()
     //
     // WORKFLOW: Run pipeline
     //
-    SEQSUBMIT (
-        samplesheet
-    )
+    if ((params.mode == "mags") || (params.mode == "bins")) {
+        GENOMESUBMIT (
+            samplesheet,
+            params.mode
+        )
+        ch_multiqc_report = GENOMESUBMIT.out.multiqc_report
+    } else {
+        SEQSUBMIT (
+            samplesheet
+        )
+        ch_multiqc_report = SEQSUBMIT.out.multiqc_report
+    }
+
+
+
     emit:
-    multiqc_report = SEQSUBMIT.out.multiqc_report // channel: /path/to/multiqc_report.html
+    multiqc_report = ch_multiqc_report // channel: /path/to/multiqc_report.html
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
