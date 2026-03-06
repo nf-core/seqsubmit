@@ -17,7 +17,7 @@
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^\\S+\\.(fa|fasta|fas|fna)(\\.gz)?$",
+                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?a\\.gz$",
                 "errorMessage": "FASTA file must be provided and have extension '.fa', '.fasta', '.fas', '.fna' (optionally gzipped)",
                 "description": "Metagenomic assembly FASTA file"
             },
