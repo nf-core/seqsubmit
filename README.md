@@ -120,6 +120,7 @@ assembly_2,data/contigs_2.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 | -------------------- | --------------------------------------------------------------------------------- |
 | `--mode`             | Type of the data to be submitted. Options: `[mags, bins, metagenomic_assemblies]` |
 | `--input`            | Path to the samplesheet describing the data to be submitted                       |
+| `--outdir`           | Path to the output directory for pipeline results                                 |
 | `--submission_study` | ENA study accession (PRJ/ERP) to submit the data to                               |
 | `--centre_name`      | Name of the submitter's organisation                                              |
 
