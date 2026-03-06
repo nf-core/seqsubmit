@@ -17,17 +17,33 @@ Changes in 'fastavalidator/meta.yml':
 Changes in 'fastavalidator/main.nf':
 --- modules/nf-core/fastavalidator/main.nf
 +++ modules/nf-core/fastavalidator/main.nf
-@@ -9,6 +9,7 @@
+@@ -9,11 +9,12 @@
  
      input:
      tuple val(meta), path(fasta)
 +    val(is_metagenome)
  
      output:
-     tuple val(meta), path('*.success.log')  , emit: success_log , optional: true
-@@ -25,6 +26,25 @@
+-    tuple val(meta), path('*.success.log')  , emit: success_log , optional: true
+-    tuple val(meta), path('*.error.log')    , emit: error_log   , optional: true
+-    path "versions.yml"                     , emit: versions
++    tuple val(meta), path('*.success.log'), emit: success_log , optional: true
++    tuple val(meta), path('*.error.log')  , emit: error_log   , optional: true
++    path "versions.yml"                   , emit: versions
+ 
+     when:
+     task.ext.when == null || task.ext.when
+@@ -21,10 +22,32 @@
+     script:
+     def prefix = task.ext.prefix ?: "${meta.id}"
+     """
++    # Ensure *.error.log file exists to append to, even if py_fasta_validator doesn't produce any errors
++    touch "${prefix}.error.log"
++
+     py_fasta_validator \\
          -f $fasta \\
-         2> "${prefix}.error.log" \\
+-        2> "${prefix}.error.log" \\
++        2>> "${prefix}.error.log" \\
          || echo "Errors from fasta_validate printed to ${prefix}.error.log"
 +    
 +    # One more check: count contigs. More than 1 contig required.
@@ -35,9 +51,9 @@ Changes in 'fastavalidator/main.nf':
 +
 +    if [ "${is_metagenome}" = true ]; then
 +        if [[ "${fasta}" == *.gz ]]; then
-+            CONTIGS=\$(zgrep -c '^>' "${fasta}" || true)
++            CONTIGS=\$(zcat "${fasta}" | grep -c '^>')
 +        else
-+            CONTIGS=\$(grep  -c '^>' "${fasta}" || true)
++            CONTIGS=\$(grep  -c '^>' "${fasta}")
 +        fi
 +
 +        echo "[INFO] Contigs detected: \${CONTIGS}"
@@ -149,7 +165,7 @@ Changes in 'fastavalidator/tests/main.nf.test':
 +                """
 +                input[0] = [
 +                    [ id:'test', single_end:false ], // meta map
-+                    file("${moduleDir}/tests/test_data/contig_test.fasta", checkIfExists: true)
++                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
 +                ]
 +                input[1] = true // is_metagenome flag
 +                """
@@ -169,5 +185,4 @@ Changes in 'fastavalidator/tests/main.nf.test':
 +    }
  }
 
-'modules/nf-core/fastavalidator/tests/test_data/contig_test.fasta' was created
 ************************************************************

@@ -22,9 +22,12 @@ process FASTAVALIDATOR {
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
+    # Ensure *.error.log file exists to append to, even if py_fasta_validator doesn't produce any errors
+    touch "${prefix}.error.log"
+
     py_fasta_validator \\
         -f $fasta \\
-        2> "${prefix}.error.log" \\
+        2>> "${prefix}.error.log" \\
         || echo "Errors from fasta_validate printed to ${prefix}.error.log"
     
     # One more check: count contigs. More than 1 contig required.
@@ -32,9 +35,9 @@ process FASTAVALIDATOR {
 
     if [ "${is_metagenome}" = true ]; then
         if [[ "${fasta}" == *.gz ]]; then
-            CONTIGS=\$(zgrep -c '^>' "${fasta}" || true)
+            CONTIGS=\$(zcat "${fasta}" | grep -c '^>')
         else
-            CONTIGS=\$(grep  -c '^>' "${fasta}" || true)
+            CONTIGS=\$(grep  -c '^>' "${fasta}")
         fi
 
         echo "[INFO] Contigs detected: \${CONTIGS}"
