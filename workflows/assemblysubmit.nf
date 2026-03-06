@@ -122,9 +122,6 @@ workflow ASSEMBLYSUBMIT {
     assemblies_with_coverage = validated_fastas
         .filter { meta, _fasta -> meta.coverage != null }
         .mix( assemblies_with_added_cov_ch )
-        .view( { meta, _fasta ->
-            "Sample ${meta.id}: Final coverage = ${meta.coverage}"
-        } )
 
     // TODO add validation step to check number of lines in CSV matches number of assemblies
 
@@ -147,15 +144,22 @@ workflow ASSEMBLYSUBMIT {
             [meta, csv_file]
         }
 
-    // TODO only register study if it's not provided
-    REGISTERSTUDY(
-        [[id:"study"], params.ena_raw_reads_study_accession, params.centre_name, params.library ]
-    )
+    def study_accession_ch
+    if (params.submission_study) {
+        // Use provided study accession directly
+        study_accession_ch = channel.of(params.submission_study)
+    } else {
+        // Register a new study
+        REGISTERSTUDY(
+            [[id:"study"], params.ena_raw_reads_study_accession, params.centre_name, params.library ]
+        )
+        study_accession_ch = REGISTERSTUDY.out.study_accession.map { _meta, accession -> accession }
+    }
 
     // Generate assembly manifest files and submit them to ENA
     GENERATE_ASSEMBLY_MANIFEST(
         assemblies_with_coverage.join(assembly_metadata_csv),
-        REGISTERSTUDY.out.study_accession.map { _meta, accession -> accession }
+        study_accession_ch
     )
 
     ENA_WEBIN_CLI(
