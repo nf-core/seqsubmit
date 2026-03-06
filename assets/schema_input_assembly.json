@@ -23,48 +23,48 @@
             },
             "fastq_1": {
                 "anyOf": [
-                {
-                    "type": "string",
-                    "format": "file-path",
-                    "exists": true,
-                    "pattern": "^\\S+\\.(fq|fastq)(\\.gz)?$"
-                },
-                {
-                    "type": "string",
-                    "maxLength": 0
-                }
+                    {
+                        "type": "string",
+                        "format": "file-path",
+                        "exists": true,
+                        "pattern": "^\\S+\\.(fq|fastq)(\\.gz)?$"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
                 ],
                 "errorMessage": "FASTQ file must have extension '.fq' or '.fastq' (optionally gzipped)",
                 "description": "Forward reads if paired-end or single-end reads FASTQ file"
             },
             "fastq_2": {
                 "anyOf": [
-                {
-                    "type": "string",
-                    "format": "file-path",
-                    "exists": true,
-                    "pattern": "^\\S+\\.(fq|fastq)(\\.gz)?$"
-                },
-                {
-                    "type": "string",
-                    "maxLength": 0
-                }
+                    {
+                        "type": "string",
+                        "format": "file-path",
+                        "exists": true,
+                        "pattern": "^\\S+\\.(fq|fastq)(\\.gz)?$"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
                 ],
                 "errorMessage": "FASTQ file for reverse reads must have extension '.fq' or '.fastq' (optionally gzipped)",
                 "description": "Reverse reads FASTQ file if paired-end. Leave empty for single-end reads"
             },
             "coverage": {
                 "anyOf": [
-                {
-                    "type": "number",
-                    "minimum": 0
-                },
-                {
-                    "type": "string",
-                    "maxLength": 0
-                }
+                    {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
                 ],
-                "errorMessage": "Coverage must be a positive number or empty", 
+                "errorMessage": "Coverage must be a positive number or empty",
                 "description": "Estimated value of assembly coverage"
             },
             "run_accession": {
@@ -80,37 +80,34 @@
                 "description": "Name of the assembler software used to generate the assembly"
             },
             "assembler_version": {
-                "anyOf": [
-                    {"type": "string"},
-                    {"type": "number"}
-                ],
+                "anyOf": [{ "type": "string" }, { "type": "number" }],
                 "pattern": "^\\S+$",
                 "errorMessage": "Assembler version must be provided and cannot contain spaces",
                 "description": "Version of the assembler software used to generate the assembly"
             }
-            },
-            "required": ["sample", "fasta", "run_accession", "assembler", "assembler_version"],
-            "anyOf": [
+        },
+        "required": ["sample", "fasta", "run_accession", "assembler", "assembler_version"],
+        "anyOf": [
             {
                 "properties": {
-                "fastq_1": {
-                    "type": "string",
-                    "minLength": 1
-                }
+                    "fastq_1": {
+                        "type": "string",
+                        "minLength": 1
+                    }
                 },
                 "required": ["fastq_1"]
             },
             {
                 "properties": {
-                "coverage": {
-                    "type": "number",
-                    "minimum": 0
-                }
+                    "coverage": {
+                        "type": "number",
+                        "minimum": 0
+                    }
                 },
                 "required": ["coverage"]
             }
-            ],
-            "errorMessage": {
+        ],
+        "errorMessage": {
             "anyOf": "Either reads or coverage must be provided in the sample sheet for each assembly"
         }
     }

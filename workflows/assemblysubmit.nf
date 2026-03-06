@@ -56,11 +56,11 @@ workflow ASSEMBLYSUBMIT {
                 assembler: row[6],
                 assembler_version: row[7]
             ]
-            
-            if (row[3] && row[3] != "") { 
+
+            if (row[3] && row[3] != "") {
                 // If paired end reads
                 [meta, [file(row[2]), file(row[3])]]
-            } else { 
+            } else {
                 // If single end
                 [meta, file(row[2])]
             }
@@ -99,8 +99,8 @@ workflow ASSEMBLYSUBMIT {
         .map { meta, coverage_file ->
             // Read the file and calculate average
             def lines = coverage_file.readLines()
-            def coverages = lines[1..-1].collect { line -> 
-                line.split('\t')[1] as Double 
+            def coverages = lines[1..-1].collect { line ->
+                line.split('\t')[1] as Double
             }
             def average = coverages.sum() / coverages.size()
             return [meta, average]
@@ -122,8 +122,8 @@ workflow ASSEMBLYSUBMIT {
     assemblies_with_coverage = validated_fastas
         .filter { meta, _fasta -> meta.coverage != null }
         .mix( assemblies_with_added_cov_ch )
-        .view( { meta, _fasta -> 
-            "Sample ${meta.id}: Final coverage = ${meta.coverage}" 
+        .view( { meta, _fasta ->
+            "Sample ${meta.id}: Final coverage = ${meta.coverage}"
         } )
 
     // TODO add validation step to check number of lines in CSV matches number of assemblies
@@ -139,11 +139,11 @@ workflow ASSEMBLYSUBMIT {
                 fasta.name,
                 ''    // Sample column left empty because co assemblies are not supported
             ].join(',')
-            
+
             def content = "${header}\n${row}"
             def csv_file = file("${meta.id}_assembly_metadata.csv")
             csv_file.text = content
-            
+
             [meta, csv_file]
         }
 
@@ -157,7 +157,7 @@ workflow ASSEMBLYSUBMIT {
         assemblies_with_coverage.join(assembly_metadata_csv),
         REGISTERSTUDY.out.study_accession.map { _meta, accession -> accession }
     )
-    
+
     ENA_WEBIN_CLI(
         validated_fastas.join(GENERATE_ASSEMBLY_MANIFEST.out.manifest)
     )
