@@ -18,12 +18,14 @@ process GENERATE_ASSEMBLY_MANIFEST {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
+    def tpa = params.upload_tpa ? "--tpa" : ""
     """
     assembly_manifest \\
         --study ${assembly_study} \\
         --data ${data_csv} \\
         --assembly_study ${assembly_study} \\
         --output-dir "." \\
+        ${tpa} \\
         ${args}
 
     cat <<-END_VERSIONS > versions.yml
