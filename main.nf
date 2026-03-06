@@ -34,7 +34,7 @@ workflow NFCORE_SEQSUBMIT {
     samplesheet // channel: samplesheet read in from --input
 
     main:
-    ch_multiqc_report = Channel.empty()
+    ch_multiqc_report = channel.empty()
     //
     // WORKFLOW: Run pipeline
     //
