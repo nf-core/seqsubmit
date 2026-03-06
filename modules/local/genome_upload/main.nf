@@ -34,7 +34,7 @@ process GENOME_UPLOAD {
     export ENA_WEBIN_PASSWORD=\$WEBIN_PASSWORD
 
     genome_upload \\
-        -u $params.ena_genome_study_accession \\
+        -u $params.submission_study \\
         --genome_info ${table_for_upload} \\
         --centre_name $params.centre_name \\
         --${mags_or_bins_flag} \\
