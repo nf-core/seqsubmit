@@ -234,10 +234,21 @@
                     "default": true,
                     "help": "Forces reset of sample xmls generation. This is useful if you changed something in your tsv table, or if ENA metadata haven't been downloaded correctly (you can check this in ENA_backup.json). Default: true"
                 },
-                "ena_genome_study_accession": {
+                "submission_study": {
                     "type": "string",
-                    "description": "ENA study accession (PRJ/ERP) to submit MAGs/bins",
+                    "description": "ENA study accession (PRJ/ERP) to submit the data to",
                     "help_text": "Current implementation of pipeline requires to pre-register ENA project (PRJ/ERP) where you want to upload data to. Documentation how to register study: https://ena-docs.readthedocs.io/en/latest/submit/study.html"
+                },
+                "library": {
+                    "type": "string",
+                    "enum": ["metagenomic", "metatranscriptomic"],
+                    "description": "Type of library for the submission. Required for creation of the new submission study.",
+                    "help_text": "Uses script register_study from assembly_uploader package that requires this parameter to compose study title."
+                },
+                "ena_raw_reads_study_accession": {
+                    "type": "string",
+                    "description": "ENA study accession (PRJ/ERP) of the raw reads study associated with the assembly submission. Required for creation of the new submission study.",
+                    "help_text": "Uses script register_study from assembly_uploader package that requires this parameter to compose study title and description."
                 },
                 "webincli_submit": {
                     "type": "boolean",
