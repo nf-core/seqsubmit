@@ -21,18 +21,20 @@
 
 ## Introduction
 
-**nf-core/seqsubmit** is a bioinformatics pipeline that submits data to public archives such as [ENA](https://www.ebi.ac.uk/ena/browser/home)
+**nf-core/seqsubmit** is a Nextflow pipeline for submitting sequence data to [ENA](https://www.ebi.ac.uk/ena/browser/home).
+Currently, the pipeline supports three submission modes, each routed to a dedicated workflow and requiring its own input samplesheet structure:
 
-Pipeline will have several modes
+- `mags` for Metagenome Assembled Genomes (MAGs) submission with `GENOMESUBMIT` workflow
+- `bins` for bins submission with `GENOMESUBMIT` workflow
+- `metagenomic_assemblies` for assembly submission with `ASSEMBLYSUBMIT` workflow
 
-- `mags` for MAGs submission with **genome_submitter** wf
-- `bins` for bins submission with **genome_submitter** wf
-- `metagenomic_assemblies` for assembly submission with **assembly_submitter** wf
+![seqsubmit workflow diagram](assets/seqsubmit_schema.png)
 
 ## Requirements
 
-- Webin account registered https://www.ebi.ac.uk/ena/submit/webin/login
-- Raw reads submitted into [INSDC](https://www.insdc.org/)
+- [Nextflow](https://www.nextflow.io/) `>=25.04.0`
+- Webin account registered at https://www.ebi.ac.uk/ena/submit/webin/login
+- Raw reads used to assemble contigs submitted to [INSDC](https://www.insdc.org/) and associated accessions available
 
 Setup your environment secrets before running the pipeline:
 
@@ -40,52 +42,131 @@ Setup your environment secrets before running the pipeline:
 
 `nextflow secrets set WEBIN_PASSWORD "XXX"`
 
-Make sure you update with your authorised credentials.
+Make sure you update commands above with your authorised credentials.
 
-## genome_submitter
+## Input samplesheets
 
-Workflow to submit MAGs and/or bins to ENA.
+### `mags` and `bins` modes (`GENOMESUBMIT`)
 
-It takes input `samplesheet.csv` with fields required for [genome_uploader](https://github.com/EBI-Metagenomics/genome_uploader). Fields described in [docs](https://github.com/EBI-Metagenomics/genome_uploader/blob/main/README.md#input-tsv-and-fields).
-For now workflow converts CSV into required TSV.
+The input must follow `assets/schema_input_genome.json`.
 
-_Future implementation will consider missing fields (for example completeness and contamination) and would run steps to fill in the gaps._
+Required columns:
 
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
+- `sample`
+- `fasta` (must end with `.fa.gz` or `.fasta.gz`)
+- `accession`
+- `assembly_software`
+- `binning_software`
+- `binning_parameters`
+- `stats_generation_software`
+- `metagenome`
+- `environmental_medium`
+- `broad_environment`
+- `local_environment`
+- `co-assembly`
 
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/guidelines/graphic_design/workflow_diagrams#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+Columns that required for now, but will be optional in the nearest future:
+
+- `completeness`
+- `contamination`
+- `genome_coverage`
+- `rRNA_presence`
+- `NCBI_lineage`
+
+Those fields are metadata required for [genome_uploader](https://github.com/EBI-Metagenomics/genome_uploader) package. They are described in [docs](https://github.com/EBI-Metagenomics/genome_uploader/blob/main/README.md#input-tsv-and-fields).
+
+Example `samplesheet_genome.csv`:
+
+```csv
+sample,fasta,accession,assembly_software,binning_software,binning_parameters,stats_generation_software,completeness,contamination,genome_coverage,metagenome,co-assembly,broad_environment,local_environment,environmental_medium,rRNA_presence,NCBI_lineage
+lachnospira_eligens,data/bin_lachnospira_eligens.fa.gz,SRR24458089,spades_v3.15.5,metabat2_v2.6,default,CheckM2_v1.0.1,61.0,0.21,32.07,sediment metagenome,false,marine,cable_bacteria,marine_sediment,false,d__Bacteria;p__Proteobacteria;s_unclassified_Proteobacteria
+```
+
+### `metagenomic_assemblies` mode (`ASSEMBLYSUBMIT`)
+
+The input must follow `assets/schema_input_assembly.json`.
+
+Required columns:
+
+- `sample`
+- `fasta` (must end with `.fa.gz` or `.fasta.gz`)
+- `run_accession`
+- `assembler`
+- `assembler_version`
+
+At least one of the following must be provided per row:
+
+- reads (`fastq_1`, optional `fastq_2` for paired-end)
+- `coverage`
+
+If `coverage` is missing and reads are provided, the workflow calculates average coverage with `coverm`.
+
+Example `samplesheet_assembly.csv`:
+
+```csv
+sample,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version
+assembly_1,data/contigs_1.fasta.gz,data/reads_1.fastq.gz,data/reads_2.fastq.gz,,ERR011322,SPAdes,3.15.5
+assembly_2,data/contigs_2.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
+```
 
 ## Usage
 
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
 
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
-First, prepare a samplesheet with your input data that looks as follows:
-`samplesheet.csv`:
-```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-```
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
--->
+### Required parameters:
 
-Now, you can run the pipeline using:
+| Parameter            | Description                                                                       |
+| -------------------- | --------------------------------------------------------------------------------- |
+| `--mode`             | Type of the data to be submitted. Options: `[mags, bins, metagenomic_assemblies]` |
+| `--input`            | Path to the samplesheet describing the data to be submitted                       |
+| `--submission_study` | ENA study accession (PRJ/ERP) to submit the data to                               |
+| `--centre_name`      | Name of the submitter's organisation                                              |
 
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
+### Optional parameters:
+
+| Parameter           | Description                                                                              |
+| ------------------- | ---------------------------------------------------------------------------------------- |
+| `--upload_tpa`      | Flag to control the type of assembly study (third party assembly or not). Default: false |
+| `--test_upload`     | Upload to TEST ENA server instead of LIVE. Default: false                                |
+| `--webincli_submit` | If set to false, submissions will be validated, but not submitted. Default: true         |
+
+General command template:
 
 ```bash
 nextflow run nf-core/seqsubmit \
    -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \
+   --mode <mags|bins|metagenomic_assemblies> \
+   --input <samplesheet.csv> \
+   --centre_name <YOUR_CENTRE> \
    --outdir <OUTDIR>
+```
+
+Validation run (ENA TEST server, no submission):
+
+```bash
+nextflow run nf-core/seqsubmit \
+   -profile docker \
+   --mode mags \
+   --input assets/samplesheet.csv \
+   --submission_study PRJEB98843 \
+   --centre_name TEST_CENTER \
+   --webincli_submit false \
+   --test_upload true \
+   --outdir results/validate_mags
+```
+
+Live submission example:
+
+```bash
+nextflow run nf-core/seqsubmit \
+   -profile docker \
+   --mode metagenomic_assemblies \
+   --input test_samplesheet.csv \
+   --submission_study PRJEB98843 \
+   --test_upload false \
+   --webincli_submit true \
+   --outdir results/live_assembly
 ```
 
 > [!WARNING]
@@ -93,13 +174,16 @@ nextflow run nf-core/seqsubmit \
 
 For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/seqsubmit/usage) and the [parameter documentation](https://nf-co.re/seqsubmit/parameters).
 
-<!-- TODO nf-core:
 ## Pipeline output
 
-To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/seqsubmit/results) tab on the nf-core website pipeline page.
-For more details about the output files and reports, please refer to the
-[output documentation](https://nf-co.re/seqsubmit/output).
--->
+Key output locations in `--outdir`:
+
+- `upload/manifests/`: generated manifest files for submission
+- `upload/webin_cli/`: ENA Webin CLI reports
+- `multiqc/`: MultiQC summary report
+- `pipeline_info/`: execution reports, trace, DAG, and software versions
+
+For full details, see the [output documentation](https://nf-co.re/seqsubmit/output).
 
 ## Credits
 
