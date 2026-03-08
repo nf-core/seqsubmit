@@ -242,7 +242,7 @@
                 },
                 "library": {
                     "type": "string",
-                    "enum": ["metagenomic", "metatranscriptomic"],
+                    "enum": ["metagenome", "metatranscriptome"],
                     "description": "Type of library for the submission. Required for creation of the new submission study.",
                     "help_text": "Uses script register_study from assembly_uploader package that requires this parameter to compose study title."
                 },

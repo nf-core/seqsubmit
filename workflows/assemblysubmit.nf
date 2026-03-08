@@ -138,7 +138,7 @@ workflow ASSEMBLYSUBMIT {
             ].join(',')
 
             def content = "${header}\n${row}"
-            def csv_file = file("${meta.id}_assembly_metadata.csv")
+            def csv_file = file("${params.outdir}/${params.mode}/${meta.id}_assembly_metadata.csv")
             csv_file.text = content
 
             [meta, csv_file]
@@ -159,11 +159,11 @@ workflow ASSEMBLYSUBMIT {
     // Generate assembly manifest files and submit them to ENA
     GENERATE_ASSEMBLY_MANIFEST(
         assemblies_with_coverage.join(assembly_metadata_csv),
-        study_accession_ch
+        study_accession_ch.first()
     )
 
     ENA_WEBIN_CLI(
-        validated_fastas.join(GENERATE_ASSEMBLY_MANIFEST.out.manifest)
+        assemblies_with_coverage.join(GENERATE_ASSEMBLY_MANIFEST.out.manifest)
     )
 
     //
