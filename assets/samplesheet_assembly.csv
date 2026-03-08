@@ -1,2 +1,4 @@
-sample,fasta,fastq_1,fastq_2,accession
-contigs_1,https://github.com/nf-core/test-datasets/raw/seqsubmit/test_data/contigs.fasta.gz,ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR011/ERR011322/ERR011322_1.fastq.gz,ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR011/ERR011322/ERR011322_2.fastq.gz,ERR011322
+sample,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version
+sample1,tests/data/contigs.fasta.gz,tests/data/fastq_1.fastq,tests/data/fastq_2.fastq,,ERR000001,SPAdes,3.15
+sample2,tests/data/invalid_assembly.fasta.gz,,,45,ERR000002,Velvet,1.2.10
+sample3,tests/data/contigs.fasta.gz,,,30,ERR000003,MEGAHIT,1.2.9
