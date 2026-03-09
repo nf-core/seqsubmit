@@ -3,15 +3,15 @@ process REGISTERSTUDY {
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
-    container "community.wave.seqera.io/library/pip_assembly-uploader:7e9461afbdd7a521"
+    container "community.wave.seqera.io/library/pip_assembly-uploader:2a65298c0161c561"
 
     input:
     tuple val(meta), val(study), val(center), val(library)
 
 
     output:
-    tuple val(meta), env(STUDY_ID), emit: study_accession
-    path "versions.yml"           , emit: versions
+    tuple val(meta), env("STUDY_ID"), emit: study_accession
+    path "versions.yml"             , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -37,7 +37,7 @@ process REGISTERSTUDY {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        python: \$(python --version)
+        assembly_uploader: \$(study_xmls --version)
     END_VERSIONS
     """
 
@@ -49,7 +49,7 @@ process REGISTERSTUDY {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        python: \$(python --version)
+        assembly_uploader: \$(study_xmls --version)
     END_VERSIONS
     """
 }

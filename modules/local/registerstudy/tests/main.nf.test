@@ -9,12 +9,12 @@ nextflow_process {
 
     tag "modules"
     tag "registerstudy"
-/*
+
     test("registerstudy - should register a study on ENA test server") {
 
         when {
             process {
-               """
+                """
                 input[0] = [
                     [ id:'test', single_end:false ], // meta map
                     "PRJNA318468",
@@ -32,7 +32,6 @@ nextflow_process {
             )
         }
     }
-*/
 
     test("registerstudy - stub") {
 

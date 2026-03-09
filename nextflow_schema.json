@@ -10,17 +10,16 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["input", "outdir"],
+            "required": ["outdir", "input"],
             "properties": {
                 "input": {
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
-                    "schema": "assets/schema_input.json",
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.csv$",
-                    "description": "Path to comma-separated file containing information about the samples in the experiment.",
-                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/seqsubmit/usage#samplesheet-input).",
+                    "description": "Path to comma-separated file describing the data to be submitted. Format depends on the pipeline mode (mags/bins/metagenomic_assemblies).",
+                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with a set of columns depending on the type of data being submitted. See [usage docs](https://nf-co.re/seqsubmit/usage#samplesheet-input).",
                     "fa_icon": "fas fa-file-csv"
                 },
                 "outdir": {
@@ -204,6 +203,7 @@
             "title": "Pipeline flow control parameters",
             "type": "object",
             "description": "Use these parameters to control the flow of the pipeline execution.",
+            "required": ["centre_name", "mode"],
             "properties": {
                 "centre_name": {
                     "type": "string",
@@ -212,16 +212,16 @@
                 },
                 "upload_tpa": {
                     "type": "boolean",
-                    "description": "Flag to control type of assembly study (third party assembly or not)",
-                    "default": true,
-                    "help": "Use this flag if the study is a third party assembly (TPA). Default: true"
+                    "description": "Flag to control the type of assembly study (third party assembly or not)",
+                    "default": false,
+                    "help": "Use this flag if the study is a third party assembly (TPA). Default: false"
                 },
                 "mode": {
                     "type": "string",
-                    "default": "mags",
+                    "default": null,
                     "description": "Type of upload",
-                    "help_text": "Different types of data require specific upload steps. That mode controls what upload workflow to run depending on type of data (mags/bins/contigs)",
-                    "enum": ["mags", "bins", "contigs"]
+                    "help_text": "Different types of data require specific upload steps. That mode controls what upload workflow to run depending on type of data (mags/bins/metagenomic_assemblies)",
+                    "enum": ["mags", "bins", "metagenomic_assemblies"]
                 },
                 "test_upload": {
                     "type": "boolean",
@@ -235,10 +235,21 @@
                     "default": true,
                     "help": "Forces reset of sample xmls generation. This is useful if you changed something in your tsv table, or if ENA metadata haven't been downloaded correctly (you can check this in ENA_backup.json). Default: true"
                 },
-                "ena_genome_study_accession": {
+                "submission_study": {
                     "type": "string",
-                    "description": "ENA study accession (PRJ/ERP) to submit MAGs/bins",
+                    "description": "ENA study accession (PRJ/ERP) to submit the data to",
                     "help_text": "Current implementation of pipeline requires to pre-register ENA project (PRJ/ERP) where you want to upload data to. Documentation how to register study: https://ena-docs.readthedocs.io/en/latest/submit/study.html"
+                },
+                "library": {
+                    "type": "string",
+                    "enum": ["metagenome", "metatranscriptome"],
+                    "description": "Type of library for the submission. Required for creation of the new submission study.",
+                    "help_text": "Uses script register_study from assembly_uploader package that requires this parameter to compose study title."
+                },
+                "ena_raw_reads_study_accession": {
+                    "type": "string",
+                    "description": "ENA study accession (PRJ/ERP) of the raw reads study associated with the assembly submission. Required for creation of the new submission study.",
+                    "help_text": "Uses script register_study from assembly_uploader package that requires this parameter to compose study title and description."
                 },
                 "webincli_submit": {
                     "type": "boolean",

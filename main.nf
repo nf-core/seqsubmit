@@ -15,8 +15,8 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { SEQSUBMIT               } from './workflows/seqsubmit'
 include { GENOMESUBMIT            } from './workflows/genomesubmit'
+include { ASSEMBLYSUBMIT          } from './workflows/assemblysubmit'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 /*
@@ -34,21 +34,28 @@ workflow NFCORE_SEQSUBMIT {
     samplesheet // channel: samplesheet read in from --input
 
     main:
-    ch_multiqc_report = Channel.empty()
+    ch_multiqc_report = channel.empty()
     //
     // WORKFLOW: Run pipeline
     //
-    if ((params.mode == "mags") || (params.mode == "bins")) {
+    // Depending on the input type (mags/bins or metagenomic_assemblies), one or the another workflow will be triggered
+    if (params.mode == "mags") {
         GENOMESUBMIT (
             samplesheet,
-            params.mode
+            "mags"
         )
         ch_multiqc_report = GENOMESUBMIT.out.multiqc_report
-    } else {
-        SEQSUBMIT (
+    } else if (params.mode == "bins") {
+        GENOMESUBMIT (
+            samplesheet,
+            "bins"
+        )
+        ch_multiqc_report = GENOMESUBMIT.out.multiqc_report
+    } else if (params.mode == "metagenomic_assemblies") {
+        ASSEMBLYSUBMIT (
             samplesheet
         )
-        ch_multiqc_report = SEQSUBMIT.out.multiqc_report
+        ch_multiqc_report = ASSEMBLYSUBMIT.out.multiqc_report
     }
 
 
@@ -68,13 +75,14 @@ workflow {
     //
     // SUBWORKFLOW: Run initialisation tasks
     //
+
     PIPELINE_INITIALISATION (
         params.version,
         params.validate_params,
-        params.monochrome_logs,
         args,
         params.outdir,
         params.input,
+        params.mode,
         params.help,
         params.help_full,
         params.show_hidden

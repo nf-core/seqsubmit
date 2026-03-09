@@ -29,10 +29,10 @@ workflow PIPELINE_INITIALISATION {
     take:
     version           // boolean: Display version and exit
     validate_params   // boolean: Boolean whether to validate parameters against the schema at runtime
-    monochrome_logs   // boolean: Do not use coloured log outputs
     nextflow_cli_args //   array: List of positional nextflow CLI args
     outdir            //  string: The output directory where the results will be saved
     input             //  string: Path to input samplesheet
+    mode              //  string: Type of input data (mags, bins, metagenomic_assemblies)
     help              // boolean: Display help message and exit
     help_full         // boolean: Show the full help message
     show_hidden       // boolean: Show hidden parameters in the help message
@@ -96,8 +96,15 @@ workflow PIPELINE_INITIALISATION {
     // Create channel from input file provided through params.input
     //
 
-    ch_samplesheet = channel
-        .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
+    if ( mode == "mags" || mode == "bins" ) {
+        ch_samplesheet = channel
+            .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input_genome.json"))
+    } else if ( mode == "metagenomic_assemblies" ) {
+        ch_samplesheet = channel
+            .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input_assembly.json"))
+    } else {
+        error("No input was found. Please, point to the location of your samplesheet using --input_genome or --input_assembly")
+    }
 
     emit:
     samplesheet = ch_samplesheet
