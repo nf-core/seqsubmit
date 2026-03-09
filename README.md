@@ -136,25 +136,40 @@ General command template:
 
 ```bash
 nextflow run nf-core/seqsubmit \
-   -profile <docker/singularity/.../institute> \
+   -profile <docker/singularity/...> \
    --mode <mags|bins|metagenomic_assemblies> \
    --input <samplesheet.csv> \
-   --centre_name <YOUR_CENTRE> \
-   --outdir <OUTDIR>
+   --centre_name <your_centre> \
+   --submission_study <your_study> \
+   --outdir <outdir>
 ```
 
-Validation run (ENA TEST server, no submission):
+Validation run (submission to the ENA TEST server) in `mags` mode:
 
 ```bash
 nextflow run nf-core/seqsubmit \
    -profile docker \
    --mode mags \
-   --input assets/samplesheet.csv \
-   --submission_study PRJEB98843 \
+   --input assets/samplesheet_genomes.csv \
+   --submission_study <your_study> \
    --centre_name TEST_CENTER \
-   --webincli_submit false \
+   --webincli_submit true \
    --test_upload true \
    --outdir results/validate_mags
+```
+
+Validation run (submission to the ENA TEST server) in `metagenomic_assemblies` mode:
+
+```bash
+nextflow run nf-core/seqsubmit \
+   -profile docker \
+   --mode metagenomic_assemblies \
+   --input assets/samplesheet_assembly.csv \
+   --submission_study <your_study> \
+   --centre_name TEST_CENTER \
+   --webincli_submit true \
+   --test_upload true \
+   --outdir results/validate_assemblies
 ```
 
 Live submission example:
@@ -163,7 +178,7 @@ Live submission example:
 nextflow run nf-core/seqsubmit \
    -profile docker \
    --mode metagenomic_assemblies \
-   --input test_samplesheet.csv \
+   --input assets/samplesheet_assembly.csv \
    --submission_study PRJEB98843 \
    --test_upload false \
    --webincli_submit true \
