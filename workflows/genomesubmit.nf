@@ -134,10 +134,31 @@ workflow GENOMESUBMIT {
         .map { meta, fasta -> [meta, fasta] }
         .set { evaluation_present }
 
-    //GENOME_EVALUATION (
-    //    genome_evaluation_input
-    //)
-    // TODO add a tool into stats_generation_software
+    GENOME_EVALUATION (
+        genome_evaluation_input
+    )
+
+    // Create a value channel with the version string
+    def stats_version_ch = GENOME_EVALUATION.out.versions
+        .first()
+        .map { version_file ->
+            version_file.readLines()[1].replace(' ', '').replace(':', '_')
+        }
+
+    fasta_updated_with_stats = GENOME_EVALUATION.out.genome_evaluation
+        .join(genome_evaluation_input)
+        .combine(stats_version_ch)
+        .map { meta, stats_tsv, fasta, stats_version ->
+            def line = stats_tsv.readLines()[1].split('\t')
+            def updated_meta = meta.clone()
+            updated_meta.completeness = line[1]
+            updated_meta.contamination = line[2]
+            updated_meta.stats_generation_software = stats_version
+
+            return [updated_meta, fasta]
+        }
+        .mix(evaluation_present)
+    fasta_updated_with_stats.view()
 
     // --------- Combine metadata into TSV
      genome_metadata_csv = fasta_updated_with_rna
