@@ -139,7 +139,7 @@ workflow GENOMESUBMIT {
     )
 
     // Create a value channel with the version string
-    def stats_version_ch = GENOME_EVALUATION.out.versions
+    def stats_version_ch = GENOME_EVALUATION.out.stats_versions
         .first()
         .map { version_file ->
             version_file.readLines()[1].replace(' ', '').replace(':', '_')

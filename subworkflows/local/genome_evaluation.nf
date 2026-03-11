@@ -46,5 +46,6 @@ workflow GENOME_EVALUATION {
 
     emit:
     genome_evaluation = CHECKM2_PREDICT.out.checkm2_tsv
+    stats_versions = CHECKM2_PREDICT.out.versions_checkm2_predict
 
 }
