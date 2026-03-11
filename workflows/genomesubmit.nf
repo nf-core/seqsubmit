@@ -140,10 +140,8 @@ workflow GENOMESUBMIT {
 
     // Create a value channel with the version string
     def stats_version_ch = GENOME_EVALUATION.out.stats_versions
-        .first()
-        .map { version_file ->
-            version_file.readLines()[1].replace(' ', '').replace(':', '_')
-        }
+        .map { process_name, tool_name, version_output -> return "${tool_name}_v${version_output}"
+        }.first()
 
     fasta_updated_with_stats = GENOME_EVALUATION.out.genome_evaluation
         .join(genome_evaluation_input)
@@ -161,7 +159,7 @@ workflow GENOMESUBMIT {
     fasta_updated_with_stats.view()
 
     // --------- Combine metadata into TSV
-     genome_metadata_csv = fasta_updated_with_rna
+    genome_metadata_csv = fasta_updated_with_stats
         .map { meta, fasta ->
             def row = [
                 meta.id,
