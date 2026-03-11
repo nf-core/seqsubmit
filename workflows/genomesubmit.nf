@@ -6,10 +6,13 @@
 include { GENOME_UPLOAD          } from '../modules/local/genome_upload'
 include { ENA_WEBIN_CLI          } from '../modules/local/ena_webin_cli'
 
-include { RNA_DETECTION           } from '../subworkflows/local/rna_detection'
-
+include { COVERM_GENOME          } from '../modules/nf-core/coverm/genome'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
+
+include { GENOME_EVALUATION      } from '../subworkflows/local/genome_evaluation'
+include { RNA_DETECTION          } from '../subworkflows/local/rna_detection'
+
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
@@ -31,8 +34,8 @@ workflow GENOMESUBMIT {
     ch_versions = channel.empty()
     ch_multiqc_files = channel.empty()
 
-     // Create genomes channel with proper metadata structure
-    genome_fasta = ch_samplesheet
+     // --------- Create genomes channel with proper metadata structure
+    genome_fasta_and_reads = ch_samplesheet
         .map { row ->
             def meta = [
                 id: row[0].id,
@@ -53,10 +56,22 @@ workflow GENOMESUBMIT {
                 RNA_presence: row[17] ?: null,
                 NCBI_lineage: row[18] ?: null
             ]
-            [meta, file(row[1])]
+            def read1 = row[3] ? file(row[3]) : null
+            def read2 = row[4] ? file(row[4]) : null
+            // TODO fix for null in reads
+            if (row[4] && row[4] != "") {
+                // If paired end reads
+                return [meta, file(row[1]), [read1, read2]]
+            } else {
+                // If single end
+                return [meta, file(row[1]), [read1]]
+            }
         }
 
-    // For genomes without RNA_presence info, calculate rRNA and tRNA
+    genome_fasta = genome_fasta_and_reads.map{meta, fasta, _fq1 -> [meta, fasta]}
+    genome_reads = genome_fasta_and_reads.map{meta, _fasta, reads -> [meta, reads]}
+
+    // --------- For genomes without RNA_presence info, calculate rRNA and tRNA
     genome_fasta.filter { meta, fasta -> meta.RNA_presence == null }
         .map { meta, fasta -> [meta, fasta] }
         .set { rna_prediction_input }
@@ -79,8 +94,38 @@ workflow GENOMESUBMIT {
         }
         .mix(rna_present)
 
+    // --------- Completeness and contamination calculation
 
-    // Combine metadata into TSV
+    genome_fasta.filter { meta, fasta -> meta.completeness == null || meta.contamination == null || meta.stats_generation_software == null }
+        .map { meta, fasta -> [meta, fasta] }
+        .set { genome_evaluation_input }
+    genome_fasta.filter { meta, fasta -> meta.completeness != null && meta.contamination != null && meta.stats_generation_software != null}
+        .map { meta, fasta -> [meta, fasta] }
+        .set { evaluation_present }
+
+    GENOME_EVALUATION (
+        genome_evaluation_input
+    )
+
+    // --------- Genome coverage calculation
+
+    genome_reads.filter { meta, reads -> meta.genome_coverage == null }
+        .map { meta, reads -> [meta, reads] }
+        .set { genome_coverage_fq_input }
+    genome_fasta.filter { meta, fasta -> meta.genome_coverage == null }
+        .map { meta, fasta -> [meta, fasta] }
+        .set { genome_coverage_ref_input }
+
+    COVERM_GENOME (
+        genome_coverage_fq_input,
+        genome_coverage_ref_input,
+        false,
+        false,
+        'file'
+    )
+    ch_versions = ch_versions.mix( COVERM_GENOME.out.versions )
+
+    // --------- Combine metadata into TSV
      genome_metadata_csv = fasta_updated_with_rna
         .map { meta, fasta ->
             def row = [
@@ -109,12 +154,12 @@ workflow GENOMESUBMIT {
             newLine: true
         )
 
-    GENOME_UPLOAD(
-        genome_fasta.map{meta, fasta -> fasta}.collect(),
-        genome_metadata_csv,
-        params.mode
-    )
-    ch_versions = ch_versions.mix( GENOME_UPLOAD.out.versions )
+    //GENOME_UPLOAD(
+    //    genome_fasta.map{meta, fasta -> fasta}.collect(),
+    //    genome_metadata_csv,
+    //    params.mode
+    //)
+    //ch_versions = ch_versions.mix( GENOME_UPLOAD.out.versions )
 
     //manifests_ch = GENOME_UPLOAD.out.manifests.flatten()
     //    .map { manifest ->
@@ -170,17 +215,17 @@ workflow GENOMESUBMIT {
         )
     )
 
-    MULTIQC (
-        ch_multiqc_files.collect(),
-        ch_multiqc_config.toList(),
-        ch_multiqc_custom_config.toList(),
-        ch_multiqc_logo.toList(),
-        [],
-        []
-    )
+    //MULTIQC (
+    //    ch_multiqc_files.collect(),
+    //    ch_multiqc_config.toList(),
+    //    ch_multiqc_custom_config.toList(),
+    //    ch_multiqc_logo.toList(),
+    //    [],
+    //    []
+    //)
 
     emit:
-    multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    multiqc_report = channel.empty() // MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
 
 }

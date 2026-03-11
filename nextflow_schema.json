@@ -63,6 +63,26 @@
                 }
             }
         },
+        "genome_evaluation_options": {
+            "title": "Evaluation options",
+            "type": "object",
+            "fa_icon": "fas fa-university",
+            "description": "Parameters used to run Checkm2",
+            "help_text": "These options are used to run Checkm2 that will calculate completeness and contamination of genome if those were not provided as input",
+            "properties": {
+                "checkm2_db": {
+                    "type": "string",
+                    "description": "Path to pre-downloaded checkm2 database",
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "checkm2_db_zenodo_id": {
+                    "type": "number",
+                    "description": "Zenodo ID for checkm2 database download",
+                    "default": 14897628,
+                    "fa_icon": "fas fa-users-cog"
+                }
+            }
+        },
         "institutional_config_options": {
             "title": "Institutional config options",
             "type": "object",
@@ -287,6 +307,9 @@
         },
         {
             "$ref": "#/$defs/rna_detection_options"
+        },
+        {
+            "$ref": "#/$defs/genome_evaluation_options"
         },
         {
             "$ref": "#/$defs/institutional_config_options"

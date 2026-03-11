@@ -24,7 +24,7 @@ workflow RNA_DETECTION {
 
     main:
 
-    ch_versions = Channel.empty()
+    ch_versions = channel.empty()
     BARRNAP(
         fasta.map {id, fasta -> [id, fasta, "bac"]}
     )
