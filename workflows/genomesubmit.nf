@@ -71,11 +71,42 @@ workflow GENOMESUBMIT {
     genome_fasta = genome_fasta_and_reads.map{meta, fasta, _fq1 -> [meta, fasta]}
     genome_reads = genome_fasta_and_reads.map{meta, _fasta, reads -> [meta, reads]}
 
+    // --------- Genome coverage calculation
+
+    genome_reads.filter { meta, reads -> meta.genome_coverage == null }
+        .map { meta, reads -> [meta, reads] }
+        .set { genome_coverage_fq_input }
+    genome_fasta.filter { meta, fasta -> meta.genome_coverage == null }
+        .map { meta, fasta -> [meta, fasta] }
+        .set { genome_coverage_ref_input }
+    genome_fasta.filter { meta, fasta -> meta.genome_coverage != null }
+        .map { meta, fasta -> [meta, fasta] }
+        .set { genome_coverage_present }
+
+    COVERM_GENOME (
+        genome_coverage_fq_input,
+        genome_coverage_ref_input,
+        false,
+        false,
+        'file'
+    )
+    ch_versions = ch_versions.mix( COVERM_GENOME.out.versions )
+
+    // Update metadata for records missing coverage
+    fasta_updated_with_coverage = COVERM_GENOME.out.coverage.join(genome_coverage_ref_input)
+        .map{ meta, coverage_tsv, fasta ->
+              def coverage = coverage_tsv.readLines()[1].split('\t')[1];  // skip header
+              def updated_meta = meta.clone()
+              updated_meta.genome_coverage = coverage;
+              return [updated_meta, fasta]
+        }
+        .mix(genome_coverage_present)
+
     // --------- For genomes without RNA_presence info, calculate rRNA and tRNA
-    genome_fasta.filter { meta, fasta -> meta.RNA_presence == null }
+    fasta_updated_with_coverage.filter { meta, fasta -> meta.RNA_presence == null }
         .map { meta, fasta -> [meta, fasta] }
         .set { rna_prediction_input }
-    genome_fasta.filter { meta, fasta -> meta.RNA_presence != null }
+    fasta_updated_with_coverage.filter { meta, fasta -> meta.RNA_presence != null }
         .map { meta, fasta -> [meta, fasta] }
         .set { rna_present }
 
@@ -96,34 +127,17 @@ workflow GENOMESUBMIT {
 
     // --------- Completeness and contamination calculation
 
-    genome_fasta.filter { meta, fasta -> meta.completeness == null || meta.contamination == null || meta.stats_generation_software == null }
+    fasta_updated_with_rna.filter { meta, fasta -> meta.completeness == null || meta.contamination == null || meta.stats_generation_software == null }
         .map { meta, fasta -> [meta, fasta] }
         .set { genome_evaluation_input }
-    genome_fasta.filter { meta, fasta -> meta.completeness != null && meta.contamination != null && meta.stats_generation_software != null}
+    fasta_updated_with_rna.filter { meta, fasta -> meta.completeness != null && meta.contamination != null && meta.stats_generation_software != null}
         .map { meta, fasta -> [meta, fasta] }
         .set { evaluation_present }
 
-    GENOME_EVALUATION (
-        genome_evaluation_input
-    )
-
-    // --------- Genome coverage calculation
-
-    genome_reads.filter { meta, reads -> meta.genome_coverage == null }
-        .map { meta, reads -> [meta, reads] }
-        .set { genome_coverage_fq_input }
-    genome_fasta.filter { meta, fasta -> meta.genome_coverage == null }
-        .map { meta, fasta -> [meta, fasta] }
-        .set { genome_coverage_ref_input }
-
-    COVERM_GENOME (
-        genome_coverage_fq_input,
-        genome_coverage_ref_input,
-        false,
-        false,
-        'file'
-    )
-    ch_versions = ch_versions.mix( COVERM_GENOME.out.versions )
+    //GENOME_EVALUATION (
+    //    genome_evaluation_input
+    //)
+    // TODO add a tool into stats_generation_software
 
     // --------- Combine metadata into TSV
      genome_metadata_csv = fasta_updated_with_rna
