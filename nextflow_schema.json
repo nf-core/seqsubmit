@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/seqsubmit/main/nextflow_schema.json",
+    "$id": "https://raw.githubusercontent.com/nf-core/seqsubmit/master/nextflow_schema.json",
     "title": "nf-core/seqsubmit pipeline parameters",
     "description": "Submit sequences, assemblies, MAGs, etc., to public archives",
     "type": "object",
@@ -39,6 +39,27 @@
                     "type": "string",
                     "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
                     "fa_icon": "fas fa-file-signature"
+                }
+            }
+        },
+        "rna_detection_options": {
+            "title": "RNA detection options",
+            "type": "object",
+            "fa_icon": "fas fa-university",
+            "description": "Parameters used to make a decision about presence/absence of RNA in data",
+            "help_text": "ENA requires a boolean value (True/False) defining RNA. Decision of presence/absence of RNA is based on number of rRNA and tRNA. If both values are bigger than their corresponding limits - RNA is present (True), otherwise - not (False).",
+            "properties": {
+                "rrna_limit": {
+                    "type": "number",
+                    "description": "Minimum number of rRNA.",
+                    "default": 80,
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "trna_limit": {
+                    "type": "number",
+                    "description": "Minimum number of tRNA.",
+                    "default": 18,
+                    "fa_icon": "fas fa-users-cog"
                 }
             }
         },
@@ -263,6 +284,9 @@
     "allOf": [
         {
             "$ref": "#/$defs/input_output_options"
+        },
+        {
+            "$ref": "#/$defs/rna_detection_options"
         },
         {
             "$ref": "#/$defs/institutional_config_options"

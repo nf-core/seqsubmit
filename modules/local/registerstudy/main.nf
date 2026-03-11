@@ -21,13 +21,14 @@ process REGISTERSTUDY {
     def args2 = task.ext.args2 ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
+    echo "Generate study XMLs"
     study_xmls \\
         $args \\
         --study ${study} \\
         --library ${library} \\
         --center ${center} \\
 
-
+    echo "Submit study to ENA"
     submit_study \\
         $args2 \\
         --directory ${study}_upload \\

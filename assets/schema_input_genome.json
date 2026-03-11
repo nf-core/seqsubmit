@@ -25,6 +25,38 @@
                 "type": "string",
                 "description": "Run or assembly ENA accession"
             },
+            "fastq_1": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "format": "file-path",
+                        "exists": true,
+                        "pattern": "^\\S+\\.(fq|fastq)(\\.gz)?$"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
+                "errorMessage": "FASTQ file must have extension '.fq' or '.fastq' (optionally gzipped)",
+                "description": "Forward reads if paired-end or single-end reads FASTQ file"
+            },
+            "fastq_2": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "format": "file-path",
+                        "exists": true,
+                        "pattern": "^\\S+\\.(fq|fastq)(\\.gz)?$"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
+                "errorMessage": "FASTQ file for reverse reads must have extension '.fq' or '.fastq' (optionally gzipped)",
+                "description": "Reverse reads FASTQ file if paired-end. Leave empty for single-end reads"
+            },
             "assembly_software": {
                 "type": "string",
                 "description": "Tool name and version that was used to assemble data"
@@ -58,8 +90,8 @@
                 "description": "ENA accepted metagenome name"
             },
             "co-assembly": {
-                "type": "boolean",
-                "description": "True if data was co-assembled, False otherwise"
+                "type": "string",
+                "description": "Yes if data was co-assembled, No otherwise"
             },
             "broad_environment": {
                 "type": "string",
@@ -73,15 +105,26 @@
                 "type": "string",
                 "description": "material displaced by the sample"
             },
-            "rRNA_presence": {
-                "type": "boolean",
-                "description": "True/False if rRNA genes detected"
+            "RNA_presence": {
+                "type": "string",
+                "description": "Yes/No if rRNA genes detected"
             },
             "NCBI_lineage": {
                 "type": "string",
                 "description": "full NCBI lineage - format: x;y;z"
             }
         },
-        "required": ["sample", "fasta"]
+        "required": [
+            "sample",
+            "fasta",
+            "assembly_software",
+            "co-assembly",
+            "binning_software",
+            "binning_parameters",
+            "metagenome",
+            "broad_environment",
+            "local_environment",
+            "environmental_medium"
+        ]
     }
 }
