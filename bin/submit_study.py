@@ -2,7 +2,6 @@
 """Submit studies to ENA via the Webin REST API v2.
 
 Read a DataHarmonizer export containing study metadata,
-validate it against a LinkML schema and an XSD schema,
 check for duplicate studies already registered under the
 Webin account, construct an XML submission document, and
 submit new studies to ENA.
@@ -15,45 +14,35 @@ secrets appearing in shell history or process listings::
 
 Usage::
 
-    python scripts/submit_study.py \\
-        --input studies.json \\
-        --linkml schemas/SRA_study.yaml \\
-        --xsd assets/ena_schema \\
+    python scripts/submit_study.py \
+        --input studies.json \
         --test
 
     # With hold date (max 2 years):
-    python scripts/submit_study.py \\
-        --input studies.json \\
-        --linkml schemas/SRA_study.yaml \\
-        --xsd assets/ena_schema \\
+    python scripts/submit_study.py \
+        --input studies.json \
         --hold-until 2028-01-01
 
     # Log to file:
-    python scripts/submit_study.py \\
-        --input studies.json \\
-        --linkml schemas/SRA_study.yaml \\
-        --xsd assets/ena_schema \\
+    python scripts/submit_study.py \
+        --input studies.json \
         --test --log submission.log
 """
 
 from __future__ import annotations
 
+import datetime
 import logging
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any, Final
 
-import pendulum
+import click
 import requests
-import typer
 from requests.auth import HTTPBasicAuth
 
 import ena_common as common
-
-app = typer.Typer(
-    help="Submit studies to ENA via the Webin REST API v2.",
-)
 
 logger = logging.getLogger("ena_submit.study")
 
@@ -180,7 +169,7 @@ def build_submission_xml(
     )
     sub_alias = (
         "study-submission-"
-        + pendulum.now().format("YYYYMMDD-HHmmss")
+        + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     )
     submission.set("alias", sub_alias)
     actions = ET.SubElement(submission, "ACTIONS")
@@ -259,7 +248,7 @@ def _add_project_attribute(
 
 
 # -----------------------------------------------------------
-# XSD validation (study-specific fallback)
+# Structural XML validation (study-specific)
 # -----------------------------------------------------------
 
 
@@ -267,7 +256,7 @@ def _validate_study_xml_structure(
     xml_bytes: bytes,
     messages: list[str],
 ) -> tuple[bool, list[str]]:
-    """Fallback structural check for study XML."""
+    """Structural check for study XML."""
     try:
         tree = ET.fromstring(xml_bytes)
     except ET.ParseError as exc:
@@ -314,24 +303,19 @@ def _validate_study_xml_structure(
     return True, messages
 
 
-def validate_against_xsd(
+def validate_study_xml(
     xml_bytes: bytes,
-    xsd_dir: str | Path,
 ) -> tuple[bool, list[str]]:
-    """Validate study XML against ENA.project.xsd.
+    """Validate study XML structure.
 
     Args:
         xml_bytes: Serialised XML document.
-        xsd_dir: Directory containing ``ENA.project.xsd``
-            and ``SRA.common.xsd``.
 
     Returns:
         Tuple of (*is_valid*, *messages*).
     """
     return common.validate_xml_against_xsd(
-        xml_bytes, xsd_dir,
-        xsd_filename="ENA.project.xsd",
-        fragment_tag="PROJECT_SET",
+        xml_bytes,
         fallback_checker=_validate_study_xml_structure,
     )
 
@@ -405,7 +389,6 @@ def _do_submission(
     base_url: str,
     auth: Any,
     xml_bytes: bytes,
-    xsd: Path,
     action: str,
     results: dict[str, list[dict[str, Any]]],
     result_key: str,
@@ -418,7 +401,6 @@ def _do_submission(
         base_url: ENA Webin v2 submission base URL.
         auth: HTTP basic-auth credentials.
         xml_bytes: Serialised XML submission document.
-        xsd: Directory containing the XSD files.
         action: Label for log messages (``"ADD"`` or
             ``"MODIFY"``).
         results: Results dict to accumulate into.
@@ -429,19 +411,17 @@ def _do_submission(
     Returns:
         ``True`` if the batch succeeded (or dry run).
     """
-    xsd_valid, xsd_messages = validate_against_xsd(
-        xml_bytes, xsd,
-    )
-    for msg in xsd_messages:
+    xml_valid, xml_messages = validate_study_xml(xml_bytes)
+    for msg in xml_messages:
         logger.info("  %s", msg)
-    if not xsd_valid:
+    if not xml_valid:
         logger.error(
-            "XSD validation FAILED (%s)"
+            "XML validation FAILED (%s)"
             " — aborting submission", action,
         )
         return False
 
-    logger.info("XSD validation PASSED (%s)", action)
+    logger.info("XML validation PASSED (%s)", action)
 
     if dry_run:
         logger.info(
@@ -509,75 +489,86 @@ def _do_submission(
 _JSON_RECORD_KEYS: Final = ("studies", "data")
 
 
-@app.command()
+@click.command(
+    help="Submit studies to ENA via the Webin REST API v2.",
+)
+@click.option(
+    "--input", "input_file",
+    required=True,
+    type=click.Path(exists=True, path_type=Path),
+    help="Path to study metadata file (JSON, CSV, or TSV)",
+)
+@click.option(
+    "--test", "use_test",
+    is_flag=True, default=False,
+    help="Use the ENA test service"
+    " (submissions are discarded daily)",
+)
+@click.option(
+    "--hold-until",
+    default=None,
+    help="Hold studies private until this date"
+    " (YYYY-MM-DD, max 2 years from now)",
+)
+@click.option(
+    "--log", "log_file",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Path to log file",
+)
+@click.option(
+    "--output",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Path to write JSON accession results"
+    " (default: stdout)",
+)
+@click.option(
+    "--max-results",
+    default=5000,
+    help="Maximum number of projects to fetch"
+    " from the Reports API for duplicate checking",
+)
+@click.option(
+    "--dry-run",
+    is_flag=True, default=False,
+    help="Validate and build XML but do not"
+    " submit to ENA",
+)
+@click.option(
+    "--automated",
+    is_flag=True, default=False,
+    help="Skip duplicate detection against the"
+    " Webin Reports API (for automated pipelines)",
+)
+@click.option(
+    "--force",
+    is_flag=True, default=False,
+    help="Submit duplicate studies using the MODIFY"
+    " action to overwrite existing ENA records,"
+    " instead of skipping them",
+)
 def main(
-    input_file: Path = typer.Option(
-        ..., "--input", exists=True,
-        help="Path to study metadata file"
-        " (JSON, CSV, TSV, XLS, or XLSX)",
-    ),
-    linkml: Path = typer.Option(
-        ..., exists=True,
-        help="Path to LinkML YAML schema"
-        " (e.g. schemas/SRA_study.yaml)",
-    ),
-    xsd: Path = typer.Option(
-        ..., exists=True,
-        file_okay=False, resolve_path=True,
-        help="Directory containing ENA.project.xsd"
-        " and SRA.common.xsd",
-    ),
-    test: bool = typer.Option(
-        False, "--test",
-        help="Use the ENA test service"
-        " (submissions are discarded daily)",
-    ),
-    hold_until: str | None = typer.Option(
-        None, "--hold-until",
-        help="Hold studies private until this date"
-        " (YYYY-MM-DD, max 2 years from now)",
-    ),
-    log: Path | None = typer.Option(
-        None, help="Path to log file",
-    ),
-    output: Path | None = typer.Option(
-        None,
-        help="Path to write JSON accession results"
-        " (default: stdout)",
-    ),
-    max_results: int = typer.Option(
-        5000, "--max-results",
-        help="Maximum number of projects to fetch"
-        " from the Reports API for duplicate"
-        " checking",
-    ),
-    dry_run: bool = typer.Option(
-        False, "--dry-run",
-        help="Validate and build XML but do not"
-        " submit to ENA",
-    ),
-    automated: bool = typer.Option(
-        False, "--automated",
-        help="Skip duplicate detection against the"
-        " Webin Reports API (for automated pipelines)",
-    ),
-    force: bool = typer.Option(
-        False, "--force",
-        help="Submit duplicate studies using the MODIFY"
-        " action to overwrite existing ENA records,"
-        " instead of skipping them",
-    ),
+    input_file: Path,
+    use_test: bool,
+    hold_until: str | None,
+    log_file: Path | None,
+    output: Path | None,
+    max_results: int,
+    dry_run: bool,
+    automated: bool,
+    force: bool,
 ) -> None:
     """Submit studies to ENA via the Webin REST API v2."""
-    common.setup_logging(log)
+    common.setup_logging(log_file)
     username, password = common.get_credentials()
 
-    env_label = "TEST" if test else "PRODUCTION"
+    env_label = "TEST" if use_test else "PRODUCTION"
     logger.info(
         "ENA Study Submission — environment: %s",
         env_label,
     )
-    base_url = common.get_base_url(test)
+    base_url = common.get_base_url(use_test)
     auth = HTTPBasicAuth(username, password)
     logger.debug("Auth username: %s", username)
 
@@ -592,7 +583,7 @@ def main(
     if studies is None:
         logger.error(
             "Unsupported file format."
-            " Supported: .json, .csv, .tsv, .xlsx, .xls",
+            " Supported: .json, .csv, .tsv",
         )
         sys.exit(1)
 
@@ -609,7 +600,7 @@ def main(
         duplicates: dict[int, dict[str, Any]] = {}
     else:
         account_studies = fetch_account_studies(
-            auth, use_test=test,
+            auth, use_test=use_test,
             max_results=max_results,
         )
         for ps in account_studies:
@@ -691,36 +682,9 @@ def main(
         len(studies_to_submit), len(studies_to_modify),
     )
 
-    # -- Step 3: Validate against LinkML -----------------
-    logger.info("Loading LinkML schema: %s", linkml)
-    schema = common.load_linkml_schema(linkml)
-
-    logger.info(
-        "Validating input against LinkML schema...",
-    )
-    linkml_valid, linkml_messages = (
-        common.validate_against_linkml(
-            studies_to_submit + studies_to_modify, schema,
-            label_fields=["STUDY_TITLE", "alias"],
-            entity_name="study",
-            unknown_field_note="will be ignored",
-        )
-    )
-    for msg in linkml_messages:
-        logger.info("  %s", msg)
-
-    if not linkml_valid:
-        logger.error(
-            "LinkML validation FAILED"
-            " — aborting submission",
-        )
-        sys.exit(1)
-
-    logger.info("LinkML validation PASSED")
-
     overall_ok = True
 
-    # -- Steps 4-7: ADD new studies ----------------------
+    # -- Step 3: ADD new studies -------------------------
     if studies_to_submit:
         logger.info(
             "Building ADD XML for %d new study/studies...",
@@ -740,7 +704,7 @@ def main(
             len(xml_bytes),
         )
         ok = _do_submission(
-            base_url, auth, xml_bytes, xsd,
+            base_url, auth, xml_bytes,
             action="ADD",
             results=results,
             result_key="submitted",
@@ -749,7 +713,7 @@ def main(
         )
         overall_ok = overall_ok and ok
 
-    # -- Steps 4-7: MODIFY duplicate studies (--force) ---
+    # -- Step 4: MODIFY duplicate studies (--force) ------
     if studies_to_modify:
         logger.info(
             "Building MODIFY XML for %d duplicate(s)...",
@@ -769,7 +733,7 @@ def main(
             len(xml_bytes),
         )
         ok = _do_submission(
-            base_url, auth, xml_bytes, xsd,
+            base_url, auth, xml_bytes,
             action="MODIFY",
             results=results,
             result_key="modified",
@@ -781,7 +745,7 @@ def main(
     if not overall_ok:
         sys.exit(1)
 
-    # -- Step 8: Output results --------------------------
+    # -- Step 5: Output results --------------------------
     common.write_results(results, output)
 
     logger.info("=" * 60)
@@ -822,4 +786,4 @@ def main(
 
 
 if __name__ == "__main__":
-    app()
+    main()
