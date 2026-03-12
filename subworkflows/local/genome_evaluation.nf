@@ -41,7 +41,7 @@ workflow GENOME_EVALUATION {
 
     CHECKM2_PREDICT(
         ch_fasta,
-        ch_check2_db,
+        ch_check2_db.first(),
     )
 
     emit:
