@@ -9,7 +9,7 @@
 */
 
 include { CHECKM2_DATABASEDOWNLOAD } from '../../modules/nf-core/checkm2/databasedownload/main'
-include { CHECKM2_PREDICT          }          from '../../modules/nf-core/checkm2/predict/main'
+include { CHECKM2_PREDICT          } from '../../modules/nf-core/checkm2/predict/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
