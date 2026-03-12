@@ -42,7 +42,7 @@ import click
 import requests
 from requests.auth import HTTPBasicAuth
 
-import ena_common as common
+import ena_submit_common as common
 
 logger = logging.getLogger("ena_submit.rawreads_study")
 

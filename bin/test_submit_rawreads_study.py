@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for submit_rawreads_study.py and ena_common.py — study submission pipeline.
+"""Tests for submit_rawreads_study.py and ena_submit_common.py — study submission pipeline.
 
 Usage:
     pytest bin/test_submit_rawreads_study.py -v
@@ -16,7 +16,7 @@ import pytest
 # Ensure the scripts directory is importable
 sys.path.insert(0, os.path.dirname(__file__))
 
-import ena_common as common
+import ena_submit_common as common
 from submit_rawreads_study import (
     build_submission_xml,
     find_duplicate_studies,
