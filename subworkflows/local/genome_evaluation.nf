@@ -9,7 +9,7 @@
 */
 
 include { CHECKM2_DATABASEDOWNLOAD } from '../../modules/nf-core/checkm2/databasedownload/main'
-include { CHECKM2_PREDICT }          from '../../modules/nf-core/checkm2/predict/main'
+include { CHECKM2_PREDICT          }          from '../../modules/nf-core/checkm2/predict/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -20,7 +20,7 @@ include { CHECKM2_PREDICT }          from '../../modules/nf-core/checkm2/predict
 workflow GENOME_EVALUATION {
 
     take:
-    fasta
+    ch_fasta   // [meta, fasta_file]
 
     main:
     ch_versions = channel.empty()
@@ -31,7 +31,7 @@ workflow GENOME_EVALUATION {
         ch_check2_db = CHECKM2_DATABASEDOWNLOAD.out.database
     }
     else {
-        ch_check2_db = Channel.of(
+        ch_check2_db = channel.of(
             [
                 [id: "checkm2_db"],
                 file(params.checkm2_db),
@@ -40,12 +40,12 @@ workflow GENOME_EVALUATION {
     }
 
     CHECKM2_PREDICT(
-        fasta,
+        ch_fasta,
         ch_check2_db,
     )
 
     emit:
-    genome_evaluation = CHECKM2_PREDICT.out.checkm2_tsv
+    genome_evaluation = CHECKM2_PREDICT.out.checkm2_tsv  // [meta, stats.tsv]
     stats_versions = CHECKM2_PREDICT.out.versions_checkm2_predict
 
 }
