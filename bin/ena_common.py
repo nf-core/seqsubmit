@@ -36,12 +36,8 @@ logger = logging.getLogger(_LOGGER_NAME)
 # Constants
 # -----------------------------------------------------------
 
-PROD_URL: Final = (
-    "https://www.ebi.ac.uk/ena/submit/webin-v2"
-)
-TEST_URL: Final = (
-    "https://wwwdev.ebi.ac.uk/ena/submit/webin-v2"
-)
+PROD_URL: Final = "https://www.ebi.ac.uk/ena/submit/webin-v2"
+TEST_URL: Final = "https://wwwdev.ebi.ac.uk/ena/submit/webin-v2"
 
 _MAX_HOLD_YEARS: Final = 2
 
@@ -104,10 +100,7 @@ def get_credentials() -> tuple[str, str]:
     username = os.environ.get("ENA_WEBIN", "").strip()
     password = os.environ.get("ENA_WEBIN_PASSWORD", "").strip()
     if not username or not password:
-        logger.error(
-            "ENA_WEBIN and ENA_WEBIN_PASSWORD environment"
-            " variables must be set",
-        )
+        logger.error("ENA_WEBIN and ENA_WEBIN_PASSWORD environment variables must be set")
         sys.exit(1)
     return username, password
 
@@ -185,8 +178,7 @@ def validate_hold_until(hold_until: str) -> datetime.date:
         hold_date = datetime.date.fromisoformat(hold_until)
     except ValueError:
         raise click.BadParameter(
-            f"Invalid date format: {hold_until!r}."
-            " Expected YYYY-MM-DD."
+            f"Invalid date format: {hold_until!r}. Expected YYYY-MM-DD."
         ) from None
 
     today = datetime.date.today()
@@ -194,15 +186,13 @@ def validate_hold_until(hold_until: str) -> datetime.date:
 
     if hold_date > max_date:
         raise click.BadParameter(
-            f"Hold date {hold_until} is more than"
-            f" {_MAX_HOLD_YEARS} years from today"
+            f"Hold date {hold_until} is more than {_MAX_HOLD_YEARS} years from today"
             f" ({today}). Maximum allowed: {max_date}."
         )
 
     if hold_date <= today:
         raise click.BadParameter(
-            f"Hold date {hold_until} is not in the"
-            f" future (today is {today})."
+            f"Hold date {hold_until} is not in the future (today is {today})."
         )
 
     return hold_date
@@ -262,7 +252,7 @@ def parse_checklist_units(
 
 def validate_xml_against_xsd(
     xml_bytes: bytes,
-    fragment_tag: str | None = None,
+    _fragment_tag: str | None = None,  # unused; kept for API compatibility
     fallback_checker: Callable[
         [bytes, list[str]], tuple[bool, list[str]]
     ] | None = None,
@@ -275,7 +265,7 @@ def validate_xml_against_xsd(
 
     Args:
         xml_bytes: Serialised XML document.
-        fragment_tag: Unused; kept for API compatibility.
+        _fragment_tag: Unused; kept for API compatibility.
         fallback_checker: Optional function called with
             (*xml_bytes*, *messages*) that returns
             (*is_valid*, *messages*).
@@ -395,11 +385,7 @@ def extract_records_from_json(
         if isinstance(container, dict):
             for key, val in container.items():
                 if isinstance(val, list):
-                    logger.info(
-                        "Extracted records from"
-                        " Container.%s",
-                        key,
-                    )
+                    logger.info("Extracted records from Container.%s", key)
                     return val
 
         for key in record_keys:
@@ -471,23 +457,13 @@ def fetch_from_reports_endpoint(
         "max-results": max_results,
     }
 
-    req = requests.Request(
-        "GET", url, params=params, auth=auth,
-    )
+    req = requests.Request("GET", url, params=params, auth=auth)
     prepared = req.prepare()
-    logger.debug(
-        'curl -u %s:*** "%s"',
-        auth.username, prepared.url,
-    )
+    logger.debug('curl -u %s:*** "%s"', auth.username, prepared.url)
 
     try:
-        resp = requests.get(
-            url, params=params, auth=auth, timeout=60,
-        )
-        logger.info(
-            "Reports API at %s returned %s",
-            url, resp.status_code,
-        )
+        resp = requests.get(url, params=params, auth=auth, timeout=60)
+        logger.info("Reports API at %s returned %s", url, resp.status_code)
         resp.raise_for_status()
         return resp.json()
 
@@ -498,30 +474,20 @@ def fetch_from_reports_endpoint(
             else "unknown"
         )
         if status == 404:
-            logger.info(
-                "Reports API at %s returned 404"
-                " — no records yet",
-                url,
-            )
+            logger.info("Reports API at %s returned 404 — no records yet", url)
             return []
         if status in (401, 403):
             logger.warning(
-                "Reports API at %s returned %s"
-                " — endpoint may not be available"
+                "Reports API at %s returned %s — endpoint may not be available"
                 " or credentials may differ",
                 url, status,
             )
             return None
-        logger.warning(
-            "Reports API at %s returned HTTP %s",
-            url, status,
-        )
+        logger.warning("Reports API at %s returned HTTP %s", url, status)
         return None
 
     except requests.exceptions.RequestException as exc:
-        logger.warning(
-            "Reports API at %s failed: %s", url, exc,
-        )
+        logger.warning("Reports API at %s failed: %s", url, exc)
         return None
 
 
@@ -561,13 +527,8 @@ def fetch_account_records(
     )
 
     for url in urls:
-        logger.info(
-            "Fetching account %s from: %s",
-            entity_label, url,
-        )
-        raw = fetch_from_reports_endpoint(
-            url, auth, max_results,
-        )
+        logger.info("Fetching account %s from: %s", entity_label, url)
+        raw = fetch_from_reports_endpoint(url, auth, max_results)
         if raw is None:
             continue
 
@@ -580,15 +541,11 @@ def fetch_account_records(
             if normalized is not None:
                 records.append(normalized)
 
-        logger.info(
-            "Found %d %s in account",
-            len(records), entity_label,
-        )
+        logger.info("Found %d %s in account", len(records), entity_label)
         return records
 
     logger.warning(
-        "Could not reach any Webin reports endpoint."
-        " Duplicate checking for %s will be skipped.",
+        "Could not reach any Webin reports endpoint. Duplicate checking for %s will be skipped.",
         entity_label,
     )
     return []
@@ -640,10 +597,8 @@ def find_duplicates_by_alias_title(
             by_alias[alias] = rec
 
     logger.info(
-        "Checking %d new %s against"
-        " %d existing account %s...",
-        total, entity_label,
-        len(account_records), entity_label,
+        "Checking %d new %s against %d existing account %s...",
+        total, entity_label, len(account_records), entity_label,
     )
 
     for i, record in enumerate(new_records):
@@ -669,11 +624,7 @@ def find_duplicates_by_alias_title(
             )
 
             if len(duplicates) == total:
-                logger.info(
-                    "All %s are duplicates"
-                    " — skipping further checks",
-                    entity_label,
-                )
+                logger.info("All %s are duplicates — skipping further checks", entity_label)
                 return duplicates
 
     return duplicates

@@ -51,12 +51,8 @@ logger = logging.getLogger("ena_submit.rawreads_study")
 # Reports API (study-specific)
 # -----------------------------------------------------------
 
-_PROD_REPORTS_URL: Final = (
-    "https://www.ebi.ac.uk/ena/submit/report/projects"
-)
-_TEST_REPORTS_URL: Final = (
-    "https://wwwdev.ebi.ac.uk/ena/submit/report/projects"
-)
+_PROD_REPORTS_URL: Final = "https://www.ebi.ac.uk/ena/submit/report/projects"
+_TEST_REPORTS_URL: Final = "https://wwwdev.ebi.ac.uk/ena/submit/report/projects"
 
 
 def _normalize_study_report(
@@ -65,27 +61,16 @@ def _normalize_study_report(
     """Normalise a raw study report dict."""
     return {
         "title": (
-            report.get("title")
-            or report.get("studyTitle")
-            or report.get("STUDY_TITLE", "")
+            report.get("title") or report.get("studyTitle") or report.get("STUDY_TITLE", "")
         ),
-        "alias": (
-            report.get("alias")
-            or report.get("studyAlias")
-            or ""
-        ),
+        "alias": report.get("alias") or report.get("studyAlias") or "",
         "accession": (
             report.get("accession")
             or report.get("studyAccession")
             or report.get("report", {}).get("id", "")
         ),
-        "secondary_accession": (
-            report.get("secondaryAccession")
-            or report.get("secondaryId", "")
-        ),
-        "status": report.get(
-            "releaseStatus", "UNKNOWN"
-        ),
+        "secondary_accession": report.get("secondaryAccession") or report.get("secondaryId", ""),
+        "status": report.get("releaseStatus", "UNKNOWN"),
     }
 
 
@@ -167,10 +152,7 @@ def build_submission_xml(
     submission = ET.SubElement(
         submission_set, "SUBMISSION",
     )
-    sub_alias = (
-        "study-submission-"
-        + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    )
+    sub_alias = f"study-submission-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
     submission.set("alias", sub_alias)
     actions = ET.SubElement(submission, "ACTIONS")
     main_action = ET.SubElement(actions, "ACTION")
@@ -271,9 +253,7 @@ def _validate_study_xml_structure(
 
     project_set = tree.find("PROJECT_SET")
     if project_set is None:
-        messages.append(
-            "ERROR: Missing PROJECT_SET element"
-        )
+        messages.append("ERROR: Missing PROJECT_SET element")
         return False, messages
 
     projects = project_set.findall("PROJECT")
@@ -285,20 +265,13 @@ def _validate_study_xml_structure(
         alias = proj.get("alias", "<no alias>")
         title = proj.find("TITLE")
         if title is None or not title.text:
-            messages.append(
-                f"ERROR: PROJECT '{alias}' missing TITLE"
-            )
+            messages.append(f"ERROR: PROJECT '{alias}' missing TITLE")
             return False, messages
         sp = proj.find("SUBMISSION_PROJECT")
         if sp is None:
-            messages.append(
-                f"ERROR: PROJECT '{alias}'"
-                " missing SUBMISSION_PROJECT"
-            )
+            messages.append(f"ERROR: PROJECT '{alias}' missing SUBMISSION_PROJECT")
             return False, messages
-        messages.append(
-            f"OK: PROJECT '{alias}' has required elements"
-        )
+        messages.append(f"OK: PROJECT '{alias}' has required elements")
 
     return True, messages
 
@@ -336,10 +309,7 @@ def parse_xml_receipt(
     Returns:
         Tuple of (*success*, *accessions*, *messages*).
     """
-    success = (
-        receipt_root.get("success", "false").lower()
-        == "true"
-    )
+    success = receipt_root.get("success", "false").lower() == "true"
     accessions: list[dict[str, str]] = []
     messages: list[str] = []
 
@@ -355,18 +325,12 @@ def parse_xml_receipt(
             "alias": proj.get("alias", ""),
             "accession": proj.get("accession", ""),
             "status": proj.get("status", ""),
-            "holdUntilDate": proj.get(
-                "holdUntilDate", ""
-            ),
+            "holdUntilDate": proj.get("holdUntilDate", ""),
         }
         ext = proj.find("EXT_ID")
         if ext is not None:
-            acc_info["external_accession"] = ext.get(
-                "accession", ""
-            )
-            acc_info["external_type"] = ext.get(
-                "type", ""
-            )
+            acc_info["external_accession"] = ext.get("accession", "")
+            acc_info["external_type"] = ext.get("type", "")
         accessions.append(acc_info)
 
     # Some receipts use STUDY instead of PROJECT.
@@ -415,45 +379,26 @@ def _do_submission(
     for msg in xml_messages:
         logger.info("  %s", msg)
     if not xml_valid:
-        logger.error(
-            "XML validation FAILED (%s)"
-            " — aborting submission", action,
-        )
+        logger.error("XML validation FAILED (%s) — aborting submission", action)
         return False
 
     logger.info("XML validation PASSED (%s)", action)
 
     if dry_run:
-        logger.info(
-            "DRY RUN — skipping %s submission", action,
-        )
-        logger.info(
-            "Generated XML:\n%s",
-            xml_bytes.decode("utf-8"),
-        )
+        logger.info("DRY RUN — skipping %s submission", action)
+        logger.info("Generated XML:\n%s", xml_bytes.decode("utf-8"))
         return True
 
-    logger.info(
-        "Submitting %s to ENA (%s)...", action, env_label,
-    )
+    logger.info("Submitting %s to ENA (%s)...", action, env_label)
     try:
-        receipt_root = common.submit_xml(
-            base_url, auth, xml_bytes,
-        )
+        receipt_root = common.submit_xml(base_url, auth, xml_bytes)
     except requests.exceptions.HTTPError as exc:
-        logger.error(
-            "HTTP error during %s submission: %s",
-            action, exc,
-        )
+        logger.error("HTTP error during %s submission: %s", action, exc)
         if exc.response is not None:
-            logger.error(
-                "Response body: %s", exc.response.text,
-            )
+            logger.error("Response body: %s", exc.response.text)
         return False
 
-    success, accessions, receipt_messages = (
-        parse_xml_receipt(receipt_root)
-    )
+    success, accessions, receipt_messages = parse_xml_receipt(receipt_root)
     for msg in receipt_messages:
         logger.info("  Receipt: %s", msg)
 
@@ -461,14 +406,10 @@ def _do_submission(
         logger.info("%s SUCCESSFUL", action)
         for acc in accessions:
             ext = acc.get("external_accession", "")
-            ext_suffix = (
-                f" (study: {ext})" if ext else ""
-            )
+            ext_suffix = f" (study: {ext})" if ext else ""
             logger.info(
-                "  %s: alias=%s accession=%s"
-                " status=%s%s",
-                action, acc["alias"], acc["accession"],
-                acc["status"], ext_suffix,
+                "  %s: alias=%s accession=%s status=%s%s",
+                action, acc["alias"], acc["accession"], acc["status"], ext_suffix,
             )
             results[result_key].append(acc)
     else:
@@ -501,14 +442,12 @@ _JSON_RECORD_KEYS: Final = ("studies", "data")
 @click.option(
     "--test", "use_test",
     is_flag=True, default=False,
-    help="Use the ENA test service"
-    " (submissions are discarded daily)",
+    help="Use the ENA test service (submissions are discarded daily)",
 )
 @click.option(
     "--hold-until",
     default=None,
-    help="Hold studies private until this date"
-    " (YYYY-MM-DD, max 2 years from now)",
+    help="Hold studies private until this date (YYYY-MM-DD, max 2 years from now)",
 )
 @click.option(
     "--log", "log_file",
@@ -520,32 +459,27 @@ _JSON_RECORD_KEYS: Final = ("studies", "data")
     "--output",
     type=click.Path(path_type=Path),
     default=None,
-    help="Path to write JSON accession results"
-    " (default: stdout)",
+    help="Path to write JSON accession results (default: stdout)",
 )
 @click.option(
     "--max-results",
     default=5000,
-    help="Maximum number of projects to fetch"
-    " from the Reports API for duplicate checking",
+    help="Maximum number of projects to fetch from the Reports API for duplicate checking",
 )
 @click.option(
     "--dry-run",
     is_flag=True, default=False,
-    help="Validate and build XML but do not"
-    " submit to ENA",
+    help="Validate and build XML but do not submit to ENA",
 )
 @click.option(
     "--automated",
     is_flag=True, default=False,
-    help="Skip duplicate detection against the"
-    " Webin Reports API (for automated pipelines)",
+    help="Skip duplicate detection against the Webin Reports API (for automated pipelines)",
 )
 @click.option(
     "--force",
     is_flag=True, default=False,
-    help="Submit duplicate studies using the MODIFY"
-    " action to overwrite existing ENA records,"
+    help="Submit duplicate studies using the MODIFY action to overwrite existing ENA records,"
     " instead of skipping them",
 )
 def main(
@@ -564,10 +498,7 @@ def main(
     username, password = common.get_credentials()
 
     env_label = "TEST" if use_test else "PRODUCTION"
-    logger.info(
-        "ENA Study Submission — environment: %s",
-        env_label,
-    )
+    logger.info("ENA Study Submission — environment: %s", env_label)
     base_url = common.get_base_url(use_test)
     auth = HTTPBasicAuth(username, password)
     logger.debug("Auth username: %s", username)
@@ -581,22 +512,14 @@ def main(
         input_file, json_record_keys=_JSON_RECORD_KEYS,
     )
     if studies is None:
-        logger.error(
-            "Unsupported file format."
-            " Supported: .json, .csv, .tsv",
-        )
+        logger.error("Unsupported file format. Supported: .json, .csv, .tsv")
         sys.exit(1)
 
-    logger.info(
-        "Loaded %d study/studies from input",
-        len(studies),
-    )
+    logger.info("Loaded %d study/studies from input", len(studies))
 
     # -- Step 2: Check for duplicates --------------------
     if automated:
-        logger.info(
-            "Automated mode: skipping duplicate detection",
-        )
+        logger.info("Automated mode: skipping duplicate detection")
         duplicates: dict[int, dict[str, Any]] = {}
     else:
         account_studies = fetch_account_studies(
@@ -605,10 +528,8 @@ def main(
         )
         for ps in account_studies:
             logger.info(
-                "  Account study: %s | alias=%s"
-                " | title=%s | status=%s",
-                ps["accession"], ps["alias"],
-                ps["title"], ps["status"],
+                "  Account study: %s | alias=%s | title=%s | status=%s",
+                ps["accession"], ps["alias"], ps["title"], ps["status"],
             )
         duplicates = find_duplicate_studies(
             studies, account_studies,
@@ -623,37 +544,23 @@ def main(
 
     studies_to_modify: list[dict[str, Any]] = []
     if duplicates:
-        action_label = (
-            "will be re-submitted with MODIFY"
-            if force else "will NOT be submitted"
-        )
+        action_label = "will be re-submitted with MODIFY" if force else "will NOT be submitted"
         logger.warning(
             "Found %d duplicate(s) — %s:",
             len(duplicates), action_label,
         )
         for idx, dup_info in duplicates.items():
-            study_title = studies[idx].get(
-                "STUDY_TITLE", f"study[{idx}]",
-            )
+            study_title = studies[idx].get("STUDY_TITLE", f"study[{idx}]")
             logger.warning(
-                "  DUPLICATE: '%s' matches existing %s"
-                " (accession: %s)",
-                study_title,
-                dup_info["match_reason"],
-                dup_info["accession"],
+                "  DUPLICATE: '%s' matches existing %s (accession: %s)",
+                study_title, dup_info["match_reason"], dup_info["accession"],
             )
             results["duplicates"].append({
                 "input_index": idx,
                 "title": study_title,
                 "alias": studies[idx].get("alias", ""),
-                "existing_accession": (
-                    dup_info["accession"]
-                ),
-                "existing_secondary_accession": (
-                    dup_info.get(
-                        "secondary_accession", ""
-                    )
-                ),
+                "existing_accession": dup_info["accession"],
+                "existing_secondary_accession": dup_info.get("secondary_accession", ""),
                 "match_reason": dup_info["match_reason"],
             })
             if force:
@@ -669,16 +576,12 @@ def main(
     ]
 
     if not studies_to_submit and not studies_to_modify:
-        logger.info(
-            "No studies to submit"
-            " (all are duplicates or input is empty)",
-        )
+        logger.info("No studies to submit (all are duplicates or input is empty)")
         common.write_results(results, output)
         return
 
     logger.info(
-        "%d new study/studies to ADD,"
-        " %d duplicate(s) to MODIFY",
+        "%d new study/studies to ADD, %d duplicate(s) to MODIFY",
         len(studies_to_submit), len(studies_to_modify),
     )
 
@@ -686,23 +589,11 @@ def main(
 
     # -- Step 3: ADD new studies -------------------------
     if studies_to_submit:
-        logger.info(
-            "Building ADD XML for %d new study/studies...",
-            len(studies_to_submit),
-        )
-        xml_root = build_submission_xml(
-            studies_to_submit, hold_until=hold_until,
-            action="ADD",
-        )
+        logger.info("Building ADD XML for %d new study/studies...", len(studies_to_submit))
+        xml_root = build_submission_xml(studies_to_submit, hold_until=hold_until, action="ADD")
         xml_bytes = common.xml_to_bytes(xml_root)
-        logger.debug(
-            "Generated XML (ADD):\n%s",
-            xml_bytes.decode("utf-8"),
-        )
-        logger.info(
-            "XML document size (ADD): %d bytes",
-            len(xml_bytes),
-        )
+        logger.debug("Generated XML (ADD):\n%s", xml_bytes.decode("utf-8"))
+        logger.info("XML document size (ADD): %d bytes", len(xml_bytes))
         ok = _do_submission(
             base_url, auth, xml_bytes,
             action="ADD",
@@ -715,23 +606,11 @@ def main(
 
     # -- Step 4: MODIFY duplicate studies (--force) ------
     if studies_to_modify:
-        logger.info(
-            "Building MODIFY XML for %d duplicate(s)...",
-            len(studies_to_modify),
-        )
-        xml_root = build_submission_xml(
-            studies_to_modify, hold_until=hold_until,
-            action="MODIFY",
-        )
+        logger.info("Building MODIFY XML for %d duplicate(s)...", len(studies_to_modify))
+        xml_root = build_submission_xml(studies_to_modify, hold_until=hold_until, action="MODIFY")
         xml_bytes = common.xml_to_bytes(xml_root)
-        logger.debug(
-            "Generated XML (MODIFY):\n%s",
-            xml_bytes.decode("utf-8"),
-        )
-        logger.info(
-            "XML document size (MODIFY): %d bytes",
-            len(xml_bytes),
-        )
+        logger.debug("Generated XML (MODIFY):\n%s", xml_bytes.decode("utf-8"))
+        logger.info("XML document size (MODIFY): %d bytes", len(xml_bytes))
         ok = _do_submission(
             base_url, auth, xml_bytes,
             action="MODIFY",
@@ -751,39 +630,22 @@ def main(
     logger.info("=" * 60)
     logger.info("SUBMISSION SUMMARY")
     logger.info(
-        "  Duplicates skipped: %d",
-        len(results["duplicates"])
-        - len(results["modified"]),
+        "  Duplicates skipped: %d", len(results["duplicates"]) - len(results["modified"]),
     )
     for d in results["duplicates"]:
-        logger.info(
-            "    %s -> %s",
-            d["title"], d["existing_accession"],
-        )
-    logger.info(
-        "  Newly submitted (ADD): %d",
-        len(results["submitted"]),
-    )
+        logger.info("    %s -> %s", d["title"], d["existing_accession"])
+    logger.info("  Newly submitted (ADD): %d", len(results["submitted"]))
     for s in results["submitted"]:
         ext = s.get("external_accession", "")
         ext_suffix = f" ({ext})" if ext else ""
-        logger.info(
-            "    %s -> %s%s",
-            s["alias"], s["accession"], ext_suffix,
-        )
-    logger.info(
-        "  Modified (MODIFY): %d",
-        len(results["modified"]),
-    )
+        logger.info("    %s -> %s%s", s["alias"], s["accession"], ext_suffix)
+    logger.info("  Modified (MODIFY): %d", len(results["modified"]))
     for m in results["modified"]:
         ext = m.get("external_accession", "")
         ext_suffix = f" ({ext})" if ext else ""
-        logger.info(
-            "    %s -> %s%s",
-            m["alias"], m["accession"], ext_suffix,
-        )
+        logger.info("    %s -> %s%s", m["alias"], m["accession"], ext_suffix)
     logger.info("=" * 60)
 
 
 if __name__ == "__main__":
-    main()
+    main()  # type: ignore[call-arg]
