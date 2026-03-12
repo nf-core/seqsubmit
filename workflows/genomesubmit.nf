@@ -58,7 +58,7 @@ workflow GENOMESUBMIT {
             ]
             def read1 = row[3] ? file(row[3]) : null
             def read2 = row[4] ? file(row[4]) : null
-            // TODO fix for null in reads
+
             if (row[4] && row[4] != "") {
                 // If paired end reads
                 return [meta, file(row[1]), [read1, read2]]
@@ -156,7 +156,6 @@ workflow GENOMESUBMIT {
             return [updated_meta, fasta]
         }
         .mix(evaluation_present)
-    fasta_updated_with_stats.view()
 
     // --------- Combine metadata into TSV
     genome_metadata_csv = fasta_updated_with_stats

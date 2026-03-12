@@ -125,6 +125,29 @@
             "broad_environment",
             "local_environment",
             "environmental_medium"
-        ]
+        ],
+        "anyOf": [
+            {
+                "properties": {
+                    "fastq_1": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "required": ["fastq_1"]
+            },
+            {
+                "properties": {
+                    "genome_coverage": {
+                        "type": "number",
+                        "minimum": 0
+                    }
+                },
+                "required": ["genome_coverage"]
+            }
+        ],
+        "errorMessage": {
+            "anyOf": "Either reads or coverage must be provided in the sample sheet for each genome"
+        }
     }
 }
