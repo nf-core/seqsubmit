@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Submit studies to ENA via the Webin REST API v2.
+"""Submit raw-reads studies to ENA via the Webin REST API v2.
 
 Read a DataHarmonizer export containing study metadata,
 check for duplicate studies already registered under the
@@ -9,22 +9,22 @@ submit new studies to ENA.
 Credentials are read from environment variables to avoid
 secrets appearing in shell history or process listings::
 
-    export ENA_USERNAME=Webin-XXXXX
-    export ENA_PASSWORD=SECRET
+    export ENA_WEBIN=Webin-XXXXX
+    export ENA_WEBIN_PASSWORD=SECRET
 
 Usage::
 
-    python scripts/submit_study.py \
+    python bin/submit_rawreads_study.py \
         --input studies.json \
         --test
 
     # With hold date (max 2 years):
-    python scripts/submit_study.py \
+    python bin/submit_rawreads_study.py \
         --input studies.json \
         --hold-until 2028-01-01
 
     # Log to file:
-    python scripts/submit_study.py \
+    python bin/submit_rawreads_study.py \
         --input studies.json \
         --test --log submission.log
 """
@@ -44,7 +44,7 @@ from requests.auth import HTTPBasicAuth
 
 import ena_common as common
 
-logger = logging.getLogger("ena_submit.study")
+logger = logging.getLogger("ena_submit.rawreads_study")
 
 
 # -----------------------------------------------------------
@@ -490,7 +490,7 @@ _JSON_RECORD_KEYS: Final = ("studies", "data")
 
 
 @click.command(
-    help="Submit studies to ENA via the Webin REST API v2.",
+    help="Submit raw-reads studies to ENA via the Webin REST API v2.",
 )
 @click.option(
     "--input", "input_file",

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Tests for submit_study.py and ena_common.py — study submission pipeline.
+"""Tests for submit_rawreads_study.py and ena_common.py — study submission pipeline.
 
 Usage:
-    pytest bin/test_submit_study.py -v
+    pytest bin/test_submit_rawreads_study.py -v
 """
 
 from __future__ import annotations
@@ -17,7 +17,7 @@ import pytest
 sys.path.insert(0, os.path.dirname(__file__))
 
 import ena_common as common
-from submit_study import (
+from submit_rawreads_study import (
     build_submission_xml,
     find_duplicate_studies,
     validate_study_xml,
@@ -30,14 +30,14 @@ from submit_study import (
 FIXTURES_DIR = os.path.join(
     os.path.dirname(__file__), "..", "assets", "test-fixtures",
 )
-MIMICC_JSON = os.path.join(FIXTURES_DIR, "mimicc_study.json")
-MIMICC_CSV = os.path.join(FIXTURES_DIR, "mimicc_study.csv")
-MIMICC_TSV = os.path.join(FIXTURES_DIR, "mimicc_study.tsv")
+EXAMPLE_STUDY_JSON = os.path.join(FIXTURES_DIR, "example_study.json")
+EXAMPLE_STUDY_CSV = os.path.join(FIXTURES_DIR, "example_study.csv")
+EXAMPLE_STUDY_TSV = os.path.join(FIXTURES_DIR, "example_study.tsv")
 
-_FIXTURES_PRESENT = os.path.isfile(MIMICC_JSON)
+_FIXTURES_PRESENT = os.path.isfile(EXAMPLE_STUDY_JSON)
 requires_fixtures = pytest.mark.skipif(
     not _FIXTURES_PRESENT,
-    reason="mimicc test fixtures not present in assets/test-fixtures/",
+    reason="example study fixtures not present in assets/test-fixtures/",
 )
 
 _JSON_RECORD_KEYS = ("studies", "data")
@@ -48,9 +48,9 @@ _JSON_RECORD_KEYS = ("studies", "data")
 
 
 @pytest.fixture
-def mimicc_json():
-    """Load the MIMICC study JSON fixture."""
-    with open(MIMICC_JSON) as f:
+def example_study_json():
+    """Load the example study JSON fixture."""
+    with open(EXAMPLE_STUDY_JSON) as f:
         return json.load(f)
 
 
@@ -63,10 +63,10 @@ class TestExtractRecordsFromJson:
     """Tests for extracting study rows from various JSON formats."""
 
     @requires_fixtures
-    def test_dataharmonizer_container_format(self, mimicc_json):
-        """The mimicc_study.json fixture uses DataHarmonizer Container format."""
+    def test_dataharmonizer_container_format(self, example_study_json):
+        """The example_study.json fixture uses DataHarmonizer Container format."""
         studies = common.extract_records_from_json(
-            mimicc_json, record_keys=_JSON_RECORD_KEYS,
+            example_study_json, record_keys=_JSON_RECORD_KEYS,
         )
         assert studies is not None
         assert len(studies) == 1
@@ -356,7 +356,7 @@ class TestLoadInputFile:
     def test_load_csv(self):
         """CSV file loads correctly."""
         studies = common.load_input_file(
-            MIMICC_CSV, json_record_keys=_JSON_RECORD_KEYS,
+            EXAMPLE_STUDY_CSV, json_record_keys=_JSON_RECORD_KEYS,
         )
         assert studies is not None
         assert len(studies) == 1
@@ -366,7 +366,7 @@ class TestLoadInputFile:
     def test_load_tsv(self):
         """TSV file loads correctly."""
         studies = common.load_input_file(
-            MIMICC_TSV, json_record_keys=_JSON_RECORD_KEYS,
+            EXAMPLE_STUDY_TSV, json_record_keys=_JSON_RECORD_KEYS,
         )
         assert studies is not None
         assert len(studies) == 1
@@ -376,7 +376,7 @@ class TestLoadInputFile:
     def test_load_json(self):
         """JSON file loads correctly."""
         studies = common.load_input_file(
-            MIMICC_JSON, json_record_keys=_JSON_RECORD_KEYS,
+            EXAMPLE_STUDY_JSON, json_record_keys=_JSON_RECORD_KEYS,
         )
         assert studies is not None
         assert len(studies) == 1
@@ -389,7 +389,7 @@ class TestLoadInputFile:
             common.load_input_file(
                 path, json_record_keys=_JSON_RECORD_KEYS,
             )
-            for path in [MIMICC_JSON, MIMICC_CSV, MIMICC_TSV]
+            for path in [EXAMPLE_STUDY_JSON, EXAMPLE_STUDY_CSV, EXAMPLE_STUDY_TSV]
         ]
         for studies in all_studies:
             assert len(studies) == 1

@@ -101,11 +101,11 @@ def get_credentials() -> tuple[str, str]:
     Raises:
         SystemExit: If either variable is unset or empty.
     """
-    username = os.environ.get("ENA_USERNAME", "").strip()
-    password = os.environ.get("ENA_PASSWORD", "").strip()
+    username = os.environ.get("ENA_WEBIN", "").strip()
+    password = os.environ.get("ENA_WEBIN_PASSWORD", "").strip()
     if not username or not password:
         logger.error(
-            "ENA_USERNAME and ENA_PASSWORD environment"
+            "ENA_WEBIN and ENA_WEBIN_PASSWORD environment"
             " variables must be set",
         )
         sys.exit(1)

@@ -1,13 +1,13 @@
-process SUBMIT_STUDY {
+process SUBMIT_RAWREADS_STUDY {
     tag "$meta.id"
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
     container "quay.io/microbiome-informatics/mgnify-pipelines-toolkit:1.4.17"
 
-    // ENA_USERNAME and ENA_PASSWORD must be set in the process environment.
+    // ENA_WEBIN and ENA_WEBIN_PASSWORD must be set in the process environment.
     // In the pipeline, map Nextflow secrets via conf/modules.config or nextflow.config:
-    //   env { ENA_USERNAME = secrets.WEBIN_ACCOUNT; ENA_PASSWORD = secrets.WEBIN_PASSWORD }
+    //   env { ENA_WEBIN = secrets.WEBIN_ACCOUNT; ENA_WEBIN_PASSWORD = secrets.WEBIN_PASSWORD }
 
     input:
     tuple val(meta), path(study_metadata)
@@ -23,7 +23,7 @@ process SUBMIT_STUDY {
     def args   = task.ext.args   ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    submit_study.py \\
+    submit_rawreads_study.py \\
         --input ${study_metadata} \\
         --output ${prefix}_accessions.json \\
         ${args}

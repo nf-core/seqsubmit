@@ -1,21 +1,21 @@
 nextflow_process {
-    name "Test Process SUBMIT_STUDY"
+    name "Test Process SUBMIT_RAWREADS_STUDY"
     script "../main.nf"
     config "./nextflow.config"
-    process "SUBMIT_STUDY"
+    process "SUBMIT_RAWREADS_STUDY"
 
     tag "modules"
-    tag "submit_study"
+    tag "submit_rawreads_study"
 
-    test("submit_study - stub") {
+    test("submit_rawreads_study - stub") {
         options "-stub"
 
         when {
             process {
                 """
                 input[0] = [
-                    [ id:'mimicc' ],
-                    file("${projectDir}/assets/test-fixtures/mimicc_study.json", checkIfExists: true)
+                    [ id:'example_study' ],
+                    file("${projectDir}/assets/test-fixtures/example_study.json", checkIfExists: true)
                 ]
                 """
             }
@@ -29,16 +29,16 @@ nextflow_process {
         }
     }
 
-    test("submit_study - dry run against ENA test server") {
-        // Requires WEBIN_ACCOUNT and WEBIN_PASSWORD Nextflow secrets.
+    test("submit_rawreads_study - dry run against ENA test server") {
         // Validates and builds the submission XML but does not submit to ENA.
+        // Dummy credentials in tests/nextflow.config are sufficient for dry-run mode.
 
         when {
             process {
                 """
                 input[0] = [
-                    [ id:'mimicc' ],
-                    file("${projectDir}/assets/test-fixtures/mimicc_study.json", checkIfExists: true)
+                    [ id:'example_study' ],
+                    file("${projectDir}/assets/test-fixtures/example_study.json", checkIfExists: true)
                 ]
                 """
             }

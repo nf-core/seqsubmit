@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
-name: "submit_study"
+name: "submit_rawreads_study"
 description: |
   Submit a new study to ENA via the Webin REST API v2.
   Reads study metadata from a JSON, CSV, or TSV file, checks for
   duplicate studies already registered under the Webin account,
   builds a PROJECT XML submission document, and submits to ENA.
   Credentials are read from the WEBIN_ACCOUNT and WEBIN_PASSWORD
-  Nextflow secrets, which are mapped to ENA_USERNAME and ENA_PASSWORD
+  Nextflow secrets, which are mapped to ENA_WEBIN and ENA_WEBIN_PASSWORD
   inside the process.
 keywords:
   - ena
