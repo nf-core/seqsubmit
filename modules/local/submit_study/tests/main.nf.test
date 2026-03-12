@@ -1,0 +1,56 @@
+nextflow_process {
+    name "Test Process SUBMIT_STUDY"
+    script "../main.nf"
+    config "./nextflow.config"
+    process "SUBMIT_STUDY"
+
+    tag "modules"
+    tag "submit_study"
+
+    test("submit_study - stub") {
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'mimicc' ],
+                    file("${projectDir}/assets/test-fixtures/mimicc_study.json", checkIfExists: true)
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+
+    test("submit_study - dry run against ENA test server") {
+        // Requires WEBIN_ACCOUNT and WEBIN_PASSWORD Nextflow secrets.
+        // Validates and builds the submission XML but does not submit to ENA.
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'mimicc' ],
+                    file("${projectDir}/assets/test-fixtures/mimicc_study.json", checkIfExists: true)
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert path(process.out.accessions[0][1]).exists() },
+                { assert path(process.out.accessions[0][1]).json.submitted instanceof List },
+                { assert path(process.out.accessions[0][1]).json.failed.size() == 0 }
+            )
+        }
+    }
+}

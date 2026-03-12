@@ -1,0 +1,68 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: "submit_study"
+description: |
+  Submit a new study to ENA via the Webin REST API v2.
+  Reads study metadata from a JSON, CSV, or TSV file, checks for
+  duplicate studies already registered under the Webin account,
+  builds a PROJECT XML submission document, and submits to ENA.
+  Credentials are read from the WEBIN_ACCOUNT and WEBIN_PASSWORD
+  Nextflow secrets, which are mapped to ENA_USERNAME and ENA_PASSWORD
+  inside the process.
+keywords:
+  - ena
+  - submission
+  - study
+  - project
+  - webin
+tools:
+  - mgnify-pipelines-toolkit:
+      description: |
+        A toolkit of utilities used in MGnify metagenomics pipelines,
+        including click, requests, and other dependencies required by
+        the ENA submission scripts.
+      homepage: https://github.com/EBI-Metagenomics/mgnify-pipelines-toolkit
+      documentation: https://github.com/EBI-Metagenomics/mgnify-pipelines-toolkit
+      tool_dev_url: https://github.com/EBI-Metagenomics/mgnify-pipelines-toolkit
+      doi: ""
+      licence: ["Apache-2.0"]
+      identifier: null
+
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information.
+          e.g. `[ id:'sample1' ]`
+    - study_metadata:
+        type: file
+        description: |
+          Study metadata file in JSON, CSV, or TSV format.
+          JSON may follow the DataHarmonizer Container export format or be
+          a plain list/dict of study records.
+          Required fields per record: STUDY_TITLE, existing_study_type.
+        pattern: "*.{json,csv,tsv}"
+
+output:
+  - accessions:
+      - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information.
+            e.g. `[ id:'sample1' ]`
+      - "*_accessions.json":
+          type: file
+          description: |
+            JSON file containing the submission results with keys:
+            submitted (newly created accessions), duplicates (skipped),
+            modified (force-updated), and failed.
+          pattern: "*_accessions.json"
+  - versions:
+      - "versions.yml":
+          type: file
+          description: File containing software versions
+          pattern: "versions.yml"
+
+authors:
+  - "@timrozday"
+maintainers:
+  - "@timrozday"

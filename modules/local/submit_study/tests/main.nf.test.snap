@@ -1,0 +1,35 @@
+{
+    "submit_study - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "mimicc"
+                        },
+                        "mimicc_accessions.json:md5,e43f257b8a1ffb551bf993867c5f1d7f"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,1ffe6cc50bd36f7110413723e0796dd4"
+                ],
+                "accessions": [
+                    [
+                        {
+                            "id": "mimicc"
+                        },
+                        "mimicc_accessions.json:md5,e43f257b8a1ffb551bf993867c5f1d7f"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,1ffe6cc50bd36f7110413723e0796dd4"
+                ]
+            }
+        ],
+        "timestamp": "2026-03-12T11:51:02.565164",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.4"
+        }
+    }
+}

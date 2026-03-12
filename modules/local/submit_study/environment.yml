@@ -1,0 +1,10 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/environment-schema.json
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - conda-forge::python>=3.12
+  - conda-forge::pip
+  - pip:
+    - mgnify-pipelines-toolkit==1.4.17
