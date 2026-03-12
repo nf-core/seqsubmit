@@ -3,54 +3,45 @@ process REGISTERSTUDY {
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
-    container "community.wave.seqera.io/library/pip_assembly-uploader:2a65298c0161c561"
+    container "quay.io/microbiome-informatics/mgnify-pipelines-toolkit:1.4.17"
+
+    // ENA_WEBIN and ENA_WEBIN_PASSWORD must be set in the process environment.
+    // In the pipeline, map Nextflow secrets via conf/modules.config or nextflow.config:
+    //   env { ENA_WEBIN = secrets.WEBIN_ACCOUNT; ENA_WEBIN_PASSWORD = secrets.WEBIN_PASSWORD }
 
     input:
-    tuple val(meta), val(study), val(center), val(library)
-
+    tuple val(meta), path(study_metadata)
 
     output:
-    tuple val(meta), env("STUDY_ID"), emit: study_accession
-    path "versions.yml"             , emit: versions
+    tuple val(meta), path("*_accessions.json"), emit: accessions
+    path "versions.yml",                        emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args ?: ''
-    def args2 = task.ext.args2 ?: ''
+    def args   = task.ext.args   ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    echo "Generate study XMLs"
-    study_xmls \\
-        $args \\
-        --study ${study} \\
-        --library ${library} \\
-        --center ${center} \\
-
-    echo "Submit study to ENA"
-    submit_study \\
-        $args2 \\
-        --directory ${study}_upload \\
-        --study ${study} 2>&1 | tee report.log
-
-    STUDY_ID=\$(grep 'A new study accession has been created' report.log | grep -oE '(PRJ|ERP)[[:alnum:]_]+[[:digit:]]+')
+    submit_study.py \\
+        --input ${study_metadata} \\
+        --output ${prefix}_accessions.json \\
+        ${args}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        assembly_uploader: \$(study_xmls --version)
+        mgnify-pipelines-toolkit: \$(python -c "import importlib.metadata; print(importlib.metadata.version('mgnify-pipelines-toolkit'))")
     END_VERSIONS
     """
 
     stub:
-    def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    touch ${prefix}.report
+    echo '{"submitted":[],"duplicates":[],"modified":[],"failed":[]}' > ${prefix}_accessions.json
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        assembly_uploader: \$(study_xmls --version)
+        mgnify-pipelines-toolkit: \$(python -c "import importlib.metadata; print(importlib.metadata.version('mgnify-pipelines-toolkit'))")
     END_VERSIONS
     """
 }

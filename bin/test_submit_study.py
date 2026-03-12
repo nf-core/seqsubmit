@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for submit_rawreads_study.py — raw-reads study submission pipeline.
+"""Tests for submit_study.py — ENA study submission pipeline.
 
 Covers:
     A. Unit tests for build_submission_xml and _add_project_element
@@ -9,11 +9,11 @@ Covers:
     E. CLI integration tests for main() using click.testing.CliRunner
 
 Usage:
-    pytest bin/test_submit_rawreads_study.py -v
+    pytest bin/test_submit_study.py -v
 
 All external I/O (HTTP requests, ENA reports API) is mocked. Tests do NOT
 import from ena_submit_common directly — all assertions go through the public
-API of submit_rawreads_study.
+API of submit_study.
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ from requests.auth import HTTPBasicAuth
 # Ensure the scripts directory is on the path before importing the module.
 sys.path.insert(0, os.path.dirname(__file__))
 
-from submit_rawreads_study import (  # noqa: E402
+from bin.submit_study import (  # noqa: E402
     _normalize_study_report,
     build_submission_xml,
     fetch_account_studies,
@@ -816,7 +816,7 @@ class TestFetchAccountStudies:
         self, auth: HTTPBasicAuth
     ) -> None:
         """fetch_account_studies calls common.fetch_account_records with prod/test URLs."""
-        target = "submit_rawreads_study.common.fetch_account_records"
+        target = "submit_study.common.fetch_account_records"
         with patch(target, return_value=[]) as mock_fetch:
             fetch_account_studies(auth, use_test=False)
             mock_fetch.assert_called_once()
@@ -826,7 +826,7 @@ class TestFetchAccountStudies:
 
     def test_fetch_passes_normalizer_callable(self, auth: HTTPBasicAuth) -> None:
         """fetch_account_studies passes a callable normalizer to fetch_account_records."""
-        target = "submit_rawreads_study.common.fetch_account_records"
+        target = "submit_study.common.fetch_account_records"
         with patch(target, return_value=[]) as mock_fetch:
             fetch_account_studies(auth, use_test=False)
             call_kwargs = mock_fetch.call_args
@@ -835,7 +835,7 @@ class TestFetchAccountStudies:
 
     def test_fetch_normalizer_handles_title_variant(self, auth: HTTPBasicAuth) -> None:
         """The normalizer passed to fetch_account_records handles title/studyTitle variants."""
-        target = "submit_rawreads_study.common.fetch_account_records"
+        target = "submit_study.common.fetch_account_records"
         captured_normalizer = None
 
         def capture_normalizer(*args: Any, **kwargs: Any) -> list[dict[str, str]]:
@@ -857,7 +857,7 @@ class TestFetchAccountStudies:
 
     def test_fetch_normalizer_handles_alias_variant(self, auth: HTTPBasicAuth) -> None:
         """The normalizer handles alias/studyAlias field variants."""
-        target = "submit_rawreads_study.common.fetch_account_records"
+        target = "submit_study.common.fetch_account_records"
         captured_normalizer = None
 
         def capture_normalizer(*args: Any, **kwargs: Any) -> list[dict[str, str]]:
@@ -879,7 +879,7 @@ class TestFetchAccountStudies:
 
     def test_fetch_normalizer_handles_accession_variant(self, auth: HTTPBasicAuth) -> None:
         """The normalizer handles accession/studyAccession field variants."""
-        target = "submit_rawreads_study.common.fetch_account_records"
+        target = "submit_study.common.fetch_account_records"
         captured_normalizer = None
 
         def capture_normalizer(*args: Any, **kwargs: Any) -> list[dict[str, str]]:
@@ -1004,8 +1004,8 @@ def minimal_metagenomics_study() -> dict[str, Any]:
 class TestMainCli:
     """CLI integration tests for main() using CliRunner."""
 
-    _CRED_TARGET = "submit_rawreads_study.common.get_credentials"
-    _SUBMIT_TARGET = "submit_rawreads_study.common.submit_xml"
+    _CRED_TARGET = "submit_study.common.get_credentials"
+    _SUBMIT_TARGET = "submit_study.common.submit_xml"
 
     def _invoke(
         self,
@@ -1106,7 +1106,7 @@ class TestMainCli:
             with (
                 patch(self._CRED_TARGET, return_value=("Webin-12345", "pass")),
                 patch(
-                    "submit_rawreads_study.fetch_account_studies",
+                    "submit_study.fetch_account_studies",
                     return_value=[existing],
                 ),
             ):
@@ -1147,7 +1147,7 @@ class TestMainCli:
             with (
                 patch(self._CRED_TARGET, return_value=("Webin-12345", "pass")),
                 patch(
-                    "submit_rawreads_study.fetch_account_studies",
+                    "submit_study.fetch_account_studies",
                     return_value=[existing],
                 ),
                 patch(self._SUBMIT_TARGET, return_value=receipt_xml),

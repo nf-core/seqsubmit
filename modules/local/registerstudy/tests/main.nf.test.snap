@@ -1,72 +1,35 @@
 {
-    "registerstudy - report - stub": {
-        "content": [
-            {
-                "0": [
-                    [
-                        {
-                            "id": "test",
-                            "single_end": false
-                        },
-                        ""
-                    ]
-                ],
-                "1": [
-                    "versions.yml:md5,ea872d341a2054fde3b2c8f06bbf8177"
-                ],
-                "study_accession": [
-                    [
-                        {
-                            "id": "test",
-                            "single_end": false
-                        },
-                        ""
-                    ]
-                ],
-                "versions": [
-                    "versions.yml:md5,ea872d341a2054fde3b2c8f06bbf8177"
-                ]
-            }
-        ],
-        "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "25.10.0"
-        },
-        "timestamp": "2025-10-28T16:35:02.331026"
-    },
     "registerstudy - stub": {
         "content": [
             {
                 "0": [
                     [
                         {
-                            "id": "test",
-                            "single_end": false
+                            "id": "example_study"
                         },
-                        ""
+                        "example_study_accessions.json:md5,e43f257b8a1ffb551bf993867c5f1d7f"
                     ]
                 ],
                 "1": [
-                    "versions.yml:md5,1d079512d28737f6b925e85563aa2c53"
+                    "versions.yml:md5,ddcc758a7d28faecd4286941889ab7e1"
                 ],
-                "study_accession": [
+                "accessions": [
                     [
                         {
-                            "id": "test",
-                            "single_end": false
+                            "id": "example_study"
                         },
-                        ""
+                        "example_study_accessions.json:md5,e43f257b8a1ffb551bf993867c5f1d7f"
                     ]
                 ],
                 "versions": [
-                    "versions.yml:md5,1d079512d28737f6b925e85563aa2c53"
+                    "versions.yml:md5,ddcc758a7d28faecd4286941889ab7e1"
                 ]
             }
         ],
+        "timestamp": "2026-03-12T13:52:06.989729",
         "meta": {
-            "nf-test": "0.9.0",
-            "nextflow": "25.04.1"
-        },
-        "timestamp": "2025-10-30T14:58:53.721718"
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.4"
+        }
     }
 }

@@ -6,7 +6,7 @@ nextflow_pipeline {
 
     test("metagenomic_assemblies mode — submission_study provided (no study registration)") {
         // Exercises the assembly submission path using a pre-registered study (stub mode).
-        // SUBMIT_RAWREADS_STUDY is NOT called here; the module-level nf-test covers it.
+        // REGISTERSTUDY is NOT called here; the module-level nf-test covers it.
         //
         // A samplesheet is generated on the fly with absolute paths so that nf-schema
         // validation succeeds regardless of the nf-test launchDir.
@@ -45,8 +45,8 @@ nextflow_pipeline {
         }
     }
 
-    test("metagenomic_assemblies mode — study_metadata provided (SUBMIT_RAWREADS_STUDY registers study)") {
-        // Tests the study-registration path in stub mode. SUBMIT_RAWREADS_STUDY stub
+    test("metagenomic_assemblies mode — study_metadata provided (REGISTERSTUDY registers study)") {
+        // Tests the study-registration path in stub mode. REGISTERSTUDY stub
         // outputs an empty accessions JSON, so this test validates the plumbing rather
         // than the end-to-end submission output.
         options "-stub"
@@ -73,7 +73,7 @@ nextflow_pipeline {
         then {
             assertAll(
                 { assert workflow.success },
-                { assert workflow.trace.succeeded().any { it.name.contains("SUBMIT_RAWREADS_STUDY") } }
+                { assert workflow.trace.succeeded().any { it.name.contains("REGISTERSTUDY") } }
             )
         }
     }

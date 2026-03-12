@@ -1,50 +1,21 @@
-// TODO nf-core: Once you have added the required tests, please run the following command to build this file:
-// nf-core modules test registerstudy
 nextflow_process {
     name "Test Process REGISTERSTUDY"
     script "../main.nf"
-    config "../nextflow.config"
+    config "./nextflow.config"
     process "REGISTERSTUDY"
-
 
     tag "modules"
     tag "registerstudy"
 
-    test("registerstudy - should register a study on ENA test server") {
-
-        when {
-            process {
-                """
-                input[0] = [
-                    [ id:'test', single_end:false ], // meta map
-                    "PRJNA318468",
-                    "EMG",
-                    "metagenome"
-                ]
-                """
-            }
-        }
-
-        then {
-            assertAll(
-                { assert process.success },
-                //TODO improve assertions
-            )
-        }
-    }
-
     test("registerstudy - stub") {
-
         options "-stub"
 
         when {
             process {
                 """
                 input[0] = [
-                    [ id:'test', single_end:false ], // meta map
-                    "PRJNA318468",
-                    "EMG",
-                    "metagenome"
+                    [ id:'example_study' ],
+                    file("${projectDir}/assets/test-fixtures/example_study.json", checkIfExists: true)
                 ]
                 """
             }
@@ -54,9 +25,32 @@ nextflow_process {
             assertAll(
                 { assert process.success },
                 { assert snapshot(process.out).match() }
-                //TODO improve assertions
             )
         }
+    }
 
+    test("registerstudy - dry run against ENA test server") {
+        // Validates and builds the submission XML but does not submit to ENA.
+        // Dummy credentials in tests/nextflow.config are sufficient for dry-run mode.
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'example_study' ],
+                    file("${projectDir}/assets/test-fixtures/example_study.json", checkIfExists: true)
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert path(process.out.accessions[0][1]).exists() },
+                { assert path(process.out.accessions[0][1]).json.submitted instanceof List },
+                { assert path(process.out.accessions[0][1]).json.failed.size() == 0 }
+            )
+        }
     }
 }

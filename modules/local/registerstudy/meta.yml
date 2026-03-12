@@ -1,18 +1,28 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
 name: "registerstudy"
-description: This module registers a study and project and generates accessions that will be used for metagenomic assembly uploads in ENA. The study generated will reference reads from an already public project.
+description: |
+  Submit a new study to ENA via the Webin REST API v2.
+  Reads study metadata from a JSON, CSV, or TSV file, checks for
+  duplicate studies already registered under the Webin account,
+  builds a PROJECT XML submission document, and submits to ENA.
+  Credentials are read from the WEBIN_ACCOUNT and WEBIN_PASSWORD
+  Nextflow secrets, which are mapped to ENA_WEBIN and ENA_WEBIN_PASSWORD
+  inside the process.
 keywords:
-  - assembly
-  - register
+  - ena
+  - submission
   - study
+  - project
+  - webin
 tools:
-  - "registerstudy":
-      description: "Nextflow module to register study/project to upload primary metagenome and metatranscriptome
-        assemblies to ENA on a per-study basis. The scripts generate xmls to register a new study and create manifests
-        necessary for submission of assemblies using webin-cli."
-      homepage: "https://github.com/EBI-Metagenomics/assembly_uploader"
-      documentation: "https://github.com/EBI-Metagenomics/assembly_uploader"
-      tool_dev_url: "None"
+  - mgnify-pipelines-toolkit:
+      description: |
+        A toolkit of utilities used in MGnify metagenomics pipelines,
+        including click, requests, and other dependencies required by
+        the ENA submission scripts.
+      homepage: https://github.com/EBI-Metagenomics/mgnify-pipelines-toolkit
+      documentation: https://github.com/EBI-Metagenomics/mgnify-pipelines-toolkit
+      tool_dev_url: https://github.com/EBI-Metagenomics/mgnify-pipelines-toolkit
       doi: ""
       licence: ["Apache-2.0"]
       identifier: null
@@ -21,50 +31,38 @@ input:
   - - meta:
         type: map
         description: |
-          Groovy Map containing sample information
+          Groovy Map containing sample information.
           e.g. `[ id:'sample1' ]`
-    - study:
-        type: value
+    - study_metadata:
+        type: file
         description: |
-          Study accession with raw reads public in ENA.
-          Example: "PRJNA312520"
-
-    - center:
-        type: value
-        description: |
-          Name of the sequencing or submitting center.
-          Example: "Wellcome Sanger Institute"
-
-  - library:
-      type: value
-      description: |
-        Library information associated with the study.
-        Example: "metagenome"
-      enum:
-        - metagenome
-        - metatranscriptome
+          Study metadata file in JSON, CSV, or TSV format.
+          JSON may follow the DataHarmonizer Container export format or be
+          a plain list/dict of study records.
+          Required fields per record: STUDY_TITLE, existing_study_type.
+        pattern: "*.{json,csv,tsv}"
 
 output:
-  study_accession:
-    - - meta:
+  - accessions:
+      - meta:
           type: map
           description: |
-            Groovy Map containing sample information
+            Groovy Map containing sample information.
             e.g. `[ id:'sample1' ]`
-      - study:
-          type: value
+      - "*_accessions.json":
+          type: file
           description: |
-            Study accession registered in ENA.
-            Example: "PRJEB312520"
-  versions:
-    - "versions.yml":
-        type: file
-        description: File containing software versions
-        pattern: "versions.yml"
-        ontologies:
-          - edam: "http://edamontology.org/format_3750" # YAML
+            JSON file containing the submission results with keys:
+            submitted (newly created accessions), duplicates (skipped),
+            modified (force-updated), and failed.
+          pattern: "*_accessions.json"
+  - versions:
+      - "versions.yml":
+          type: file
+          description: File containing software versions
+          pattern: "versions.yml"
 
 authors:
-  - "@alisha246"
+  - "@timrozday"
 maintainers:
-  - "@alisha246"
+  - "@timrozday"

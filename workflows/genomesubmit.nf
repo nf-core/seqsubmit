@@ -5,7 +5,7 @@
 */
 include { GENOME_UPLOAD          } from '../modules/local/genome_upload'
 include { ENA_WEBIN_CLI          } from '../modules/local/ena_webin_cli'
-include { SUBMIT_RAWREADS_STUDY  } from '../modules/local/submit_rawreads_study/main'
+include { REGISTERSTUDY          } from '../modules/local/registerstudy/main'
 
 include { RNA_DETECTION           } from '../subworkflows/local/rna_detection'
 
@@ -114,11 +114,11 @@ workflow GENOMESUBMIT {
     if (params.submission_study) {
         study_accession_ch = channel.of(params.submission_study)
     } else {
-        SUBMIT_RAWREADS_STUDY(
+        REGISTERSTUDY(
             channel.of([[id: "study"], file(params.study_metadata)])
         )
-        ch_versions = ch_versions.mix(SUBMIT_RAWREADS_STUDY.out.versions)
-        study_accession_ch = SUBMIT_RAWREADS_STUDY.out.accessions
+        ch_versions = ch_versions.mix(REGISTERSTUDY.out.versions)
+        study_accession_ch = REGISTERSTUDY.out.accessions
             .map { _meta, json ->
                 def data = new groovy.json.JsonSlurper().parse(json)
                 data.submitted[0]?.accession

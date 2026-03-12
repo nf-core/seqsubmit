@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Submit raw-reads studies to ENA via the Webin REST API v2.
+"""Submit raw-reads, assembly and genome studies to ENA 
+via the Webin REST API v2.
 
 Read a DataHarmonizer export containing study metadata,
 check for duplicate studies already registered under the
@@ -14,17 +15,17 @@ secrets appearing in shell history or process listings::
 
 Usage::
 
-    python bin/submit_rawreads_study.py \
+    python bin/submit_study.py \
         --input studies.json \
         --test
 
     # With hold date (max 2 years):
-    python bin/submit_rawreads_study.py \
+    python bin/submit_study.py \
         --input studies.json \
         --hold-until 2028-01-01
 
     # Log to file:
-    python bin/submit_rawreads_study.py \
+    python bin/submit_study.py \
         --input studies.json \
         --test --log submission.log
 """
@@ -431,7 +432,7 @@ _JSON_RECORD_KEYS: Final = ("studies", "data")
 
 
 @click.command(
-    help="Submit raw-reads studies to ENA via the Webin REST API v2.",
+    help="Submit raw-reads, assembly and genome studies to ENA via the Webin REST API v2.",
 )
 @click.option(
     "--input", "input_file",
