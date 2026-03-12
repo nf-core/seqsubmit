@@ -1,0 +1,58 @@
+{
+    "metagenomic_assemblies mode \u2014 submission_study provided (no study registration)": {
+        "content": [
+            {
+                "Workflow": {
+                    "nf-core/seqsubmit": "v1.0.0dev"
+                }
+            },
+            [
+                "coverm",
+                "coverm/sample1.depth.txt",
+                "fastavalidator",
+                "fastavalidator/sample1.success.log",
+                "fastavalidator/sample2.success.log",
+                "fastavalidator/sample3.success.log",
+                "generate",
+                "generate/PRJEB98843_upload",
+                "generate/PRJEB98843_upload/test.manifest",
+                "metagenomic_assemblies",
+                "metagenomic_assemblies/multiqc",
+                "metagenomic_assemblies/multiqc/multiqc_data",
+                "metagenomic_assemblies/multiqc/multiqc_plots",
+                "metagenomic_assemblies/multiqc/multiqc_report.html",
+                "metagenomic_assemblies/sample1_assembly_metadata.csv",
+                "metagenomic_assemblies/sample2_assembly_metadata.csv",
+                "metagenomic_assemblies/sample3_assembly_metadata.csv",
+                "metagenomic_assemblies/upload",
+                "metagenomic_assemblies/upload/webin_cli",
+                "metagenomic_assemblies/upload/webin_cli/sample1_webin-cli.report",
+                "metagenomic_assemblies/upload/webin_cli/sample2_webin-cli.report",
+                "metagenomic_assemblies/upload/webin_cli/sample3_webin-cli.report",
+                "pipeline_info",
+                "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml",
+                "samplesheet_assembly.csv"
+            ],
+            [
+                "sample1.depth.txt:md5,d41d8cd98f00b204e9800998ecf8427e",
+                "sample1.success.log:md5,b0b859eda1db5cd43915846e00ebc22c",
+                "sample2.success.log:md5,b0b859eda1db5cd43915846e00ebc22c",
+                "sample3.success.log:md5,b0b859eda1db5cd43915846e00ebc22c",
+                "test.manifest:md5,d41d8cd98f00b204e9800998ecf8427e",
+                "multiqc_report.html:md5,d41d8cd98f00b204e9800998ecf8427e",
+                "sample1_assembly_metadata.csv:md5,e1a00dc628e95c38e18dfd5161fa2ce4",
+                "sample2_assembly_metadata.csv:md5,901e55730b100224efb27f23aabf4f67",
+                "sample3_assembly_metadata.csv:md5,d5b1575095ece78d988395b874440bef",
+                "sample1_webin-cli.report:md5,d41d8cd98f00b204e9800998ecf8427e",
+                "sample2_webin-cli.report:md5,d41d8cd98f00b204e9800998ecf8427e",
+                "sample3_webin-cli.report:md5,d41d8cd98f00b204e9800998ecf8427e",
+                "samplesheet_assembly.csv:md5,2f74b281cb7096ad80a378b8960aabee"
+            ]
+        ],
+        "timestamp": "2026-03-12T13:22:15.261886",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.4"
+        }
+    }
+}

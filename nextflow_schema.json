@@ -261,16 +261,13 @@
                     "description": "ENA study accession (PRJ/ERP) to submit the data to",
                     "help_text": "Current implementation of pipeline requires to pre-register ENA project (PRJ/ERP) where you want to upload data to. Documentation how to register study: https://ena-docs.readthedocs.io/en/latest/submit/study.html"
                 },
-                "library": {
+                "study_metadata": {
                     "type": "string",
-                    "enum": ["metagenome", "metatranscriptome"],
-                    "description": "Type of library for the submission. Required for creation of the new submission study.",
-                    "help_text": "Uses script register_study from assembly_uploader package that requires this parameter to compose study title."
-                },
-                "ena_raw_reads_study_accession": {
-                    "type": "string",
-                    "description": "ENA study accession (PRJ/ERP) of the raw reads study associated with the assembly submission. Required for creation of the new submission study.",
-                    "help_text": "Uses script register_study from assembly_uploader package that requires this parameter to compose study title and description."
+                    "format": "file-path",
+                    "exists": true,
+                    "description": "Path to study metadata file (JSON, CSV, or TSV) for registering a new ENA study. Required when submission_study is not provided.",
+                    "help_text": "File containing study metadata fields (STUDY_TITLE, STUDY_ABSTRACT, existing_study_type, alias, etc.). Used by SUBMIT_RAWREADS_STUDY to create a new study in ENA when no existing submission_study accession is given.",
+                    "fa_icon": "fas fa-file-alt"
                 },
                 "webincli_submit": {
                     "type": "boolean",

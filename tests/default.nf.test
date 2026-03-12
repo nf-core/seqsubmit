@@ -4,30 +4,81 @@ nextflow_pipeline {
     script "../main.nf"
     tag "pipeline"
 
-    test("-profile test") {
+    test("metagenomic_assemblies mode — submission_study provided (no study registration)") {
+        // Exercises the assembly submission path using a pre-registered study (stub mode).
+        // SUBMIT_RAWREADS_STUDY is NOT called here; the module-level nf-test covers it.
+        //
+        // A samplesheet is generated on the fly with absolute paths so that nf-schema
+        // validation succeeds regardless of the nf-test launchDir.
+        options "-stub"
 
         when {
             params {
-                outdir = "$outputDir"
+                def csv = new File("${outputDir}/samplesheet_assembly.csv")
+                csv.parentFile.mkdirs()
+                csv.text = [
+                    "sample,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version",
+                    "sample1,${projectDir}/tests/data/contigs.fasta.gz,${projectDir}/tests/data/fastq_1.fastq,${projectDir}/tests/data/fastq_2.fastq,,ERR000001,SPAdes,3.15",
+                    "sample2,${projectDir}/tests/data/invalid_assembly.fasta.gz,,,45,ERR000002,Velvet,1.2.10",
+                    "sample3,${projectDir}/tests/data/contigs.fasta.gz,,,30,ERR000003,MEGAHIT,1.2.9"
+                ].join("\n")
+
+                outdir           = "$outputDir"
+                input            = csv.absolutePath
+                mode             = "metagenomic_assemblies"
+                submission_study = "PRJEB98843"
+                centre_name      = "TEST_CENTER"
             }
         }
 
         then {
-            // stable_name: All files + folders in ${params.outdir}/ with a stable name
             def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
-            // stable_path: All files in ${params.outdir}/ with stable content
             def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
             assertAll(
-                { assert workflow.success},
+                { assert workflow.success },
                 { assert snapshot(
-                    // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
                     removeNextflowVersion("$outputDir/pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"),
-                    // All stable path name, with a relative path
                     stable_name,
-                    // All files with stable contents
                     stable_path
                 ).match() }
             )
         }
     }
+
+    test("metagenomic_assemblies mode — study_metadata provided (SUBMIT_RAWREADS_STUDY registers study)") {
+        // Tests the study-registration path in stub mode. SUBMIT_RAWREADS_STUDY stub
+        // outputs an empty accessions JSON, so this test validates the plumbing rather
+        // than the end-to-end submission output.
+        options "-stub"
+
+        when {
+            params {
+                def csv = new File("${outputDir}/samplesheet_assembly.csv")
+                csv.parentFile.mkdirs()
+                csv.text = [
+                    "sample,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version",
+                    "sample1,${projectDir}/tests/data/contigs.fasta.gz,${projectDir}/tests/data/fastq_1.fastq,${projectDir}/tests/data/fastq_2.fastq,,ERR000001,SPAdes,3.15",
+                    "sample2,${projectDir}/tests/data/invalid_assembly.fasta.gz,,,45,ERR000002,Velvet,1.2.10",
+                    "sample3,${projectDir}/tests/data/contigs.fasta.gz,,,30,ERR000003,MEGAHIT,1.2.9"
+                ].join("\n")
+
+                outdir         = "$outputDir"
+                input          = csv.absolutePath
+                mode           = "metagenomic_assemblies"
+                study_metadata = "${projectDir}/assets/test-fixtures/example_study.json"
+                centre_name    = "TEST_CENTER"
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.trace.succeeded().any { it.name.contains("SUBMIT_RAWREADS_STUDY") } }
+            )
+        }
+    }
+
+    // NOTE: The MAGs/bins test requires remote genome files from nf-core/test-datasets
+    // (https://github.com/nf-core/test-datasets/tree/seqsubmit) and cannot run offline.
+    // Run it manually with: nf-test test tests/default.nf.test --filter "mags" --profile test_genome,docker
 }

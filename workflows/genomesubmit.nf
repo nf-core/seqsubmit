@@ -5,6 +5,7 @@
 */
 include { GENOME_UPLOAD          } from '../modules/local/genome_upload'
 include { ENA_WEBIN_CLI          } from '../modules/local/ena_webin_cli'
+include { SUBMIT_RAWREADS_STUDY  } from '../modules/local/submit_rawreads_study/main'
 
 include { RNA_DETECTION           } from '../subworkflows/local/rna_detection'
 
@@ -109,10 +110,27 @@ workflow GENOMESUBMIT {
             newLine: true
         )
 
+    def study_accession_ch
+    if (params.submission_study) {
+        study_accession_ch = channel.of(params.submission_study)
+    } else {
+        SUBMIT_RAWREADS_STUDY(
+            channel.of([[id: "study"], file(params.study_metadata)])
+        )
+        ch_versions = ch_versions.mix(SUBMIT_RAWREADS_STUDY.out.versions)
+        study_accession_ch = SUBMIT_RAWREADS_STUDY.out.accessions
+            .map { _meta, json ->
+                def data = new groovy.json.JsonSlurper().parse(json)
+                data.submitted[0]?.accession
+                    ?: data.duplicates[0]?.existing_accession
+            }
+    }
+
     GENOME_UPLOAD(
         genome_fasta.map{meta, fasta -> fasta}.collect(),
         genome_metadata_csv,
-        params.mode
+        params.mode,
+        study_accession_ch.first()
     )
     ch_versions = ch_versions.mix( GENOME_UPLOAD.out.versions )
 

@@ -7,7 +7,7 @@
 include { COVERM_CONTIG              } from '../modules/nf-core/coverm/contig/main'
 include { FASTAVALIDATOR             } from '../modules/nf-core/fastavalidator/main'
 include { GENERATE_ASSEMBLY_MANIFEST } from '../modules/local/generate_assembly_manifest/main'
-include { REGISTERSTUDY              } from '../modules/local/registerstudy/main'
+include { SUBMIT_RAWREADS_STUDY      } from '../modules/local/submit_rawreads_study/main'
 include { ENA_WEBIN_CLI              } from '../modules/local/ena_webin_cli'
 
 include { MULTIQC                    } from '../modules/nf-core/multiqc/main'
@@ -99,6 +99,9 @@ workflow ASSEMBLYSUBMIT {
         .map { meta, coverage_file ->
             // Read the file and calculate average
             def lines = coverage_file.readLines()
+            if (lines.size() < 2) {
+                return [meta, 0.0]
+            }
             def coverages = lines[1..-1].collect { line ->
                 line.split('\t')[1] as Double
             }
@@ -139,6 +142,7 @@ workflow ASSEMBLYSUBMIT {
 
             def content = "${header}\n${row}"
             def csv_file = file("${params.outdir}/${params.mode}/${meta.id}_assembly_metadata.csv")
+            csv_file.parent.toFile().mkdirs()
             csv_file.text = content
 
             [meta, csv_file]
@@ -149,11 +153,17 @@ workflow ASSEMBLYSUBMIT {
         // Use provided study accession directly
         study_accession_ch = channel.of(params.submission_study)
     } else {
-        // Register a new study
-        REGISTERSTUDY(
-            [[id:"study"], params.ena_raw_reads_study_accession, params.centre_name, params.library ]
+        // Register a new study using the study metadata file
+        SUBMIT_RAWREADS_STUDY(
+            channel.of([[id: "study"], file(params.study_metadata)])
         )
-        study_accession_ch = REGISTERSTUDY.out.study_accession.map { _meta, accession -> accession }
+        ch_versions = ch_versions.mix(SUBMIT_RAWREADS_STUDY.out.versions)
+        study_accession_ch = SUBMIT_RAWREADS_STUDY.out.accessions
+            .map { _meta, json ->
+                def data = new groovy.json.JsonSlurper().parse(json)
+                data.submitted[0]?.accession
+                    ?: data.duplicates[0]?.existing_accession
+            }
     }
 
     // Generate assembly manifest files and submit them to ENA
