@@ -25,10 +25,6 @@ process ENA_WEBIN_CLI_WRAPPER {
     export ITEM_FULL_PATH=\$(readlink -f ${submission_item})
     sed 's|^FASTA\t.*|FASTA\t'"\${ITEM_FULL_PATH}"'|g' ${manifest} > ${prefix}_updated_manifest.manifest
 
-
-    echo ${ENA_WEBIN}
-    echo ${ENA_WEBIN_PASSWORD}
-
     webin_cli_handler \\
       -m ${prefix}_updated_manifest.manifest \\
       --webin-cli-jar ${webin_cli_jar} \\

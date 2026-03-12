@@ -4,20 +4,20 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 // TODO rename when we will have register_study module separately
-include { GENOME_UPLOAD as REGISTER_STUDY_AND_CREATE_MANIFESTS } from '../modules/local/genome_upload'
-include { ENA_WEBIN_CLI_WRAPPER as SUBMIT  } from '../modules/local/ena_webin_cli_wrapper'
-include { ENA_WEBIN_CLI_DOWNLOAD           } from '../modules/local/ena_webin_cli_download'
+include { GENOME_UPLOAD as CREATE_MANIFESTS } from '../modules/local/genome_upload'
+include { ENA_WEBIN_CLI_WRAPPER as SUBMIT   } from '../modules/local/ena_webin_cli_wrapper'
+include { ENA_WEBIN_CLI_DOWNLOAD            } from '../modules/local/ena_webin_cli_download'
 
-include { COVERM_GENOME                    } from '../modules/nf-core/coverm/genome'
-include { MULTIQC                          } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap                 } from 'plugin/nf-schema'
+include { COVERM_GENOME                     } from '../modules/nf-core/coverm/genome'
+include { MULTIQC                           } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap                  } from 'plugin/nf-schema'
 
-include { GENOME_EVALUATION                } from '../subworkflows/local/genome_evaluation'
-include { RNA_DETECTION                    } from '../subworkflows/local/rna_detection'
+include { GENOME_EVALUATION                 } from '../subworkflows/local/genome_evaluation'
+include { RNA_DETECTION                     } from '../subworkflows/local/rna_detection'
 
-include { paramsSummaryMultiqc             } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML           } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText           } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
+include { paramsSummaryMultiqc              } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML            } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText            } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -189,17 +189,19 @@ workflow GENOMESUBMIT {
         )
 
     // --------- Generate manifests
-    REGISTER_STUDY_AND_CREATE_MANIFESTS(
+    CREATE_MANIFESTS(
         fasta_updated_with_stats.map{meta, fasta -> fasta}.collect(),
         genome_metadata_csv,
         params.mode     // mags or bins
     )
 
     // All manifests were generated in one run
-    // Manifests should be saparated into differen channels using prefix as id
-    manifests_ch = REGISTER_STUDY_AND_CREATE_MANIFESTS.out.manifests.flatten()
+    // Manifests should be separated into different channels using prefix as id
+    manifests_ch = CREATE_MANIFESTS.out.manifests.flatten()
         .map { manifest ->
-            def prefix = manifest.name.replaceAll(/_\d+\.manifest$/, '')
+            def prefix = params.test_upload ?
+                manifest.name.replaceAll(/_\d+\.manifest$/, '') :
+                manifest.name.replaceAll(/\.manifest$/, '')
             def meta = [id: prefix]
             [ meta, manifest ]
     }
