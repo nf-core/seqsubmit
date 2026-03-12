@@ -38,9 +38,9 @@ Currently, the pipeline supports three submission modes, each routed to a dedica
 
 Setup your environment secrets before running the pipeline:
 
-`nextflow secrets set WEBIN_ACCOUNT "Webin-XXX"`
+`nextflow secrets set ENA_WEBIN "Webin-XXX"`
 
-`nextflow secrets set WEBIN_PASSWORD "XXX"`
+`nextflow secrets set ENA_WEBIN_PASSWORD "XXX"`
 
 Make sure you update commands above with your authorised credentials.
 

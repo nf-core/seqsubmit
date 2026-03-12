@@ -2,10 +2,10 @@ process ENA_WEBIN_CLI_DOWNLOAD {
     label 'process_single'
 
     input:
-    tuple val(version)
+    val(version)
 
     output:
-    tuple path("webin-cli-*.jar"), emit: webin_cli_jar
+    path("webin-cli-*.jar"), emit: webin_cli_jar
 
     when:
     task.ext.when == null || task.ext.when

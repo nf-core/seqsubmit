@@ -5,9 +5,7 @@ process ENA_WEBIN_CLI_WRAPPER {
 
     label 'process_low'
     tag "${meta.id}"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mgnify-pipelines-toolkit:1.4.18--pyhdfd78af_0':
-        'quay.io/biocontainers/mgnify-pipelines-toolkit:1.4.18--pyhdfd78af_0' }"
+    container "community.wave.seqera.io/library/ena-webin-cli_mgnify-pipelines-toolkit:49478611e9515066"
 
     input:
     tuple val(meta), path(submission_item), path(manifest)
@@ -26,6 +24,10 @@ process ENA_WEBIN_CLI_WRAPPER {
     # change FASTA path in manifest to current workdir
     export ITEM_FULL_PATH=\$(readlink -f ${submission_item})
     sed 's|^FASTA\t.*|FASTA\t'"\${ITEM_FULL_PATH}"'|g' ${manifest} > ${prefix}_updated_manifest.manifest
+
+
+    echo ${ENA_WEBIN}
+    echo ${ENA_WEBIN_PASSWORD}
 
     webin_cli_handler \\
       -m ${prefix}_updated_manifest.manifest \\
