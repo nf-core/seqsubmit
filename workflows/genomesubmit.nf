@@ -3,19 +3,21 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { GENOME_UPLOAD          } from '../modules/local/genome_upload'
-include { ENA_WEBIN_CLI          } from '../modules/local/ena_webin_cli'
+// TODO rename when we will have register_study module separately
+include { GENOME_UPLOAD as REGISTER_STUDY_AND_CREATE_MANIFESTS } from '../modules/local/genome_upload'
+include { ENA_WEBIN_CLI_WRAPPER as SUBMIT  } from '../modules/local/ena_webin_cli_wrapper'
+include { ENA_WEBIN_CLI_DOWNLOAD           } from '../modules/local/ena_webin_cli_download'
 
-include { COVERM_GENOME          } from '../modules/nf-core/coverm/genome'
-include { MULTIQC                } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap       } from 'plugin/nf-schema'
+include { COVERM_GENOME                    } from '../modules/nf-core/coverm/genome'
+include { MULTIQC                          } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap                 } from 'plugin/nf-schema'
 
-include { GENOME_EVALUATION      } from '../subworkflows/local/genome_evaluation'
-include { RNA_DETECTION          } from '../subworkflows/local/rna_detection'
+include { GENOME_EVALUATION                } from '../subworkflows/local/genome_evaluation'
+include { RNA_DETECTION                    } from '../subworkflows/local/rna_detection'
 
-include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
+include { paramsSummaryMultiqc             } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML           } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText           } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -186,22 +188,40 @@ workflow GENOMESUBMIT {
             newLine: true
         )
 
-    //GENOME_UPLOAD(
-    //    genome_fasta.map{meta, fasta -> fasta}.collect(),
-    //    genome_metadata_csv,
-    //    params.mode
-    //)
-    //ch_versions = ch_versions.mix( GENOME_UPLOAD.out.versions )
+    // --------- Generate manifests
+    REGISTER_STUDY_AND_CREATE_MANIFESTS(
+        fasta_updated_with_stats.map{meta, fasta -> fasta}.collect(),
+        genome_metadata_csv,
+        params.mode     // mags or bins
+    )
 
-    //manifests_ch = GENOME_UPLOAD.out.manifests.flatten()
-    //    .map { manifest ->
-    //        def prefix = manifest.name.replaceAll(/_\d+\.manifest$/, '')
-    //        def meta = [id: prefix]
-    //        [ meta, manifest ]
-    //}
-    //combined_ch = ch_mags.join(manifests_ch)
+    // All manifests were generated in one run
+    // Manifests should be saparated into differen channels using prefix as id
+    manifests_ch = REGISTER_STUDY_AND_CREATE_MANIFESTS.out.manifests.flatten()
+        .map { manifest ->
+            def prefix = manifest.name.replaceAll(/_\d+\.manifest$/, '')
+            def meta = [id: prefix]
+            [ meta, manifest ]
+    }
+    // Combine fasta and manifests
+    ch_combined = fasta_updated_with_stats
+    .map { meta, fasta -> [meta.id, meta, fasta] }
+    .join(
+        manifests_ch.map { meta, manifest -> [meta.id, manifest] }  // Has only [id: prefix]
+    )
+    .map { id, full_meta, fasta, manifest ->
+        [full_meta, fasta, manifest]
+    }
 
-    //ENA_WEBIN_CLI( combined_ch )
+    // --------- Upload data to ENA
+    ENA_WEBIN_CLI_DOWNLOAD (
+        params.webin_cli_version
+    )
+
+    SUBMIT (
+        ch_combined,
+        ENA_WEBIN_CLI_DOWNLOAD.out.webin_cli_jar
+    )
     //ch_versions = ch_versions.mix( ENA_WEBIN_CLI.out.versions.first() )
 
     //

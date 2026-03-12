@@ -4,9 +4,6 @@ process GENOME_UPLOAD {
 
     container "quay.io/biocontainers/genome-uploader:2.5.1--pyhdfd78af_1"
 
-    secret 'WEBIN_ACCOUNT'
-    secret 'WEBIN_PASSWORD'
-
     input:
     path(mags)
     path(table_for_upload)
@@ -18,7 +15,7 @@ process GENOME_UPLOAD {
     path "results/{MAG,bin}_upload/genome_samples.xml"         , emit: upload_genome_samples
     path "results/{MAG,bin}_upload/registered_{MAGs,bins}*.tsv", emit: upload_registered_mags
     path "results/{MAG,bin}_upload/submission.xml"             , emit: upload_submission_xml
-    path "versions.yml"                                        , emit: versions
+    tuple val("${task.process}"), val('genome_uploader'), eval("genome_upload --version 2>&1 | sed 's/genome_uploader //g'"), topic: versions, emit: versions_genome_uploader
 
     when:
     task.ext.when == null || task.ext.when
@@ -30,8 +27,8 @@ process GENOME_UPLOAD {
     def mode     = (!params.test_upload) ? "--live" : ""
 
     """
-    export ENA_WEBIN=\$WEBIN_ACCOUNT
-    export ENA_WEBIN_PASSWORD=\$WEBIN_PASSWORD
+    echo ${ENA_WEBIN}
+    echo ${ENA_WEBIN_PASSWORD}
 
     genome_upload \\
         -u $params.submission_study \\
@@ -43,10 +40,16 @@ process GENOME_UPLOAD {
         ${mode} \\
         --out results \\
         ${args}
+    """
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        genome_uploader: \$(genome_upload --version 2>&1 | sed 's/genome_uploader //g')
-    END_VERSIONS
+    stub:
+    """
+    mkdir results/MAG_upload
+    touch results/MAG_upload/ENA_backup.json
+    touch results/MAG_upload/genome_samples.xml
+    touch results/MAG_upload/submission.xml
+    touch results/MAG_upload/registered_MAGs_test.tsv
+    mkdir results/MAG_upload/manifests_test
+    touch results/MAG_upload/manifests_test/test_1.manifest
     """
 }
