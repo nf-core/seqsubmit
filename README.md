@@ -70,7 +70,7 @@ Columns that required for now, but will be optional in the nearest future:
 - `completeness`
 - `contamination`
 - `genome_coverage`
-- `rRNA_presence`
+- `RNA_presence`
 - `NCBI_lineage`
 
 Those fields are metadata required for [genome_uploader](https://github.com/EBI-Metagenomics/genome_uploader) package. They are described in [docs](https://github.com/EBI-Metagenomics/genome_uploader/blob/main/README.md#input-tsv-and-fields).
@@ -78,8 +78,8 @@ Those fields are metadata required for [genome_uploader](https://github.com/EBI-
 Example `samplesheet_genome.csv`:
 
 ```csv
-sample,fasta,accession,assembly_software,binning_software,binning_parameters,stats_generation_software,completeness,contamination,genome_coverage,metagenome,co-assembly,broad_environment,local_environment,environmental_medium,rRNA_presence,NCBI_lineage
-lachnospira_eligens,data/bin_lachnospira_eligens.fa.gz,SRR24458089,spades_v3.15.5,metabat2_v2.6,default,CheckM2_v1.0.1,61.0,0.21,32.07,sediment metagenome,false,marine,cable_bacteria,marine_sediment,false,d__Bacteria;p__Proteobacteria;s_unclassified_Proteobacteria
+sample,fasta,accession,assembly_software,binning_software,binning_parameters,stats_generation_software,completeness,contamination,genome_coverage,metagenome,co-assembly,broad_environment,local_environment,environmental_medium,RNA_presence,NCBI_lineage
+lachnospira_eligens,data/bin_lachnospira_eligens.fa.gz,SRR24458089,spades_v3.15.5,metabat2_v2.6,default,CheckM2_v1.0.1,61.0,0.21,32.07,sediment metagenome,No,marine,cable_bacteria,marine_sediment,No,d__Bacteria;p__Proteobacteria;s_unclassified_Proteobacteria
 ```
 
 ### `metagenomic_assemblies` mode (`ASSEMBLYSUBMIT`)
