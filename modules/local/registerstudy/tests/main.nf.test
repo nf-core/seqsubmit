@@ -15,7 +15,7 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'example_study' ],
-                    file("${projectDir}/assets/test-fixtures/example_study.json", checkIfExists: true)
+                    file(params.pipelines_testdata_base_path + "/test_data/study_metadata/example_study.json", checkIfExists: true)
                 ]
                 """
             }
@@ -38,7 +38,7 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'example_study' ],
-                    file("${projectDir}/assets/test-fixtures/example_study.json", checkIfExists: true)
+                    file(params.pipelines_testdata_base_path + "/test_data/study_metadata/example_study.json", checkIfExists: true)
                 ]
                 """
             }
