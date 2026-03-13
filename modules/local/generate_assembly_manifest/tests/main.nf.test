@@ -6,7 +6,6 @@ nextflow_process {
     process "GENERATE_ASSEMBLY_MANIFEST"
 
     tag "modules"
-    tag "modules_"
     tag "generate_assembly_manifest"
 
     test("GENERATE_ASSEMBLY_MANIFEST completes with expected outputs") {

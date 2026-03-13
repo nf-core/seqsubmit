@@ -107,7 +107,7 @@
             },
             "RNA_presence": {
                 "type": "string",
-                "description": "Yes/No if rRNA genes detected"
+                "description": "Yes/No if at least 18 tRNAs and 5S, 16S, 23S rRNA genes detected"
             },
             "NCBI_lineage": {
                 "type": "string",
