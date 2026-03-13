@@ -2,17 +2,6 @@
     "registerstudy - stub": {
         "content": [
             {
-                "0": [
-                    [
-                        {
-                            "id": "example_study"
-                        },
-                        "example_study_accessions.json:md5,e43f257b8a1ffb551bf993867c5f1d7f"
-                    ]
-                ],
-                "1": [
-                    "versions.yml:md5,ddcc758a7d28faecd4286941889ab7e1"
-                ],
                 "accessions": [
                     [
                         {
@@ -26,7 +15,7 @@
                 ]
             }
         ],
-        "timestamp": "2026-03-12T13:52:06.989729",
+        "timestamp": "2026-03-13T12:14:02.650852",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.4"
