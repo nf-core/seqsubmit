@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 """Submit raw-reads, assembly and genome studies to ENA via the Webin REST API v2.
 
-Read a DataHarmonizer export containing study metadata,
-check for duplicate studies already registered under the
-Webin account, construct an XML submission document, and
-submit new studies to ENA.
+Read a study metadata file (JSON, CSV, or TSV), construct an
+XML submission document, and submit new studies to ENA.
 
 Credentials are read from environment variables to avoid
 secrets appearing in shell history or process listings::
@@ -235,9 +233,10 @@ def validate_xml_against_xsd(
 
 
 def _is_metadata_row(row: Sequence[object]) -> bool:
-    """Check whether *row* is a DataHarmonizer label row.
+    """Check whether *row* is a non-data header/metadata row.
 
-    These rows have at most one non-empty cell.
+    Such rows have at most one non-empty cell and are skipped
+    during record extraction.
     """
     non_empty = sum(
         1 for c in row
@@ -252,8 +251,8 @@ def extract_records_from_tabular(
 ) -> list[dict[str, str]]:
     """Extract record dicts from a CSV or TSV file.
 
-    Skip an optional DataHarmonizer metadata row if
-    detected.
+    Skip an optional leading metadata/label row if detected
+    (a row with at most one non-empty cell).
 
     Args:
         filepath: Path to the tabular file.
@@ -294,11 +293,11 @@ def extract_records_from_json(
     input_data: object,
     record_keys: Sequence[str] = ("data",),
 ) -> list[dict[str, Any]] | None:
-    """Extract record dicts from a DataHarmonizer JSON export.
+    """Extract record dicts from a JSON input.
 
     Handle several JSON shapes:
 
-    * DataHarmonizer Container format::
+    * Container format (e.g. DataHarmonizer exports)::
 
         {"Container": {"<ClassName>s": [{...}, ...]}}
 
