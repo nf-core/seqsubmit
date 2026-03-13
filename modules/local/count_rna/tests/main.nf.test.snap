@@ -1,0 +1,78 @@
+{
+    "COUNT_RNA completes with expected outputs": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_rna_decision.tsv:md5,8162813732f3a353edb6fc3e37e950e1"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,e95935822376c17ae9ca6d59164d29f4"
+                ],
+                "rna_decision": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_rna_decision.tsv:md5,8162813732f3a353edb6fc3e37e950e1"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,e95935822376c17ae9ca6d59164d29f4"
+                ]
+            },
+            {
+                "COUNT_RNA": {
+                    "python": "3.8.13"
+                }
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.0",
+            "nextflow": "25.04.1"
+        },
+        "timestamp": "2026-03-12T14:29:39.713941"
+    },
+    "COUNT_RNA completes with expected outputs - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_rna_decision.tsv:md5,cf8ebf06bf0641ceec14c8b034c639af"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,e95935822376c17ae9ca6d59164d29f4"
+                ],
+                "rna_decision": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_rna_decision.tsv:md5,cf8ebf06bf0641ceec14c8b034c639af"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,e95935822376c17ae9ca6d59164d29f4"
+                ]
+            },
+            {
+                "COUNT_RNA": {
+                    "python": "3.8.13"
+                }
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.0",
+            "nextflow": "25.04.1"
+        },
+        "timestamp": "2026-03-12T14:29:43.951744"
+    }
+}

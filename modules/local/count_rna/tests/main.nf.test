@@ -1,0 +1,68 @@
+nextflow_process {
+
+    name "Test Process COUNT_RNA"
+    script "../main.nf"
+    process "COUNT_RNA"
+
+    tag "modules"
+    tag "count_rna"
+
+    test("COUNT_RNA completes with expected outputs") {
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test' ],
+                    file("$moduleDir/tests/data/ecoli.stats", checkIfExists: true),
+                    file("$moduleDir/tests/data/ecoli_bac.gff", checkIfExists: true)
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assertAll(
+                { assert snapshot(
+                    process.out,
+                    path(process.out.versions[0]).yaml
+                ).match() },
+                { assert process.out.rna_decision.size() == 1 },
+                {
+                    def rnaDecisionContent = path(process.out.rna_decision[0][1]).text
+                    assert rnaDecisionContent.contains("Yes")
+                }
+            )
+        }
+
+    }
+
+    test("COUNT_RNA completes with expected outputs - stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test' ],
+                    file("$moduleDir/tests/data/ecoli.stats", checkIfExists: true),
+                    file("$moduleDir/tests/data/ecoli_bac.gff", checkIfExists: true)
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assertAll(
+                { assert snapshot(
+                    process.out,
+                    path(process.out.versions[0]).yaml
+                ).match() }
+            )
+        }
+
+    }
+
+}

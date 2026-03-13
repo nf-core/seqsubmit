@@ -7,10 +7,13 @@ include { GENOME_UPLOAD          } from '../modules/local/genome_upload'
 include { ENA_WEBIN_CLI          } from '../modules/local/ena_webin_cli'
 include { REGISTERSTUDY          } from '../modules/local/registerstudy/main'
 
-include { RNA_DETECTION           } from '../subworkflows/local/rna_detection'
-
+include { COVERM_GENOME          } from '../modules/nf-core/coverm/genome'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
+
+include { GENOME_EVALUATION      } from '../subworkflows/local/genome_evaluation'
+include { RNA_DETECTION          } from '../subworkflows/local/rna_detection'
+
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
@@ -32,8 +35,8 @@ workflow GENOMESUBMIT {
     ch_versions = channel.empty()
     ch_multiqc_files = channel.empty()
 
-     // Create genomes channel with proper metadata structure
-    genome_fasta = ch_samplesheet
+     // --------- Create genomes channel with proper metadata structure
+    genome_fasta_and_reads = ch_samplesheet
         .map { row ->
             def meta = [
                 id: row[0].id,
@@ -54,14 +57,57 @@ workflow GENOMESUBMIT {
                 RNA_presence: row[17] ?: null,
                 NCBI_lineage: row[18] ?: null
             ]
-            [meta, file(row[1])]
+            def read1 = row[3] ? file(row[3]) : null
+            def read2 = row[4] ? file(row[4]) : null
+
+            if (row[4] && row[4] != "") {
+                // If paired end reads
+                return [meta, file(row[1]), [read1, read2]]
+            } else {
+                // If single end
+                return [meta, file(row[1]), [read1]]
+            }
         }
 
-    // For genomes without RNA_presence info, calculate rRNA and tRNA
-    genome_fasta.filter { meta, fasta -> meta.RNA_presence == null }
+    genome_fasta = genome_fasta_and_reads.map{meta, fasta, _fq1 -> [meta, fasta]}
+    genome_reads = genome_fasta_and_reads.map{meta, _fasta, reads -> [meta, reads]}
+
+    // --------- Genome coverage calculation
+
+    genome_reads.filter { meta, reads -> meta.genome_coverage == null }
+        .map { meta, reads -> [meta, reads] }
+        .set { genome_coverage_fq_input }
+    genome_fasta.filter { meta, fasta -> meta.genome_coverage == null }
+        .map { meta, fasta -> [meta, fasta] }
+        .set { genome_coverage_ref_input }
+    genome_fasta.filter { meta, fasta -> meta.genome_coverage != null }
+        .map { meta, fasta -> [meta, fasta] }
+        .set { genome_coverage_present }
+
+    COVERM_GENOME (
+        genome_coverage_fq_input,
+        genome_coverage_ref_input,
+        false,
+        false,
+        'file'
+    )
+    ch_versions = ch_versions.mix( COVERM_GENOME.out.versions )
+
+    // Update metadata for records missing coverage
+    fasta_updated_with_coverage = COVERM_GENOME.out.coverage.join(genome_coverage_ref_input)
+        .map{ meta, coverage_tsv, fasta ->
+              def coverage = coverage_tsv.readLines()[1].split('\t')[1];  // skip header
+              def updated_meta = meta.clone()
+              updated_meta.genome_coverage = coverage;
+              return [updated_meta, fasta]
+        }
+        .mix(genome_coverage_present)
+
+    // --------- For genomes without RNA_presence info, calculate rRNA and tRNA
+    fasta_updated_with_coverage.filter { meta, fasta -> meta.RNA_presence == null }
         .map { meta, fasta -> [meta, fasta] }
         .set { rna_prediction_input }
-    genome_fasta.filter { meta, fasta -> meta.RNA_presence != null }
+    fasta_updated_with_coverage.filter { meta, fasta -> meta.RNA_presence != null }
         .map { meta, fasta -> [meta, fasta] }
         .set { rna_present }
 
@@ -80,9 +126,40 @@ workflow GENOMESUBMIT {
         }
         .mix(rna_present)
 
+    // --------- Completeness and contamination calculation
 
-    // Combine metadata into TSV
-     genome_metadata_csv = fasta_updated_with_rna
+    fasta_updated_with_rna.filter { meta, fasta -> meta.completeness == null || meta.contamination == null || meta.stats_generation_software == null }
+        .map { meta, fasta -> [meta, fasta] }
+        .set { genome_evaluation_input }
+    fasta_updated_with_rna.filter { meta, fasta -> meta.completeness != null && meta.contamination != null && meta.stats_generation_software != null}
+        .map { meta, fasta -> [meta, fasta] }
+        .set { evaluation_present }
+
+    GENOME_EVALUATION (
+        genome_evaluation_input
+    )
+
+    // Create a value channel with the version string
+    def stats_version_ch = GENOME_EVALUATION.out.stats_versions
+        .map { process_name, tool_name, version_output -> return "${tool_name}_v${version_output}"
+        }.first()
+
+    fasta_updated_with_stats = GENOME_EVALUATION.out.genome_evaluation
+        .join(genome_evaluation_input)
+        .combine(stats_version_ch)
+        .map { meta, stats_tsv, fasta, stats_version ->
+            def line = stats_tsv.readLines()[1].split('\t')
+            def updated_meta = meta.clone()
+            updated_meta.completeness = line[1]
+            updated_meta.contamination = line[2]
+            updated_meta.stats_generation_software = stats_version
+
+            return [updated_meta, fasta]
+        }
+        .mix(evaluation_present)
+
+    // --------- Combine metadata into TSV
+    genome_metadata_csv = fasta_updated_with_stats
         .map { meta, fasta ->
             def row = [
                 meta.id,
@@ -188,17 +265,17 @@ workflow GENOMESUBMIT {
         )
     )
 
-    MULTIQC (
-        ch_multiqc_files.collect(),
-        ch_multiqc_config.toList(),
-        ch_multiqc_custom_config.toList(),
-        ch_multiqc_logo.toList(),
-        [],
-        []
-    )
+    //MULTIQC (
+    //    ch_multiqc_files.collect(),
+    //    ch_multiqc_config.toList(),
+    //    ch_multiqc_custom_config.toList(),
+    //    ch_multiqc_logo.toList(),
+    //    [],
+    //    []
+    //)
 
     emit:
-    multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    multiqc_report = channel.empty() // MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
 
 }
