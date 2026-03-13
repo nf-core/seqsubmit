@@ -183,53 +183,6 @@ def validate_hold_until(hold_until: str) -> datetime.date:
 
 
 # -----------------------------------------------------------
-# ENA checklist XML parsing
-# -----------------------------------------------------------
-
-
-def parse_checklist_units(
-    xml_path: str | Path,
-) -> dict[str, str]:
-    """Parse an ENA checklist XML and return field units.
-
-    Reads the ``<FIELD>`` elements from an ENA checklist XML
-    file (e.g. ``ERC000015.xml``) and returns a mapping from
-    slot name to unit string for every field that declares a
-    ``<UNITS><UNIT>`` element.
-
-    Args:
-        xml_path: Path to the ENA checklist XML file.
-
-    Returns:
-        Dict mapping slot name to unit string.
-        Fields without units are absent from the dict.
-    """
-    units: dict[str, str] = {}
-    try:
-        tree = ET.parse(str(xml_path))
-    except ET.ParseError as exc:
-        logger.warning(
-            "Could not parse checklist XML %s: %s",
-            xml_path, exc,
-        )
-        return units
-
-    for field in tree.iter("FIELD"):
-        name_el = field.find("NAME")
-        if name_el is None or not name_el.text:
-            continue
-        units_el = field.find("UNITS")
-        if units_el is None:
-            continue
-        unit_el = units_el.find("UNIT")
-        if unit_el is None or not unit_el.text:
-            continue
-        units[name_el.text.strip()] = unit_el.text.strip()
-
-    return units
-
-
-# -----------------------------------------------------------
 # XSD validation (structural fallback only)
 # -----------------------------------------------------------
 
@@ -746,7 +699,7 @@ _JSON_RECORD_KEYS: Final = ("studies", "data")
 
 
 @click.command(
-    help="Submit raw-reads, assembly and genome studies to ENA via the Webin REST API v2.",
+    help="Submit studies to ENA via the Webin REST API v2.",
 )
 @click.option(
     "--input", "input_file",
