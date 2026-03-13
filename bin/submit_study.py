@@ -181,53 +181,6 @@ def validate_hold_until(hold_until: str) -> datetime.date:
 
 
 # -----------------------------------------------------------
-# XSD validation (structural fallback only)
-# -----------------------------------------------------------
-
-
-def validate_xml_against_xsd(
-    xml_bytes: bytes,
-    _fragment_tag: str | None = None,  # unused; kept for API compatibility
-    fallback_checker: Callable[
-        [bytes, list[str]], tuple[bool, list[str]]
-    ] | None = None,
-) -> tuple[bool, list[str]]:
-    """Validate XML bytes using a structural check.
-
-    Full XSD validation via lxml is not available in this
-    container.  Uses *fallback_checker* if provided,
-    otherwise checks that the document is well-formed XML.
-
-    Args:
-        xml_bytes: Serialised XML document.
-        _fragment_tag: Unused; kept for API compatibility.
-        fallback_checker: Optional function called with
-            (*xml_bytes*, *messages*) that returns
-            (*is_valid*, *messages*).
-
-    Returns:
-        Tuple of (*is_valid*, *messages*).
-    """
-    messages: list[str] = []
-
-    if fallback_checker is not None:
-        return fallback_checker(xml_bytes, messages)
-
-    try:
-        ET.fromstring(xml_bytes)
-    except ET.ParseError as exc:
-        messages.append(
-            f"ERROR: XML is not well-formed: {exc}"
-        )
-        return False, messages
-
-    messages.append(
-        "XML is well-formed (basic check passed)"
-    )
-    return True, messages
-
-
-# -----------------------------------------------------------
 # File loading (JSON, CSV, TSV)
 # -----------------------------------------------------------
 
@@ -543,23 +496,6 @@ def _validate_study_xml_structure(
     return True, messages
 
 
-def validate_study_xml(
-    xml_bytes: bytes,
-) -> tuple[bool, list[str]]:
-    """Validate study XML structure.
-
-    Args:
-        xml_bytes: Serialised XML document.
-
-    Returns:
-        Tuple of (*is_valid*, *messages*).
-    """
-    return validate_xml_against_xsd(
-        xml_bytes,
-        fallback_checker=_validate_study_xml_structure,
-    )
-
-
 # -----------------------------------------------------------
 # Receipt parsing
 # -----------------------------------------------------------
@@ -642,15 +578,6 @@ def _do_submission(
     Returns:
         ``True`` if the batch succeeded (or dry run).
     """
-    xml_valid, xml_messages = validate_study_xml(xml_bytes)
-    for msg in xml_messages:
-        logger.info("  %s", msg)
-    if not xml_valid:
-        logger.error("XML validation FAILED (%s) — aborting submission", action)
-        return False
-
-    logger.info("XML validation PASSED (%s)", action)
-
     if dry_run:
         logger.info("DRY RUN — skipping %s submission", action)
         logger.info("Generated XML:\n%s", xml_bytes.decode("utf-8"))
