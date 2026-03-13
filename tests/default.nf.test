@@ -65,7 +65,7 @@ nextflow_pipeline {
                 outdir         = "$outputDir"
                 input          = csv.absolutePath
                 mode           = "metagenomic_assemblies"
-                study_metadata = params.pipelines_testdata_base_path + "/test_data/study_metadata/example_study.json"
+                study_metadata = "https://raw.githubusercontent.com/nf-core/test-datasets/refs/heads/seqsubmit/test_data/study_metadata/example_study.json"
                 centre_name    = "TEST_CENTER"
             }
         }

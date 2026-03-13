@@ -37,7 +37,7 @@ process REGISTERSTUDY {
     stub:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    echo '{"submitted":[],"duplicates":[],"modified":[],"failed":[]}' > ${prefix}_accessions.json
+    echo '{"submitted":[],"failed":[]}' > ${prefix}_accessions.json
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

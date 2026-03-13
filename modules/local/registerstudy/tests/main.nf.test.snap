@@ -7,7 +7,7 @@
                         {
                             "id": "example_study"
                         },
-                        "example_study_accessions.json:md5,e43f257b8a1ffb551bf993867c5f1d7f"
+                        "example_study_accessions.json:md5,83600b2fb33a560c25351dbd4a9bdba2"
                     ]
                 ],
                 "versions": [
@@ -15,7 +15,7 @@
                 ]
             }
         ],
-        "timestamp": "2026-03-13T12:14:02.650852",
+        "timestamp": "2026-03-13T14:02:21.161445",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.4"
