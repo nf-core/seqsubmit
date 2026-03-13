@@ -31,7 +31,7 @@
                 }
             }
         ],
-        "timestamp": "2026-03-12T13:52:01.267817",
+        "timestamp": "2026-03-13T12:32:28.183967",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.4"
@@ -40,23 +40,12 @@
     "GENERATE_ASSEMBLY_MANIFEST completes with expected outputs": {
         "content": [
             {
-                "0": [
-                    [
-                        {
-                            "id": "test"
-                        },
-                        "233126d4c4d0.manifest:md5,8387c0e6c123313259db613612c09dce"
-                    ]
-                ],
-                "1": [
-                    "versions.yml:md5,0664035de44b4d88c1a70a357c1a24f2"
-                ],
                 "manifest": [
                     [
                         {
                             "id": "test"
                         },
-                        "233126d4c4d0.manifest:md5,8387c0e6c123313259db613612c09dce"
+                        "233126d4c4d0.manifest:md5,cacedcfcce220081e7aa2f98c2f4ffd6"
                     ]
                 ],
                 "versions": [
@@ -69,7 +58,7 @@
                 }
             }
         ],
-        "timestamp": "2026-03-12T13:51:56.121365",
+        "timestamp": "2026-03-13T12:32:23.722449",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.4"
