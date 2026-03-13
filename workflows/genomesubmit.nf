@@ -3,20 +3,21 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { GENOME_UPLOAD          } from '../modules/local/genome_upload'
-include { ENA_WEBIN_CLI          } from '../modules/local/ena_webin_cli'
+include { GENOME_UPLOAD            } from '../modules/local/genome_upload'
+include { ENA_WEBIN_CLI            } from '../modules/local/ena_webin_cli'
+include { RENAME_FASTA_FOR_CATPACK } from '../modules/local/rename_fasta_for_catpack'
 
-include { COVERM_GENOME          } from '../modules/nf-core/coverm/genome'
-include { MULTIQC                } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap       } from 'plugin/nf-schema'
+include { COVERM_GENOME            } from '../modules/nf-core/coverm/genome'
+include { MULTIQC                  } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap         } from 'plugin/nf-schema'
 
-include { GENOME_EVALUATION      } from '../subworkflows/local/genome_evaluation'
-include { RNA_DETECTION          } from '../subworkflows/local/rna_detection'
-include { FASTA_CLASSIFY_CATPACK } from '../subworkflows/nf-core/fasta_classify_catpack/main'
+include { GENOME_EVALUATION        } from '../subworkflows/local/genome_evaluation'
+include { RNA_DETECTION            } from '../subworkflows/local/rna_detection'
+include { FASTA_CLASSIFY_CATPACK   } from '../subworkflows/nf-core/fasta_classify_catpack/main'
 
-include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
+include { paramsSummaryMultiqc     } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText   } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -126,9 +127,6 @@ workflow GENOMESUBMIT {
         }
         .mix(rna_present)
 
-    // --------- Taxonomy
-    // FASTA_CLASSIFY_CATPACK()
-
     // --------- Completeness and contamination calculation
 
     fasta_updated_with_rna.filter { meta, _fasta -> meta.completeness == null || meta.contamination == null || meta.stats_generation_software == null }
@@ -160,6 +158,37 @@ workflow GENOMESUBMIT {
             return [updated_meta, fasta]
         }
         .mix(evaluation_present)
+
+    // --------- Taxonomy
+    fasta_updated_with_stats
+        .branch { meta, fasta ->
+            genome_taxonomy_input: meta.NCBI_lineage == null
+            taxonomy_present: true  // Everything else goes here
+        }
+    .set { branched_taxonomy_results }
+
+    // Change extension for all files required taxonomy to .fasta because CATPACK requires suffix as input
+    RENAME_FASTA_FOR_CATPACK (
+        branched_taxonomy_results.genome_taxonomy_input
+    )
+
+    // build input structures for CAT_DB depending on what provided as input
+    def cat_db_input = (params.cat_db != null && params.cat_db != '')
+        ? channel.of( [['id': 'CAT_DB'], file(params.cat_db)] )
+        : channel.empty()
+
+    def cat_db_id_input = (params.cat_db_download_id != null && params.cat_db_download_id != '')
+        ? channel.of( [['id': 'CAT_DB_id'], params.cat_db_download_id] )
+        : channel.empty()
+
+    FASTA_CLASSIFY_CATPACK (
+        RENAME_FASTA_FOR_CATPACK.out.renamed_fasta,
+        channel.empty(),
+        cat_db_input,
+        cat_db_id_input,
+        true,  // generate summaries
+        '.fasta'
+    )
 
     // --------- Combine metadata into TSV
     genome_metadata_csv = fasta_updated_with_stats

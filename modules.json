@@ -8,78 +8,108 @@
                     "barrnap": {
                         "branch": "master",
                         "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
-                        "installed_by": ["modules"]
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "catpack/addnames": {
                         "branch": "master",
                         "git_sha": "1100099613c12e944931426f46f10b14c4a74b3d",
-                        "installed_by": ["fasta_classify_catpack"]
+                        "installed_by": [
+                            "fasta_classify_catpack"
+                        ]
                     },
                     "catpack/bins": {
                         "branch": "master",
                         "git_sha": "1100099613c12e944931426f46f10b14c4a74b3d",
-                        "installed_by": ["fasta_classify_catpack"]
+                        "installed_by": [
+                            "fasta_classify_catpack"
+                        ]
                     },
                     "catpack/contigs": {
                         "branch": "master",
                         "git_sha": "1100099613c12e944931426f46f10b14c4a74b3d",
-                        "installed_by": ["fasta_classify_catpack"]
+                        "installed_by": [
+                            "fasta_classify_catpack"
+                        ]
                     },
                     "catpack/download": {
                         "branch": "master",
                         "git_sha": "1100099613c12e944931426f46f10b14c4a74b3d",
-                        "installed_by": ["fasta_classify_catpack"]
+                        "installed_by": [
+                            "fasta_classify_catpack"
+                        ]
                     },
                     "catpack/prepare": {
                         "branch": "master",
                         "git_sha": "1100099613c12e944931426f46f10b14c4a74b3d",
-                        "installed_by": ["fasta_classify_catpack"]
+                        "installed_by": [
+                            "fasta_classify_catpack"
+                        ]
                     },
                     "catpack/summarise": {
                         "branch": "master",
                         "git_sha": "1100099613c12e944931426f46f10b14c4a74b3d",
-                        "installed_by": ["fasta_classify_catpack"]
+                        "installed_by": [
+                            "fasta_classify_catpack"
+                        ]
                     },
                     "checkm2/databasedownload": {
                         "branch": "master",
                         "git_sha": "81470b59ebadb3d01dcfcd37d44f88eb890f4851",
-                        "installed_by": ["modules"]
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "checkm2/predict": {
                         "branch": "master",
                         "git_sha": "81470b59ebadb3d01dcfcd37d44f88eb890f4851",
-                        "installed_by": ["modules"]
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "coverm/contig": {
                         "branch": "master",
                         "git_sha": "27e31681fdbf1e511257355a236037a8cd9c2b2e",
-                        "installed_by": ["modules"]
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "coverm/genome": {
                         "branch": "master",
                         "git_sha": "8583516e8bdf15b48539c085fea9db657e814a30",
-                        "installed_by": ["modules"]
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "fastavalidator": {
                         "branch": "master",
                         "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
-                        "installed_by": ["modules"],
+                        "installed_by": [
+                            "modules"
+                        ],
                         "patch": "modules/nf-core/fastavalidator/fastavalidator.diff"
                     },
                     "multiqc": {
                         "branch": "master",
                         "git_sha": "af27af1be706e6a2bb8fe454175b0cdf77f47b49",
-                        "installed_by": ["modules"]
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "trnascanse": {
                         "branch": "master",
                         "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
-                        "installed_by": ["modules"]
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "untar": {
                         "branch": "master",
                         "git_sha": "447f7bc0fa41dfc2400c8cad4c0291880dc060cf",
-                        "installed_by": ["fasta_classify_catpack"]
+                        "installed_by": [
+                            "fasta_classify_catpack"
+                        ]
                     }
                 }
             },
@@ -88,22 +118,31 @@
                     "fasta_classify_catpack": {
                         "branch": "master",
                         "git_sha": "1e1d30d328949507ee5af79b7ff58b09738b8227",
-                        "installed_by": ["subworkflows"]
+                        "installed_by": [
+                            "subworkflows"
+                        ],
+                        "patch": "subworkflows/nf-core/fasta_classify_catpack/fasta_classify_catpack.diff"
                     },
                     "utils_nextflow_pipeline": {
                         "branch": "master",
                         "git_sha": "05954dab2ff481bcb999f24455da29a5828af08d",
-                        "installed_by": ["subworkflows"]
+                        "installed_by": [
+                            "subworkflows"
+                        ]
                     },
                     "utils_nfcore_pipeline": {
                         "branch": "master",
                         "git_sha": "271e7fc14eb1320364416d996fb077421f3faed2",
-                        "installed_by": ["subworkflows"]
+                        "installed_by": [
+                            "subworkflows"
+                        ]
                     },
                     "utils_nfschema_plugin": {
                         "branch": "master",
                         "git_sha": "4b406a74dc0449c0401ed87d5bfff4252fd277fd",
-                        "installed_by": ["subworkflows"]
+                        "installed_by": [
+                            "subworkflows"
+                        ]
                     }
                 }
             }

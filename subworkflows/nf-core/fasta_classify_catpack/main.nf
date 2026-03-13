@@ -32,11 +32,15 @@ workflow FASTA_CLASSIFY_CATPACK {
 
     // Handle pre-built db: untar if compressed, or use directory directly
     ch_cat_db_input = ch_cat_db
-        .branch { _meta, db ->
+        .map { meta, db ->
+            def dbPath = db instanceof Path ? db : file(db)
+            return [meta, dbPath]
+        }
+        .branch { meta, db ->
             tar:   db.name.endsWith('.tar.gz')
             dir:   db.isDirectory()
             other: true
-         }
+        }
 
     ch_cat_db_input.other.subscribe { _meta, _db ->
         error("Error: A DB was provided to FASTA_CLASSIFY_CATPACK that is not a `.tar.gz` or a directory.")

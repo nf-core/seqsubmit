@@ -63,6 +63,25 @@
                 }
             }
         },
+        "taxonomy_assignment_options": {
+            "title": "Assigning NCBI taxonomy with CAT_pack",
+            "type": "object",
+            "fa_icon": "fas fa-university",
+            "description": "CAT_pack required data",
+            "help_text": "Provide a path to pre-downloaded DB or DB id for automatic download",
+            "properties": {
+                "cat_db": {
+                    "type": "string",
+                    "description": "Path to CAT_pack DB",
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "cat_db_download_id": {
+                    "type": "number",
+                    "description": "CAT_pack database ID for download",
+                    "fa_icon": "fas fa-users-cog"
+                }
+            }
+        },
         "genome_evaluation_options": {
             "title": "Evaluation options",
             "type": "object",
@@ -310,6 +329,9 @@
         },
         {
             "$ref": "#/$defs/genome_evaluation_options"
+        },
+        {
+            "$ref": "#/$defs/taxonomy_assignment_options"
         },
         {
             "$ref": "#/$defs/institutional_config_options"
