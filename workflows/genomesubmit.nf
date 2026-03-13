@@ -12,6 +12,7 @@ include { paramsSummaryMap       } from 'plugin/nf-schema'
 
 include { GENOME_EVALUATION      } from '../subworkflows/local/genome_evaluation'
 include { RNA_DETECTION          } from '../subworkflows/local/rna_detection'
+include { FASTA_CLASSIFY_CATPACK } from '../subworkflows/nf-core/fasta_classify_catpack/main'
 
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -103,10 +104,10 @@ workflow GENOMESUBMIT {
         .mix(genome_coverage_present)
 
     // --------- For genomes without RNA_presence info, calculate rRNA and tRNA
-    fasta_updated_with_coverage.filter { meta, fasta -> meta.RNA_presence == null }
+    fasta_updated_with_coverage.filter { meta, _fasta -> meta.RNA_presence == null }
         .map { meta, fasta -> [meta, fasta] }
         .set { rna_prediction_input }
-    fasta_updated_with_coverage.filter { meta, fasta -> meta.RNA_presence != null }
+    fasta_updated_with_coverage.filter { meta, _fasta -> meta.RNA_presence != null }
         .map { meta, fasta -> [meta, fasta] }
         .set { rna_present }
 
@@ -125,12 +126,15 @@ workflow GENOMESUBMIT {
         }
         .mix(rna_present)
 
+    // --------- Taxonomy
+    // FASTA_CLASSIFY_CATPACK()
+
     // --------- Completeness and contamination calculation
 
-    fasta_updated_with_rna.filter { meta, fasta -> meta.completeness == null || meta.contamination == null || meta.stats_generation_software == null }
+    fasta_updated_with_rna.filter { meta, _fasta -> meta.completeness == null || meta.contamination == null || meta.stats_generation_software == null }
         .map { meta, fasta -> [meta, fasta] }
         .set { genome_evaluation_input }
-    fasta_updated_with_rna.filter { meta, fasta -> meta.completeness != null && meta.contamination != null && meta.stats_generation_software != null}
+    fasta_updated_with_rna.filter { meta, _fasta -> meta.completeness != null && meta.contamination != null && meta.stats_generation_software != null}
         .map { meta, fasta -> [meta, fasta] }
         .set { evaluation_present }
 
@@ -140,7 +144,7 @@ workflow GENOMESUBMIT {
 
     // Create a value channel with the version string
     def stats_version_ch = GENOME_EVALUATION.out.stats_versions
-        .map { process_name, tool_name, version_output -> return "${tool_name}_v${version_output}"
+        .map { _process_name, tool_name, version_output -> return "${tool_name}_v${version_output}"
         }.first()
 
     fasta_updated_with_stats = GENOME_EVALUATION.out.genome_evaluation
@@ -160,7 +164,7 @@ workflow GENOMESUBMIT {
     // --------- Combine metadata into TSV
     genome_metadata_csv = fasta_updated_with_stats
         .map { meta, fasta ->
-            def row = [
+            [
                 meta.id,
                 fasta,
                 meta.accession,
@@ -182,7 +186,25 @@ workflow GENOMESUBMIT {
         }
         .collectFile(
             name: "${params.outdir}/genomes_metadata.csv",
-            seed: 'genome_name\tgenome_path\taccessions\tassembly_software\tbinning_software\tbinning_parameters\tstats_generation_software\tcompleteness\tcontamination\tgenome_coverage\tmetagenome\tco-assembly\tbroad_environment\tlocal_environment\tenvironmental_medium\trRNA_presence\tNCBI_lineage',
+            seed: [
+                'genome_name',
+                'genome_path',
+                'accessions',
+                'assembly_software',
+                'binning_software',
+                'binning_parameters',
+                'stats_generation_software',
+                'completeness',
+                'contamination',
+                'genome_coverage',
+                'metagenome',
+                'co-assembly',
+                'broad_environment',
+                'local_environment',
+                'environmental_medium',
+                'rRNA_presence',
+                'NCBI_lineage'
+            ].join('\t'),
             newLine: true
         )
 
