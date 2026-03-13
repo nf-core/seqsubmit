@@ -54,45 +54,12 @@ from requests.auth import HTTPBasicAuth
 
 # All loggers in the ENA submission scripts share this root,
 # so configuring it once propagates to all child loggers.
-_LOGGER_NAME: Final = "ena_submit"
-
+logging.basicConfig(
+    format="%(levelname)s: %(message)s",
+    level=logging.INFO,
+    stream=sys.stderr,
+)
 logger = logging.getLogger("ena_submit.study")
-
-
-def setup_logging(log_file: Path | None = None) -> None:
-    """Configure stderr and optional file logging.
-
-    Attach handlers to the ``ena_submit`` parent logger.
-    Child loggers (e.g. ``ena_submit.study``) propagate
-    their messages to these handlers automatically.
-
-    Args:
-        log_file: Path to a log file.  If provided,
-            debug-level messages are written there in
-            addition to stderr.
-    """
-    root = logging.getLogger(_LOGGER_NAME)
-
-    # Avoid duplicate handlers on repeated calls.
-    if root.handlers:
-        return
-
-    fmt = logging.Formatter(
-        "%(asctime)s [%(levelname)s] %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-    root.setLevel(logging.DEBUG)
-
-    stderr_handler = logging.StreamHandler(sys.stderr)
-    stderr_handler.setLevel(logging.INFO)
-    stderr_handler.setFormatter(fmt)
-    root.addHandler(stderr_handler)
-
-    if log_file:
-        file_handler = logging.FileHandler(log_file)
-        file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(fmt)
-        root.addHandler(file_handler)
 
 
 # -----------------------------------------------------------
@@ -450,233 +417,6 @@ def load_input_file(
 
 
 # -----------------------------------------------------------
-# Reports API
-# -----------------------------------------------------------
-
-
-def fetch_from_reports_endpoint(
-    url: str,
-    auth: HTTPBasicAuth,
-    max_results: int = 5000,
-) -> list[dict[str, Any]] | None:
-    """Fetch records from a single Webin Reports endpoint.
-
-    Args:
-        url: Full URL of the reports endpoint.
-        auth: HTTP basic-auth credentials.
-        max_results: Maximum number of results to request.
-
-    Returns:
-        List of raw report dicts, or ``None`` on error.
-    """
-    params = {
-        "format": "json",
-        "max-results": max_results,
-    }
-
-    req = requests.Request("GET", url, params=params, auth=auth)
-    prepared = req.prepare()
-    logger.debug('curl -u %s:*** "%s"', auth.username, prepared.url)
-
-    try:
-        resp = requests.get(url, params=params, auth=auth, timeout=60)
-        logger.info("Reports API at %s returned %s", url, resp.status_code)
-        resp.raise_for_status()
-        return resp.json()
-
-    except requests.exceptions.HTTPError as exc:
-        status = (
-            exc.response.status_code
-            if exc.response is not None
-            else "unknown"
-        )
-        if status == 404:
-            logger.info("Reports API at %s returned 404 — no records yet", url)
-            return []
-        if status in (401, 403):
-            logger.warning(
-                "Reports API at %s returned %s — endpoint may not be available"
-                " or credentials may differ",
-                url, status,
-            )
-            return None
-        logger.warning("Reports API at %s returned HTTP %s", url, status)
-        return None
-
-    except requests.exceptions.RequestException as exc:
-        logger.warning("Reports API at %s failed: %s", url, exc)
-        return None
-
-
-def fetch_account_records(
-    auth: HTTPBasicAuth,
-    use_test: bool,
-    prod_url: str,
-    test_url: str,
-    normalizer: Callable[
-        [dict[str, Any]], dict[str, str] | None
-    ],
-    entity_label: str,
-    max_results: int = 5000,
-) -> list[dict[str, str]]:
-    """Fetch and normalise records from the Reports API.
-
-    Try test endpoint first (if *use_test*), then fall back
-    to production.
-
-    Args:
-        auth: HTTP basic-auth credentials.
-        use_test: Try the test endpoint first.
-        prod_url: Production reports endpoint URL.
-        test_url: Test reports endpoint URL.
-        normalizer: Callable that maps a raw report dict to
-            a normalised dict, or ``None`` to skip.
-        entity_label: Label for log messages (e.g.
-            ``"studies"``).
-        max_results: Maximum number of results to request.
-
-    Returns:
-        List of normalised record dicts.
-    """
-    urls = (
-        [test_url, prod_url] if use_test
-        else [prod_url]
-    )
-
-    for url in urls:
-        logger.info("Fetching account %s from: %s", entity_label, url)
-        raw = fetch_from_reports_endpoint(url, auth, max_results)
-        if raw is None:
-            continue
-
-        records: list[dict[str, str]] = []
-        for entry in raw:
-            report = entry.get("report")
-            if report is None:
-                continue
-            normalized = normalizer(report)
-            if normalized is not None:
-                records.append(normalized)
-
-        logger.info("Found %d %s in account", len(records), entity_label)
-        return records
-
-    logger.warning(
-        "Could not reach any Webin reports endpoint."
-        " Duplicate checking for %s will be skipped.",
-        entity_label,
-    )
-    return []
-
-
-# -----------------------------------------------------------
-# Duplicate detection (alias + title matching)
-# -----------------------------------------------------------
-
-
-def find_duplicates_by_alias_title(
-    new_records: Sequence[dict[str, Any]],
-    account_records: Sequence[dict[str, str]],
-    title_field: str,
-    entity_label: str,
-) -> dict[int, dict[str, str]]:
-    """Check new records against account records.
-
-    Match by ``alias`` (preferred) or by the entity-specific
-    title field against the pre-fetched account records from
-    the Webin Reports API.
-
-    Args:
-        new_records: Records the user wants to submit.
-        account_records: Existing records already registered
-            under the Webin account.
-        title_field: Field name for the title in new records
-            (e.g. ``"STUDY_TITLE"`` or ``"SAMPLE_TITLE"``).
-        entity_label: Label for log messages.
-
-    Returns:
-        Mapping of index in *new_records* to matching
-        existing record info.
-    """
-    duplicates: dict[int, dict[str, str]] = {}
-    total = len(new_records)
-
-    if not account_records:
-        return duplicates
-
-    by_title: dict[str, dict[str, str]] = {}
-    by_alias: dict[str, dict[str, str]] = {}
-    for rec in account_records:
-        title = (rec.get("title") or "").strip()
-        alias = (rec.get("alias") or "").strip()
-        if title:
-            by_title[title] = rec
-        if alias:
-            by_alias[alias] = rec
-
-    logger.info(
-        "Checking %d new %s against %d existing account %s...",
-        total, entity_label, len(account_records), entity_label,
-    )
-
-    for i, record in enumerate(new_records):
-        new_title = (
-            record.get(title_field) or ""
-        ).strip()
-        new_alias = (record.get("alias") or "").strip()
-
-        if not new_title and not new_alias:
-            continue
-
-        match = _match_by_alias_title(
-            new_alias, new_title, by_alias, by_title,
-        )
-        if match is not None:
-            duplicates[i] = match
-            logger.info(
-                "  Duplicate: '%s' matches %s -> %s (%s)",
-                new_title or new_alias,
-                match["match_reason"],
-                match["accession"],
-                match["status"],
-            )
-
-            if len(duplicates) == total:
-                logger.info("All %s are duplicates — skipping further checks", entity_label)
-                return duplicates
-
-    return duplicates
-
-
-def _match_by_alias_title(
-    new_alias: str,
-    new_title: str,
-    by_alias: dict[str, dict[str, str]],
-    by_title: dict[str, dict[str, str]],
-) -> dict[str, str] | None:
-    """Return matching record info or ``None``."""
-    if new_alias and new_alias in by_alias:
-        rec = by_alias[new_alias]
-        reason = f"alias '{new_alias}'"
-    elif new_title and new_title in by_title:
-        rec = by_title[new_title]
-        reason = f"title '{new_title}'"
-    else:
-        return None
-
-    return {
-        "accession": rec.get("accession", ""),
-        "secondary_accession": rec.get(
-            "secondary_accession", ""
-        ),
-        "alias": rec.get("alias", ""),
-        "title": rec.get("title", ""),
-        "status": rec.get("status", "UNKNOWN"),
-        "match_reason": reason,
-    }
-
-
-# -----------------------------------------------------------
 # Result output
 # -----------------------------------------------------------
 
@@ -693,79 +433,6 @@ def write_results(
         logger.info("Results written to %s", output_path)
     else:
         print(json_str)
-
-
-# -----------------------------------------------------------
-# Reports API (study-specific)
-# -----------------------------------------------------------
-
-_PROD_REPORTS_URL: Final = "https://www.ebi.ac.uk/ena/submit/report/projects"
-_TEST_REPORTS_URL: Final = "https://wwwdev.ebi.ac.uk/ena/submit/report/projects"
-
-
-def _normalize_study_report(
-    report: dict[str, Any],
-) -> dict[str, str]:
-    """Normalise a raw study report dict."""
-    return {
-        "title": (
-            report.get("title") or report.get("studyTitle") or report.get("STUDY_TITLE", "")
-        ),
-        "alias": report.get("alias") or report.get("studyAlias") or "",
-        "accession": (
-            report.get("accession")
-            or report.get("studyAccession")
-            or report.get("report", {}).get("id", "")
-        ),
-        "secondary_accession": report.get("secondaryAccession") or report.get("secondaryId", ""),
-        "status": report.get("releaseStatus", "UNKNOWN"),
-    }
-
-
-def fetch_account_studies(
-    auth: HTTPBasicAuth,
-    use_test: bool = False,
-    max_results: int = 5000,
-) -> list[dict[str, str]]:
-    """Fetch all projects from the Webin Reports API.
-
-    Args:
-        auth: HTTP basic-auth credentials.
-        use_test: Try the test endpoint before production.
-        max_results: Maximum number of results to request.
-
-    Returns:
-        List of normalised study dicts.
-    """
-    return fetch_account_records(
-        auth,
-        use_test=use_test,
-        prod_url=_PROD_REPORTS_URL,
-        test_url=_TEST_REPORTS_URL,
-        normalizer=_normalize_study_report,
-        entity_label="studies",
-        max_results=max_results,
-    )
-
-
-def find_duplicate_studies(
-    new_studies: list[dict[str, Any]],
-    account_studies: list[dict[str, str]],
-) -> dict[int, dict[str, str]]:
-    """Check new studies against existing account studies.
-
-    Args:
-        new_studies: Studies the user wants to submit.
-        account_studies: Existing studies in the account.
-
-    Returns:
-        Mapping of index to matching study info.
-    """
-    return find_duplicates_by_alias_title(
-        new_studies, account_studies,
-        title_field="STUDY_TITLE",
-        entity_label="studies",
-    )
 
 
 # -----------------------------------------------------------
@@ -1110,25 +777,9 @@ _JSON_RECORD_KEYS: Final = ("studies", "data")
     help="Path to write JSON accession results (default: stdout)",
 )
 @click.option(
-    "--max-results",
-    default=5000,
-    help="Maximum number of projects to fetch from the Reports API for duplicate checking",
-)
-@click.option(
-    "--dry-run",
+    "--validate",
     is_flag=True, default=False,
     help="Validate and build XML but do not submit to ENA",
-)
-@click.option(
-    "--automated",
-    is_flag=True, default=False,
-    help="Skip duplicate detection against the Webin Reports API (for automated pipelines)",
-)
-@click.option(
-    "--force",
-    is_flag=True, default=False,
-    help="Submit duplicate studies using the MODIFY action to overwrite existing ENA records,"
-    " instead of skipping them",
 )
 def main(
     input_file: Path,
@@ -1136,13 +787,9 @@ def main(
     hold_until: str | None,
     log_file: Path | None,
     output: Path | None,
-    max_results: int,
-    dry_run: bool,
-    automated: bool,
-    force: bool,
+    validate: bool,
 ) -> None:
     """Submit studies to ENA via the Webin REST API v2."""
-    setup_logging(log_file)
     username, password = get_credentials()
 
     env_label = "TEST" if use_test else "PRODUCTION"
@@ -1165,133 +812,44 @@ def main(
 
     logger.info("Loaded %d study/studies from input", len(studies))
 
-    # -- Step 2: Check for duplicates --------------------
-    if automated:
-        logger.info("Automated mode: skipping duplicate detection")
-        duplicates: dict[int, dict[str, Any]] = {}
-    else:
-        account_studies = fetch_account_studies(
-            auth, use_test=use_test,
-            max_results=max_results,
-        )
-        for ps in account_studies:
-            logger.info(
-                "  Account study: %s | alias=%s | title=%s | status=%s",
-                ps["accession"], ps["alias"], ps["title"], ps["status"],
-            )
-        duplicates = find_duplicate_studies(
-            studies, account_studies,
-        )
+    if not studies:
+        logger.info("No studies to submit")
+        write_results({"submitted": [], "failed": []}, output)
+        return
 
     results: dict[str, list[dict[str, Any]]] = {
-        "duplicates": [],
         "submitted": [],
-        "modified": [],
         "failed": [],
     }
 
-    studies_to_modify: list[dict[str, Any]] = []
-    if duplicates:
-        action_label = "will be re-submitted with MODIFY" if force else "will NOT be submitted"
-        logger.warning(
-            "Found %d duplicate(s) — %s:",
-            len(duplicates), action_label,
-        )
-        for idx, dup_info in duplicates.items():
-            study_title = studies[idx].get("STUDY_TITLE", f"study[{idx}]")
-            logger.warning(
-                "  DUPLICATE: '%s' matches existing %s (accession: %s)",
-                study_title, dup_info["match_reason"], dup_info["accession"],
-            )
-            results["duplicates"].append({
-                "input_index": idx,
-                "title": study_title,
-                "alias": studies[idx].get("alias", ""),
-                "existing_accession": dup_info["accession"],
-                "existing_secondary_accession": dup_info.get("secondary_accession", ""),
-                "match_reason": dup_info["match_reason"],
-            })
-            if force:
-                study_copy = dict(studies[idx])
-                existing_alias = dup_info.get("alias", "")
-                if existing_alias:
-                    study_copy["alias"] = existing_alias
-                studies_to_modify.append(study_copy)
-
-    studies_to_submit = [
-        s for i, s in enumerate(studies)
-        if i not in duplicates
-    ]
-
-    if not studies_to_submit and not studies_to_modify:
-        logger.info("No studies to submit (all are duplicates or input is empty)")
-        write_results(results, output)
-        return
-
-    logger.info(
-        "%d new study/studies to ADD, %d duplicate(s) to MODIFY",
-        len(studies_to_submit), len(studies_to_modify),
+    # -- Step 2: Build and submit XML --------------------
+    logger.info("Building ADD XML for %d study/studies...", len(studies))
+    xml_root = build_submission_xml(studies, hold_until=hold_until, action="ADD")
+    xml_bytes = xml_to_bytes(xml_root)
+    logger.debug("Generated XML:\n%s", xml_bytes.decode("utf-8"))
+    logger.info("XML document size: %d bytes", len(xml_bytes))
+    ok = _do_submission(
+        base_url, auth, xml_bytes,
+        action="ADD",
+        results=results,
+        result_key="submitted",
+        env_label=env_label,
+        dry_run=validate,
     )
 
-    overall_ok = True
-
-    # -- Step 3: ADD new studies -------------------------
-    if studies_to_submit:
-        logger.info("Building ADD XML for %d new study/studies...", len(studies_to_submit))
-        xml_root = build_submission_xml(studies_to_submit, hold_until=hold_until, action="ADD")
-        xml_bytes = xml_to_bytes(xml_root)
-        logger.debug("Generated XML (ADD):\n%s", xml_bytes.decode("utf-8"))
-        logger.info("XML document size (ADD): %d bytes", len(xml_bytes))
-        ok = _do_submission(
-            base_url, auth, xml_bytes,
-            action="ADD",
-            results=results,
-            result_key="submitted",
-            env_label=env_label,
-            dry_run=dry_run,
-        )
-        overall_ok = overall_ok and ok
-
-    # -- Step 4: MODIFY duplicate studies (--force) ------
-    if studies_to_modify:
-        logger.info("Building MODIFY XML for %d duplicate(s)...", len(studies_to_modify))
-        xml_root = build_submission_xml(studies_to_modify, hold_until=hold_until, action="MODIFY")
-        xml_bytes = xml_to_bytes(xml_root)
-        logger.debug("Generated XML (MODIFY):\n%s", xml_bytes.decode("utf-8"))
-        logger.info("XML document size (MODIFY): %d bytes", len(xml_bytes))
-        ok = _do_submission(
-            base_url, auth, xml_bytes,
-            action="MODIFY",
-            results=results,
-            result_key="modified",
-            env_label=env_label,
-            dry_run=dry_run,
-        )
-        overall_ok = overall_ok and ok
-
-    if not overall_ok:
+    if not ok:
         sys.exit(1)
 
-    # -- Step 5: Output results --------------------------
+    # -- Step 3: Output results --------------------------
     write_results(results, output)
 
     logger.info("=" * 60)
     logger.info("SUBMISSION SUMMARY")
-    logger.info(
-        "  Duplicates skipped: %d", len(results["duplicates"]) - len(results["modified"]),
-    )
-    for d in results["duplicates"]:
-        logger.info("    %s -> %s", d["title"], d["existing_accession"])
-    logger.info("  Newly submitted (ADD): %d", len(results["submitted"]))
+    logger.info("  Submitted (ADD): %d", len(results["submitted"]))
     for s in results["submitted"]:
         ext = s.get("external_accession", "")
         ext_suffix = f" ({ext})" if ext else ""
         logger.info("    %s -> %s%s", s["alias"], s["accession"], ext_suffix)
-    logger.info("  Modified (MODIFY): %d", len(results["modified"]))
-    for m in results["modified"]:
-        ext = m.get("external_accession", "")
-        ext_suffix = f" ({ext})" if ext else ""
-        logger.info("    %s -> %s%s", m["alias"], m["accession"], ext_suffix)
     logger.info("=" * 60)
 
 
