@@ -56,7 +56,7 @@ def parse_args():
                         default="rna_decision.tsv", required=False)
     parser.add_argument("--trna-limit", dest="trna_limit", help="Minimal required number of tRNA",
                         required=True, type=int)
-    parser.add_argument("--rrna-limit", dest="rrna_limit", help="Minimum % of 16S, 23S, and 5S rRNA gene length recovered to count the gene as present.",
+    parser.add_argument("--rrna-limit", dest="rrna_limit", help="Minimum percentage of 16S, 23S, and 5S rRNA gene length recovered to count the gene as present.",
                         required=True, type=int)
     return parser.parse_args()
 

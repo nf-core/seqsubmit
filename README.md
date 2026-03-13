@@ -46,6 +46,8 @@ Make sure you update commands above with your authorised credentials.
 
 ## Input samplesheets
 
+For detailed descriptions of all samplesheet columns, see the [usage documentation](docs/usage.md#samplesheet-input).
+
 ### `mags` and `bins` modes (`GENOMESUBMIT`)
 
 The input must follow `assets/schema_input_genome.json`.
@@ -73,7 +75,7 @@ Columns that required for now, but will be optional in the nearest future:
 - `RNA_presence`
 - `NCBI_lineage`
 
-Those fields are metadata required for [genome_uploader](https://github.com/EBI-Metagenomics/genome_uploader) package. They are described in [docs](https://github.com/EBI-Metagenomics/genome_uploader/blob/main/README.md#input-tsv-and-fields).
+Those fields are metadata required for [genome_uploader](https://github.com/EBI-Metagenomics/genome_uploader) package.
 
 Example `samplesheet_genome.csv`:
 
