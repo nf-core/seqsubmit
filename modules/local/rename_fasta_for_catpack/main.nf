@@ -5,7 +5,7 @@ process RENAME_FASTA_FOR_CATPACK {
     tuple val(meta), path(fasta)
 
     output:
-    tuple val(meta), path("output/*.fasta{,.gz}"), emit: renamed_fasta
+    tuple val(meta), path("output/*.fasta"), emit: renamed_fasta
 
     script:
         def is_compressed = fasta.name.endsWith('.gz')

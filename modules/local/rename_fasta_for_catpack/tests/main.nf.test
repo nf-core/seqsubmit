@@ -14,7 +14,7 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id: 'test' ],
-                    file("${projectDir}/modules/local/rename_fasta_for_catpack/tests/test.fasta", checkIfExists: true)
+                    file("${moduleDir}/tests/test.fasta", checkIfExists: true)
                 ]
                 """
             }
@@ -38,7 +38,7 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id: 'test_compressed' ],
-                    file("${projectDir}/modules/local/rename_fasta_for_catpack/tests/test_compressed.fa.gz", checkIfExists: true)
+                    file("${moduleDir}/tests/test_compressed.fa.gz", checkIfExists: true)
                 ]
                 """
             }

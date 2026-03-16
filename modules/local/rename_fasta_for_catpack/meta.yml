@@ -37,7 +37,7 @@ output:
           type: file
           description: |
             Renamed FASTA file with a .fasta extension, decompressed if the input was compressed.
-          pattern: "output/*.fasta{,.gz}"
+          pattern: "output/*.fasta"
 
 authors:
   - "@KateSakharova"

@@ -73,12 +73,15 @@
                 "cat_db": {
                     "type": "string",
                     "description": "Path to CAT_pack DB",
+                    "help": "Database should be pre-downloaded using CATpack commands. The folder with database should contain sub-folders 'db' with files .dmnd, .fastaid2LCAtaxid, .taxids_with_multiple_offspring, etc. And subfolder 'tax' that should contain taxonomy files like .dmp, .taxdump.tar.gz, .prot.accession2taxid.FULL.gz, etc",
                     "fa_icon": "fas fa-users-cog"
                 },
                 "cat_db_download_id": {
-                    "type": "number",
+                    "type": "string",
                     "description": "CAT_pack database ID for download",
-                    "fa_icon": "fas fa-users-cog"
+                    "help": "There are two options available: nr (default) NCBI non-redundant protein database and gtdb (Genome Taxonomy Database (GTDB) proteins). We use NCBI proteins because ENA supports only NCBI format of taxonomy for submission",
+                    "fa_icon": "fas fa-users-cog",
+                    "default": "nr"
                 }
             }
         },

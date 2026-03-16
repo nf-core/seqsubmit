@@ -185,7 +185,7 @@ workflow GENOMESUBMIT {
         channel.empty(),
         cat_db_input,
         cat_db_id_input,
-        true,  // generate summaries
+        false,  // generate summaries
         '.fasta'
     )
 
