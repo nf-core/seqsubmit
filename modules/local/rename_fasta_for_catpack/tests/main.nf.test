@@ -1,0 +1,60 @@
+nextflow_process {
+
+    name "Test Process RENAME_FASTA_FOR_CATPACK"
+    script "../main.nf"
+    process "RENAME_FASTA_FOR_CATPACK"
+
+    tag "modules"
+    tag "rename_fasta_for_catpack"
+
+    test("RENAME_FASTA_FOR_CATPACK - uncompressed fasta") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id: 'test' ],
+                    file("${projectDir}/modules/local/rename_fasta_for_catpack/tests/test.fasta", checkIfExists: true)
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.renamed_fasta.size() == 1 },
+                { assert process.out.renamed_fasta[0][1].toString().endsWith(".fasta") },
+                { assert snapshot(process.out).match() }
+            )
+        }
+
+    }
+
+    test("RENAME_FASTA_FOR_CATPACK - compressed fasta") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id: 'test_compressed' ],
+                    file("${projectDir}/modules/local/rename_fasta_for_catpack/tests/test_compressed.fa.gz", checkIfExists: true)
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.renamed_fasta.size() == 1 },
+                // compressed input should be decompressed and renamed to .fasta (not .fasta.gz)
+                { assert process.out.renamed_fasta[0][1].toString().endsWith(".fasta") },
+                { assert !process.out.renamed_fasta[0][1].toString().endsWith(".fa.fasta") },
+                { assert snapshot(process.out).match() }
+            )
+        }
+
+    }
+
+}

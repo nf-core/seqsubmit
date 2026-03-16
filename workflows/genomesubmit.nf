@@ -74,20 +74,20 @@ workflow GENOMESUBMIT {
     genome_reads = genome_fasta_and_reads.map{meta, _fasta, reads -> [meta, reads]}
 
     // --------- Genome coverage calculation
+    genome_fasta
+        .branch { meta, fasta ->
+            genome_coverage_ref_input: meta.genome_coverage == null
+            genome_coverage_present: true  // Everything else goes here
+        }
+    .set { branched_coverage_results }
 
     genome_reads.filter { meta, reads -> meta.genome_coverage == null }
         .map { meta, reads -> [meta, reads] }
         .set { genome_coverage_fq_input }
-    genome_fasta.filter { meta, fasta -> meta.genome_coverage == null }
-        .map { meta, fasta -> [meta, fasta] }
-        .set { genome_coverage_ref_input }
-    genome_fasta.filter { meta, fasta -> meta.genome_coverage != null }
-        .map { meta, fasta -> [meta, fasta] }
-        .set { genome_coverage_present }
 
     COVERM_GENOME (
         genome_coverage_fq_input,
-        genome_coverage_ref_input,
+        branched_coverage_results.genome_coverage_ref_input,
         false,
         false,
         'file'
@@ -95,49 +95,48 @@ workflow GENOMESUBMIT {
     ch_versions = ch_versions.mix( COVERM_GENOME.out.versions )
 
     // Update metadata for records missing coverage
-    fasta_updated_with_coverage = COVERM_GENOME.out.coverage.join(genome_coverage_ref_input)
+    fasta_updated_with_coverage = COVERM_GENOME.out.coverage.join(branched_coverage_results.genome_coverage_ref_input)
         .map{ meta, coverage_tsv, fasta ->
               def coverage = coverage_tsv.readLines()[1].split('\t')[1];  // skip header
               def updated_meta = meta.clone()
               updated_meta.genome_coverage = coverage;
               return [updated_meta, fasta]
         }
-        .mix(genome_coverage_present)
+        .mix(branched_coverage_results.genome_coverage_present)
 
     // --------- For genomes without RNA_presence info, calculate rRNA and tRNA
-    fasta_updated_with_coverage.filter { meta, _fasta -> meta.RNA_presence == null }
-        .map { meta, fasta -> [meta, fasta] }
-        .set { rna_prediction_input }
-    fasta_updated_with_coverage.filter { meta, _fasta -> meta.RNA_presence != null }
-        .map { meta, fasta -> [meta, fasta] }
-        .set { rna_present }
+    fasta_updated_with_coverage
+        .branch { meta, fasta ->
+            rna_prediction_input: meta.RNA_presence == null
+            rna_present: true  // Everything else goes here
+        }
+    .set { branched_rna_results }
 
     RNA_DETECTION (
-        rna_prediction_input
+        branched_rna_results.rna_prediction_input
     )
     ch_versions = ch_versions.mix( RNA_DETECTION.out.versions )
 
     // Update metadata for records missing RNA
-    fasta_updated_with_rna = RNA_DETECTION.out.rna_detected.join(rna_prediction_input)
+    fasta_updated_with_rna = RNA_DETECTION.out.rna_detected.join(branched_rna_results.rna_prediction_input)
         .map{ meta, rna_decision, fasta ->
               def decision = rna_decision.readLines()[0].split('\t')[1];
               def updated_meta = meta.clone()
               updated_meta.RNA_presence = decision;
               return [updated_meta, fasta]
         }
-        .mix(rna_present)
+        .mix(branched_rna_results.rna_present)
 
     // --------- Completeness and contamination calculation
-
-    fasta_updated_with_rna.filter { meta, _fasta -> meta.completeness == null || meta.contamination == null || meta.stats_generation_software == null }
-        .map { meta, fasta -> [meta, fasta] }
-        .set { genome_evaluation_input }
-    fasta_updated_with_rna.filter { meta, _fasta -> meta.completeness != null && meta.contamination != null && meta.stats_generation_software != null}
-        .map { meta, fasta -> [meta, fasta] }
-        .set { evaluation_present }
+    fasta_updated_with_rna
+        .branch { meta, fasta ->
+            genome_evaluation_input: meta.completeness == null || meta.contamination == null || meta.stats_generation_software == null
+            evaluation_present: true  // Everything else goes here
+        }
+    .set { branched_stats_results }
 
     GENOME_EVALUATION (
-        genome_evaluation_input
+        branched_stats_results.genome_evaluation_input
     )
 
     // Create a value channel with the version string
@@ -146,7 +145,7 @@ workflow GENOMESUBMIT {
         }.first()
 
     fasta_updated_with_stats = GENOME_EVALUATION.out.genome_evaluation
-        .join(genome_evaluation_input)
+        .join(branched_stats_results.genome_evaluation_input)
         .combine(stats_version_ch)
         .map { meta, stats_tsv, fasta, stats_version ->
             def line = stats_tsv.readLines()[1].split('\t')
@@ -157,7 +156,7 @@ workflow GENOMESUBMIT {
 
             return [updated_meta, fasta]
         }
-        .mix(evaluation_present)
+        .mix(branched_stats_results.evaluation_present)
 
     // --------- Taxonomy
     fasta_updated_with_stats
@@ -190,8 +189,18 @@ workflow GENOMESUBMIT {
         '.fasta'
     )
 
+    fasta_updated_with_taxonomy = FASTA_CLASSIFY_CATPACK.out.bat_classification
+        .join(branched_taxonomy_results.genome_taxonomy_input)
+        .map { meta, taxa_tsv, fasta ->
+            def line = taxa_tsv.readLines()[1].split('\t')
+            def updated_meta = meta.clone()
+            updated_meta.NCBI_lineage = line[3]
+            return [updated_meta, fasta]
+        }
+        .mix(branched_taxonomy_results.taxonomy_present)
+
     // --------- Combine metadata into TSV
-    genome_metadata_csv = fasta_updated_with_stats
+    genome_metadata_csv = fasta_updated_with_taxonomy
         .map { meta, fasta ->
             [
                 meta.id,
@@ -214,7 +223,7 @@ workflow GENOMESUBMIT {
             ].join('\t')
         }
         .collectFile(
-            name: "${params.outdir}/genomes_metadata.csv",
+            name: "${params.outdir}/${params.mode}/genomes_metadata.csv",
             seed: [
                 'genome_name',
                 'genome_path',

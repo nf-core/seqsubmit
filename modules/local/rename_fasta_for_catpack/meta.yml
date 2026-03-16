@@ -1,0 +1,47 @@
+name: "rename_fasta_for_catpack"
+description: |
+  Renames a FASTA file (stripping the original extension and using .fasta) for compatibility with CAT/BAT (CATpack). Compressed inputs are decompressed; uncompressed inputs are symlinked.
+keywords:
+  - fasta
+  - rename
+  - catpack
+  - cat
+tools:
+  - "gzip":
+      description: "Standard compression/decompression utility, used here to decompress .gz FASTA files."
+      homepage: "https://www.gnu.org/software/gzip/"
+      documentation: "https://www.gnu.org/software/gzip/manual/"
+      licence: ["GPL-3.0-or-later"]
+      identifier: null
+
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information.
+          e.g. `[ id:'sample1' ]`
+    - fasta:
+        type: file
+        description: |
+          FASTA file (compressed .gz or uncompressed). Any of .fa, .fna, or .fasta extensions are accepted.
+        pattern: "*.{fa,fna,fasta,fa.gz,fna.gz,fasta.gz}"
+
+output:
+  renamed_fasta:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information.
+            e.g. `[ id:'sample1' ]`
+      - "output/*.fasta{,.gz}":
+          type: file
+          description: |
+            Renamed FASTA file with a .fasta extension, decompressed if the input was compressed.
+          pattern: "output/*.fasta{,.gz}"
+
+authors:
+  - "@KateSakharova"
+  - "@ochkalova"
+maintainers:
+  - "@KateSakharova"
+  - "@ochkalova"
