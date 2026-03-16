@@ -1,0 +1,28 @@
+Changes in component 'nf-core/fasta_classify_catpack'
+'subworkflows/nf-core/fasta_classify_catpack/meta.yml' is unchanged
+Changes in 'fasta_classify_catpack/main.nf':
+--- subworkflows/nf-core/fasta_classify_catpack/main.nf
++++ subworkflows/nf-core/fasta_classify_catpack/main.nf
+@@ -32,11 +32,15 @@
+ 
+     // Handle pre-built db: untar if compressed, or use directory directly
+     ch_cat_db_input = ch_cat_db
+-        .branch { _meta, db ->
++        .map { meta, db ->
++            def dbPath = db instanceof Path ? db : file(db)
++            return [meta, dbPath]
++        }
++        .branch { meta, db ->
+             tar:   db.name.endsWith('.tar.gz')
+             dir:   db.isDirectory()
+             other: true
+-         }
++        }
+ 
+     ch_cat_db_input.other.subscribe { _meta, _db ->
+         error("Error: A DB was provided to FASTA_CLASSIFY_CATPACK that is not a `.tar.gz` or a directory.")
+
+'subworkflows/nf-core/fasta_classify_catpack/tests/main.nf.test.snap' is unchanged
+'subworkflows/nf-core/fasta_classify_catpack/tests/nextflow.config' is unchanged
+'subworkflows/nf-core/fasta_classify_catpack/tests/main.nf.test' is unchanged
+************************************************************
