@@ -174,21 +174,21 @@ workflow GENOMESUBMIT {
     )
 
     // build input structures for CAT_DB depending on what provided as input
-    def cat_db_input = (params.cat_db != null && params.cat_db != '')
+    def cat_db_input = params.cat_db
         ? channel.of( [['id': 'CAT_DB'], file(params.cat_db)] )
         : channel.empty()
 
-    def cat_db_id_input = (params.cat_db_download_id != null && params.cat_db_download_id != '')
+    def cat_db_id_input = (!params.cat_db && params.cat_db_download_id)
         ? channel.of( [['id': 'CAT_DB_id'], params.cat_db_download_id] )
         : channel.empty()
 
     FASTA_CLASSIFY_CATPACK (
-        RENAME_FASTA_FOR_CATPACK.out.renamed_fasta,
-        channel.empty(),
+        RENAME_FASTA_FOR_CATPACK.out.renamed_fasta,  // ch_bins
+        channel.empty(),                             // ch_contigs - empty because we classify bins, not contigs
         cat_db_input,
         cat_db_id_input,
-        false,  // generate summaries
-        '.fasta'
+        false,                                       // disable summary generation
+        '.fasta'                                     // bin_suffix - the suffix of the renamed fasta files
     )
 
     fasta_updated_with_taxonomy = FASTA_CLASSIFY_CATPACK.out.bat_classification
