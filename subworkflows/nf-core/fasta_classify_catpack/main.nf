@@ -55,8 +55,15 @@ workflow FASTA_CLASSIFY_CATPACK {
             taxonomy: [meta, dir / 'tax']
         }
 
-    // Download and prepare db from scratch if no pre-built db provided
-    CATPACK_DOWNLOAD(ch_cat_db_download_id)
+    // Download and prepare db from scratch if no pre-built db provided - only trigger if ch_bins OR ch_contigs has items
+    // Mix both channels and use first item to trigger download once
+    ch_download_trigger = ch_bins
+        .mix(ch_contigs)
+        .first()
+        .combine(ch_cat_db_download_id)
+        .map { _meta, _fasta, db_meta, db_id -> [db_meta, db_id] }
+
+    CATPACK_DOWNLOAD(ch_download_trigger)
 
     CATPACK_PREPARE(
         CATPACK_DOWNLOAD.out.fasta,
