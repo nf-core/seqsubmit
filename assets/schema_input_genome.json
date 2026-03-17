@@ -17,8 +17,8 @@
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?a\\.gz$",
-                "errorMessage": "FASTA file for sequences 1 must be provided, cannot contain spaces and must have extension '.fa.gz' or '.fasta.gz'",
+                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.(fa|fasta|fna)\\.gz$",
+                "errorMessage": "FASTA file for sequences 1 must be provided, cannot contain spaces and must have extension '.fa.gz', '.fasta.gz', or '.fna.gz'",
                 "description": "MAG/bin sequence file"
             },
             "accession": {
