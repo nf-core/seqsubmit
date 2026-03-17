@@ -9,6 +9,7 @@ include { ENA_WEBIN_CLI_WRAPPER as SUBMIT   } from '../modules/local/ena_webin_c
 include { ENA_WEBIN_CLI_DOWNLOAD            } from '../modules/local/ena_webin_cli_download'
 include { RENAME_FASTA_FOR_CATPACK          } from '../modules/local/rename_fasta_for_catpack'
 
+include { FASTAVALIDATOR                    } from '../modules/nf-core/fastavalidator/main'
 include { COVERM_GENOME                     } from '../modules/nf-core/coverm/genome'
 include { MULTIQC                           } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap                  } from 'plugin/nf-schema'
@@ -75,8 +76,19 @@ workflow GENOMESUBMIT {
     genome_fasta = genome_fasta_and_reads.map{meta, fasta, _fq1 -> [meta, fasta]}
     genome_reads = genome_fasta_and_reads.map{meta, _fasta, reads -> [meta, reads]}
 
+    // --------- Check fasta files are properly formatted
+    FASTAVALIDATOR (
+        genome_fasta,
+        "true" // is_metagenome flag
+    )
+    // TODO add some logging here to track discarded assemblies
+    validated_fastas = genome_fasta.join(FASTAVALIDATOR.out.success_log)
+        .map { meta, fasta, _log ->
+            [meta, fasta]
+        }
+
     // --------- Genome coverage calculation
-    genome_fasta
+    validated_fastas
         .branch { meta, fasta ->
             genome_coverage_ref_input: meta.genome_coverage == null
             genome_coverage_present: true  // Everything else goes here
