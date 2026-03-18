@@ -12,6 +12,7 @@ process ENA_WEBIN_CLI_WRAPPER {
     path(webin_cli_jar)
 
     output:
+    tuple val(meta), path("*_accessions.tsv"),  emit: accessions
     path "versions.yml",                        emit: versions
 
     script:
@@ -27,6 +28,7 @@ process ENA_WEBIN_CLI_WRAPPER {
 
     webin_cli_handler \\
       -m ${prefix}_updated_manifest.manifest \\
+      -o ${prefix}_accessions.tsv \\
       --webin-cli-jar ${webin_cli_jar} \\
       ${submit_or_validate} \\
       ${mode} \\

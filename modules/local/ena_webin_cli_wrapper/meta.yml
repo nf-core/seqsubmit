@@ -34,7 +34,12 @@ input:
           pattern: "webin-cli-*.jar"
 
 output:
-  versions:
+  - - accessions:
+        type: file
+        description: |
+          TSV file containing the accession assigned by ENA for the submitted item.
+          File has two columns: "alias" and "accession".
+  - - versions:
     - "versions.yml":
         type: file
         description: File containing software versions.
