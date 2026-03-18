@@ -69,7 +69,7 @@ workflow ASSEMBLYSUBMIT {
     // Check fasta files are properly formatted
     FASTAVALIDATOR (
         assembly_fasta,
-        "true" // is_metagenome flag
+        "true" // enables number of contigs check - ENA requires more than 1 contig for an assembly submission
     )
     // TODO add some logging here to track discarded assemblies
     validated_fastas = assembly_fasta.join(FASTAVALIDATOR.out.success_log)

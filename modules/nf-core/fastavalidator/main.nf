@@ -9,7 +9,7 @@ process FASTAVALIDATOR {
 
     input:
     tuple val(meta), path(fasta)
-    val(is_metagenome)
+    val(count_contigs)
 
     output:
     tuple val(meta), path('*.success.log'), emit: success_log , optional: true
@@ -33,7 +33,7 @@ process FASTAVALIDATOR {
     # One more check: count contigs. More than 1 contig required.
     echo "[INFO] Checking contig count..."
 
-    if [ "${is_metagenome}" = true ]; then
+    if [ "${count_contigs}" = true ]; then
         if [[ "${fasta}" == *.gz ]]; then
             CONTIGS=\$(zcat "${fasta}" | grep -c '^>')
         else

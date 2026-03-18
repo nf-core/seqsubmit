@@ -79,7 +79,7 @@ workflow GENOMESUBMIT {
     // --------- Check fasta files are properly formatted
     FASTAVALIDATOR (
         genome_fasta,
-        "true" // is_metagenome flag
+        "true" // enables number of contigs check - ENA requires more than 1 contig for a bin/MAG submission
     )
     // TODO add some logging here to track discarded assemblies
     validated_fastas = genome_fasta.join(FASTAVALIDATOR.out.success_log)
@@ -89,19 +89,22 @@ workflow GENOMESUBMIT {
 
     // --------- Genome coverage calculation
     validated_fastas
-        .branch { meta, fasta ->
+        .branch { meta, _fasta ->
             genome_coverage_ref_input: meta.genome_coverage == null
             genome_coverage_present: true  // Everything else goes here
         }
     .set { branched_coverage_results }
 
-    genome_reads.filter { meta, reads -> meta.genome_coverage == null }
-        .map { meta, reads -> [meta, reads] }
-        .set { genome_coverage_fq_input }
+    branched_coverage_results.genome_coverage_ref_input.join(genome_reads)
+        .multiMap { meta, fasta, fastq ->
+            genome: [ meta, fasta ]
+            raw_reads: [ meta, fastq ]
+        }
+        .set { coverm_input }
 
     COVERM_GENOME (
-        genome_coverage_fq_input,
-        branched_coverage_results.genome_coverage_ref_input,
+        coverm_input.raw_reads,
+        coverm_input.genome,
         false,
         false,
         'file'
