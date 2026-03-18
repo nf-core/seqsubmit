@@ -5,7 +5,7 @@ process ENA_WEBIN_CLI_WRAPPER {
 
     label 'process_low'
     tag "${meta.id}"
-    container "community.wave.seqera.io/library/ena-webin-cli_mgnify-pipelines-toolkit:49478611e9515066"
+    container "quay.io/microbiome-informatics/java_mgnify-pipelines-toolkit:1.4.20"
 
     input:
     tuple val(meta), path(submission_item), path(manifest)
@@ -35,7 +35,6 @@ process ENA_WEBIN_CLI_WRAPPER {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version 2>&1 | sed 's/Python //g')
-        biopython: \$(python -c "import pkg_resources; print(pkg_resources.get_distribution('biopython').version)")
     END_VERSIONS
     """
 }
