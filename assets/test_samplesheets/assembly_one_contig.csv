@@ -1,0 +1,2 @@
+sample,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version
+one_contig,/Users/sofia/mgnify/seqsubmit/tests/data/one_contig_assembly.fasta.gz,,,45,ERR000002,Velvet,1.2.10
