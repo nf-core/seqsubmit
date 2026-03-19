@@ -3,6 +3,7 @@ nextflow_pipeline {
     name "Test assembly submission workflow stub - no_coverage_paired_reads"
     script "../main.nf"
     tag "pipeline"
+    tag "mode_assembly"
     tag "test_assembly_no_coverage_paired_reads"
     profile "test_assembly_no_coverage_paired_reads"
 

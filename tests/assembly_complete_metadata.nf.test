@@ -3,6 +3,7 @@ nextflow_pipeline {
     name "Test assembly submission workflow stub - complete_metadata"
     script "../main.nf"
     tag "pipeline"
+    tag "mode_assembly"
     tag "test_assembly_complete_metadata"
     profile "test_assembly_complete_metadata"
 

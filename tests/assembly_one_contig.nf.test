@@ -3,6 +3,7 @@ nextflow_pipeline {
     name "Test assembly submission workflow stub - one_contig"
     script "../main.nf"
     tag "pipeline"
+    tag "mode_assembly"
     tag "test_assembly_one_contig"
     profile "test_assembly_one_contig"
 

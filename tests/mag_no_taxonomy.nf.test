@@ -3,6 +3,7 @@ nextflow_pipeline {
     name "Test genome submission workflow stub - no_taxonomy"
     script "../main.nf"
     tag "pipeline"
+    tag "mode_mag"
     tag "test_mag_no_taxonomy"
     profile "test_mag_no_taxonomy"
 
@@ -16,7 +17,7 @@ nextflow_pipeline {
 
         then {
             // stable_name: All files + folders in ${params.outdir}/ with a stable name
-            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
+            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}', '**/manifests_test/*'])
             // stable_path: All files in ${params.outdir}/ with stable content
             def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
             // Early failure no need to test the rest of snapshots

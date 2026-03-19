@@ -1,8 +1,15 @@
+// ------------------------------------------------------------------
+// This test will download real CheckM2 DB and run Diamond search,
+// which is slow and requires 20+Gb of memory
+// We only run this test on specific occasions and it is not included
+// in the main test suite
+// ------------------------------------------------------------------
 nextflow_pipeline {
 
     name "Test genome submission workflow stub - no_quality"
     script "../main.nf"
-    tag "pipeline"
+    // tag "pipeline"
+    // tag "mode_mag"
     tag "test_mag_no_quality"
     profile "test_mag_no_quality"
 
@@ -16,7 +23,7 @@ nextflow_pipeline {
 
         then {
             // stable_name: All files + folders in ${params.outdir}/ with a stable name
-            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
+            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}', '**/manifests_test/*'])
             // stable_path: All files in ${params.outdir}/ with stable content
             def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
             // Early failure no need to test the rest of snapshots
