@@ -138,7 +138,12 @@ workflow ASSEMBLYSUBMIT {
             ].join(',')
 
             def content = "${header}\n${row}"
-            def csv_file = file("${params.outdir}/${params.mode}/${meta.id}_assembly_metadata.csv")
+
+            // Create output directory if it doesn't exist
+            def outDir = file("${params.outdir}/${params.mode}")
+            outDir.mkdirs()
+
+            def csv_file = file("${outDir}/${meta.id}_assembly_metadata.csv")
             csv_file.text = content
 
             [meta, csv_file]
@@ -209,17 +214,18 @@ workflow ASSEMBLYSUBMIT {
         )
     )
 
-    MULTIQC (
-        ch_multiqc_files.collect(),
-        ch_multiqc_config.toList(),
-        ch_multiqc_custom_config.toList(),
-        ch_multiqc_logo.toList(),
-        [],
-        []
-    )
+    // MULTIQC (
+    //     ch_multiqc_files.collect(),
+    //     ch_multiqc_config.toList(),
+    //     ch_multiqc_custom_config.toList(),
+    //     ch_multiqc_logo.toList(),
+    //     [],
+    //     []
+    // )
 
     emit:
-    multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    // multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    multiqc_report  = channel.empty() // TODO re-enable when multiqc is added back in
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
 
 }

@@ -221,7 +221,7 @@ workflow GENOMESUBMIT {
         .map { meta, fasta ->
             [
                 meta.id,
-                fasta,
+                fasta.getName(),
                 meta.accession,
                 meta.assembly_software,
                 meta.binning_software,
@@ -240,7 +240,8 @@ workflow GENOMESUBMIT {
             ].join('\t')
         }
         .collectFile(
-            name: "${params.outdir}/${params.mode}/genomes_metadata.csv",
+            name: 'genomes_metadata.csv',
+            storeDir: "${params.outdir}/${params.mode}",
             seed: [
                 'genome_name',
                 'genome_path',
