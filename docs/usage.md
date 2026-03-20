@@ -24,8 +24,8 @@ Before running the pipeline, make sure that:
 Set your Webin credentials as Nextflow secrets:
 
 ```bash
-nextflow secrets set WEBIN_ACCOUNT "Webin-XXX"
-nextflow secrets set WEBIN_PASSWORD "XXX"
+nextflow secrets set ENA_WEBIN "Webin-XXX"
+nextflow secrets set ENA_WEBIN_PASSWORD "XXX"
 ```
 
 ## Samplesheet input
@@ -98,6 +98,28 @@ assembly_002,data/assembly_002.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 | `assembler_version` | Version of the assembler software used to generate the assembly.                                                                                      |
 
 An example file is available at [assets/samplesheet_assembly.csv](../assets/samplesheet_assembly.csv).
+
+## Database preparation (`mags` / `bins`)
+
+The `GENOMESUBMIT` workflow uses `CheckM2` and `CAT_pack` that require specialized databases for completeness/contamination assessment and taxonomy assignment.
+
+You can either provide pre-existing databases or let the pipeline prepare them during execution.
+
+- `CheckM2`:
+  - provide the path to local database with `--checkm2_db`, otherwise the pipeline downloads version specified with `--checkm2_db_zenodo_id` (by default `14897628`).
+
+- `CAT_pack`:
+  - provide the path to local database (containing `tax/` and `db/` folders or `tar.gz` archive) with `--cat_db`, otherwise the pipeline constructs version specified with `--cat_db_download_id` (by default `nr`).
+
+See [CAT_pack documentation](https://github.com/MGXlab/CAT_pack) and [CheckM2 documentation](https://github.com/chklovski/CheckM2) for more details on usage and creation of databases.
+
+> [!IMPORTANT]
+> `CAT_pack` database creation can take significant time.
+>
+> Reusing an existing database is strongly recommended for repeated runs.
+>
+> Databases created/downloaded by the pipeline are published under:
+> `${params.outdir}/databases/`
 
 ## Running the pipeline
 

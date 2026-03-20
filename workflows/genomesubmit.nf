@@ -276,8 +276,8 @@ workflow GENOMESUBMIT {
     manifests_ch = CREATE_MANIFESTS.out.manifests.flatten()
         .map { manifest ->
             def prefix = params.test_upload ?
-                manifest.name.replaceAll(/_\d+\.manifest$/, '') :
-                manifest.name.replaceAll(/\.manifest$/, '')
+                manifest.name.replaceAll(/_\d+\.manifest$/, '') :  // Remove extension and hash suffix appended in test mode
+                manifest.name.replaceAll(/\.manifest$/, '')        // Remove only extension in live mode
             def meta = [id: prefix]
             [ meta, manifest ]
     }

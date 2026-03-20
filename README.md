@@ -55,33 +55,39 @@ The input must follow `assets/schema_input_genome.json`.
 Required columns:
 
 - `sample`
-- `fasta` (must end with `.fa.gz` or `.fasta.gz`)
+- `fasta` (must end with `.fa.gz`, `.fasta.gz`, or `.fna.gz`)
 - `accession`
 - `assembly_software`
 - `binning_software`
 - `binning_parameters`
-- `stats_generation_software`
 - `metagenome`
 - `environmental_medium`
 - `broad_environment`
 - `local_environment`
 - `co-assembly`
 
-Columns that required for now, but will be optional in the nearest future:
+At least one of the following must be provided per row:
 
+- reads (`fastq_1`, optional `fastq_2` for paired-end)
+- `genome_coverage`
+
+Additional supported columns:
+
+- `stats_generation_software`
 - `completeness`
 - `contamination`
-- `genome_coverage`
 - `RNA_presence`
 - `NCBI_lineage`
 
-Those fields are metadata required for [genome_uploader](https://github.com/EBI-Metagenomics/genome_uploader) package.
+If `genome_coverage`, `stats_generation_software`, `completeness`, `contamination`, `RNA_presence`, or `NCBI_lineage` are missing, the workflow can calculate or infer them when the required inputs are available.
 
-Example `samplesheet_genome.csv`:
+Those fields are metadata required for the [genome_uploader](https://github.com/EBI-Metagenomics/genome_uploader) package.
+
+Example `samplesheet_genomes.csv`:
 
 ```csv
-sample,fasta,accession,assembly_software,binning_software,binning_parameters,stats_generation_software,completeness,contamination,genome_coverage,metagenome,co-assembly,broad_environment,local_environment,environmental_medium,RNA_presence,NCBI_lineage
-lachnospira_eligens,data/bin_lachnospira_eligens.fa.gz,SRR24458089,spades_v3.15.5,metabat2_v2.6,default,CheckM2_v1.0.1,61.0,0.21,32.07,sediment metagenome,No,marine,cable_bacteria,marine_sediment,No,d__Bacteria;p__Proteobacteria;s_unclassified_Proteobacteria
+sample,fasta,accession,fastq_1,fastq_2,assembly_software,binning_software,binning_parameters,stats_generation_software,completeness,contamination,genome_coverage,metagenome,co-assembly,broad_environment,local_environment,environmental_medium,RNA_presence,NCBI_lineage
+lachnospira_eligens,data/bin_lachnospira_eligens.fa.gz,SRR24458089,,,spades_v3.15.5,metabat2_v2.6,default,CheckM2_v1.0.1,61.0,0.21,32.07,sediment metagenome,No,marine,cable_bacteria,marine_sediment,No,d__Bacteria;p__Proteobacteria;s__unclassified_Proteobacteria
 ```
 
 ### `metagenomic_assemblies` mode (`ASSEMBLYSUBMIT`)
@@ -91,7 +97,7 @@ The input must follow `assets/schema_input_assembly.json`.
 Required columns:
 
 - `sample`
-- `fasta` (must end with `.fa.gz` or `.fasta.gz`)
+- `fasta` (must end with `.fa.gz`, `.fasta.gz`, or `.fna.gz`)
 - `run_accession`
 - `assembler`
 - `assembler_version`
@@ -116,6 +122,10 @@ assembly_2,data/contigs_2.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
 
+### Database setup (`CheckM2` and `CAT_pack`)
+
+The `mags`/`bins` workflow requires databases for completeness/contamination estimation and taxonomy assignment. See [Usage documentation](usage.md) for details.
+
 ### Required parameters:
 
 | Parameter            | Description                                                                       |
@@ -131,7 +141,7 @@ assembly_2,data/contigs_2.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 | Parameter           | Description                                                                              |
 | ------------------- | ---------------------------------------------------------------------------------------- |
 | `--upload_tpa`      | Flag to control the type of assembly study (third party assembly or not). Default: false |
-| `--test_upload`     | Upload to TEST ENA server instead of LIVE. Default: false                                |
+| `--test_upload`     | Upload to TEST ENA server instead of LIVE. Default: true                                 |
 | `--webincli_submit` | If set to false, submissions will be validated, but not submitted. Default: true         |
 
 General command template:
@@ -196,8 +206,8 @@ For more details and further functionality, please refer to the [usage documenta
 
 Key output locations in `--outdir`:
 
-- `upload/manifests/`: generated manifest files for submission
-- `upload/webin_cli/`: ENA Webin CLI reports
+- `mags/` or `bins/`: genome metadata, manifests, and per-sample submission support files
+- `metagenomic_assemblies/`: assembly metadata CSVs and per-sample coverage files
 - `multiqc/`: MultiQC summary report
 - `pipeline_info/`: execution reports, trace, DAG, and software versions
 
