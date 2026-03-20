@@ -1,7 +1,7 @@
 {
     "-profile test_assembly_no_coverage_paired_reads": {
         "content": [
-            4,
+            5,
             {
                 "Workflow": {
                     "nf-core/seqsubmit": "v1.0.0dev"
@@ -14,7 +14,7 @@
                 "metagenomic_assemblies/no_coverage_paired_reads/coverage/no_coverage_paired_reads.depth.txt",
                 "metagenomic_assemblies/no_coverage_paired_reads/upload",
                 "metagenomic_assemblies/no_coverage_paired_reads/upload/webin_cli",
-                "metagenomic_assemblies/no_coverage_paired_reads/upload/webin_cli/no_coverage_paired_reads_webin-cli.report",
+                "metagenomic_assemblies/no_coverage_paired_reads/upload/webin_cli/no_coverage_paired_reads_accessions.tsv",
                 "metagenomic_assemblies/no_coverage_paired_reads_assembly_metadata.csv",
                 "pipeline_info",
                 "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
@@ -28,6 +28,6 @@
             "nf-test": "0.9.0",
             "nextflow": "25.04.1"
         },
-        "timestamp": "2026-03-19T17:02:24.792759"
+        "timestamp": "2026-03-20T15:13:14.194671"
     }
 }

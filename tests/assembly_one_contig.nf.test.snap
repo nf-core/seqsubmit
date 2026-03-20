@@ -1,7 +1,7 @@
 {
     "-profile test_assembly_one_contig": {
         "content": [
-            1,
+            2,
             {
                 "Workflow": {
                     "nf-core/seqsubmit": "v1.0.0dev"
@@ -19,6 +19,6 @@
             "nf-test": "0.9.0",
             "nextflow": "25.04.1"
         },
-        "timestamp": "2026-03-19T14:55:59.974186"
+        "timestamp": "2026-03-20T15:14:00.09396"
     }
 }

@@ -4,17 +4,18 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { COVERM_CONTIG              } from '../modules/nf-core/coverm/contig/main'
-include { FASTAVALIDATOR             } from '../modules/nf-core/fastavalidator/main'
-include { GENERATE_ASSEMBLY_MANIFEST } from '../modules/local/generate_assembly_manifest/main'
-include { REGISTERSTUDY              } from '../modules/local/registerstudy/main'
-include { ENA_WEBIN_CLI              } from '../modules/local/ena_webin_cli'
+include { COVERM_CONTIG                   } from '../modules/nf-core/coverm/contig/main'
+include { FASTAVALIDATOR                  } from '../modules/nf-core/fastavalidator/main'
+include { GENERATE_ASSEMBLY_MANIFEST      } from '../modules/local/generate_assembly_manifest/main'
+include { REGISTERSTUDY                   } from '../modules/local/registerstudy/main'
+include { ENA_WEBIN_CLI_WRAPPER as SUBMIT } from '../modules/local/ena_webin_cli_wrapper'
+include { ENA_WEBIN_CLI_DOWNLOAD          } from '../modules/local/ena_webin_cli_download'
 
-include { MULTIQC                    } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap           } from 'plugin/nf-schema'
-include { paramsSummaryMultiqc       } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML     } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText     } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
+include { MULTIQC                         } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap                } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc            } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText          } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -167,8 +168,13 @@ workflow ASSEMBLYSUBMIT {
         study_accession_ch.first()
     )
 
-    ENA_WEBIN_CLI(
-        assemblies_with_coverage.join(GENERATE_ASSEMBLY_MANIFEST.out.manifest)
+    ENA_WEBIN_CLI_DOWNLOAD (
+        params.webin_cli_version
+    )
+
+    SUBMIT (
+        assemblies_with_coverage.join(GENERATE_ASSEMBLY_MANIFEST.out.manifest),
+        ENA_WEBIN_CLI_DOWNLOAD.out.webin_cli_jar
     )
 
     //

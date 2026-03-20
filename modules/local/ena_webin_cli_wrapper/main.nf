@@ -6,6 +6,7 @@ process ENA_WEBIN_CLI_WRAPPER {
     label 'process_low'
     tag "${meta.id}"
     container "quay.io/microbiome-informatics/java_mgnify-pipelines-toolkit:1.4.21"
+    stageInMode 'copy'
 
     input:
     tuple val(meta), path(submission_item), path(manifest)
@@ -18,7 +19,7 @@ process ENA_WEBIN_CLI_WRAPPER {
     script:
     def args               = task.ext.args          ?: ""
     def prefix             = task.ext.prefix        ?: "${meta.id}"
-    def mode               = params.test_upload     ? "--test" : ""
+    def test_flag          = params.test_upload     ? "--test" : ""
     def submit_or_validate = params.webincli_submit ? "--mode submit": "--mode validate"
 
     """
@@ -31,7 +32,7 @@ process ENA_WEBIN_CLI_WRAPPER {
       -o ${prefix}_accessions.tsv \\
       --webin-cli-jar ${webin_cli_jar} \\
       ${submit_or_validate} \\
-      ${mode} \\
+      ${test_flag} \\
       ${args}
 
     cat <<-END_VERSIONS > versions.yml
