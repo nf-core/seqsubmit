@@ -1,0 +1,30 @@
+{
+    "-profile test_assembly_complete_metadata": {
+        "content": [
+            3,
+            {
+                "Workflow": {
+                    "nf-core/seqsubmit": "v1.0.0dev"
+                }
+            },
+            [
+                "metagenomic_assemblies",
+                "metagenomic_assemblies/complete_metadata",
+                "metagenomic_assemblies/complete_metadata/upload",
+                "metagenomic_assemblies/complete_metadata/upload/webin_cli",
+                "metagenomic_assemblies/complete_metadata/upload/webin_cli/complete_metadata_webin-cli.report",
+                "metagenomic_assemblies/complete_metadata_assembly_metadata.csv",
+                "pipeline_info",
+                "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
+            ],
+            [
+                "complete_metadata_assembly_metadata.csv:md5,d5b1575095ece78d988395b874440bef"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.0",
+            "nextflow": "25.04.1"
+        },
+        "timestamp": "2026-03-19T14:50:08.737906"
+    }
+}
