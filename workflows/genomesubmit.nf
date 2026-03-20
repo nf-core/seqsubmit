@@ -300,7 +300,6 @@ workflow GENOMESUBMIT {
         ch_combined,
         ENA_WEBIN_CLI_DOWNLOAD.out.webin_cli_jar
     )
-    //ch_versions = ch_versions.mix( ENA_WEBIN_CLI.out.versions.first() )
 
     //
     // Collate and save software versions
