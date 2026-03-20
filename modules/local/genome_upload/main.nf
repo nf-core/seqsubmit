@@ -27,9 +27,6 @@ process GENOME_UPLOAD {
     def mode     = (!params.test_upload) ? "--live" : ""
 
     """
-    echo ${ENA_WEBIN}
-    echo ${ENA_WEBIN_PASSWORD}
-
     genome_upload \\
         -u $params.submission_study \\
         --genome_info ${table_for_upload} \\
