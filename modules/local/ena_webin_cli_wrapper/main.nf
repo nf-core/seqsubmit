@@ -5,7 +5,7 @@ process ENA_WEBIN_CLI_WRAPPER {
 
     label 'process_low'
     tag "${meta.id}"
-    container "quay.io/microbiome-informatics/java_mgnify-pipelines-toolkit:1.4.20"
+    container "quay.io/microbiome-informatics/java_mgnify-pipelines-toolkit:1.4.21"
 
     input:
     tuple val(meta), path(submission_item), path(manifest)
