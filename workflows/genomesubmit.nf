@@ -3,20 +3,22 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { GENOME_UPLOAD          } from '../modules/local/genome_upload'
-include { ENA_WEBIN_CLI          } from '../modules/local/ena_webin_cli'
-include { REGISTERSTUDY          } from '../modules/local/registerstudy/main'
+include { GENOME_UPLOAD            } from '../modules/local/genome_upload'
+include { ENA_WEBIN_CLI            } from '../modules/local/ena_webin_cli'
+include { REGISTERSTUDY            } from '../modules/local/registerstudy/main'
+include { RENAME_FASTA_FOR_CATPACK } from '../modules/local/rename_fasta_for_catpack'
 
-include { COVERM_GENOME          } from '../modules/nf-core/coverm/genome'
-include { MULTIQC                } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap       } from 'plugin/nf-schema'
+include { COVERM_GENOME            } from '../modules/nf-core/coverm/genome'
+include { MULTIQC                  } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap         } from 'plugin/nf-schema'
 
-include { GENOME_EVALUATION      } from '../subworkflows/local/genome_evaluation'
-include { RNA_DETECTION          } from '../subworkflows/local/rna_detection'
+include { GENOME_EVALUATION        } from '../subworkflows/local/genome_evaluation'
+include { RNA_DETECTION            } from '../subworkflows/local/rna_detection'
+include { FASTA_CLASSIFY_CATPACK   } from '../subworkflows/nf-core/fasta_classify_catpack/main'
 
-include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
+include { paramsSummaryMultiqc     } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText   } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -73,20 +75,20 @@ workflow GENOMESUBMIT {
     genome_reads = genome_fasta_and_reads.map{meta, _fasta, reads -> [meta, reads]}
 
     // --------- Genome coverage calculation
+    genome_fasta
+        .branch { meta, fasta ->
+            genome_coverage_ref_input: meta.genome_coverage == null
+            genome_coverage_present: true  // Everything else goes here
+        }
+    .set { branched_coverage_results }
 
     genome_reads.filter { meta, reads -> meta.genome_coverage == null }
         .map { meta, reads -> [meta, reads] }
         .set { genome_coverage_fq_input }
-    genome_fasta.filter { meta, fasta -> meta.genome_coverage == null }
-        .map { meta, fasta -> [meta, fasta] }
-        .set { genome_coverage_ref_input }
-    genome_fasta.filter { meta, fasta -> meta.genome_coverage != null }
-        .map { meta, fasta -> [meta, fasta] }
-        .set { genome_coverage_present }
 
     COVERM_GENOME (
         genome_coverage_fq_input,
-        genome_coverage_ref_input,
+        branched_coverage_results.genome_coverage_ref_input,
         false,
         false,
         'file'
@@ -94,58 +96,57 @@ workflow GENOMESUBMIT {
     ch_versions = ch_versions.mix( COVERM_GENOME.out.versions )
 
     // Update metadata for records missing coverage
-    fasta_updated_with_coverage = COVERM_GENOME.out.coverage.join(genome_coverage_ref_input)
+    fasta_updated_with_coverage = COVERM_GENOME.out.coverage.join(branched_coverage_results.genome_coverage_ref_input)
         .map{ meta, coverage_tsv, fasta ->
               def coverage = coverage_tsv.readLines()[1].split('\t')[1];  // skip header
               def updated_meta = meta.clone()
               updated_meta.genome_coverage = coverage;
               return [updated_meta, fasta]
         }
-        .mix(genome_coverage_present)
+        .mix(branched_coverage_results.genome_coverage_present)
 
     // --------- For genomes without RNA_presence info, calculate rRNA and tRNA
-    fasta_updated_with_coverage.filter { meta, fasta -> meta.RNA_presence == null }
-        .map { meta, fasta -> [meta, fasta] }
-        .set { rna_prediction_input }
-    fasta_updated_with_coverage.filter { meta, fasta -> meta.RNA_presence != null }
-        .map { meta, fasta -> [meta, fasta] }
-        .set { rna_present }
+    fasta_updated_with_coverage
+        .branch { meta, fasta ->
+            rna_prediction_input: meta.RNA_presence == null
+            rna_present: true  // Everything else goes here
+        }
+    .set { branched_rna_results }
 
     RNA_DETECTION (
-        rna_prediction_input
+        branched_rna_results.rna_prediction_input
     )
     ch_versions = ch_versions.mix( RNA_DETECTION.out.versions )
 
     // Update metadata for records missing RNA
-    fasta_updated_with_rna = RNA_DETECTION.out.rna_detected.join(rna_prediction_input)
+    fasta_updated_with_rna = RNA_DETECTION.out.rna_detected.join(branched_rna_results.rna_prediction_input)
         .map{ meta, rna_decision, fasta ->
               def decision = rna_decision.readLines()[0].split('\t')[1];
               def updated_meta = meta.clone()
               updated_meta.RNA_presence = decision;
               return [updated_meta, fasta]
         }
-        .mix(rna_present)
+        .mix(branched_rna_results.rna_present)
 
     // --------- Completeness and contamination calculation
-
-    fasta_updated_with_rna.filter { meta, fasta -> meta.completeness == null || meta.contamination == null || meta.stats_generation_software == null }
-        .map { meta, fasta -> [meta, fasta] }
-        .set { genome_evaluation_input }
-    fasta_updated_with_rna.filter { meta, fasta -> meta.completeness != null && meta.contamination != null && meta.stats_generation_software != null}
-        .map { meta, fasta -> [meta, fasta] }
-        .set { evaluation_present }
+    fasta_updated_with_rna
+        .branch { meta, fasta ->
+            genome_evaluation_input: meta.completeness == null || meta.contamination == null || meta.stats_generation_software == null
+            evaluation_present: true  // Everything else goes here
+        }
+    .set { branched_stats_results }
 
     GENOME_EVALUATION (
-        genome_evaluation_input
+        branched_stats_results.genome_evaluation_input
     )
 
     // Create a value channel with the version string
     def stats_version_ch = GENOME_EVALUATION.out.stats_versions
-        .map { process_name, tool_name, version_output -> return "${tool_name}_v${version_output}"
+        .map { _process_name, tool_name, version_output -> return "${tool_name}_v${version_output}"
         }.first()
 
     fasta_updated_with_stats = GENOME_EVALUATION.out.genome_evaluation
-        .join(genome_evaluation_input)
+        .join(branched_stats_results.genome_evaluation_input)
         .combine(stats_version_ch)
         .map { meta, stats_tsv, fasta, stats_version ->
             def line = stats_tsv.readLines()[1].split('\t')
@@ -156,12 +157,53 @@ workflow GENOMESUBMIT {
 
             return [updated_meta, fasta]
         }
-        .mix(evaluation_present)
+        .mix(branched_stats_results.evaluation_present)
+
+    // --------- Taxonomy
+    fasta_updated_with_stats
+        .branch { meta, fasta ->
+            genome_taxonomy_input: meta.NCBI_lineage == null
+            taxonomy_present: true  // Everything else goes here
+        }
+    .set { branched_taxonomy_results }
+
+    // Change extension for all files required taxonomy to .fasta because CATPACK requires suffix as input
+    RENAME_FASTA_FOR_CATPACK (
+        branched_taxonomy_results.genome_taxonomy_input
+    )
+
+    // build input structures for CAT_DB depending on what provided as input
+    def cat_db_input = (params.cat_db != null && params.cat_db != '')
+        ? channel.of( [['id': 'CAT_DB'], file(params.cat_db)] )
+        : channel.empty()
+
+    def cat_db_id_input = (params.cat_db_download_id != null && params.cat_db_download_id != '')
+        ? channel.of( [['id': 'CAT_DB_id'], params.cat_db_download_id] )
+        : channel.empty()
+
+    FASTA_CLASSIFY_CATPACK (
+        RENAME_FASTA_FOR_CATPACK.out.renamed_fasta,
+        channel.empty(),
+        cat_db_input,
+        cat_db_id_input,
+        false,  // generate summaries
+        '.fasta'
+    )
+
+    fasta_updated_with_taxonomy = FASTA_CLASSIFY_CATPACK.out.bat_classification
+        .join(branched_taxonomy_results.genome_taxonomy_input)
+        .map { meta, taxa_tsv, fasta ->
+            def line = taxa_tsv.readLines()[1].split('\t')
+            def updated_meta = meta.clone()
+            updated_meta.NCBI_lineage = line[3]
+            return [updated_meta, fasta]
+        }
+        .mix(branched_taxonomy_results.taxonomy_present)
 
     // --------- Combine metadata into TSV
-    genome_metadata_csv = fasta_updated_with_stats
+    genome_metadata_csv = fasta_updated_with_taxonomy
         .map { meta, fasta ->
-            def row = [
+            [
                 meta.id,
                 fasta,
                 meta.accession,
@@ -182,8 +224,26 @@ workflow GENOMESUBMIT {
             ].join('\t')
         }
         .collectFile(
-            name: "${params.outdir}/genomes_metadata.csv",
-            seed: 'genome_name\tgenome_path\taccessions\tassembly_software\tbinning_software\tbinning_parameters\tstats_generation_software\tcompleteness\tcontamination\tgenome_coverage\tmetagenome\tco-assembly\tbroad_environment\tlocal_environment\tenvironmental_medium\trRNA_presence\tNCBI_lineage',
+            name: "${params.outdir}/${params.mode}/genomes_metadata.csv",
+            seed: [
+                'genome_name',
+                'genome_path',
+                'accessions',
+                'assembly_software',
+                'binning_software',
+                'binning_parameters',
+                'stats_generation_software',
+                'completeness',
+                'contamination',
+                'genome_coverage',
+                'metagenome',
+                'co-assembly',
+                'broad_environment',
+                'local_environment',
+                'environmental_medium',
+                'rRNA_presence',
+                'NCBI_lineage'
+            ].join('\t'),
             newLine: true
         )
 
