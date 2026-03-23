@@ -2,11 +2,10 @@
 name: "registerstudy"
 description: |
   Submit a new study to ENA via the Webin REST API v2.
-  Reads study metadata from a JSON, CSV, or TSV file, checks for
-  duplicate studies already registered under the Webin account,
+  Reads study metadata from a JSON, CSV, or TSV file,
   builds a PROJECT XML submission document, and submits to ENA.
   Credentials are read from the WEBIN_ACCOUNT and WEBIN_PASSWORD
-  Nextflow secrets, which are mapped to ENA_WEBIN and ENA_WEBIN_PASSWORD
+  env variables, which are mapped to ENA_WEBIN and ENA_WEBIN_PASSWORD
   inside the process.
 keywords:
   - ena
@@ -53,8 +52,7 @@ output:
           type: file
           description: |
             JSON file containing the submission results with keys:
-            submitted (newly created accessions), duplicates (skipped),
-            modified (force-updated), and failed.
+            submitted (newly created accessions) and failed.
           pattern: "*_accessions.json"
   - versions:
       - "versions.yml":
