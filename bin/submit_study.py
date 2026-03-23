@@ -1,8 +1,90 @@
 #!/usr/bin/env python3
-"""Submit raw-reads, assembly and genome studies to ENA via the Webin REST API v2.
+"""Submit studies to ENA via the Webin REST API v2.
 
 Read a study metadata file (JSON, CSV, or TSV), construct an
 XML submission document, and submit new studies to ENA.
+
+# TODO: Currently script supports multiple input format that might be unnecessary.
+# TODO: Consider standardising on a single format (e.g. JSON and/or TSV) and deprecating the others.
+Input formats accepted (``--input``):
+
+* ``.json``
+* ``.csv``
+* ``.tsv``
+
+Example JSON inputs accepted::
+
+        {
+            "alias": "study-gut-2026",
+            "STUDY_TITLE": "Gut microbiome study",
+            "STUDY_ABSTRACT": "Characterisation of gut microbial communities",
+            "existing_study_type": "Metagenomics"
+        }
+
+        [
+            {
+                "alias": "study-gut-2026",
+                "STUDY_TITLE": "Gut microbiome study",
+                "STUDY_ABSTRACT": "Characterisation of gut microbial communities",
+                "existing_study_type": "Metagenomics"
+            },
+            ...
+        ]
+
+        {
+            "studies": [
+                {
+                    "alias": "study-soil-2026",
+                    "STUDY_TITLE": "Soil microbiome study",
+                    "existing_study_type": "Other",
+                    "new_study_type": "Environmental microbiome"
+                }
+            ]
+        }
+
+        {
+            "data": [
+                {
+                    "alias": "study-soil-2026",
+                    "STUDY_TITLE": "Soil microbiome study",
+                }
+            ]
+        }
+
+        {
+            "Container": {
+                "Studies": [
+                    {
+                        "STUDY_TITLE": "Marine metagenome study",
+                        "STUDY_ABSTRACT": "Shotgun metagenomics from seawater"
+                    }
+                ]
+            }
+        }
+
+Example CSV input accepted::
+
+        alias,STUDY_TITLE,STUDY_ABSTRACT,existing_study_type
+        study-gut-2026,Gut microbiome study,Characterisation of gut microbial communities,Metagenomics
+
+Example TSV input accepted::
+
+        alias\tSTUDY_TITLE\tSTUDY_ABSTRACT\texisting_study_type
+        study-soil-2026\tSoil microbiome study\tSurvey of soil microbiota\tMetagenomics
+
+Study metadata fields:
+
+Mandatory:
+
+* ``STUDY_TITLE`` — study title used in ``<TITLE>``.
+
+Optional:
+
+* ``alias`` — project alias; if missing, derived from ``STUDY_TITLE`` (first 50 characters).
+* ``CENTER_PROJECT_NAME`` — written to ``<NAME>``; defaults to alias.
+* ``STUDY_ABSTRACT`` or ``STUDY_DESCRIPTION`` — written to ``<DESCRIPTION>``.
+* ``existing_study_type`` — included as PROJECT_ATTRIBUTE.
+* ``new_study_type`` — included only when ``existing_study_type == "Other"``.
 
 Credentials are read from environment variables to avoid
 secrets appearing in shell history or process listings::
@@ -58,7 +140,7 @@ logging.basicConfig(
     level=logging.INFO,
     stream=sys.stderr,
 )
-logger = logging.getLogger("ena_submit.study")
+logger = logging.getLogger()
 
 
 # -----------------------------------------------------------
@@ -89,11 +171,6 @@ def get_credentials() -> tuple[str, str]:
 
 PROD_URL: Final = "https://www.ebi.ac.uk/ena/submit/webin-v2"
 TEST_URL: Final = "https://wwwdev.ebi.ac.uk/ena/submit/webin-v2"
-
-
-def get_base_url(use_test: bool) -> str:
-    """Return the ENA Webin v2 submission base URL."""
-    return TEST_URL if use_test else PROD_URL
 
 
 def submit_xml(
@@ -512,7 +589,6 @@ def _do_submission(
     xml_bytes: bytes,
     action: str,
     results: dict[str, list[dict[str, Any]]],
-    result_key: str,
     env_label: str,
     dry_run: bool,
 ) -> bool:
@@ -525,8 +601,7 @@ def _do_submission(
         action: Label for log messages (``"ADD"`` or
             ``"MODIFY"``).
         results: Results dict to accumulate into.
-        result_key: Key under which successes are stored.
-        env_label: ``"TEST"`` or ``"PRODUCTION"``.
+        env_label: ``"TEST server"`` or ``"LIVE server"``.
         dry_run: If ``True``, skip the actual submission.
 
     Returns:
@@ -559,7 +634,7 @@ def _do_submission(
                 "  %s: alias=%s accession=%s status=%s%s",
                 action, acc["alias"], acc["accession"], acc["status"], ext_suffix,
             )
-            results[result_key].append(acc)
+            results["submitted"].append(acc)
     else:
         logger.error("%s FAILED", action)
         receipt_xml_str = ET.tostring(
@@ -618,9 +693,10 @@ def main(
     """Submit studies to ENA via the Webin REST API v2."""
     username, password = get_credentials()
 
-    env_label = "TEST" if use_test else "PRODUCTION"
+    env_label = "TEST server" if use_test else "LIVE server"
     logger.info("ENA Study Submission — environment: %s", env_label)
-    base_url = get_base_url(use_test)
+    base_url = TEST_URL if use_test else PROD_URL
+
     auth = HTTPBasicAuth(username, password)
     logger.debug("Auth username: %s", username)
 
