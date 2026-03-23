@@ -8,10 +8,11 @@ Credentials are read from environment variables to avoid
 secrets appearing in shell history or process listings::
 
     export ENA_WEBIN=Webin-XXXXX
-    export ENA_WEBIN_PASSWORD=SECRET
+    export ENA_WEBIN_PASSWORD=XXXXX
 
 Usage::
 
+    # Submission to TEST server (submissions are discarded daily):
     python bin/submit_study.py \\
         --input studies.json \\
         --test
@@ -36,7 +37,7 @@ import logging
 import os
 import sys
 import xml.etree.ElementTree as ET
-from collections.abc import Callable, Sequence
+from collections.abc import Sequence
 from io import BytesIO
 from pathlib import Path
 from typing import Any, Final
@@ -450,53 +451,6 @@ def _add_project_attribute(
 
 
 # -----------------------------------------------------------
-# Structural XML validation (study-specific)
-# -----------------------------------------------------------
-
-
-def _validate_study_xml_structure(
-    xml_bytes: bytes,
-    messages: list[str],
-) -> tuple[bool, list[str]]:
-    """Structural check for study XML."""
-    try:
-        tree = ET.fromstring(xml_bytes)
-    except ET.ParseError as exc:
-        messages.append(
-            f"ERROR: XML is not well-formed: {exc}"
-        )
-        return False, messages
-
-    messages.append(
-        "XML is well-formed (basic check passed)"
-    )
-
-    project_set = tree.find("PROJECT_SET")
-    if project_set is None:
-        messages.append("ERROR: Missing PROJECT_SET element")
-        return False, messages
-
-    projects = project_set.findall("PROJECT")
-    if not projects:
-        messages.append("ERROR: No PROJECT elements found")
-        return False, messages
-
-    for proj in projects:
-        alias = proj.get("alias", "<no alias>")
-        title = proj.find("TITLE")
-        if title is None or not title.text:
-            messages.append(f"ERROR: PROJECT '{alias}' missing TITLE")
-            return False, messages
-        sp = proj.find("SUBMISSION_PROJECT")
-        if sp is None:
-            messages.append(f"ERROR: PROJECT '{alias}' missing SUBMISSION_PROJECT")
-            return False, messages
-        messages.append(f"OK: PROJECT '{alias}' has required elements")
-
-    return True, messages
-
-
-# -----------------------------------------------------------
 # Receipt parsing
 # -----------------------------------------------------------
 
@@ -644,12 +598,6 @@ _JSON_RECORD_KEYS: Final = ("studies", "data")
     help="Hold studies private until this date (YYYY-MM-DD, max 2 years from now)",
 )
 @click.option(
-    "--log", "log_file",
-    type=click.Path(path_type=Path),
-    default=None,
-    help="Path to log file",
-)
-@click.option(
     "--output",
     type=click.Path(path_type=Path),
     default=None,
@@ -664,7 +612,6 @@ def main(
     input_file: Path,
     use_test: bool,
     hold_until: str | None,
-    log_file: Path | None,
     output: Path | None,
     validate: bool,
 ) -> None:
