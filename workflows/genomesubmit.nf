@@ -259,7 +259,6 @@ workflow GENOMESUBMIT {
             .map { _meta, json ->
                 def data = new groovy.json.JsonSlurper().parse(json)
                 data.submitted[0]?.accession
-                    ?: data.duplicates[0]?.existing_accession
             }
     }
 

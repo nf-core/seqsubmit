@@ -136,8 +136,6 @@ from requests.auth import HTTPBasicAuth
 # Logging
 # -----------------------------------------------------------
 
-# All loggers in the ENA submission scripts share this root,
-# so configuring it once propagates to all child loggers.
 logging.basicConfig(
     format="%(levelname)s: %(message)s",
     level=logging.INFO,

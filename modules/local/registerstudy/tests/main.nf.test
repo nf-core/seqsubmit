@@ -7,31 +7,7 @@ nextflow_process {
     tag "modules"
     tag "registerstudy"
 
-    test("registerstudy - stub") {
-        options "-stub"
-
-        when {
-            process {
-                """
-                input[0] = [
-                    [ id:'example_study' ],
-                    file(params.pipelines_testdata_base_path + "/test_data/study_metadata/example_study.json", checkIfExists: true)
-                ]
-                """
-            }
-        }
-
-        then {
-            assertAll(
-                { assert process.success },
-                { assert snapshot(sanitizeOutput(process.out)).match() }
-            )
-        }
-    }
-
-    test("registerstudy - dry run against ENA test server") {
-        // Validates and builds the submission XML but does not submit to ENA.
-        // Dummy credentials in tests/nextflow.config are sufficient for dry-run mode.
+    test("registerstudy - submission to ENA test server") {
 
         when {
             process {
@@ -50,6 +26,28 @@ nextflow_process {
                 { assert path(process.out.accessions[0][1]).exists() },
                 { assert path(process.out.accessions[0][1]).json.submitted instanceof List },
                 { assert path(process.out.accessions[0][1]).json.failed.size() == 0 }
+            )
+        }
+    }
+
+    test("registerstudy - stub") {
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'example_study' ],
+                    file(params.pipelines_testdata_base_path + "/test_data/study_metadata/example_study.json", checkIfExists: true)
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(sanitizeOutput(process.out)).match() }
             )
         }
     }

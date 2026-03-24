@@ -1,10 +1,10 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
 name: "registerstudy"
 description: |
-  Submit a new study to ENA via the Webin REST API v2.
+  Submit a new study to ENA via via the Webin drop-box XML submission service.
   Reads study metadata from a JSON, CSV, or TSV file,
-  builds a PROJECT XML submission document, and submits to ENA.
-  Credentials are read from the WEBIN_ACCOUNT and WEBIN_PASSWORD
+  builds SUBMISSION XML and PROJECT XML, and submits to ENA.
+  Credentials are read from the ENA_WEBIN and ENA_WEBIN_PASSWORD
   env variables, which are mapped to ENA_WEBIN and ENA_WEBIN_PASSWORD
   inside the process.
 keywords:
@@ -62,5 +62,7 @@ output:
 
 authors:
   - "@timrozday"
+  - "@ochkalova"
 maintainers:
   - "@timrozday"
+  - "@ochkalova"
