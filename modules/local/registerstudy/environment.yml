@@ -7,4 +7,4 @@ dependencies:
   - conda-forge::python>=3.12
   - conda-forge::pip
   - pip:
-    - mgnify-pipelines-toolkit==1.4.17
+      - mgnify-pipelines-toolkit==1.4.17
