@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Submit studies to ENA via the Webin drop-box XML submission service.
+"""Submit studies to ENA via the Webin REST API v2.
 
 Read a study metadata file (JSON, CSV, or TSV), construct an
 XML submission document, and submit new studies to ENA.
@@ -170,34 +170,33 @@ def get_credentials() -> tuple[str, str]:
 # ENA API helpers
 # -----------------------------------------------------------
 
-PROD_URL: Final = "https://www.ebi.ac.uk/ena/submit/drop-box"
-TEST_URL: Final = "https://wwwdev.ebi.ac.uk/ena/submit/drop-box"
+PROD_URL: Final = "https://www.ebi.ac.uk/ena/submit/webin-v2"
+TEST_URL: Final = "https://wwwdev.ebi.ac.uk/ena/submit/webin-v2"
 
 
 def submit_xml(
     base_url: str,
     auth: HTTPBasicAuth,
-    submission_xml_bytes: bytes,
-    project_xml_bytes: bytes,
+    xml_bytes: bytes,
 ) -> ET.Element:
-    """Submit study XMLs to ENA via the submit/drop-box endpoint.
+    """Submit an XML document to ENA via Webin REST API v2.
 
     Args:
         base_url: ENA submission service base URL.
         auth: HTTP basic-auth credentials.
-        submission_xml_bytes: Serialised ``<SUBMISSION>`` XML.
-        project_xml_bytes: Serialised ``<PROJECT_SET>`` XML.
+        xml_bytes: Serialised XML submission document.
 
     Returns:
         Parsed receipt XML element tree root.
     """
     url = f"{base_url}/submit"
-    files = {
-        "SUBMISSION": ("submission.xml", submission_xml_bytes, "application/xml"),
-        "PROJECT": ("project.xml", project_xml_bytes, "application/xml"),
+    headers = {
+        "Content-Type": "application/xml",
+        "Accept": "application/xml",
     }
     resp = requests.post(
-        url, files=files, auth=auth, timeout=120,
+        url, data=xml_bytes,
+        headers=headers, auth=auth, timeout=120,
     )
     resp.raise_for_status()
     return ET.fromstring(resp.content)
@@ -425,24 +424,33 @@ def write_results(
 # -----------------------------------------------------------
 
 
-def build_submission_actions_xml(
+def build_submission_xml(
+    studies: list[dict[str, Any]],
     hold_until: str | None = None,
     action: str = "ADD",
+    test: bool = False,
 ) -> ET.Element:
-    """Build the ``<SUBMISSION>`` actions XML element.
-
-    This is submitted as the ``SUBMISSION`` multipart field.
+    """Build a ``<WEBIN>`` XML document for submitting studies.
 
     Args:
+        studies: Study metadata dicts.
         hold_until: Optional hold-until date string
             (``YYYY-MM-DD``).
         action: Submission action — ``"ADD"`` for new studies
             or ``"MODIFY"`` to update existing ones.
+        test: If ``True``, append a timestamp-based hash to aliases
+            for uniqueness in test submissions.
 
     Returns:
-        Root ``<SUBMISSION>`` element.
+        Root ``<WEBIN>`` element.
     """
-    submission = ET.Element("SUBMISSION")
+    webin = ET.Element("WEBIN")
+
+    # SUBMISSION_SET
+    submission_set = ET.SubElement(webin, "SUBMISSION_SET")
+    submission = ET.SubElement(submission_set, "SUBMISSION")
+    sub_alias = f"study-submission-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
+    submission.set("alias", sub_alias)
     actions = ET.SubElement(submission, "ACTIONS")
     main_action = ET.SubElement(actions, "ACTION")
     ET.SubElement(main_action, action.upper())
@@ -450,74 +458,66 @@ def build_submission_actions_xml(
         hold_action = ET.SubElement(actions, "ACTION")
         hold_el = ET.SubElement(hold_action, "HOLD")
         hold_el.set("HoldUntilDate", hold_until)
-    return submission
 
-
-def build_project_set_xml(
-    studies: list[dict[str, Any]],
-    test: bool = False,
-) -> ET.Element:
-    """Build the ``<PROJECT_SET>`` XML element.
-
-    This is submitted as the ``PROJECT`` multipart field.
-
-    Args:
-        studies: Study metadata dicts.
-        test: If ``True``, append a timestamp-based hash to aliases
-            for uniqueness in test submissions.
-
-    Returns:
-        Root ``<PROJECT_SET>`` element.
-    """
-    project_set = ET.Element("PROJECT_SET")
+    # PROJECT_SET
+    project_set = ET.SubElement(webin, "PROJECT_SET")
     for study in studies:
-        alias = study.get(
-            "alias",
-            study.get("STUDY_TITLE", "").replace(" ", "_")[:50],
+        _add_project_element(project_set, study, test=test)
+    return webin
+
+
+def _add_project_element(
+    project_set: ET.Element,
+    study: dict[str, Any],
+    test: bool = False,
+) -> None:
+    """Append a ``<PROJECT>`` element to *project_set*."""
+    alias = study.get(
+        "alias",
+        study.get("STUDY_TITLE", "").replace(" ", "_")[:50],
+    )
+    if test:
+        # Append 8-character hash of current timestamp for uniqueness in test mode
+        timestamp_hash = hashlib.md5(
+            datetime.datetime.now().isoformat().encode()
+        ).hexdigest()[:8]
+        alias = f"{alias}_{timestamp_hash}"
+
+    project = ET.SubElement(project_set, "PROJECT")
+    project.set("alias", alias)
+
+    name_text = study.get("CENTER_PROJECT_NAME", alias)
+    if name_text:
+        name_el = ET.SubElement(project, "NAME")
+        name_el.text = name_text
+
+    title_el = ET.SubElement(project, "TITLE")
+    title_el.text = study.get("STUDY_TITLE", "")
+
+    desc_text = (
+        study.get("STUDY_ABSTRACT")
+        or study.get("STUDY_DESCRIPTION", "")
+    )
+    if desc_text:
+        desc_el = ET.SubElement(project, "DESCRIPTION")
+        desc_el.text = desc_text
+
+    sp = ET.SubElement(project, "SUBMISSION_PROJECT")
+    ET.SubElement(sp, "SEQUENCING_PROJECT")
+    # TODO: Check existing_study_type and new_study_type metadata fields, do we need those?
+    study_type = study.get("existing_study_type")
+    if study_type:
+        attrs = ET.SubElement(
+            project, "PROJECT_ATTRIBUTES",
         )
-        if test:
-            # Append 8-character hash of current timestamp for uniqueness in test mode
-            timestamp_hash = hashlib.md5(
-                datetime.datetime.now().isoformat().encode()
-            ).hexdigest()[:8]
-            alias = f"{alias}_{timestamp_hash}"
-
-        project = ET.SubElement(project_set, "PROJECT")
-        project.set("alias", alias)
-
-        name_text = study.get("CENTER_PROJECT_NAME", alias)
-        if name_text:
-            name_el = ET.SubElement(project, "NAME")
-            name_el.text = name_text
-
-        title_el = ET.SubElement(project, "TITLE")
-        title_el.text = study.get("STUDY_TITLE", "")
-
-        desc_text = (
-            study.get("STUDY_ABSTRACT")
-            or study.get("STUDY_DESCRIPTION", "")
+        _add_project_attribute(
+            attrs, "existing_study_type", study_type,
         )
-        if desc_text:
-            desc_el = ET.SubElement(project, "DESCRIPTION")
-            desc_el.text = desc_text
-
-        sp = ET.SubElement(project, "SUBMISSION_PROJECT")
-        ET.SubElement(sp, "SEQUENCING_PROJECT")
-        # TODO: Check existing_study_type and new_study_type metadata fields, do we need those?
-        study_type = study.get("existing_study_type")
-        if study_type:
-            attrs = ET.SubElement(
-                project, "PROJECT_ATTRIBUTES",
-            )
+        new_type = study.get("new_study_type")
+        if new_type and study_type == "Other":
             _add_project_attribute(
-                attrs, "existing_study_type", study_type,
+                attrs, "new_study_type", new_type,
             )
-            new_type = study.get("new_study_type")
-            if new_type and study_type == "Other":
-                _add_project_attribute(
-                    attrs, "new_study_type", new_type,
-                )
-    return project_set
 
 
 def _add_project_attribute(
@@ -594,8 +594,7 @@ def parse_xml_receipt(
 def _do_submission(
     base_url: str,
     auth: Any,
-    submission_xml_bytes: bytes,
-    project_xml_bytes: bytes,
+    xml_bytes: bytes,
     action: str,
     results: dict[str, list[dict[str, Any]]],
     env_label: str,
@@ -606,8 +605,7 @@ def _do_submission(
     Args:
         base_url: ENA submission base URL.
         auth: HTTP basic-auth credentials.
-        submission_xml_bytes: Serialised ``<SUBMISSION>`` actions XML.
-        project_xml_bytes: Serialised ``<PROJECT_SET>`` XML.
+        xml_bytes: Serialised XML submission document.
         action: Label for log messages (``"ADD"`` or
             ``"MODIFY"``).
         results: Results dict to accumulate into.
@@ -619,13 +617,12 @@ def _do_submission(
     """
     if dry_run:
         logger.info("DRY RUN — skipping %s submission", action)
-        logger.info("SUBMISSION XML:\n%s", submission_xml_bytes.decode("utf-8"))
-        logger.info("PROJECT XML:\n%s", project_xml_bytes.decode("utf-8"))
+        logger.info("Generated XML:\n%s", xml_bytes.decode("utf-8"))
         return True
 
     logger.info("Submitting %s to ENA (%s)...", action, env_label)
     try:
-        receipt_root = submit_xml(base_url, auth, submission_xml_bytes, project_xml_bytes)
+        receipt_root = submit_xml(base_url, auth, xml_bytes)
     except requests.exceptions.HTTPError as exc:
         logger.error("HTTP error during %s submission: %s", action, exc)
         if exc.response is not None:
@@ -665,7 +662,7 @@ _JSON_RECORD_KEYS: Final = ("studies", "data")
 
 
 @click.command(
-    help="Register studies with ENA using Webin XML submission service.",
+    help="Submit studies to ENA via the Webin REST API v2.",
 )
 @click.option(
     "--input", "input_file",
@@ -701,7 +698,7 @@ def main(
     output: Path | None,
     validate: bool,
 ) -> None:
-    """Register studies with ENA using Webin XML submission service."""
+    """Submit studies to ENA via the Webin REST API v2."""
     username, password = get_credentials()
 
     env_label = "TEST server" if use_test else "LIVE server"
@@ -737,16 +734,17 @@ def main(
 
     # -- Step 2: Build and submit XML --------------------
     logger.info("Building ADD XML for %d study/studies...", len(studies))
-    submission_root = build_submission_actions_xml(hold_until=hold_until, action="ADD")
-    project_root = build_project_set_xml(studies, test=use_test)
-    submission_xml_bytes = xml_to_bytes(submission_root)
-    project_xml_bytes = xml_to_bytes(project_root)
-    logger.info("SUBMISSION XML document size: %d bytes", len(submission_xml_bytes))
-    logger.debug("SUBMISSION XML:\n%s", submission_xml_bytes.decode("utf-8"))
-    logger.info("PROJECT XML document size: %d bytes", len(project_xml_bytes))
-    logger.debug("PROJECT XML:\n%s", project_xml_bytes.decode("utf-8"))
+    xml_root = build_submission_xml(
+        studies,
+        hold_until=hold_until,
+        action="ADD",
+        test=use_test,
+    )
+    xml_bytes = xml_to_bytes(xml_root)
+    logger.info("XML document size: %d bytes", len(xml_bytes))
+    logger.debug("Generated XML:\n%s", xml_bytes.decode("utf-8"))
     ok = _do_submission(
-        base_url, auth, submission_xml_bytes, project_xml_bytes,
+        base_url, auth, xml_bytes,
         action="ADD",
         results=results,
         env_label=env_label,
