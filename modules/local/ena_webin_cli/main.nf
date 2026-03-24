@@ -58,16 +58,4 @@ process ENA_WEBIN_CLI {
         false
     fi
     """
-
-    stub:
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    """
-    touch ${prefix}_webin-cli.report
-    export STATUS="success"
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        ena-webin-cli: 0.0.0
-    END_VERSIONS
-    """
 }
