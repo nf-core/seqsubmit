@@ -99,6 +99,70 @@ assembly_002,data/assembly_002.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 
 An example file is available at [assets/samplesheet_assembly.csv](../assets/samplesheet_assembly.csv).
 
+## Submission study
+
+All data submitted through this pipeline must be associated with an ENA study (project). You have two options:
+
+### Option 1 — Use an existing study
+
+If you already have an ENA study, pass its accession (starting with `PRJ` or `ERP`) via `--submission_study`:
+
+```bash
+--submission_study PRJEB12345
+```
+
+You can create a study manually via the [Webin Portal](https://www.ebi.ac.uk/ena/submit/webin/login) and then use the assigned accession here.
+
+### Option 2 — Register a new study automatically
+
+Provide a study metadata file via `--study_metadata` and the pipeline will register the study with ENA before submitting your data:
+
+```bash
+--study_metadata study_metadata.json
+```
+
+The pipeline accepts JSON, CSV, and TSV formats.
+
+#### JSON formats
+
+Single study as a flat object:
+
+```json
+{
+  "alias": "study-gut-2026",
+  "study_title": "Gut microbiome study",
+  "study_abstract": "Characterisation of gut microbial communities"
+}
+```
+
+#### CSV format
+
+```csv
+alias,study_title,study_abstract
+study-gut-2026,Gut microbiome study,Characterisation of gut microbial communities
+```
+
+#### TSV format
+
+```tsv
+alias	study_title	study_abstract
+study-soil-2026	Soil microbiome study	Survey of soil microbiota
+```
+
+#### Study metadata fields
+
+| Field                 | Required | Description                                                                  |
+| --------------------- | -------- | ---------------------------------------------------------------------------- |
+| `study_title`         | Yes      | Descriptive title of the study.                                              |
+| `alias`               | Yes      | Unique project alias within your Webin account. Max length is 50 characters. |
+| `study_abstract`      | No       | Free-text abstract describing the study.                                     |
+| `study_description`   | No       | Alternative to `study_abstract`.                                             |
+| `project_name`        | No       | Project name. Defaults to `study_title`.                                     |
+| `existing_study_type` | No       | ENA study type (e.g. `Metagenomics`, `Other`).                               |
+| `new_study_type`      | No       | Custom study type. Only used when `existing_study_type` is set to `Other`.   |
+
+An example metadata file is available at [assets/study_metadata.json](../assets/study_metadata.json).
+
 ## Running the pipeline
 
 General command template:

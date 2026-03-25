@@ -5,6 +5,7 @@
 */
 include { GENOME_UPLOAD            } from '../modules/local/genome_upload'
 include { ENA_WEBIN_CLI            } from '../modules/local/ena_webin_cli'
+include { REGISTERSTUDY            } from '../modules/local/registerstudy/main'
 include { RENAME_FASTA_FOR_CATPACK } from '../modules/local/rename_fasta_for_catpack'
 
 include { COVERM_GENOME            } from '../modules/nf-core/coverm/genome'
@@ -246,12 +247,28 @@ workflow GENOMESUBMIT {
             newLine: true
         )
 
-    //GENOME_UPLOAD(
-    //    genome_fasta.map{meta, fasta -> fasta}.collect(),
-    //    genome_metadata_csv,
-    //    params.mode
-    //)
-    //ch_versions = ch_versions.mix( GENOME_UPLOAD.out.versions )
+    def study_accession_ch
+    if (params.submission_study) {
+        study_accession_ch = channel.of(params.submission_study)
+    } else {
+        REGISTERSTUDY(
+            channel.of([[id: "study"], file(params.study_metadata)])
+        )
+        ch_versions = ch_versions.mix(REGISTERSTUDY.out.versions)
+        study_accession_ch = REGISTERSTUDY.out.accessions
+            .map { _meta, json ->
+                def data = new groovy.json.JsonSlurper().parse(json)
+                data.submitted[0]?.accession
+            }
+    }
+
+    GENOME_UPLOAD(
+        genome_fasta.map{meta, fasta -> fasta}.collect(),
+        genome_metadata_csv,
+        params.mode,
+        study_accession_ch.first()
+    )
+    ch_versions = ch_versions.mix( GENOME_UPLOAD.out.versions )
 
     //manifests_ch = GENOME_UPLOAD.out.manifests.flatten()
     //    .map { manifest ->

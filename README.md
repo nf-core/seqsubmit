@@ -116,15 +116,21 @@ assembly_2,data/contigs_2.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
 
+### Submission study
+
+All data submitted through this pipeline must be associated with an ENA study (project). You can either pass an accession of your existing study via `--submission_study`or provide a metadata file via `--study_metadata` and the pipeline will register the study with ENA before submitting your data.
+
+See the [usage documentation](docs/usage.md#submission-study) for more details.
+
 ### Required parameters:
 
-| Parameter            | Description                                                                       |
-| -------------------- | --------------------------------------------------------------------------------- |
-| `--mode`             | Type of the data to be submitted. Options: `[mags, bins, metagenomic_assemblies]` |
-| `--input`            | Path to the samplesheet describing the data to be submitted                       |
-| `--outdir`           | Path to the output directory for pipeline results                                 |
-| `--submission_study` | ENA study accession (PRJ/ERP) to submit the data to                               |
-| `--centre_name`      | Name of the submitter's organisation                                              |
+| Parameter                                  | Description                                                                                                       |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `--mode`                                   | Type of the data to be submitted. Options: `[mags, bins, metagenomic_assemblies]`                                 |
+| `--input`                                  | Path to the samplesheet describing the data to be submitted                                                       |
+| `--outdir`                                 | Path to the output directory for pipeline results                                                                 |
+| `--submission_study` OR `--study_metadata` | ENA study accession (PRJ/ERP) to submit the data to OR metadata file in JSON/TSV/CSV format to register new study |
+| `--centre_name`                            | Name of the submitter's organisation                                                                              |
 
 ### Optional parameters:
 

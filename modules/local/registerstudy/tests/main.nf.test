@@ -1,25 +1,20 @@
-// TODO nf-core: Once you have added the required tests, please run the following command to build this file:
-// nf-core modules test registerstudy
 nextflow_process {
     name "Test Process REGISTERSTUDY"
     script "../main.nf"
-    config "../nextflow.config"
+    config "./nextflow.config"
     process "REGISTERSTUDY"
-
 
     tag "modules"
     tag "registerstudy"
 
-    test("registerstudy - should register a study on ENA test server") {
+    test("registerstudy - submission to ENA test server (JSON metadata)") {
 
         when {
             process {
                 """
                 input[0] = [
-                    [ id:'test', single_end:false ], // meta map
-                    "PRJNA318468",
-                    "EMG",
-                    "metagenome"
+                    [ id:'example_study' ],
+                    file("$projectDir/assets/study_metadata.json", checkIfExists: true)
                 ]
                 """
             }
@@ -28,23 +23,45 @@ nextflow_process {
         then {
             assertAll(
                 { assert process.success },
-                //TODO improve assertions
+                { assert path(process.out.accessions[0][1]).exists() },
+                { assert path(process.out.accessions[0][1]).json.submitted instanceof List },
+                { assert path(process.out.accessions[0][1]).json.failed.size() == 0 }
+            )
+        }
+    }
+
+    test("registerstudy - submission to ENA test server (TSV metadata)") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'example_study_tsv' ],
+                    file("$projectDir/assets/study_metadata.tsv", checkIfExists: true)
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert path(process.out.accessions[0][1]).exists() },
+                { assert path(process.out.accessions[0][1]).json.submitted instanceof List },
+                { assert path(process.out.accessions[0][1]).json.failed.size() == 0 }
             )
         }
     }
 
     test("registerstudy - stub") {
-
         options "-stub"
 
         when {
             process {
                 """
                 input[0] = [
-                    [ id:'test', single_end:false ], // meta map
-                    "PRJNA318468",
-                    "EMG",
-                    "metagenome"
+                    [ id:'example_study' ],
+                    file("$projectDir/assets/study_metadata.json", checkIfExists: true)
                 ]
                 """
             }
@@ -53,10 +70,8 @@ nextflow_process {
         then {
             assertAll(
                 { assert process.success },
-                { assert snapshot(process.out).match() }
-                //TODO improve assertions
+                { assert snapshot(sanitizeOutput(process.out)).match() }
             )
         }
-
     }
 }

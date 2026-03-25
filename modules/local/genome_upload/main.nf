@@ -11,6 +11,7 @@ process GENOME_UPLOAD {
     path(mags)
     path(table_for_upload)
     val(mags_or_bins_flag)
+    val(submission_study)
 
     output:
     path "results/{MAG,bin}_upload/manifests*/*.manifest"      , emit: manifests
@@ -34,7 +35,7 @@ process GENOME_UPLOAD {
     export ENA_WEBIN_PASSWORD=\$WEBIN_PASSWORD
 
     genome_upload \\
-        -u $params.submission_study \\
+        -u $submission_study \\
         --genome_info ${table_for_upload} \\
         --centre_name $params.centre_name \\
         --${mags_or_bins_flag} \\

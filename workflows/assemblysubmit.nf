@@ -99,6 +99,9 @@ workflow ASSEMBLYSUBMIT {
         .map { meta, coverage_file ->
             // Read the file and calculate average
             def lines = coverage_file.readLines()
+            if (lines.size() < 2) {
+                return [meta, 0.0]
+            }
             def coverages = lines[1..-1].collect { line ->
                 line.split('\t')[1] as Double
             }
@@ -139,6 +142,7 @@ workflow ASSEMBLYSUBMIT {
 
             def content = "${header}\n${row}"
             def csv_file = file("${params.outdir}/${params.mode}/${meta.id}_assembly_metadata.csv")
+            csv_file.parent.toFile().mkdirs()
             csv_file.text = content
 
             [meta, csv_file]
@@ -149,11 +153,16 @@ workflow ASSEMBLYSUBMIT {
         // Use provided study accession directly
         study_accession_ch = channel.of(params.submission_study)
     } else {
-        // Register a new study
+        // Register a new study using the study metadata file
         REGISTERSTUDY(
-            [[id:"study"], params.ena_raw_reads_study_accession, params.centre_name, params.library ]
+            channel.of([[id: "study"], file(params.study_metadata)])
         )
-        study_accession_ch = REGISTERSTUDY.out.study_accession.map { _meta, accession -> accession }
+        ch_versions = ch_versions.mix(REGISTERSTUDY.out.versions)
+        study_accession_ch = REGISTERSTUDY.out.accessions
+            .map { _meta, json ->
+                def data = new groovy.json.JsonSlurper().parse(json)
+                data.submitted[0]?.accession
+            }
     }
 
     // Generate assembly manifest files and submit them to ENA
