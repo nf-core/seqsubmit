@@ -1,65 +1,17 @@
 {
-    "registerstudy - report - stub": {
-        "content": [
-            {
-                "0": [
-                    [
-                        {
-                            "id": "test",
-                            "single_end": false
-                        },
-                        ""
-                    ]
-                ],
-                "1": [
-                    "versions.yml:md5,ea872d341a2054fde3b2c8f06bbf8177"
-                ],
-                "study_accession": [
-                    [
-                        {
-                            "id": "test",
-                            "single_end": false
-                        },
-                        ""
-                    ]
-                ],
-                "versions": [
-                    "versions.yml:md5,ea872d341a2054fde3b2c8f06bbf8177"
-                ]
-            }
-        ],
-        "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "25.10.0"
-        },
-        "timestamp": "2025-10-28T16:35:02.331026"
-    },
     "registerstudy - stub": {
         "content": [
             {
-                "0": [
+                "accessions": [
                     [
                         {
-                            "id": "test",
-                            "single_end": false
+                            "id": "example_study"
                         },
-                        ""
-                    ]
-                ],
-                "1": [
-                    "versions.yml:md5,1d079512d28737f6b925e85563aa2c53"
-                ],
-                "study_accession": [
-                    [
-                        {
-                            "id": "test",
-                            "single_end": false
-                        },
-                        ""
+                        "example_study_accessions.json:md5,83600b2fb33a560c25351dbd4a9bdba2"
                     ]
                 ],
                 "versions": [
-                    "versions.yml:md5,1d079512d28737f6b925e85563aa2c53"
+                    "versions.yml:md5,29d54944e57cbb7cb12b7605f13fd0fc"
                 ]
             }
         ],
@@ -67,6 +19,6 @@
             "nf-test": "0.9.0",
             "nextflow": "25.04.1"
         },
-        "timestamp": "2025-10-30T14:58:53.721718"
+        "timestamp": "2026-03-25T10:54:18.30373"
     }
 }

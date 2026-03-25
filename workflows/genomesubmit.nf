@@ -3,10 +3,10 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-// TODO rename when we will have register_study module separately
 include { GENOME_UPLOAD as CREATE_MANIFESTS } from '../modules/local/genome_upload'
 include { ENA_WEBIN_CLI_WRAPPER as SUBMIT   } from '../modules/local/ena_webin_cli_wrapper'
 include { ENA_WEBIN_CLI_DOWNLOAD            } from '../modules/local/ena_webin_cli_download'
+include { REGISTERSTUDY                     } from '../modules/local/registerstudy/main'
 include { RENAME_FASTA_FOR_CATPACK          } from '../modules/local/rename_fasta_for_catpack'
 
 include { FASTAVALIDATOR                    } from '../modules/nf-core/fastavalidator/main'
@@ -264,11 +264,28 @@ workflow GENOMESUBMIT {
             newLine: true
         )
 
+    // --------- Register study if accession not provided
+    def study_accession_ch
+    if (params.submission_study) {
+        study_accession_ch = channel.of(params.submission_study)
+    } else {
+        REGISTERSTUDY(
+            channel.of([[id: "study"], file(params.study_metadata)])
+        )
+        ch_versions = ch_versions.mix(REGISTERSTUDY.out.versions)
+        study_accession_ch = REGISTERSTUDY.out.accessions
+            .map { _meta, json ->
+                def data = new groovy.json.JsonSlurper().parse(json)
+                data.submitted[0]?.accession
+            }
+    }
+
     // --------- Generate manifests
     CREATE_MANIFESTS(
         fasta_updated_with_stats.map{meta, fasta -> fasta}.collect(),
         genome_metadata_csv,
-        params.mode     // mags or bins
+        params.mode,     // mags or bins
+        study_accession_ch.first()
     )
 
     // All manifests were generated in one run
