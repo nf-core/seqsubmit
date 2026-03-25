@@ -7,14 +7,37 @@ nextflow_process {
     tag "modules"
     tag "registerstudy"
 
-    test("registerstudy - submission to ENA test server") {
+    test("registerstudy - submission to ENA test server (JSON metadata)") {
 
         when {
             process {
                 """
                 input[0] = [
                     [ id:'example_study' ],
-                    file(params.pipelines_testdata_base_path + "/test_data/study_metadata/example_study.json", checkIfExists: true)
+                    file("$projectDir/assets/study_metadata.json", checkIfExists: true)
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert path(process.out.accessions[0][1]).exists() },
+                { assert path(process.out.accessions[0][1]).json.submitted instanceof List },
+                { assert path(process.out.accessions[0][1]).json.failed.size() == 0 }
+            )
+        }
+    }
+
+    test("registerstudy - submission to ENA test server (TSV metadata)") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'example_study_tsv' ],
+                    file("$projectDir/assets/study_metadata.tsv", checkIfExists: true)
                 ]
                 """
             }
@@ -38,7 +61,7 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'example_study' ],
-                    file(params.pipelines_testdata_base_path + "/test_data/study_metadata/example_study.json", checkIfExists: true)
+                    file("$projectDir/assets/study_metadata.json", checkIfExists: true)
                 ]
                 """
             }

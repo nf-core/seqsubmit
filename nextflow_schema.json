@@ -308,7 +308,7 @@
                     "format": "file-path",
                     "exists": true,
                     "description": "Path to study metadata file (JSON, CSV, or TSV) for registering a new ENA study. Required when submission_study is not provided.",
-                    "help_text": "File containing study metadata fields (required: STUDY_TITLE, optional: alias, STUDY_ABSTRACT, existing_study_type, etc.). Used by REGISTERSTUDY to create a new study in ENA when no existing submission_study accession is given.",
+                    "help_text": "File containing study metadata fields (required: study_title and alias, optional: study_abstract, existing_study_type, etc.). Used by REGISTERSTUDY to create a new study in ENA when no existing submission_study accession is given.",
                     "fa_icon": "fas fa-file-alt"
                 },
                 "webincli_submit": {

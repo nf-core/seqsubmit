@@ -1,117 +1,4 @@
 #!/usr/bin/env python3
-"""Submit studies to ENA via the Webin REST API v2.
-
-Read a study metadata file (JSON, CSV, or TSV), construct an
-XML submission document, and submit new studies to ENA.
-
-# TODO: Currently script supports multiple input format that might be unnecessary.
-# TODO: Consider standardising on a single format (e.g. JSON and/or TSV) and deprecating the others.
-# TODO: Consider which columns are mandatory vs optional. "alias" is optional, might be worth making it mandatory.
-# TODO: Add input file validation and error handling (e.g. missing mandatory fields, long alias).
-Input formats accepted (``--input``):
-
-* ``.json``
-* ``.csv``
-* ``.tsv``
-
-Example JSON inputs accepted::
-
-        {
-            "alias": "study-gut-2026",
-            "STUDY_TITLE": "Gut microbiome study",
-            "STUDY_ABSTRACT": "Characterisation of gut microbial communities",
-            "existing_study_type": "Metagenomics"
-        }
-
-        [
-            {
-                "alias": "study-gut-2026",
-                "STUDY_TITLE": "Gut microbiome study",
-                "STUDY_ABSTRACT": "Characterisation of gut microbial communities",
-                "existing_study_type": "Metagenomics"
-            },
-            ...
-        ]
-
-        {
-            "studies": [
-                {
-                    "alias": "study-soil-2026",
-                    "STUDY_TITLE": "Soil microbiome study",
-                    "existing_study_type": "Other",
-                    "new_study_type": "Environmental microbiome"
-                }
-            ]
-        }
-
-        {
-            "data": [
-                {
-                    "alias": "study-soil-2026",
-                    "STUDY_TITLE": "Soil microbiome study",
-                }
-            ]
-        }
-
-        {
-            "Container": {
-                "Studies": [
-                    {
-                        "STUDY_TITLE": "Marine metagenome study",
-                        "STUDY_ABSTRACT": "Shotgun metagenomics from seawater"
-                    }
-                ]
-            }
-        }
-
-Example CSV input accepted::
-
-        alias,STUDY_TITLE,STUDY_ABSTRACT,existing_study_type
-        study-gut-2026,Gut microbiome study,Characterisation of gut microbial communities,Metagenomics
-
-Example TSV input accepted::
-
-        alias\tSTUDY_TITLE\tSTUDY_ABSTRACT\texisting_study_type
-        study-soil-2026\tSoil microbiome study\tSurvey of soil microbiota\tMetagenomics
-
-Study metadata fields:
-
-Mandatory:
-
-* ``STUDY_TITLE`` — study title used in ``<TITLE>``.
-
-Optional:
-
-* ``alias`` — project alias; if missing, derived from ``STUDY_TITLE`` (first 50 characters).
-* ``CENTER_PROJECT_NAME`` — written to ``<NAME>``; defaults to alias.
-* ``STUDY_ABSTRACT`` or ``STUDY_DESCRIPTION`` — written to ``<DESCRIPTION>``.
-* ``existing_study_type`` — included as PROJECT_ATTRIBUTE.
-* ``new_study_type`` — included only when ``existing_study_type == "Other"``.
-
-Credentials are read from environment variables to avoid
-secrets appearing in shell history or process listings::
-
-    export ENA_WEBIN=Webin-XXXXX
-    export ENA_WEBIN_PASSWORD=XXXXX
-
-Usage::
-
-    # Submission to TEST server (submissions are discarded daily):
-    python bin/submit_study.py \\
-        --input studies.json \\
-        --test
-
-    # With hold date (max 2 years):
-    python bin/submit_study.py \\
-        --input studies.json \\
-        --hold-until 2028-01-01
-
-    # Log to file:
-    python bin/submit_study.py \\
-        --input studies.json \\
-        --test --log submission.log
-"""
-
 from __future__ import annotations
 
 import csv
@@ -122,7 +9,6 @@ import logging
 import os
 import sys
 import xml.etree.ElementTree as ET
-from collections.abc import Sequence
 from io import BytesIO
 from pathlib import Path
 from typing import Any, Final
@@ -260,21 +146,31 @@ def validate_hold_until(hold_until: str) -> datetime.date:
 
 
 # -----------------------------------------------------------
-# File loading (JSON, CSV, TSV)
+# Study metadata field definitions
 # -----------------------------------------------------------
 
+#: Fields that must be present and non-empty in every record.
+_REQUIRED_FIELDS: Final[frozenset[str]] = frozenset({
+    "alias",
+    "study_title",
+})
 
-def _is_metadata_row(row: Sequence[object]) -> bool:
-    """Check whether *row* is a non-data header/metadata row.
+#: Fields that are recognised but optional.
+_OPTIONAL_FIELDS: Final[frozenset[str]] = frozenset({
+    "project_name",
+    "study_abstract",
+    "study_description",
+    "existing_study_type",
+    "new_study_type",
+})
 
-    Such rows have at most one non-empty cell and are skipped
-    during record extraction.
-    """
-    non_empty = sum(
-        1 for c in row
-        if c is not None and str(c).strip()
-    )
-    return non_empty <= 1
+#: All recognised field names (required + optional).
+_ALL_FIELDS: Final[frozenset[str]] = _REQUIRED_FIELDS | _OPTIONAL_FIELDS
+
+
+# -----------------------------------------------------------
+# File loading (JSON, CSV, TSV)
+# -----------------------------------------------------------
 
 
 def extract_records_from_tabular(
@@ -283,8 +179,8 @@ def extract_records_from_tabular(
 ) -> list[dict[str, str]]:
     """Extract record dicts from a CSV or TSV file.
 
-    Skip an optional leading metadata/label row if detected
-    (a row with at most one non-empty cell).
+    Only columns present in _ALL_FIELDS are retained;
+    unknown columns are ignored.
 
     Args:
         filepath: Path to the tabular file.
@@ -293,111 +189,88 @@ def extract_records_from_tabular(
     Returns:
         List of record dicts.
     """
+    records = []
+
     with open(filepath, newline="", encoding="utf-8") as fh:
-        rows = list(csv.reader(fh, delimiter=delimiter))
+        reader = csv.DictReader(fh, delimiter=delimiter)
+        for line in reader:
+            record = {}
+            for col in _ALL_FIELDS:
+                value = line.get(col, "").strip()
+                if value:
+                    record[col] = value
+            if record:
+                records.append(record)
 
-    if not rows:
-        return []
-
-    idx = 0
-    if _is_metadata_row(rows[idx]):
-        idx += 1
-    if idx >= len(rows):
-        return []
-
-    headers = rows[idx]
-    idx += 1
-
-    records: list[dict[str, str]] = []
-    for row in rows[idx:]:
-        record: dict[str, str] = {}
-        for col, val in zip(headers, row):
-            col = col.strip()
-            if col and val is not None and val.strip():
-                record[col] = val.strip()
-        if record:
-            records.append(record)
-
-    return records
+        return records
 
 
 def extract_records_from_json(
-    input_data: object,
-    record_keys: Sequence[str] = ("data",),
-) -> list[dict[str, Any]] | None:
-    """Extract record dicts from a JSON input.
+    filepath: str | Path,
+) -> list[dict[str, Any]]:
+    """Extract record dicts from a JSON file.
 
-    Handle several JSON shapes:
-
-    * Container format (e.g. DataHarmonizer exports)::
-
-        {"Container": {"<ClassName>s": [{...}, ...]}}
+    Handle two JSON shapes:
 
     * Plain list of dicts.
-    * Dict with an entity-specific key or ``data`` key.
     * Single record object (no wrapper).
 
     Args:
-        input_data: Parsed JSON data (any shape).
-        record_keys: Dict keys to check for record lists
-            (e.g. ``["studies", "data"]``).
+        filepath: Path to the JSON file.
 
     Returns:
-        List of record dicts, or ``None`` if unrecognised.
+        List of record dicts, or [] if unrecognised.
     """
+    with open(filepath) as fh:
+        input_data = json.load(fh)
+
     if isinstance(input_data, list):
         return input_data
 
     if isinstance(input_data, dict):
-        container = input_data.get("Container")
-        if isinstance(container, dict):
-            for key, val in container.items():
-                if isinstance(val, list):
-                    logger.info("Extracted records from Container.%s", key)
-                    return val
-
-        for key in record_keys:
-            if key in input_data:
-                return input_data[key]
-
         return [input_data]
 
-    return None
+    return []
 
 
-def load_input_file(
+def load_and_validate_input_file(
     filepath: str | Path,
-    json_record_keys: Sequence[str] = ("data",),
-) -> list[dict[str, Any]] | None:
-    """Load records from a supported file format.
+) -> list[dict[str, Any]]:
+    """Load and validate records from a supported file format.
 
-    Supported formats: JSON, CSV, TSV.
+    Supported formats: JSON, CSV, TSV. Other formats will cause a ValueError.
+    Records are validated against _REQUIRED_FIELDS before being returned;
+    missing required fields will cause a ValueError.
 
     Args:
         filepath: Path to the input file.
-        json_record_keys: Dict keys to check when parsing
-            JSON (e.g. ``["studies", "data"]``).
 
     Returns:
-        List of record dicts, or ``None`` if the format is
-        unrecognised.
+        List of record dicts. If the file format is
+        unrecognised (based on file extension) or required fields are missing,
+        raises ValueError.
     """
     ext = Path(filepath).suffix.lower()
     if ext == ".json":
-        with open(filepath) as fh:
-            input_data = json.load(fh)
-        return extract_records_from_json(
-            input_data, json_record_keys,
-        )
-    if ext == ".csv":
-        return extract_records_from_tabular(
-            filepath, delimiter=",",
-        )
-    if ext == ".tsv":
-        return extract_records_from_tabular(
-            filepath, delimiter="\t",
-        )
-    return None
+        records = extract_records_from_json(filepath)
+    elif ext == ".csv":
+        records = extract_records_from_tabular(filepath, delimiter=",")
+    elif ext == ".tsv":
+        records = extract_records_from_tabular(filepath, delimiter="\t")
+    else:
+        raise ValueError(f"Unsupported file format: {ext}. Supported: .json, .csv, .tsv")
+
+    if not records:
+        raise ValueError(f"File {filepath} seems to be empty. Check the format and content.")
+
+    for record in records:
+        for field in _REQUIRED_FIELDS:
+            if not record.get(field, "").strip():
+                raise ValueError(
+                    f"Record with alias {record.get('alias', '<missing>')} is missing required field: {field}"
+                )
+
+    return records
 
 
 # -----------------------------------------------------------
@@ -472,10 +345,7 @@ def _add_project_element(
     test: bool = False,
 ) -> None:
     """Append a ``<PROJECT>`` element to *project_set*."""
-    alias = study.get(
-        "alias",
-        study.get("STUDY_TITLE", "").replace(" ", "_")[:50],
-    )
+    alias = study.get("alias", "")
     if test:
         # Append 8-character hash of current timestamp for uniqueness in test mode
         timestamp_hash = hashlib.md5(
@@ -486,17 +356,17 @@ def _add_project_element(
     project = ET.SubElement(project_set, "PROJECT")
     project.set("alias", alias)
 
-    name_text = study.get("CENTER_PROJECT_NAME", alias)
+    name_text = study.get("project_name", study.get("study_title", ""))
     if name_text:
         name_el = ET.SubElement(project, "NAME")
         name_el.text = name_text
 
     title_el = ET.SubElement(project, "TITLE")
-    title_el.text = study.get("STUDY_TITLE", "")
+    title_el.text = study.get("study_title", "")
 
     desc_text = (
-        study.get("STUDY_ABSTRACT")
-        or study.get("STUDY_DESCRIPTION", "")
+        study.get("study_abstract")
+        or study.get("study_description", "")
     )
     if desc_text:
         desc_el = ET.SubElement(project, "DESCRIPTION")
@@ -658,9 +528,6 @@ def _do_submission(
 # Main
 # -----------------------------------------------------------
 
-_JSON_RECORD_KEYS: Final = ("studies", "data")
-
-
 @click.command(
     help="Submit studies to ENA via the Webin REST API v2.",
 )
@@ -713,19 +580,13 @@ def main(
 
     # -- Step 1: Load input file -------------------------
     logger.info("Loading input: %s", input_file)
-    studies = load_input_file(
-        input_file, json_record_keys=_JSON_RECORD_KEYS,
-    )
-    if studies is None:
-        logger.error("Unsupported file format. Supported: .json, .csv, .tsv")
-        sys.exit(1)
+    try:
+        studies = load_and_validate_input_file(input_file)
+    except ValueError as exc:
+        # Re-raise as click.BadParameter to get nice error formatting without a full stack trace
+        raise click.BadParameter(str(exc), param_hint="--input") from exc
 
     logger.info("Loaded %d study/studies from input", len(studies))
-
-    if not studies:
-        logger.info("No studies to submit")
-        write_results({"submitted": [], "failed": []}, output)
-        return
 
     results: dict[str, list[dict[str, Any]]] = {
         "submitted": [],

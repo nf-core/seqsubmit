@@ -130,36 +130,36 @@ Single study as a flat object:
 ```json
 {
   "alias": "study-gut-2026",
-  "STUDY_TITLE": "Gut microbiome study",
-  "STUDY_ABSTRACT": "Characterisation of gut microbial communities"
+  "study_title": "Gut microbiome study",
+  "study_abstract": "Characterisation of gut microbial communities"
 }
 ```
 
 #### CSV format
 
 ```csv
-alias,STUDY_TITLE,STUDY_ABSTRACT
+alias,study_title,study_abstract
 study-gut-2026,Gut microbiome study,Characterisation of gut microbial communities
 ```
 
 #### TSV format
 
 ```tsv
-alias	STUDY_TITLE	STUDY_ABSTRACT
+alias	study_title	study_abstract
 study-soil-2026	Soil microbiome study	Survey of soil microbiota
 ```
 
 #### Study metadata fields
 
-| Field                 | Required | Description                                                                                 |
-| --------------------- | -------- | ------------------------------------------------------------------------------------------- |
-| `STUDY_TITLE`         | Yes      | Descriptive title of the study.                                                             |
-| `alias`               | No       | Unique project alias within your Webin account. Derived from `STUDY_TITLE` if not provided. |
-| `STUDY_ABSTRACT`      | No       | Free-text abstract describing the study.                                                    |
-| `STUDY_DESCRIPTION`   | No       | Alternative to `STUDY_ABSTRACT`.                                                            |
-| `CENTER_PROJECT_NAME` | No       | Internal project name at your centre. Defaults to `alias`.                                  |
-| `existing_study_type` | No       | ENA study type (e.g. `Metagenomics`, `Other`).                                              |
-| `new_study_type`      | No       | Custom study type. Only used when `existing_study_type` is set to `Other`.                  |
+| Field                 | Required | Description                                                                  |
+| --------------------- | -------- | ---------------------------------------------------------------------------- |
+| `study_title`         | Yes      | Descriptive title of the study.                                              |
+| `alias`               | Yes      | Unique project alias within your Webin account. Max length is 50 characters. |
+| `study_abstract`      | No       | Free-text abstract describing the study.                                     |
+| `study_description`   | No       | Alternative to `study_abstract`.                                             |
+| `project_name`        | No       | Project name. Defaults to `study_title`.                                     |
+| `existing_study_type` | No       | ENA study type (e.g. `Metagenomics`, `Other`).                               |
+| `new_study_type`      | No       | Custom study type. Only used when `existing_study_type` is set to `Other`.   |
 
 An example metadata file is available at [assets/study_metadata.json](../assets/study_metadata.json).
 
