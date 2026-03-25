@@ -1,7 +1,7 @@
 {
     "-profile test_mag_multiple_bins_missing_metadata": {
         "content": [
-            16,
+            17,
             {
                 "BARRNAP": {
                     "barrnap": 0.9
@@ -22,6 +22,14 @@
             [
                 "mags",
                 "mags/genomes_metadata.csv",
+                "mags/multiqc",
+                "mags/multiqc/multiqc_data",
+                "mags/multiqc/multiqc_data/multiqc.log",
+                "mags/multiqc/multiqc_data/multiqc_citations.txt",
+                "mags/multiqc/multiqc_data/multiqc_data.json",
+                "mags/multiqc/multiqc_data/multiqc_software_versions.txt",
+                "mags/multiqc/multiqc_data/multiqc_sources.txt",
+                "mags/multiqc/multiqc_report.html",
                 "mags/no_coverage_paired_reads",
                 "mags/no_coverage_paired_reads/coverage",
                 "mags/no_coverage_paired_reads/coverage/no_coverage_paired_reads.tsv",
@@ -60,6 +68,12 @@
             ],
             [
                 "genomes_metadata.csv:md5,a75d1d35c762863c487f010f6a000910",
+                "multiqc.log:md5,66e1af1df4fd84eb6ac1aa57ecb5d6b3",
+                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
+                "multiqc_data.json:md5,8123a0125e961755dd4447b63520b4ce",
+                "multiqc_software_versions.txt:md5,1dea254d76424e9a0e5ad498e05d45ed",
+                "multiqc_sources.txt:md5,d2a044df39ce3c6abe5cdc2d67473490",
+                "multiqc_report.html:md5,80665f9539038d7fab651749febec217",
                 "no_coverage_paired_reads.tsv:md5,fb8374996c3bad9ddd296684d8c28628",
                 "no_rna_presence_bac.gff:md5,df19e1b84ba6f691d20c72b397c88abf",
                 "no_rna_presence.tsv:md5,abd958e8addba39c9e4d7f6b97a1a7c6",
@@ -73,6 +87,6 @@
             "nf-test": "0.9.0",
             "nextflow": "25.04.1"
         },
-        "timestamp": "2026-03-19T17:12:22.739259"
+        "timestamp": "2026-03-25T16:37:24.426014"
     }
 }

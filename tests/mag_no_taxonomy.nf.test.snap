@@ -1,7 +1,7 @@
 {
     "-profile test_mag_no_taxonomy": {
         "content": [
-            8,
+            9,
             {
                 "Workflow": {
                     "nf-core/seqsubmit": "v1.0.0dev"
@@ -10,6 +10,14 @@
             [
                 "mags",
                 "mags/genomes_metadata.csv",
+                "mags/multiqc",
+                "mags/multiqc/multiqc_data",
+                "mags/multiqc/multiqc_data/multiqc.log",
+                "mags/multiqc/multiqc_data/multiqc_citations.txt",
+                "mags/multiqc/multiqc_data/multiqc_data.json",
+                "mags/multiqc/multiqc_data/multiqc_software_versions.txt",
+                "mags/multiqc/multiqc_data/multiqc_sources.txt",
+                "mags/multiqc/multiqc_report.html",
                 "mags/no_taxonomy",
                 "mags/no_taxonomy/taxonomy",
                 "mags/no_taxonomy/taxonomy/no_taxonomy.bin2classification.txt",
@@ -31,6 +39,12 @@
             ],
             [
                 "genomes_metadata.csv:md5,b1d01539d787b77e30b9bacd5b23d51f",
+                "multiqc.log:md5,fe17075d5d9582044aaff80aad847961",
+                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
+                "multiqc_data.json:md5,37284229add460f4535b3c27c946df30",
+                "multiqc_software_versions.txt:md5,57fdf3fb8ab5ca39ae384d3cf1ae9e58",
+                "multiqc_sources.txt:md5,d2a044df39ce3c6abe5cdc2d67473490",
+                "multiqc_report.html:md5,57bcf167566caa403280a0038f7d79cd",
                 "no_taxonomy.bin2classification.txt:md5,e24c109efe807c7044a866999fd736f1",
                 "no_taxonomy.txt:md5,0f2082d3e397fd630d605dd60993b131",
                 "ENA_backup.json:md5,e339bef4b1e1e11c37ef72f3d9ef2c93",
@@ -41,6 +55,6 @@
             "nf-test": "0.9.0",
             "nextflow": "25.04.1"
         },
-        "timestamp": "2026-03-19T15:57:14.366463"
+        "timestamp": "2026-03-25T16:48:43.584726"
     }
 }

@@ -1,14 +1,22 @@
 {
-    "-profile test_assembly_no_coverage_paired_reads": {
+    "-profile test_assembly_no_study_complete_metadata": {
         "content": [
             6,
             {
+                "REGISTERSTUDY": {
+                    "mgnify-pipelines-toolkit": "1.4.21"
+                },
                 "Workflow": {
                     "nf-core/seqsubmit": "v1.0.0dev"
                 }
             },
             [
                 "metagenomic_assemblies",
+                "metagenomic_assemblies/complete_metadata",
+                "metagenomic_assemblies/complete_metadata/upload",
+                "metagenomic_assemblies/complete_metadata/upload/webin_cli",
+                "metagenomic_assemblies/complete_metadata/upload/webin_cli/complete_metadata_accessions.tsv",
+                "metagenomic_assemblies/complete_metadata_assembly_metadata.csv",
                 "metagenomic_assemblies/multiqc",
                 "metagenomic_assemblies/multiqc/multiqc_data",
                 "metagenomic_assemblies/multiqc/multiqc_data/multiqc.log",
@@ -17,31 +25,23 @@
                 "metagenomic_assemblies/multiqc/multiqc_data/multiqc_software_versions.txt",
                 "metagenomic_assemblies/multiqc/multiqc_data/multiqc_sources.txt",
                 "metagenomic_assemblies/multiqc/multiqc_report.html",
-                "metagenomic_assemblies/no_coverage_paired_reads",
-                "metagenomic_assemblies/no_coverage_paired_reads/coverage",
-                "metagenomic_assemblies/no_coverage_paired_reads/coverage/no_coverage_paired_reads.depth.txt",
-                "metagenomic_assemblies/no_coverage_paired_reads/upload",
-                "metagenomic_assemblies/no_coverage_paired_reads/upload/webin_cli",
-                "metagenomic_assemblies/no_coverage_paired_reads/upload/webin_cli/no_coverage_paired_reads_accessions.tsv",
-                "metagenomic_assemblies/no_coverage_paired_reads_assembly_metadata.csv",
                 "pipeline_info",
                 "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
             ],
             [
-                "multiqc.log:md5,f0581c03f3c6b93dbd9d7041bf413023",
+                "complete_metadata_assembly_metadata.csv:md5,d5b1575095ece78d988395b874440bef",
+                "multiqc.log:md5,0ffd75914a9aed929a0709ae6ed074cc",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
-                "multiqc_data.json:md5,52d4ff25685c9220279f3273484eda88",
-                "multiqc_software_versions.txt:md5,57fdf3fb8ab5ca39ae384d3cf1ae9e58",
+                "multiqc_data.json:md5,14518f81b55710a5b7e07ff86e77f635",
+                "multiqc_software_versions.txt:md5,e640e15de64dd5b779b09e71f35dbd21",
                 "multiqc_sources.txt:md5,d2a044df39ce3c6abe5cdc2d67473490",
-                "multiqc_report.html:md5,23ccd334e5826645d5db1fbbeff1df85",
-                "no_coverage_paired_reads.depth.txt:md5,bb5f99e74d21df3c73e0ae0f388bcbcb",
-                "no_coverage_paired_reads_assembly_metadata.csv:md5,91a2616ccedc6bb93c2209153bec50f0"
+                "multiqc_report.html:md5,c2d27f7d2dc117dd4791d2970dbcb8e0"
             ]
         ],
         "meta": {
             "nf-test": "0.9.0",
             "nextflow": "25.04.1"
         },
-        "timestamp": "2026-03-25T16:06:20.33222"
+        "timestamp": "2026-03-25T16:09:09.948413"
     }
 }

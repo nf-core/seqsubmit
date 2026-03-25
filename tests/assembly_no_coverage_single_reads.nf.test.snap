@@ -1,7 +1,7 @@
 {
     "-profile test_assembly_no_coverage_single_reads": {
         "content": [
-            5,
+            6,
             {
                 "Workflow": {
                     "nf-core/seqsubmit": "v1.0.0dev"
@@ -9,6 +9,14 @@
             },
             [
                 "metagenomic_assemblies",
+                "metagenomic_assemblies/multiqc",
+                "metagenomic_assemblies/multiqc/multiqc_data",
+                "metagenomic_assemblies/multiqc/multiqc_data/multiqc.log",
+                "metagenomic_assemblies/multiqc/multiqc_data/multiqc_citations.txt",
+                "metagenomic_assemblies/multiqc/multiqc_data/multiqc_data.json",
+                "metagenomic_assemblies/multiqc/multiqc_data/multiqc_software_versions.txt",
+                "metagenomic_assemblies/multiqc/multiqc_data/multiqc_sources.txt",
+                "metagenomic_assemblies/multiqc/multiqc_report.html",
                 "metagenomic_assemblies/no_coverage_single_reads",
                 "metagenomic_assemblies/no_coverage_single_reads/coverage",
                 "metagenomic_assemblies/no_coverage_single_reads/coverage/no_coverage_single_reads.depth.txt",
@@ -20,6 +28,12 @@
                 "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
             ],
             [
+                "multiqc.log:md5,29712ce710262129eabfcfb6ffa641d0",
+                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
+                "multiqc_data.json:md5,d3d129462271bcec26d19ca670c2158f",
+                "multiqc_software_versions.txt:md5,57fdf3fb8ab5ca39ae384d3cf1ae9e58",
+                "multiqc_sources.txt:md5,d2a044df39ce3c6abe5cdc2d67473490",
+                "multiqc_report.html:md5,809384ac9d6289c97e7a47365afd2734",
                 "no_coverage_single_reads.depth.txt:md5,bd88282b17e851377b1dd223839be150",
                 "no_coverage_single_reads_assembly_metadata.csv:md5,fc1beef7e8439eaf5329e02587460009"
             ]
@@ -28,6 +42,6 @@
             "nf-test": "0.9.0",
             "nextflow": "25.04.1"
         },
-        "timestamp": "2026-03-20T15:13:50.079728"
+        "timestamp": "2026-03-25T16:06:57.003548"
     }
 }
