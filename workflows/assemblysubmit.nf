@@ -95,19 +95,16 @@ workflow ASSEMBLYSUBMIT {
         false  // interleaved
     )
 
-    // Calculate average coverage using map operator
+    // Calculate average coverage using splitCsv operator
     average_coverage_ch = COVERM_CONTIG.out.coverage
-        .map { meta, coverage_file ->
-            // Read the file and calculate average
-            def lines = coverage_file.readLines()
-            if (lines.size() < 2) {
-                return [meta, 0.0]
-            }
-            def coverages = lines[1..-1].collect { line ->
-                line.split('\t')[1] as Double
-            }
+        .splitCsv(sep: '\t', skip: 1)
+        .map { meta, row ->
+            [meta, row[1] as Double]
+        }
+        .groupTuple()
+        .map { meta, coverages ->
             def average = coverages.sum() / coverages.size()
-            return [meta, average]
+            [meta, average]
         }
 
     // Update metadata with calculated coverage
