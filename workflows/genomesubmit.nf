@@ -81,7 +81,6 @@ workflow GENOMESUBMIT {
         genome_fasta,
         "true" // enables number of contigs check - ENA requires more than 1 contig for a bin/MAG submission
     )
-    // TODO add some logging here to track discarded assemblies
     validated_fastas = genome_fasta.join(FASTAVALIDATOR.out.success_log)
         .map { meta, fasta, _log ->
             [meta, fasta]

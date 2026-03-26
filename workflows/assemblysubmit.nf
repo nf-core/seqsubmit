@@ -72,13 +72,10 @@ workflow ASSEMBLYSUBMIT {
         assembly_fasta,
         "true" // enables number of contigs check - ENA requires more than 1 contig for an assembly submission
     )
-    // TODO add some logging here to track discarded assemblies
     validated_fastas = assembly_fasta.join(FASTAVALIDATOR.out.success_log)
         .map { meta, fasta, _log ->
             [meta, fasta]
         }
-
-    // TODO add human decontamination step
 
     // For assemblies without coverage, calculate coverage with CoverM
     validated_fastas.filter { meta, _fasta -> meta.coverage == null }
@@ -123,8 +120,6 @@ workflow ASSEMBLYSUBMIT {
     assemblies_with_coverage = validated_fastas
         .filter { meta, _fasta -> meta.coverage != null }
         .mix( assemblies_with_added_cov_ch )
-
-    // TODO add validation step to check number of lines in CSV matches number of assemblies
 
     assembly_metadata_csv = assemblies_with_coverage
         .map { meta, fasta ->
