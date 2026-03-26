@@ -90,6 +90,9 @@ sample,fasta,accession,fastq_1,fastq_2,assembly_software,binning_software,binnin
 lachnospira_eligens,data/bin_lachnospira_eligens.fa.gz,SRR24458089,,,spades_v3.15.5,metabat2_v2.6,default,CheckM2_v1.0.1,61.0,0.21,32.07,sediment metagenome,No,marine,cable_bacteria,marine_sediment,No,d__Bacteria;p__Proteobacteria;s__unclassified_Proteobacteria
 ```
 
+> [!IMPORTANT]
+> **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
+
 ### `metagenomic_assemblies` mode (`ASSEMBLYSUBMIT`)
 
 The input must follow `assets/schema_input_assembly.json`.
@@ -116,6 +119,9 @@ sample,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version
 assembly_1,data/contigs_1.fasta.gz,data/reads_1.fastq.gz,data/reads_2.fastq.gz,,ERR011322,SPAdes,3.15.5
 assembly_2,data/contigs_2.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 ```
+
+> [!IMPORTANT]
+> **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
 
 ## Usage
 
