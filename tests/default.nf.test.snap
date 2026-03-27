@@ -1,5 +1,5 @@
 {
-    "-profile test_mag_multiple_bins_missing_metadata": {
+    "-profile test": {
         "content": [
             17,
             {
@@ -82,6 +82,6 @@
             "nf-test": "0.9.0",
             "nextflow": "25.04.1"
         },
-        "timestamp": "2026-03-27T12:32:04.486728"
+        "timestamp": "2026-03-27T13:44:33.345037"
     }
 }
