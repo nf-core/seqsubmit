@@ -17,31 +17,26 @@
                 "metagenomic_assemblies/complete_metadata/upload/webin_cli",
                 "metagenomic_assemblies/complete_metadata/upload/webin_cli/complete_metadata_accessions.tsv",
                 "metagenomic_assemblies/complete_metadata_assembly_metadata.csv",
-                "metagenomic_assemblies/multiqc",
-                "metagenomic_assemblies/multiqc/multiqc_data",
-                "metagenomic_assemblies/multiqc/multiqc_data/multiqc.log",
-                "metagenomic_assemblies/multiqc/multiqc_data/multiqc_citations.txt",
-                "metagenomic_assemblies/multiqc/multiqc_data/multiqc_data.json",
-                "metagenomic_assemblies/multiqc/multiqc_data/multiqc_software_versions.txt",
-                "metagenomic_assemblies/multiqc/multiqc_data/multiqc_sources.txt",
-                "metagenomic_assemblies/multiqc/multiqc_report.html",
+                "multiqc",
+                "multiqc/multiqc_data",
+                "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc_citations.txt",
+                "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_software_versions.txt",
+                "multiqc/multiqc_data/multiqc_sources.txt",
+                "multiqc/multiqc_report.html",
                 "pipeline_info",
                 "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
             ],
             [
                 "complete_metadata_assembly_metadata.csv:md5,d5b1575095ece78d988395b874440bef",
-                "multiqc.log:md5,0ffd75914a9aed929a0709ae6ed074cc",
-                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
-                "multiqc_data.json:md5,14518f81b55710a5b7e07ff86e77f635",
-                "multiqc_software_versions.txt:md5,e640e15de64dd5b779b09e71f35dbd21",
-                "multiqc_sources.txt:md5,d2a044df39ce3c6abe5cdc2d67473490",
-                "multiqc_report.html:md5,c2d27f7d2dc117dd4791d2970dbcb8e0"
+                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
             ]
         ],
         "meta": {
             "nf-test": "0.9.0",
             "nextflow": "25.04.1"
         },
-        "timestamp": "2026-03-25T16:09:09.948413"
+        "timestamp": "2026-03-27T12:20:59.186788"
     }
 }

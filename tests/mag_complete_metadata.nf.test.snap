@@ -14,14 +14,6 @@
                 "mags/complete_metadata/upload/webin_cli",
                 "mags/complete_metadata/upload/webin_cli/complete_metadata_accessions.tsv",
                 "mags/genomes_metadata.csv",
-                "mags/multiqc",
-                "mags/multiqc/multiqc_data",
-                "mags/multiqc/multiqc_data/multiqc.log",
-                "mags/multiqc/multiqc_data/multiqc_citations.txt",
-                "mags/multiqc/multiqc_data/multiqc_data.json",
-                "mags/multiqc/multiqc_data/multiqc_software_versions.txt",
-                "mags/multiqc/multiqc_data/multiqc_sources.txt",
-                "mags/multiqc/multiqc_report.html",
                 "mags/upload",
                 "mags/upload/manifests",
                 "mags/upload/manifests/results",
@@ -31,25 +23,28 @@
                 "mags/upload/manifests/results/MAG_upload/manifests_test",
                 "mags/upload/manifests/results/MAG_upload/registered_MAGs_test.tsv",
                 "mags/upload/manifests/results/MAG_upload/submission.xml",
+                "multiqc",
+                "multiqc/multiqc_data",
+                "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc_citations.txt",
+                "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_software_versions.txt",
+                "multiqc/multiqc_data/multiqc_sources.txt",
+                "multiqc/multiqc_report.html",
                 "pipeline_info",
                 "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
             ],
             [
                 "genomes_metadata.csv:md5,ae2b884015d1850fa63365e8a64d9fc8",
-                "multiqc.log:md5,3d7cbf4832b5d456a9bc16b53b3ff94b",
-                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
-                "multiqc_data.json:md5,44d2f20f0db17bd3cc1d0257ab07bbe5",
-                "multiqc_software_versions.txt:md5,57fdf3fb8ab5ca39ae384d3cf1ae9e58",
-                "multiqc_sources.txt:md5,d2a044df39ce3c6abe5cdc2d67473490",
-                "multiqc_report.html:md5,fa67f512e57e908e19c840713ad0d1a4",
                 "ENA_backup.json:md5,e339bef4b1e1e11c37ef72f3d9ef2c93",
-                "submission.xml:md5,4b7d1d7e1b883a3eac57e1267943a8d6"
+                "submission.xml:md5,4b7d1d7e1b883a3eac57e1267943a8d6",
+                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
             ]
         ],
         "meta": {
             "nf-test": "0.9.0",
             "nextflow": "25.04.1"
         },
-        "timestamp": "2026-03-25T16:10:57.783771"
+        "timestamp": "2026-03-27T12:22:02.015517"
     }
 }

@@ -9,30 +9,25 @@
             },
             [
                 "mags",
-                "mags/multiqc",
-                "mags/multiqc/multiqc_data",
-                "mags/multiqc/multiqc_data/multiqc.log",
-                "mags/multiqc/multiqc_data/multiqc_citations.txt",
-                "mags/multiqc/multiqc_data/multiqc_data.json",
-                "mags/multiqc/multiqc_data/multiqc_software_versions.txt",
-                "mags/multiqc/multiqc_data/multiqc_sources.txt",
-                "mags/multiqc/multiqc_report.html",
+                "multiqc",
+                "multiqc/multiqc_data",
+                "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc_citations.txt",
+                "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_software_versions.txt",
+                "multiqc/multiqc_data/multiqc_sources.txt",
+                "multiqc/multiqc_report.html",
                 "pipeline_info",
                 "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
             ],
             [
-                "multiqc.log:md5,e3309f477c6395ea61d4923ed792aebc",
-                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
-                "multiqc_data.json:md5,7c8d1fd2dccde4249299d3f9617d2aa2",
-                "multiqc_software_versions.txt:md5,57fdf3fb8ab5ca39ae384d3cf1ae9e58",
-                "multiqc_sources.txt:md5,d2a044df39ce3c6abe5cdc2d67473490",
-                "multiqc_report.html:md5,a6ed0c8727067113dbefe2c1264c73cd"
+                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
             ]
         ],
         "meta": {
             "nf-test": "0.9.0",
             "nextflow": "25.04.1"
         },
-        "timestamp": "2026-03-25T16:49:04.514285"
+        "timestamp": "2026-03-27T12:43:36.609186"
     }
 }
