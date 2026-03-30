@@ -11,7 +11,7 @@
                     ]
                 ],
                 "1": [
-                    "versions.yml:md5,4711ed8f2fd35e895aefafebd29f0333"
+                    "versions.yml:md5,0664035de44b4d88c1a70a357c1a24f2"
                 ],
                 "manifest": [
                     [
@@ -19,33 +19,6 @@
                             "id": "test"
                         },
                         "test.manifest:md5,d41d8cd98f00b204e9800998ecf8427e"
-                    ]
-                ],
-                "versions": [
-                    "versions.yml:md5,4711ed8f2fd35e895aefafebd29f0333"
-                ]
-            },
-            {
-                "GENERATE_ASSEMBLY_MANIFEST": {
-                    "assembly_uploader": null
-                }
-            }
-        ],
-        "timestamp": "2026-03-13T14:02:14.937082",
-        "meta": {
-            "nf-test": "0.9.4",
-            "nextflow": "25.10.4"
-        }
-    },
-    "GENERATE_ASSEMBLY_MANIFEST completes with expected outputs": {
-        "content": [
-            {
-                "manifest": [
-                    [
-                        {
-                            "id": "test"
-                        },
-                        "233126d4c4d0.manifest:md5,cacedcfcce220081e7aa2f98c2f4ffd6"
                     ]
                 ],
                 "versions": [
@@ -58,10 +31,24 @@
                 }
             }
         ],
-        "timestamp": "2026-03-13T12:32:23.722449",
         "meta": {
-            "nf-test": "0.9.4",
-            "nextflow": "25.10.4"
-        }
+            "nf-test": "0.9.0",
+            "nextflow": "25.04.1"
+        },
+        "timestamp": "2026-03-25T16:53:50.281438"
+    },
+    "GENERATE_ASSEMBLY_MANIFEST completes with expected outputs": {
+        "content": [
+            {
+                "GENERATE_ASSEMBLY_MANIFEST": {
+                    "assembly_uploader": "assembly_uploader 1.3.4"
+                }
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.0",
+            "nextflow": "25.04.1"
+        },
+        "timestamp": "2026-03-25T17:34:01.598736"
     }
 }

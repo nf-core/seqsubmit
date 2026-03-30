@@ -4,17 +4,18 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { COVERM_CONTIG              } from '../modules/nf-core/coverm/contig/main'
-include { FASTAVALIDATOR             } from '../modules/nf-core/fastavalidator/main'
-include { GENERATE_ASSEMBLY_MANIFEST } from '../modules/local/generate_assembly_manifest/main'
-include { REGISTERSTUDY              } from '../modules/local/registerstudy/main'
-include { ENA_WEBIN_CLI              } from '../modules/local/ena_webin_cli'
+include { COVERM_CONTIG                   } from '../modules/nf-core/coverm/contig/main'
+include { FASTAVALIDATOR                  } from '../modules/nf-core/fastavalidator/main'
+include { GENERATE_ASSEMBLY_MANIFEST      } from '../modules/local/generate_assembly_manifest/main'
+include { REGISTERSTUDY                   } from '../modules/local/registerstudy/main'
+include { ENA_WEBIN_CLI_WRAPPER as SUBMIT } from '../modules/local/ena_webin_cli_wrapper'
+include { ENA_WEBIN_CLI_DOWNLOAD          } from '../modules/local/ena_webin_cli_download'
 
-include { MULTIQC                    } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap           } from 'plugin/nf-schema'
-include { paramsSummaryMultiqc       } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML     } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText     } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
+include { MULTIQC                         } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap                } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc            } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText          } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -69,15 +70,12 @@ workflow ASSEMBLYSUBMIT {
     // Check fasta files are properly formatted
     FASTAVALIDATOR (
         assembly_fasta,
-        "true" // is_metagenome flag
+        "true" // enables number of contigs check - ENA requires more than 1 contig for an assembly submission
     )
-    // TODO add some logging here to track discarded assemblies
     validated_fastas = assembly_fasta.join(FASTAVALIDATOR.out.success_log)
         .map { meta, fasta, _log ->
             [meta, fasta]
         }
-
-    // TODO add human decontamination step
 
     // For assemblies without coverage, calculate coverage with CoverM
     validated_fastas.filter { meta, _fasta -> meta.coverage == null }
@@ -94,19 +92,16 @@ workflow ASSEMBLYSUBMIT {
         false  // interleaved
     )
 
-    // Calculate average coverage using map operator
+    // Calculate average coverage using splitCsv operator
     average_coverage_ch = COVERM_CONTIG.out.coverage
-        .map { meta, coverage_file ->
-            // Read the file and calculate average
-            def lines = coverage_file.readLines()
-            if (lines.size() < 2) {
-                return [meta, 0.0]
-            }
-            def coverages = lines[1..-1].collect { line ->
-                line.split('\t')[1] as Double
-            }
+        .splitCsv(sep: '\t', skip: 1)
+        .map { meta, row ->
+            [meta, row[1] as Double]
+        }
+        .groupTuple()
+        .map { meta, coverages ->
             def average = coverages.sum() / coverages.size()
-            return [meta, average]
+            [meta, average]
         }
 
     // Update metadata with calculated coverage
@@ -126,8 +121,6 @@ workflow ASSEMBLYSUBMIT {
         .filter { meta, _fasta -> meta.coverage != null }
         .mix( assemblies_with_added_cov_ch )
 
-    // TODO add validation step to check number of lines in CSV matches number of assemblies
-
     assembly_metadata_csv = assemblies_with_coverage
         .map { meta, fasta ->
             def header = 'Runs,Coverage,Assembler,Version,Filepath,Sample'
@@ -141,8 +134,12 @@ workflow ASSEMBLYSUBMIT {
             ].join(',')
 
             def content = "${header}\n${row}"
-            def csv_file = file("${params.outdir}/${params.mode}/${meta.id}_assembly_metadata.csv")
-            csv_file.parent.toFile().mkdirs()
+
+            // Create output directory if it doesn't exist
+            def outDir = file("${params.outdir}/${params.mode}")
+            outDir.mkdirs()
+
+            def csv_file = file("${outDir}/${meta.id}_assembly_metadata.csv")
             csv_file.text = content
 
             [meta, csv_file]
@@ -171,8 +168,13 @@ workflow ASSEMBLYSUBMIT {
         study_accession_ch.first()
     )
 
-    ENA_WEBIN_CLI(
-        assemblies_with_coverage.join(GENERATE_ASSEMBLY_MANIFEST.out.manifest)
+    ENA_WEBIN_CLI_DOWNLOAD (
+        params.webin_cli_version
+    )
+
+    SUBMIT (
+        assemblies_with_coverage.join(GENERATE_ASSEMBLY_MANIFEST.out.manifest),
+        ENA_WEBIN_CLI_DOWNLOAD.out.webin_cli_jar
     )
 
     //

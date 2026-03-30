@@ -1,0 +1,7 @@
+---
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - "bioconda::mgnify-pipelines-toolkit"
+  - "conda-forge::openjdk"

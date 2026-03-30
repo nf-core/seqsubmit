@@ -1,0 +1,53 @@
+name: "ena_webin_cli_wrapper"
+description: Runs ENA Webin-CLI to validate or submit assemblies, using the webin_cli_handler script from mgnify-pipelines-toolkit.
+keywords:
+  - ena
+  - webin
+  - submission
+  - assembly
+tools:
+  - "mgnify-pipelines-toolkit":
+      description: "A toolkit of utilities for MGnify pipelines, including webin_cli_handler for robust Webin-CLI submission."
+      homepage: "https://github.com/EBI-Metagenomics/mgnify-pipelines-toolkit"
+      documentation: "https://github.com/EBI-Metagenomics/mgnify-pipelines-toolkit"
+      licence: ["Apache-2.0"]
+      identifier: null
+
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information.
+          e.g. `[ id:'sample1' ]`
+    - submission_item:
+        type: file
+        description: |
+          FASTA file for submission (assembly, MAG, or bin).
+    - manifest:
+        type: file
+        description: |
+          Webin-CLI submission manifest file.
+  - - webin_cli_jar:
+        type: file
+        description: |
+          The Webin-CLI JAR file downloaded by ena_webin_cli_download.
+          pattern: "webin-cli-*.jar"
+
+output:
+  - - accessions:
+        type: file
+        description: |
+          TSV file containing the accession assigned by ENA for the submitted item.
+          File has two columns: "alias" and "accession".
+  - - versions:
+    - "versions.yml":
+        type: file
+        description: File containing software versions.
+        pattern: "versions.yml"
+
+authors:
+  - "@KateSakharova"
+  - "@ochkalova"
+maintainers:
+  - "@KateSakharova"
+  - "@ochkalova"

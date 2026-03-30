@@ -38,9 +38,9 @@ Currently, the pipeline supports three submission modes, each routed to a dedica
 
 Setup your environment secrets before running the pipeline:
 
-`nextflow secrets set WEBIN_ACCOUNT "Webin-XXX"`
+`nextflow secrets set ENA_WEBIN "Webin-XXX"`
 
-`nextflow secrets set WEBIN_PASSWORD "XXX"`
+`nextflow secrets set ENA_WEBIN_PASSWORD "XXX"`
 
 Make sure you update commands above with your authorised credentials.
 
@@ -55,34 +55,43 @@ The input must follow `assets/schema_input_genome.json`.
 Required columns:
 
 - `sample`
-- `fasta` (must end with `.fa.gz` or `.fasta.gz`)
+- `fasta` (must end with `.fa.gz`, `.fasta.gz`, or `.fna.gz`)
 - `accession`
 - `assembly_software`
 - `binning_software`
 - `binning_parameters`
-- `stats_generation_software`
 - `metagenome`
 - `environmental_medium`
 - `broad_environment`
 - `local_environment`
 - `co-assembly`
 
-Columns that required for now, but will be optional in the nearest future:
+At least one of the following must be provided per row:
 
+- reads (`fastq_1`, optional `fastq_2` for paired-end)
+- `genome_coverage`
+
+Additional supported columns:
+
+- `stats_generation_software`
 - `completeness`
 - `contamination`
-- `genome_coverage`
 - `RNA_presence`
 - `NCBI_lineage`
 
-Those fields are metadata required for [genome_uploader](https://github.com/EBI-Metagenomics/genome_uploader) package.
+If `genome_coverage`, `stats_generation_software`, `completeness`, `contamination`, `RNA_presence`, or `NCBI_lineage` are missing, the workflow can calculate or infer them when the required inputs are available.
 
-Example `samplesheet_genome.csv`:
+Those fields are metadata required for the [genome_uploader](https://github.com/EBI-Metagenomics/genome_uploader) package.
+
+Example `samplesheet_genomes.csv`:
 
 ```csv
-sample,fasta,accession,assembly_software,binning_software,binning_parameters,stats_generation_software,completeness,contamination,genome_coverage,metagenome,co-assembly,broad_environment,local_environment,environmental_medium,RNA_presence,NCBI_lineage
-lachnospira_eligens,data/bin_lachnospira_eligens.fa.gz,SRR24458089,spades_v3.15.5,metabat2_v2.6,default,CheckM2_v1.0.1,61.0,0.21,32.07,sediment metagenome,No,marine,cable_bacteria,marine_sediment,No,d__Bacteria;p__Proteobacteria;s_unclassified_Proteobacteria
+sample,fasta,accession,fastq_1,fastq_2,assembly_software,binning_software,binning_parameters,stats_generation_software,completeness,contamination,genome_coverage,metagenome,co-assembly,broad_environment,local_environment,environmental_medium,RNA_presence,NCBI_lineage
+lachnospira_eligens,data/bin_lachnospira_eligens.fa.gz,SRR24458089,,,spades_v3.15.5,metabat2_v2.6,default,CheckM2_v1.0.1,61.0,0.21,32.07,sediment metagenome,No,marine,cable_bacteria,marine_sediment,No,d__Bacteria;p__Proteobacteria;s__unclassified_Proteobacteria
 ```
+
+> [!IMPORTANT]
+> **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
 
 ### `metagenomic_assemblies` mode (`ASSEMBLYSUBMIT`)
 
@@ -91,7 +100,7 @@ The input must follow `assets/schema_input_assembly.json`.
 Required columns:
 
 - `sample`
-- `fasta` (must end with `.fa.gz` or `.fasta.gz`)
+- `fasta` (must end with `.fa.gz`, `.fasta.gz`, or `.fna.gz`)
 - `run_accession`
 - `assembler`
 - `assembler_version`
@@ -111,6 +120,9 @@ assembly_1,data/contigs_1.fasta.gz,data/reads_1.fastq.gz,data/reads_2.fastq.gz,,
 assembly_2,data/contigs_2.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 ```
 
+> [!IMPORTANT]
+> **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
+
 ## Usage
 
 > [!NOTE]
@@ -121,6 +133,10 @@ assembly_2,data/contigs_2.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 All data submitted through this pipeline must be associated with an ENA study (project). You can either pass an accession of your existing study via `--submission_study`or provide a metadata file via `--study_metadata` and the pipeline will register the study with ENA before submitting your data.
 
 See the [usage documentation](docs/usage.md#submission-study) for more details.
+
+### Database setup (`CheckM2` and `CAT_pack`)
+
+The `mags`/`bins` workflow requires databases for completeness/contamination estimation and taxonomy assignment. See [Usage documentation](usage.md) for details.
 
 ### Required parameters:
 
@@ -137,7 +153,7 @@ See the [usage documentation](docs/usage.md#submission-study) for more details.
 | Parameter           | Description                                                                              |
 | ------------------- | ---------------------------------------------------------------------------------------- |
 | `--upload_tpa`      | Flag to control the type of assembly study (third party assembly or not). Default: false |
-| `--test_upload`     | Upload to TEST ENA server instead of LIVE. Default: false                                |
+| `--test_upload`     | Upload to TEST ENA server instead of LIVE. Default: true                                 |
 | `--webincli_submit` | If set to false, submissions will be validated, but not submitted. Default: true         |
 
 General command template:
@@ -202,8 +218,8 @@ For more details and further functionality, please refer to the [usage documenta
 
 Key output locations in `--outdir`:
 
-- `upload/manifests/`: generated manifest files for submission
-- `upload/webin_cli/`: ENA Webin CLI reports
+- `mags/` or `bins/`: genome metadata, manifests, and per-sample submission support files
+- `metagenomic_assemblies/`: assembly metadata CSVs and per-sample coverage files
 - `multiqc/`: MultiQC summary report
 - `pipeline_info/`: execution reports, trace, DAG, and software versions
 

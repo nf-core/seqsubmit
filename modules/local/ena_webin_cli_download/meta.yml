@@ -1,0 +1,35 @@
+name: "ena_webin_cli_download"
+description: Downloads the ENA Webin-CLI JAR file from GitHub releases.
+keywords:
+  - ena
+  - webin
+  - submission
+  - download
+tools:
+  - "wget":
+      description: "A free utility for non-interactive download of files from the web."
+      homepage: "https://www.gnu.org/software/wget/"
+      documentation: "https://www.gnu.org/software/wget/manual/"
+      licence: ["GPL-3.0-or-later"]
+      identifier: null
+
+input:
+  - - version:
+        type: value
+        description: |
+          Version of the Webin-CLI JAR to download.
+          Example: "7.4.1"
+
+output:
+  webin_cli_jar:
+    - - "webin-cli-*.jar":
+          type: file
+          description: The downloaded Webin-CLI JAR file.
+          pattern: "webin-cli-*.jar"
+
+authors:
+  - "@KateSakharova"
+  - "@ochkalova"
+maintainers:
+  - "@KateSakharova"
+  - "@ochkalova"

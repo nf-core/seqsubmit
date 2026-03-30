@@ -20,18 +20,27 @@ include { CHECKM2_PREDICT          } from '../../modules/nf-core/checkm2/predict
 workflow GENOME_EVALUATION {
 
     take:
-    ch_fasta   // [meta, fasta_file]
+    ch_fasta   // channel: [ val(meta), path(fasta) ]
 
     main:
     ch_versions = channel.empty()
 
-    // Run checkM2 database download if there is no db path provided
+    //
+    // Database preparation
+    //
+
     if (!params.checkm2_db || !file(params.checkm2_db).exists()) {
-        CHECKM2_DATABASEDOWNLOAD(params.checkm2_db_zenodo_id)
-        ch_check2_db = CHECKM2_DATABASEDOWNLOAD.out.database
+        // Conditional download: only trigger if ch_fasta has items
+        ch_download_trigger = ch_fasta
+            .map { _meta, _fasta -> params.checkm2_db_zenodo_id }
+            .first()  // Only need one trigger regardless of how many fasta files
+
+        CHECKM2_DATABASEDOWNLOAD(ch_download_trigger)
+        ch_checkm2_db = CHECKM2_DATABASEDOWNLOAD.out.database
     }
     else {
-        ch_check2_db = channel.of(
+        // Use existing database
+        ch_checkm2_db = channel.of(
             [
                 [id: "checkm2_db"],
                 file(params.checkm2_db),
@@ -39,13 +48,17 @@ workflow GENOME_EVALUATION {
         )
     }
 
+    //
+    // Genome evaluation
+    //
+
     CHECKM2_PREDICT(
         ch_fasta,
-        ch_check2_db.first(),
+        ch_checkm2_db,
     )
 
     emit:
-    genome_evaluation = CHECKM2_PREDICT.out.checkm2_tsv  // [meta, stats.tsv]
-    stats_versions = CHECKM2_PREDICT.out.versions_checkm2_predict
+    genome_evaluation = CHECKM2_PREDICT.out.checkm2_tsv  // channel: [ val(meta), path(tsv) ]
+    stats_versions    = CHECKM2_PREDICT.out.versions_checkm2_predict
 
 }

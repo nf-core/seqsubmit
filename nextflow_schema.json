@@ -51,7 +51,7 @@
             "properties": {
                 "rrna_limit": {
                     "type": "number",
-                    "description": "Minimum number of rRNA.",
+                    "description": "Minimum percentage of 16S, 23S, and 5S rRNA gene length recovered to count the gene as present.",
                     "default": 80,
                     "fa_icon": "fas fa-users-cog"
                 },
@@ -72,7 +72,7 @@
             "properties": {
                 "cat_db": {
                     "type": "string",
-                    "description": "Path to CAT_pack DB",
+                    "description": "Path to local CAT_pack DB",
                     "help": "Database should be pre-downloaded using CATpack commands. The folder with database should contain sub-folders 'db' with files .dmnd, .fastaid2LCAtaxid, .taxids_with_multiple_offspring, etc. And subfolder 'tax' that should contain taxonomy files like .dmp, .taxdump.tar.gz, .prot.accession2taxid.FULL.gz, etc",
                     "fa_icon": "fas fa-users-cog"
                 },
@@ -294,9 +294,9 @@
                 },
                 "upload_force": {
                     "type": "boolean",
-                    "description": "Flag to control upload retries",
+                    "description": "Enables force mode for genome_uploader (used for MAGs/BINs submission)",
                     "default": true,
-                    "help": "Forces reset of sample xmls generation. This is useful if you changed something in your tsv table, or if ENA metadata haven't been downloaded correctly (you can check this in ENA_backup.json). Default: true"
+                    "help": "Forces reset of bin/MAG sample xmls generation. This is useful if you changed something in your tsv table, or if ENA metadata haven't been downloaded correctly (you can check this in ENA_backup.json). Default: true"
                 },
                 "submission_study": {
                     "type": "string",
@@ -316,6 +316,12 @@
                     "description": "Submit or validate",
                     "default": true,
                     "help": "Flag to run submission or validation. Submission (true) will run upload of data with ena-webin-cli. Validation (false) validates correctness of input files, it does not do submission. Default: true (submit)"
+                },
+                "webin_cli_version": {
+                    "type": "string",
+                    "description": "Version of webon-cli.jar to use for submission",
+                    "default": "9.0.3",
+                    "help": "Check version https://github.com/enasequence/webin-cli"
                 }
             }
         }

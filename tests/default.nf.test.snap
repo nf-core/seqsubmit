@@ -1,0 +1,87 @@
+{
+    "-profile test": {
+        "content": [
+            17,
+            {
+                "BARRNAP": {
+                    "barrnap": 0.9
+                },
+                "COUNT_RNA": {
+                    "python": "3.8.13"
+                },
+                "COVERM_GENOME": {
+                    "coverm": "0.7.0"
+                },
+                "TRNASCANSE": {
+                    "tRNAscan-SE": "2.0.12"
+                },
+                "Workflow": {
+                    "nf-core/seqsubmit": "v1.0.0dev"
+                }
+            },
+            [
+                "mags",
+                "mags/genomes_metadata.csv",
+                "mags/no_coverage_paired_reads",
+                "mags/no_coverage_paired_reads/coverage",
+                "mags/no_coverage_paired_reads/coverage/no_coverage_paired_reads.tsv",
+                "mags/no_coverage_paired_reads/upload",
+                "mags/no_coverage_paired_reads/upload/webin_cli",
+                "mags/no_coverage_paired_reads/upload/webin_cli/no_coverage_paired_reads_accessions.tsv",
+                "mags/no_rna_presence",
+                "mags/no_rna_presence/rna",
+                "mags/no_rna_presence/rna/barrnap",
+                "mags/no_rna_presence/rna/barrnap/no_rna_presence_bac.gff",
+                "mags/no_rna_presence/rna/trnascanse",
+                "mags/no_rna_presence/rna/trnascanse/no_rna_presence.log",
+                "mags/no_rna_presence/rna/trnascanse/no_rna_presence.stats",
+                "mags/no_rna_presence/rna/trnascanse/no_rna_presence.tsv",
+                "mags/no_rna_presence/upload",
+                "mags/no_rna_presence/upload/webin_cli",
+                "mags/no_rna_presence/upload/webin_cli/no_rna_presence_accessions.tsv",
+                "mags/no_taxonomy",
+                "mags/no_taxonomy/taxonomy",
+                "mags/no_taxonomy/taxonomy/no_taxonomy.bin2classification.txt",
+                "mags/no_taxonomy/taxonomy/no_taxonomy.txt",
+                "mags/no_taxonomy/upload",
+                "mags/no_taxonomy/upload/webin_cli",
+                "mags/no_taxonomy/upload/webin_cli/no_taxonomy_accessions.tsv",
+                "mags/upload",
+                "mags/upload/manifests",
+                "mags/upload/manifests/results",
+                "mags/upload/manifests/results/MAG_upload",
+                "mags/upload/manifests/results/MAG_upload/ENA_backup.json",
+                "mags/upload/manifests/results/MAG_upload/genome_samples.xml",
+                "mags/upload/manifests/results/MAG_upload/manifests_test",
+                "mags/upload/manifests/results/MAG_upload/registered_MAGs_test.tsv",
+                "mags/upload/manifests/results/MAG_upload/submission.xml",
+                "multiqc",
+                "multiqc/multiqc_data",
+                "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc_citations.txt",
+                "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_software_versions.txt",
+                "multiqc/multiqc_data/multiqc_sources.txt",
+                "multiqc/multiqc_report.html",
+                "pipeline_info",
+                "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
+            ],
+            [
+                "genomes_metadata.csv:md5,a75d1d35c762863c487f010f6a000910",
+                "no_coverage_paired_reads.tsv:md5,fb8374996c3bad9ddd296684d8c28628",
+                "no_rna_presence_bac.gff:md5,df19e1b84ba6f691d20c72b397c88abf",
+                "no_rna_presence.tsv:md5,abd958e8addba39c9e4d7f6b97a1a7c6",
+                "no_taxonomy.bin2classification.txt:md5,e24c109efe807c7044a866999fd736f1",
+                "no_taxonomy.txt:md5,0f2082d3e397fd630d605dd60993b131",
+                "ENA_backup.json:md5,e339bef4b1e1e11c37ef72f3d9ef2c93",
+                "submission.xml:md5,4b7d1d7e1b883a3eac57e1267943a8d6",
+                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.0",
+            "nextflow": "25.04.1"
+        },
+        "timestamp": "2026-03-27T13:44:33.345037"
+    }
+}

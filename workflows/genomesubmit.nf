@@ -3,22 +3,24 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { GENOME_UPLOAD            } from '../modules/local/genome_upload'
-include { ENA_WEBIN_CLI            } from '../modules/local/ena_webin_cli'
-include { REGISTERSTUDY            } from '../modules/local/registerstudy/main'
-include { RENAME_FASTA_FOR_CATPACK } from '../modules/local/rename_fasta_for_catpack'
+include { GENOME_UPLOAD as CREATE_MANIFESTS } from '../modules/local/genome_upload'
+include { ENA_WEBIN_CLI_WRAPPER as SUBMIT   } from '../modules/local/ena_webin_cli_wrapper'
+include { ENA_WEBIN_CLI_DOWNLOAD            } from '../modules/local/ena_webin_cli_download'
+include { REGISTERSTUDY                     } from '../modules/local/registerstudy/main'
+include { RENAME_FASTA_FOR_CATPACK          } from '../modules/local/rename_fasta_for_catpack'
 
-include { COVERM_GENOME            } from '../modules/nf-core/coverm/genome'
-include { MULTIQC                  } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap         } from 'plugin/nf-schema'
+include { FASTAVALIDATOR                    } from '../modules/nf-core/fastavalidator/main'
+include { COVERM_GENOME                     } from '../modules/nf-core/coverm/genome'
+include { MULTIQC                           } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap                  } from 'plugin/nf-schema'
 
-include { GENOME_EVALUATION        } from '../subworkflows/local/genome_evaluation'
-include { RNA_DETECTION            } from '../subworkflows/local/rna_detection'
-include { FASTA_CLASSIFY_CATPACK   } from '../subworkflows/nf-core/fasta_classify_catpack/main'
+include { GENOME_EVALUATION                 } from '../subworkflows/local/genome_evaluation'
+include { RNA_DETECTION                     } from '../subworkflows/local/rna_detection'
+include { FASTA_CLASSIFY_CATPACK            } from '../subworkflows/nf-core/fasta_classify_catpack/main'
 
-include { paramsSummaryMultiqc     } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText   } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
+include { paramsSummaryMultiqc              } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML            } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText            } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -74,21 +76,34 @@ workflow GENOMESUBMIT {
     genome_fasta = genome_fasta_and_reads.map{meta, fasta, _fq1 -> [meta, fasta]}
     genome_reads = genome_fasta_and_reads.map{meta, _fasta, reads -> [meta, reads]}
 
+    // --------- Check fasta files are properly formatted
+    FASTAVALIDATOR (
+        genome_fasta,
+        "true" // enables number of contigs check - ENA requires more than 1 contig for a bin/MAG submission
+    )
+    validated_fastas = genome_fasta.join(FASTAVALIDATOR.out.success_log)
+        .map { meta, fasta, _log ->
+            [meta, fasta]
+        }
+
     // --------- Genome coverage calculation
-    genome_fasta
-        .branch { meta, fasta ->
+    validated_fastas
+        .branch { meta, _fasta ->
             genome_coverage_ref_input: meta.genome_coverage == null
             genome_coverage_present: true  // Everything else goes here
         }
     .set { branched_coverage_results }
 
-    genome_reads.filter { meta, reads -> meta.genome_coverage == null }
-        .map { meta, reads -> [meta, reads] }
-        .set { genome_coverage_fq_input }
+    branched_coverage_results.genome_coverage_ref_input.join(genome_reads)
+        .multiMap { meta, fasta, fastq ->
+            genome: [ meta, fasta ]
+            raw_reads: [ meta, fastq ]
+        }
+        .set { coverm_input }
 
     COVERM_GENOME (
-        genome_coverage_fq_input,
-        branched_coverage_results.genome_coverage_ref_input,
+        coverm_input.raw_reads,
+        coverm_input.genome,
         false,
         false,
         'file'
@@ -173,21 +188,21 @@ workflow GENOMESUBMIT {
     )
 
     // build input structures for CAT_DB depending on what provided as input
-    def cat_db_input = (params.cat_db != null && params.cat_db != '')
+    def cat_db_input = params.cat_db
         ? channel.of( [['id': 'CAT_DB'], file(params.cat_db)] )
         : channel.empty()
 
-    def cat_db_id_input = (params.cat_db_download_id != null && params.cat_db_download_id != '')
+    def cat_db_id_input = (!params.cat_db && params.cat_db_download_id)
         ? channel.of( [['id': 'CAT_DB_id'], params.cat_db_download_id] )
         : channel.empty()
 
     FASTA_CLASSIFY_CATPACK (
-        RENAME_FASTA_FOR_CATPACK.out.renamed_fasta,
-        channel.empty(),
+        RENAME_FASTA_FOR_CATPACK.out.renamed_fasta,  // ch_bins
+        channel.empty(),                             // ch_contigs - empty because we classify bins, not contigs
         cat_db_input,
         cat_db_id_input,
-        false,  // generate summaries
-        '.fasta'
+        false,                                       // disable summary generation
+        '.fasta'                                     // bin_suffix - the suffix of the renamed fasta files
     )
 
     fasta_updated_with_taxonomy = FASTA_CLASSIFY_CATPACK.out.bat_classification
@@ -205,7 +220,7 @@ workflow GENOMESUBMIT {
         .map { meta, fasta ->
             [
                 meta.id,
-                fasta,
+                fasta.getName(),
                 meta.accession,
                 meta.assembly_software,
                 meta.binning_software,
@@ -224,7 +239,8 @@ workflow GENOMESUBMIT {
             ].join('\t')
         }
         .collectFile(
-            name: "${params.outdir}/${params.mode}/genomes_metadata.csv",
+            name: 'genomes_metadata.csv',
+            storeDir: "${params.outdir}/${params.mode}",
             seed: [
                 'genome_name',
                 'genome_path',
@@ -247,6 +263,7 @@ workflow GENOMESUBMIT {
             newLine: true
         )
 
+    // --------- Register study if accession not provided
     def study_accession_ch
     if (params.submission_study) {
         study_accession_ch = channel.of(params.submission_study)
@@ -262,24 +279,43 @@ workflow GENOMESUBMIT {
             }
     }
 
-    GENOME_UPLOAD(
-        genome_fasta.map{meta, fasta -> fasta}.collect(),
+    // --------- Generate manifests
+    CREATE_MANIFESTS(
+        fasta_updated_with_stats.map{meta, fasta -> fasta}.collect(),
         genome_metadata_csv,
-        params.mode,
+        params.mode,     // mags or bins
         study_accession_ch.first()
     )
-    ch_versions = ch_versions.mix( GENOME_UPLOAD.out.versions )
 
-    //manifests_ch = GENOME_UPLOAD.out.manifests.flatten()
-    //    .map { manifest ->
-    //        def prefix = manifest.name.replaceAll(/_\d+\.manifest$/, '')
-    //        def meta = [id: prefix]
-    //        [ meta, manifest ]
-    //}
-    //combined_ch = ch_mags.join(manifests_ch)
+    // All manifests were generated in one run
+    // Manifests should be separated into different channels using prefix as id
+    manifests_ch = CREATE_MANIFESTS.out.manifests.flatten()
+        .map { manifest ->
+            def prefix = params.test_upload ?
+                manifest.name.replaceAll(/_\d+\.manifest$/, '') :  // Remove extension and hash suffix appended in test mode
+                manifest.name.replaceAll(/\.manifest$/, '')        // Remove only extension in live mode
+            def meta = [id: prefix]
+            [ meta, manifest ]
+    }
+    // Combine fasta and manifests
+    ch_combined = fasta_updated_with_stats
+    .map { meta, fasta -> [meta.id, meta, fasta] }
+    .join(
+        manifests_ch.map { meta, manifest -> [meta.id, manifest] }  // Has only [id: prefix]
+    )
+    .map { id, full_meta, fasta, manifest ->
+        [full_meta, fasta, manifest]
+    }
 
-    //ENA_WEBIN_CLI( combined_ch )
-    //ch_versions = ch_versions.mix( ENA_WEBIN_CLI.out.versions.first() )
+    // --------- Upload data to ENA
+    ENA_WEBIN_CLI_DOWNLOAD (
+        params.webin_cli_version
+    )
+
+    SUBMIT (
+        ch_combined,
+        ENA_WEBIN_CLI_DOWNLOAD.out.webin_cli_jar
+    )
 
     //
     // Collate and save software versions
@@ -324,17 +360,17 @@ workflow GENOMESUBMIT {
         )
     )
 
-    //MULTIQC (
-    //    ch_multiqc_files.collect(),
-    //    ch_multiqc_config.toList(),
-    //    ch_multiqc_custom_config.toList(),
-    //    ch_multiqc_logo.toList(),
-    //    [],
-    //    []
-    //)
+    MULTIQC (
+        ch_multiqc_files.collect(),
+        ch_multiqc_config.toList(),
+        ch_multiqc_custom_config.toList(),
+        ch_multiqc_logo.toList(),
+        [],
+        []
+    )
 
     emit:
-    multiqc_report = channel.empty() // MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
 
 }

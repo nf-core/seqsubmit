@@ -1,0 +1,42 @@
+{
+    "-profile test_assembly_no_study_complete_metadata": {
+        "content": [
+            6,
+            {
+                "REGISTERSTUDY": {
+                    "mgnify-pipelines-toolkit": "1.4.21"
+                },
+                "Workflow": {
+                    "nf-core/seqsubmit": "v1.0.0dev"
+                }
+            },
+            [
+                "metagenomic_assemblies",
+                "metagenomic_assemblies/complete_metadata",
+                "metagenomic_assemblies/complete_metadata/upload",
+                "metagenomic_assemblies/complete_metadata/upload/webin_cli",
+                "metagenomic_assemblies/complete_metadata/upload/webin_cli/complete_metadata_accessions.tsv",
+                "metagenomic_assemblies/complete_metadata_assembly_metadata.csv",
+                "multiqc",
+                "multiqc/multiqc_data",
+                "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc_citations.txt",
+                "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_software_versions.txt",
+                "multiqc/multiqc_data/multiqc_sources.txt",
+                "multiqc/multiqc_report.html",
+                "pipeline_info",
+                "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
+            ],
+            [
+                "complete_metadata_assembly_metadata.csv:md5,d5b1575095ece78d988395b874440bef",
+                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.0",
+            "nextflow": "25.04.1"
+        },
+        "timestamp": "2026-03-27T12:20:59.186788"
+    }
+}

@@ -7,9 +7,9 @@ Changes in 'fastavalidator/meta.yml':
          description: Input fasta file
          pattern: "*.fasta"
          ontologies: []
-+  - - is_metagenome:
++  - - count_contigs:
 +        type: boolean
-+        description: True if the fasta file is from a metagenome. Enables number of contigs check.
++        description: Enables number of contigs check (ENA requires more than 1 contig for a contig-level assembly submission)
  output:
    success_log:
      - - meta:
@@ -21,7 +21,7 @@ Changes in 'fastavalidator/main.nf':
  
      input:
      tuple val(meta), path(fasta)
-+    val(is_metagenome)
++    val(count_contigs)
  
      output:
 -    tuple val(meta), path('*.success.log')  , emit: success_log , optional: true
@@ -49,7 +49,7 @@ Changes in 'fastavalidator/main.nf':
 +    # One more check: count contigs. More than 1 contig required.
 +    echo "[INFO] Checking contig count..."
 +
-+    if [ "${is_metagenome}" = true ]; then
++    if [ "${count_contigs}" = true ]; then
 +        if [[ "${fasta}" == *.gz ]]; then
 +            CONTIGS=\$(zcat "${fasta}" | grep -c '^>')
 +        else

@@ -24,22 +24,30 @@ nextflow_process {
         }
 
         then {
-            assert process.success
-            assertAll(
-                { assert snapshot(
-                    sanitizeOutput(process.out),
-                    path(process.out.versions[0]).yaml
-                ).match() },
-                { assert process.out.manifest.size() == 1 },
-                { assert process.out.manifest[0][1].toString().endsWith(".manifest") },
-                {
-                    def manifestContent = path(process.out.manifest[0][1]).text
-                    assert manifestContent.contains("PRJ12345") : "PRJ12345 not found in manifest file"
-                }
-            )
-        }
+        assert process.success
+        assertAll(
+            // Only snapshot versions, not the manifest because it contains a timestamp
+            { assert snapshot(
+                path(process.out.versions[0]).yaml
+            ).match() },
+            { assert process.out.manifest.size() == 1 },
+            { assert process.out.manifest[0][1].toString().endsWith(".manifest") },
+            {
+                // Validate manifest structure
+                def manifestContent = path(process.out.manifest[0][1]).text
+                def lines = manifestContent.readLines()
 
+                // Check length of manifest
+                assert lines.size() == 10
+
+                // Check required fields are present
+                assert manifestContent.contains("SAMPLE	SAMEA7687881")
+                assert manifestContent.contains("STUDY	PRJ12345")
+                assert manifestContent.contains("RUN_REF	ERR4918394")
+            }
+        )
     }
+}
 
     test("GENERATE_ASSEMBLY_MANIFEST completes with expected outputs - stub") {
 

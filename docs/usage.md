@@ -24,8 +24,8 @@ Before running the pipeline, make sure that:
 Set your Webin credentials as Nextflow secrets:
 
 ```bash
-nextflow secrets set WEBIN_ACCOUNT "Webin-XXX"
-nextflow secrets set WEBIN_PASSWORD "XXX"
+nextflow secrets set ENA_WEBIN "Webin-XXX"
+nextflow secrets set ENA_WEBIN_PASSWORD "XXX"
 ```
 
 ## Samplesheet input
@@ -47,10 +47,13 @@ sample,fasta,accession,fastq_1,fastq_2,assembly_software,binning_software,binnin
 mag_001,data/mag_001.fasta.gz,SRR24458089,,,SPAdes 3.15.5,MetaBAT2 2.15,default,CheckM2 1.0.1,92.81,1.09,66.04,sediment metagenome,No,marine,cable bacteria,marine sediment,No,d__Bacteria;p__Proteobacteria;s__
 ```
 
+> [!IMPORTANT]
+> **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
+
 | Column                      | Description                                                                                                                                                                                                                                                       |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sample`                    | Unique identifier of this particular data entry. It is used as the alias when submitting to ENA, so it must be unique within one Webin account.                                                                                                                   |
-| `fasta`                     | Path to MAG/bin contigs in FASTA format compressed with `gzip`.                                                                                                                                                                                                   |
+| `fasta`                     | Path to MAG/bin contigs in FASTA format compressed with `gzip`. All names of the FASTA files must be unique to prevent pipeline errors.                                                                                                                           |
 | `accession`                 | ENA accession of the run or metagenomic assembly used to generate the MAG/bin.                                                                                                                                                                                    |
 | `fastq_1`                   | Path to the read file in FASTQ format used to generate the source metagenomic assembly. Required if `genome_coverage` is not provided.                                                                                                                            |
 | `fastq_2`                   | Path to the second read file in FASTQ format for paired-end data used to generate the source metagenomic assembly. Leave empty for single-end reads.                                                                                                              |
@@ -85,6 +88,9 @@ sample,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version
 assembly_001,data/assembly_001.fasta.gz,data/assembly_001_R1.fastq.gz,data/assembly_001_R2.fastq.gz,,ERR011322,SPAdes,3.15.5
 assembly_002,data/assembly_002.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 ```
+
+> [!IMPORTANT]
+> **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
 
 | Column              | Description                                                                                                                                           |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -162,6 +168,28 @@ study-soil-2026	Soil microbiome study	Survey of soil microbiota
 | `new_study_type`      | No       | Custom study type. Only used when `existing_study_type` is set to `Other`.   |
 
 An example metadata file is available at [assets/study_metadata.json](../assets/study_metadata.json).
+
+## Database preparation (`mags` / `bins`)
+
+The `GENOMESUBMIT` workflow uses `CheckM2` and `CAT_pack` that require specialized databases for completeness/contamination assessment and taxonomy assignment.
+
+You can either provide pre-existing databases or let the pipeline prepare them during execution.
+
+- `CheckM2`:
+  - provide the path to local database with `--checkm2_db`, otherwise the pipeline downloads version specified with `--checkm2_db_zenodo_id` (by default `14897628`).
+
+- `CAT_pack`:
+  - provide the path to local database (containing `tax/` and `db/` folders or `tar.gz` archive) with `--cat_db`, otherwise the pipeline constructs version specified with `--cat_db_download_id` (by default `nr`).
+
+See [CAT_pack documentation](https://github.com/MGXlab/CAT_pack) and [CheckM2 documentation](https://github.com/chklovski/CheckM2) for more details on usage and creation of databases.
+
+> [!IMPORTANT]
+> `CAT_pack` database creation can take significant time.
+>
+> Reusing an existing database is strongly recommended for repeated runs.
+>
+> Databases created/downloaded by the pipeline are published under:
+> `${params.outdir}/databases/`
 
 ## Running the pipeline
 

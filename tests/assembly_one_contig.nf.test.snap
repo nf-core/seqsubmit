@@ -1,0 +1,32 @@
+{
+    "-profile test_assembly_one_contig": {
+        "content": [
+            3,
+            {
+                "Workflow": {
+                    "nf-core/seqsubmit": "v1.0.0dev"
+                }
+            },
+            [
+                "multiqc",
+                "multiqc/multiqc_data",
+                "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc_citations.txt",
+                "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_software_versions.txt",
+                "multiqc/multiqc_data/multiqc_sources.txt",
+                "multiqc/multiqc_report.html",
+                "pipeline_info",
+                "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
+            ],
+            [
+                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.0",
+            "nextflow": "25.04.1"
+        },
+        "timestamp": "2026-03-27T12:21:16.358644"
+    }
+}

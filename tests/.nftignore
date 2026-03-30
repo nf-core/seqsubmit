@@ -8,3 +8,17 @@ multiqc/multiqc_data/llms-full.txt
 multiqc/multiqc_plots/{svg,pdf,png}/*.{svg,pdf,png}
 multiqc/multiqc_report.html
 pipeline_info/*.{html,json,txt,yml}
+**_webin-cli.report
+**/webin_cli/*accessions.tsv
+**/MAG_upload/registered_MAGs.tsv
+**/MAG_upload/registered_MAGs_test.tsv
+**/bin_upload/registered_bins.tsv
+**/bin_upload/registered_bins_test.tsv
+**/MAG_upload/manifests/
+**/bin_upload/manifests/
+**/MAG_upload/manifests_test/*
+**/bin_upload/manifests_test/*
+**/MAG_upload/genome_samples.xml
+**/bin_upload/genome_samples.xml
+**/rna/trnascanse/*.stats
+**/rna/trnascanse/*.log

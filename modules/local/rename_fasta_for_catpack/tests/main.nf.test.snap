@@ -1,0 +1,56 @@
+{
+    "RENAME_FASTA_FOR_CATPACK - uncompressed fasta": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.fasta:md5,3dc842bfe6f1059ccb006fc454437ebf"
+                    ]
+                ],
+                "renamed_fasta": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.fasta:md5,3dc842bfe6f1059ccb006fc454437ebf"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.0",
+            "nextflow": "25.04.1"
+        },
+        "timestamp": "2026-03-25T16:51:01.874131"
+    },
+    "RENAME_FASTA_FOR_CATPACK - compressed fasta": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test_compressed"
+                        },
+                        "test_compressed.fasta:md5,b349eb81b2fc8db6a6cee870c8d4b054"
+                    ]
+                ],
+                "renamed_fasta": [
+                    [
+                        {
+                            "id": "test_compressed"
+                        },
+                        "test_compressed.fasta:md5,b349eb81b2fc8db6a6cee870c8d4b054"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.0",
+            "nextflow": "25.04.1"
+        },
+        "timestamp": "2026-03-25T16:51:04.916201"
+    }
+}

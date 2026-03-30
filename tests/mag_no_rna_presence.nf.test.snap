@@ -1,0 +1,68 @@
+{
+    "-profile test_mag_no_rna_presence": {
+        "content": [
+            8,
+            {
+                "BARRNAP": {
+                    "barrnap": 0.9
+                },
+                "COUNT_RNA": {
+                    "python": "3.8.13"
+                },
+                "TRNASCANSE": {
+                    "tRNAscan-SE": "2.0.12"
+                },
+                "Workflow": {
+                    "nf-core/seqsubmit": "v1.0.0dev"
+                }
+            },
+            [
+                "mags",
+                "mags/genomes_metadata.csv",
+                "mags/no_rna_presence",
+                "mags/no_rna_presence/rna",
+                "mags/no_rna_presence/rna/barrnap",
+                "mags/no_rna_presence/rna/barrnap/no_rna_presence_bac.gff",
+                "mags/no_rna_presence/rna/trnascanse",
+                "mags/no_rna_presence/rna/trnascanse/no_rna_presence.log",
+                "mags/no_rna_presence/rna/trnascanse/no_rna_presence.stats",
+                "mags/no_rna_presence/rna/trnascanse/no_rna_presence.tsv",
+                "mags/no_rna_presence/upload",
+                "mags/no_rna_presence/upload/webin_cli",
+                "mags/no_rna_presence/upload/webin_cli/no_rna_presence_accessions.tsv",
+                "mags/upload",
+                "mags/upload/manifests",
+                "mags/upload/manifests/results",
+                "mags/upload/manifests/results/MAG_upload",
+                "mags/upload/manifests/results/MAG_upload/ENA_backup.json",
+                "mags/upload/manifests/results/MAG_upload/genome_samples.xml",
+                "mags/upload/manifests/results/MAG_upload/manifests_test",
+                "mags/upload/manifests/results/MAG_upload/registered_MAGs_test.tsv",
+                "mags/upload/manifests/results/MAG_upload/submission.xml",
+                "multiqc",
+                "multiqc/multiqc_data",
+                "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc_citations.txt",
+                "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_software_versions.txt",
+                "multiqc/multiqc_data/multiqc_sources.txt",
+                "multiqc/multiqc_report.html",
+                "pipeline_info",
+                "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
+            ],
+            [
+                "genomes_metadata.csv:md5,0f567491f038d4a0c1dbf4c05cdc26c0",
+                "no_rna_presence_bac.gff:md5,df19e1b84ba6f691d20c72b397c88abf",
+                "no_rna_presence.tsv:md5,abd958e8addba39c9e4d7f6b97a1a7c6",
+                "ENA_backup.json:md5,e339bef4b1e1e11c37ef72f3d9ef2c93",
+                "submission.xml:md5,4b7d1d7e1b883a3eac57e1267943a8d6",
+                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.0",
+            "nextflow": "25.04.1"
+        },
+        "timestamp": "2026-03-27T12:38:24.654035"
+    }
+}
