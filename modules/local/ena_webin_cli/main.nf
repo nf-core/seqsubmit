@@ -5,8 +5,10 @@ process ENA_WEBIN_CLI {
     container "quay.io/biocontainers/ena-webin-cli:9.0.1--hdfd78af_1"
 
     stageInMode 'copy'
-    secret 'WEBIN_ACCOUNT'
-    secret 'WEBIN_PASSWORD'
+    if (!params.webincli_mock) {
+        secret 'WEBIN_ACCOUNT'
+        secret 'WEBIN_PASSWORD'
+    }
 
     input:
     tuple val(meta), path(submission_item), path(manifest)
@@ -23,19 +25,38 @@ process ENA_WEBIN_CLI {
     def prefix             = task.ext.prefix        ?: "${meta.id}"
     def mode               = params.test_upload     ? "-test" : ""
     def submit_or_validate = params.webincli_submit ? "-submit": "-validate"
+    def webincli_mock      = params.webincli_mock   ? "true" : "false"
 
     """
     # change FASTA path in manifest to current workdir
     export ITEM_FULL_PATH=\$(readlink -f ${submission_item})
     sed 's|^FASTA\t.*|FASTA\t'"\${ITEM_FULL_PATH}"'|g' ${manifest} > ${prefix}_updated_manifest.manifest
 
-    ena-webin-cli \\
-        -context=genome \\
-        -manifest=${prefix}_updated_manifest.manifest \\
-        -userName="\${WEBIN_ACCOUNT}" \\
-        -password="\${WEBIN_PASSWORD}" \\
-        ${submit_or_validate} \\
-        ${mode}
+    if [[ "${webincli_mock}" == "true" ]]; then
+        if [[ "${submit_or_validate}" == "-submit" ]]; then
+            cat <<-EOF > webin-cli.report
+            INFO : MOCK WEBIN RUN
+            INFO : command=ena-webin-cli -context=genome -manifest=${prefix}_updated_manifest.manifest ${submit_or_validate} ${mode}
+            INFO : Submission(s) validated successfully
+            INFO : The submission has been completed successfully
+            INFO : This was a TEST submission(s)
+            EOF
+        else
+            cat <<-EOF > webin-cli.report
+            INFO : MOCK WEBIN RUN
+            INFO : command=ena-webin-cli -context=genome -manifest=${prefix}_updated_manifest.manifest ${submit_or_validate} ${mode}
+            INFO : Submission(s) validated successfully
+            EOF
+        fi
+    else
+        ena-webin-cli \\
+            -context=genome \\
+            -manifest=${prefix}_updated_manifest.manifest \\
+            -userName="\${WEBIN_ACCOUNT}" \\
+            -password="\${WEBIN_PASSWORD}" \\
+            ${submit_or_validate} \\
+            ${mode}
+    fi
 
     mv webin-cli.report "${prefix}_webin-cli.report"
 

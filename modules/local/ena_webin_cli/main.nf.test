@@ -9,6 +9,7 @@ nextflow_process {
         when {
             params {
                 webincli_submit = false
+                webincli_mock = true
             }
             process {
                 """
@@ -27,7 +28,12 @@ nextflow_process {
             assertAll {
                 assert process.success
                 assert process.out.upload_status[0][1] == 'success'
-                assert path(process.out.webin_report[0][1]).readLines()[0].contains("Submission(s) validated successfully")
+                def report_lines = path(process.out.webin_report[0][1]).readLines()
+                assert report_lines.any { it.contains("MOCK WEBIN RUN") }
+                assert report_lines.any { it.contains("-context=genome") }
+                assert report_lines.any { it.contains("-manifest=lachnospira_eligens_updated_manifest.manifest") }
+                assert report_lines.any { it.contains("-validate") }
+                assert report_lines.any { it.contains("Submission(s) validated successfully") }
                 assert snapshot(process.out.versions).match()
             }
         }
@@ -53,6 +59,7 @@ nextflow_process {
             params {
                 webincli_submit = true
                 test_upload = true
+                webincli_mock = true
             }
             process {
                 """
@@ -73,10 +80,16 @@ nextflow_process {
             assertAll {
                 assert process.success
                 assert process.out.upload_status[0][1] == 'success'
+                def report_lines = path(process.out.webin_report[0][1]).readLines()
+                assert report_lines.any { it.contains("MOCK WEBIN RUN") }
+                assert report_lines.any { it.contains("-context=genome") }
+                assert report_lines.any { it.contains("-manifest=lachnospira_eligens_updated_manifest.manifest") }
+                assert report_lines.any { it.contains("-submit") }
+                assert report_lines.any { it.contains("-test") }
+                assert report_lines.any { it.contains("Submission(s) validated successfully") }
+                assert report_lines.any { it.contains("The submission has been completed successfully") }
+                assert report_lines.any { it.contains("This was a TEST submission(s)") }
                 assert snapshot(process.out.versions).match()
-                assert path(process.out.webin_report[0][1]).readLines()[1].contains("Submission(s) validated successfully")
-                assert path(process.out.webin_report[0][1]).readLines()[5].contains("The submission has been completed successfully")
-                assert path(process.out.webin_report[0][1]).readLines()[6].contains("This was a TEST submission(s)")
 
             }
         }
