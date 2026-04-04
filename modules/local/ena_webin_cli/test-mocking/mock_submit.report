@@ -1,0 +1,5 @@
+INFO : MOCK WEBIN RUN
+INFO : command=ena-webin-cli -context=genome -manifest=<PREFIX>_updated_manifest.manifest <ACTION> <MODE>
+INFO : Submission(s) validated successfully
+INFO : The submission has been completed successfully
+INFO : This was a TEST submission(s)

@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Mock ena-webin-cli script for testing without credentials.
+set -euo pipefail
+
+# Verify that a real ena-webin-cli exists somewhere in PATH beyond this mock.
+real_bin="$(which -a ena-webin-cli 2>/dev/null | grep -v "$(realpath "$0")" | head -1 || true)"
+if [[ -z "$real_bin" ]]; then
+    echo "FATAL: No real ena-webin-cli found in PATH besides this mock." >&2
+    exit 666
+fi
+
+# Outputs the version of the real ena-webin-cli when called with -version, to allow testing of version parsing logic.
+if [[ "${1:-}" == "-version" ]]; then
+  echo $(${real_bin} -version 2>&1)
+  exit 0
+fi
+
+manifest=""
+action=""
+mode=""
+
+for arg in "$@"; do
+  case "$arg" in
+    -manifest=*)
+      manifest="${arg#-manifest=}"
+      ;;
+    -submit|-validate)
+      action="$arg"
+      ;;
+    -test)
+      mode="$arg"
+      ;;
+  esac
+done
+
+if [[ -z "$manifest" || -z "$action" ]]; then
+  echo "Mock ena-webin-cli: missing required arguments" >&2
+  exit 1
+fi
+
+prefix="$(basename "$manifest")"
+prefix="${prefix%_updated_manifest.manifest}"
+
+template_dir="${WEBINCLI_MOCK_TEMPLATE_DIR:-.}"
+if [[ "$action" == "-submit" ]]; then
+  template="$template_dir/mock_submit.report"
+else
+  template="$template_dir/mock_validate.report"
+fi
+
+if [[ ! -f "$template" ]]; then
+  echo "Mock template file not found: $template" >&2
+  exit 1
+fi
+
+sed \
+  -e "s|<PREFIX>|$prefix|g" \
+  -e "s|<ACTION>|$action|g" \
+  -e "s|<MODE>|$mode|g" \
+  "$template" > webin-cli.report

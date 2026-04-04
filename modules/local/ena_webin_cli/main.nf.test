@@ -1,8 +1,8 @@
 nextflow_process {
-
     name "Test Process ENA_WEBIN_CLI"
     script "modules/local/ena_webin_cli/main.nf"
     process "ENA_WEBIN_CLI"
+    config "./nextflow.config"
 
     test("Run validate with no failures") {
 
