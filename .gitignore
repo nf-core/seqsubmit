@@ -9,3 +9,6 @@ testing*
 null/
 .idea/
 test_data
+
+# Ignore Nextflow test output files, which may contain sensitive information and are not relevant to the repository.
+.nf-test*
