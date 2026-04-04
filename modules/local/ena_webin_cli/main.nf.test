@@ -2,14 +2,22 @@ nextflow_process {
     name "Test Process ENA_WEBIN_CLI"
     script "modules/local/ena_webin_cli/main.nf"
     process "ENA_WEBIN_CLI"
-    config "./nextflow.config"
+
+    // Set WEBINCLI_TEST_MOCK=true to run against a mocked ena-webin-cli.
+    def useMocking = (System.getenv('WEBINCLI_TEST_MOCK') ?: 'false').toBoolean()
+    def launchDir = System.getProperty('user.dir')
+    def mockConfigPath = "${launchDir}/modules/local/ena_webin_cli/test-mocking/nextflow.config"
 
     test("Run validate with no failures") {
+
+        if (useMocking) {
+            options "-c ${mockConfigPath}"
+        }
 
         when {
             params {
                 webincli_submit = false
-                webincli_mock = true
+                webincli_mock = useMocking
             }
             process {
                 """
@@ -29,10 +37,14 @@ nextflow_process {
                 assert process.success
                 assert process.out.upload_status[0][1] == 'success'
                 def report_lines = path(process.out.webin_report[0][1]).readLines()
-                assert report_lines.any { it.contains("MOCK WEBIN RUN") }
-                assert report_lines.any { it.contains("-context=genome") }
-                assert report_lines.any { it.contains("-manifest=lachnospira_eligens_updated_manifest.manifest") }
-                assert report_lines.any { it.contains("-validate") }
+                // When mocking it validates the parameters are passed correctly, but doesn't actually run the submission,
+                // so we check for the presence of the parameters in the report.
+                if (useMocking) {
+                    assert report_lines.any { it.contains("MOCK WEBIN RUN") }
+                    assert report_lines.any { it.contains("-context=genome") }
+                    assert report_lines.any { it.contains("-manifest=lachnospira_eligens_updated_manifest.manifest") }
+                    assert report_lines.any { it.contains("-validate") }
+                }
                 assert report_lines.any { it.contains("Submission(s) validated successfully") }
                 assert snapshot(process.out.versions).match()
             }
@@ -41,6 +53,10 @@ nextflow_process {
     }
 
     test("Run push with no failures") {
+        if (useMocking) {
+            options "-c ${mockConfigPath}"
+        }
+
         setup {
             run("GENERATE_TEST_DATA") {
                 script "./setup_test.nf"
@@ -59,7 +75,7 @@ nextflow_process {
             params {
                 webincli_submit = true
                 test_upload = true
-                webincli_mock = true
+                webincli_mock = useMocking
             }
             process {
                 """
@@ -81,11 +97,15 @@ nextflow_process {
                 assert process.success
                 assert process.out.upload_status[0][1] == 'success'
                 def report_lines = path(process.out.webin_report[0][1]).readLines()
-                assert report_lines.any { it.contains("MOCK WEBIN RUN") }
-                assert report_lines.any { it.contains("-context=genome") }
-                assert report_lines.any { it.contains("-manifest=lachnospira_eligens_updated_manifest.manifest") }
-                assert report_lines.any { it.contains("-submit") }
-                assert report_lines.any { it.contains("-test") }
+                // When mocking it validates the parameters are passed correctly, but doesn't actually run the submission,
+                // so we check for the presence of the parameters in the report.
+                if (useMocking) {
+                    assert report_lines.any { it.contains("MOCK WEBIN RUN") }
+                    assert report_lines.any { it.contains("-context=genome") }
+                    assert report_lines.any { it.contains("-manifest=lachnospira_eligens_updated_manifest.manifest") }
+                    assert report_lines.any { it.contains("-submit") }
+                    assert report_lines.any { it.contains("-test") }
+                }
                 assert report_lines.any { it.contains("Submission(s) validated successfully") }
                 assert report_lines.any { it.contains("The submission has been completed successfully") }
                 assert report_lines.any { it.contains("This was a TEST submission(s)") }
