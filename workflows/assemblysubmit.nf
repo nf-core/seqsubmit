@@ -7,6 +7,7 @@
 include { COVERM_CONTIG                         } from '../modules/nf-core/coverm/contig/main'
 include { FASTAVALIDATOR                        } from '../modules/nf-core/fastavalidator/main'
 include { CREATE_ASSEMBLY_METADATA_CSV          } from '../modules/local/create_assembly_metadata_csv/main'
+include { CREATE_ASSEMBLY_METADATA_CSV          } from '../modules/local/create_assembly_metadata_csv/main'
 include { GENERATE_ASSEMBLY_MANIFEST            } from '../modules/local/generate_assembly_manifest/main'
 include { REGISTERSTUDY                         } from '../modules/local/registerstudy/main'
 include { ENA_WEBIN_CLI_WRAPPER as SUBMIT       } from '../modules/local/ena_webin_cli_wrapper'
@@ -177,6 +178,7 @@ workflow ASSEMBLYSUBMIT {
     ENA_WEBIN_CLI_DOWNLOAD (
         webin_cli_version
     )
+    ch_versions = ch_versions.mix(ENA_WEBIN_CLI_DOWNLOAD.out.versions)
 
     SUBMIT (
         assemblies_with_coverage.join(GENERATE_ASSEMBLY_MANIFEST.out.manifest),
