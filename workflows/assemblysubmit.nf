@@ -6,6 +6,7 @@
 
 include { COVERM_CONTIG                   } from '../modules/nf-core/coverm/contig/main'
 include { FASTAVALIDATOR                  } from '../modules/nf-core/fastavalidator/main'
+include { CREATE_ASSEMBLY_METADATA_CSV    } from '../modules/local/create_assembly_metadata_csv/main'
 include { GENERATE_ASSEMBLY_MANIFEST      } from '../modules/local/generate_assembly_manifest/main'
 include { REGISTERSTUDY                   } from '../modules/local/registerstudy/main'
 include { ENA_WEBIN_CLI_WRAPPER as SUBMIT } from '../modules/local/ena_webin_cli_wrapper'
@@ -72,6 +73,8 @@ workflow ASSEMBLYSUBMIT {
         assembly_fasta,
         "true" // enables number of contigs check - ENA requires more than 1 contig for an assembly submission
     )
+    ch_versions = ch_versions.mix(FASTAVALIDATOR.out.versions)
+
     validated_fastas = assembly_fasta.join(FASTAVALIDATOR.out.success_log)
         .map { meta, fasta, _log ->
             [meta, fasta]
@@ -85,12 +88,14 @@ workflow ASSEMBLYSUBMIT {
             reads: [ meta, fastq ]
         }
         .set { coverm_input }
+
     COVERM_CONTIG (
         coverm_input.reads,
         coverm_input.assembly,
         false, // bam_input
         false  // interleaved
     )
+    ch_versions = ch_versions.mix(COVERM_CONTIG.out.versions)
 
     // Calculate average coverage using splitCsv operator
     average_coverage_ch = COVERM_CONTIG.out.coverage
@@ -121,29 +126,11 @@ workflow ASSEMBLYSUBMIT {
         .filter { meta, _fasta -> meta.coverage != null }
         .mix( assemblies_with_added_cov_ch )
 
-    assembly_metadata_csv = assemblies_with_coverage
-        .map { meta, fasta ->
-            def header = 'Runs,Coverage,Assembler,Version,Filepath,Sample'
-            def row = [
-                meta.run_accession ?: '',
-                meta.coverage ?: '',
-                meta.assembler ?: '',
-                meta.assembler_version ?: '',
-                fasta.name,
-                ''    // Sample column left empty because co assemblies are not supported
-            ].join(',')
-
-            def content = "${header}\n${row}"
-
-            // Create output directory if it doesn't exist
-            def outDir = file("${params.outdir}/${params.mode}")
-            outDir.mkdirs()
-
-            def csv_file = file("${outDir}/${meta.id}_assembly_metadata.csv")
-            csv_file.text = content
-
-            [meta, csv_file]
-        }
+    // Create CSV with assembly metadata for manifest generation
+    CREATE_ASSEMBLY_METADATA_CSV(
+        assemblies_with_coverage
+    )
+    ch_versions = ch_versions.mix(CREATE_ASSEMBLY_METADATA_CSV.out.versions)
 
     def study_accession_ch
     if (params.submission_study) {
@@ -164,18 +151,21 @@ workflow ASSEMBLYSUBMIT {
 
     // Generate assembly manifest files and submit them to ENA
     GENERATE_ASSEMBLY_MANIFEST(
-        assemblies_with_coverage.join(assembly_metadata_csv),
+        assemblies_with_coverage.join(CREATE_ASSEMBLY_METADATA_CSV.out.csv),
         study_accession_ch.first()
     )
+    ch_versions = ch_versions.mix(GENERATE_ASSEMBLY_MANIFEST.out.versions.first())
 
     ENA_WEBIN_CLI_DOWNLOAD (
         params.webin_cli_version
     )
+    ch_versions = ch_versions.mix(ENA_WEBIN_CLI_DOWNLOAD.out.versions)
 
     SUBMIT (
         assemblies_with_coverage.join(GENERATE_ASSEMBLY_MANIFEST.out.manifest),
         ENA_WEBIN_CLI_DOWNLOAD.out.webin_cli_jar
     )
+    ch_versions = ch_versions.mix(SUBMIT.out.versions)
 
     //
     // Collate and save software versions
