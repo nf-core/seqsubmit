@@ -292,12 +292,6 @@
                     "default": true,
                     "help": "Use that flag for development purposes or for validation of your submissions. Submission would be done to TEST ENA server instead of LIVE server. TEST server holds data 24h and removes afterwords. LIVE server does not have option to modify your submission, you can only suppress data and re-upload"
                 },
-                "upload_force": {
-                    "type": "boolean",
-                    "description": "Enables force mode for genome_uploader (used for MAGs/BINs submission)",
-                    "default": true,
-                    "help": "Forces reset of bin/MAG sample xmls generation. This is useful if you changed something in your tsv table, or if ENA metadata haven't been downloaded correctly (you can check this in ENA_backup.json). Default: true"
-                },
                 "submission_study": {
                     "type": "string",
                     "description": "ENA study accession (PRJ/ERP) to submit the data to",
@@ -319,7 +313,7 @@
                 },
                 "webin_cli_version": {
                     "type": "string",
-                    "description": "Version of webon-cli.jar to use for submission",
+                    "description": "Version of webin-cli.jar to use for submission",
                     "default": "9.0.3",
                     "help": "Check version https://github.com/enasequence/webin-cli"
                 }
