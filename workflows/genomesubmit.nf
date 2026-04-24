@@ -285,7 +285,9 @@ workflow GENOMESUBMIT {
 
     SUBMIT (
         ch_combined,
-        ENA_WEBIN_CLI_DOWNLOAD.out.webin_cli_jar
+        ENA_WEBIN_CLI_DOWNLOAD.out.webin_cli_jar,
+        params.test_upload,
+        params.webincli_submit
     )
 
     // Concatenate accessions into single file to publish

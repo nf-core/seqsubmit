@@ -31,19 +31,32 @@ input:
         type: file
         description: |
           The Webin-CLI JAR file downloaded by ena_webin_cli_download.
-          pattern: "webin-cli-*.jar"
+        pattern: "webin-cli-*.jar"
+  - - test_upload:
+        type: value
+        description: Whether to run ENA Webin-CLI in test mode.
+    - webincli_submit:
+        type: value
+        description: Whether to submit (`true`) or only validate (`false`).
 
 output:
-  - - accessions:
-        type: file
-        description: |
-          TSV file containing the accession assigned by ENA for the submitted item.
-          File has two columns: "alias" and "accession".
-  - - versions:
-    - "versions.yml":
-        type: file
-        description: File containing software versions.
-        pattern: "versions.yml"
+  - accessions:
+      - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information.
+            e.g. `[ id:'sample1' ]`
+      - "*_accessions.tsv":
+          type: file
+          description: |
+            TSV file containing the accession assigned by ENA for the submitted item.
+            File has two columns: "alias" and "accession".
+          pattern: "*_accessions.tsv"
+  - versions:
+      - "versions.yml":
+          type: file
+          description: File containing software versions.
+          pattern: "versions.yml"
 
 authors:
   - "@KateSakharova"
