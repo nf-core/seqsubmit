@@ -161,7 +161,8 @@ workflow ASSEMBLYSUBMIT {
     // Generate assembly manifest files and submit them to ENA
     GENERATE_ASSEMBLY_MANIFEST(
         assemblies_with_coverage.join(CREATE_ASSEMBLY_METADATA_CSV.out.csv),
-        study_accession_ch.first()
+        study_accession_ch.first(),
+        params.upload_tpa
     )
     ch_versions = ch_versions.mix(GENERATE_ASSEMBLY_MANIFEST.out.versions.first())
 

@@ -7,6 +7,7 @@ process GENERATE_ASSEMBLY_MANIFEST {
     input:
     tuple val(meta), path(assembly_fasta), path(data_csv)
     val(assembly_study)
+    val(is_tpa)
 
     output:
     tuple val(meta), path("${assembly_study}_upload/*.manifest") , emit: manifest
@@ -18,7 +19,7 @@ process GENERATE_ASSEMBLY_MANIFEST {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def tpa = params.upload_tpa ? "--tpa" : ""
+    def tpa = is_tpa ? "--tpa" : ""
     """
     assembly_manifest \\
         --study ${assembly_study} \\
