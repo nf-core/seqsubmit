@@ -11,16 +11,18 @@ process ENA_WEBIN_CLI_WRAPPER {
     input:
     tuple val(meta), path(submission_item), path(manifest)
     path(webin_cli_jar)
+    val test_upload
+    val webincli_submit
 
     output:
     tuple val(meta), path("*_accessions.tsv"),  emit: accessions
     path "versions.yml",                        emit: versions
 
     script:
-    def args               = task.ext.args          ?: ""
-    def prefix             = task.ext.prefix        ?: "${meta.id}"
-    def test_flag          = params.test_upload     ? "--test" : ""
-    def submit_or_validate = params.webincli_submit ? "--mode submit": "--mode validate"
+    def args               = task.ext.args   ?: ""
+    def prefix             = task.ext.prefix ?: "${meta.id}"
+    def test_flag          = test_upload     ? "--test" : ""
+    def submit_or_validate = webincli_submit ? "--mode submit": "--mode validate"
 
     """
     # change FASTA path in manifest to current workdir
