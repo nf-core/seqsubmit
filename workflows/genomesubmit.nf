@@ -357,6 +357,13 @@ workflow GENOMESUBMIT {
     ch_methods_description                = channel.value(
         methodsDescriptionText(ch_multiqc_custom_methods_description))
 
+    samples_mqc = CREATE_MANIFESTS.out.upload_registered_mags
+        .map { meta, file ->
+            def newFile = file.copyTo(file.parent.resolve("${file.baseName}_mqc.tsv"))
+            return newFile
+        }
+    ch_multiqc_files = ch_multiqc_files.mix(samples_mqc)
+    ch_multiqc_files = ch_multiqc_files.mix(SUBMIT.out.accessions_multiqc)
     ch_multiqc_files = ch_multiqc_files.mix(ch_collated_versions)
     ch_multiqc_files = ch_multiqc_files.mix(
         ch_methods_description.collectFile(

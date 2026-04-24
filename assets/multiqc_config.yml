@@ -13,3 +13,50 @@ report_section_order:
 export_plots: true
 
 disable_version_detection: true
+
+custom_content:
+  order:
+    - sample_registration
+    - submission_results
+
+# Custom data configuration
+custom_data:
+
+  sample_registration:
+    id: 'sample_registration'
+    section_name: 'genpmes_samples'
+    description: 'Sample assigned during registration process'
+    file_format: 'tsv'
+    plot_type: 'table'
+    pconfig:
+      id: 'sample_registration'
+      title: 'Sample registration assigned accessions'
+      col1_header: 'ID'
+      col2_header: 'ENA sample accession'
+    headers:
+      alias:
+        title: 'Uploaded fasta'
+        description: 'FASTA file for upload'
+      accession:
+        title: 'ENA sample accession'
+        description: 'Assigned sample accession after registration'
+
+  submission_results:
+    id: 'submission_results'
+    section_name: 'Submission results'
+    description: 'Accessions assigned during upload process'
+    file_format: 'tsv'
+    plot_type: 'table'
+    pconfig:
+      id: 'custom_metrics_table'
+      title: 'Submission results'
+      col1_header: 'ID'
+      col2_header: 'ENA accession'
+    headers:
+      alias:
+        title: 'Uploaded fasta'
+        description: 'FASTA file for upload'
+      accession:
+        title: 'ENA accession'
+        description: 'Assigned accession after submission'
+

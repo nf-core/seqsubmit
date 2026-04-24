@@ -5,7 +5,7 @@ process ENA_WEBIN_CLI_WRAPPER {
 
     label 'process_low'
     tag "${meta.id}"
-    container "quay.io/microbiome-informatics/java_mgnify-pipelines-toolkit:1.4.21"
+    container "community.wave.seqera.io/library/ena-webin-cli_mgnify-pipelines-toolkit:0fd318932c5ba88e"
     stageInMode 'copy'
 
     input:
@@ -16,6 +16,7 @@ process ENA_WEBIN_CLI_WRAPPER {
 
     output:
     tuple val(meta), path("*_accessions.tsv"),  emit: accessions
+    path("*_accessions_mqc.tsv"),               emit: accessions_multiqc
     path "versions.yml",                        emit: versions
 
     script:
@@ -35,6 +36,8 @@ process ENA_WEBIN_CLI_WRAPPER {
       --mode ${webincli_mode} \\
       ${test_flag} \\
       ${args}
+
+    cp ${prefix}_accessions.tsv ${prefix}_accessions_mqc.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
