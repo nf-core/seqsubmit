@@ -31,6 +31,9 @@ input:
         description: |
           Pre-existing study ID to submit to if available.
           Must exist in the webin account.
+    - is_tpa:
+        type: value
+        description: Whether assembly being submitted is a TPA (Third Party Annotation).
 
 output:
   - meta:
