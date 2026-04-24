@@ -18,6 +18,7 @@ nextflow_process {
                     file(params.pipelines_testdata_base_path + "/samplesheets/samplesheet_generatemanifest.csv", checkIfExists: true)
                 ]
                 input[1] = "PRJ12345"
+                input[2] = false
                 """
 
             }
@@ -62,6 +63,7 @@ nextflow_process {
                     file('test_samplesheet_generatemanifest.csv')
                 ]
                 input[1] = "PRJ12345"
+                input[2] = false
                 """
             }
         }
