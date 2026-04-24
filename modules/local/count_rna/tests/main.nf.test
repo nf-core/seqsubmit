@@ -16,6 +16,8 @@ nextflow_process {
                     file("$moduleDir/tests/data/ecoli.stats", checkIfExists: true),
                     file("$moduleDir/tests/data/ecoli_bac.gff", checkIfExists: true)
                 ]
+                input[1] = 18
+                input[2] = 80
                 """
             }
         }
@@ -49,6 +51,8 @@ nextflow_process {
                     file("$moduleDir/tests/data/ecoli.stats", checkIfExists: true),
                     file("$moduleDir/tests/data/ecoli_bac.gff", checkIfExists: true)
                 ]
+                input[1] = 18
+                input[2] = 80
                 """
             }
         }
