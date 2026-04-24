@@ -43,7 +43,6 @@ workflow GENOME_EVALUATION {
         .map { _count, _meta, _fasta, db_meta, db_id -> [db_meta, db_id] }
 
     CHECKM2_DATABASEDOWNLOAD(ch_download_trigger)
-    ch_versions = ch_versions.mix( CHECKM2_DATABASEDOWNLOAD.out.versions )
 
     // Combine db sources - one of these channels will be empty depending on inputs
     ch_db = ch_checkm2_db.mix(CHECKM2_DATABASEDOWNLOAD.out.database).first()
@@ -56,11 +55,9 @@ workflow GENOME_EVALUATION {
         ch_fasta,
         ch_db,
     )
-    ch_versions = ch_versions.mix( CHECKM2_PREDICT.out.versions )
 
     emit:
     genome_evaluation = CHECKM2_PREDICT.out.checkm2_tsv  // channel: [ val(meta), path(tsv) ]
     stats_versions    = CHECKM2_PREDICT.out.versions_checkm2_predict
-    versions          = ch_versions
 
 }

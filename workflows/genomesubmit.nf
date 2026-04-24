@@ -153,10 +153,19 @@ workflow GENOMESUBMIT {
         }
     .set { branched_stats_results }
 
+    // build input structures for CheckM2 DB depending on what provided as input
+    def checkm2_db_input = params.checkm2_db
+        ? channel.of( [['id': 'CHECKM2_DB'], file(params.checkm2_db)] )
+        : channel.empty()
+
+    def checkm2_db_id_input = (!params.checkm2_db && params.checkm2_db_download_id)
+        ? channel.of( [['id': 'CHECKM2_DB_id'], params.checkm2_db_download_id] )
+        : channel.empty()
+
     GENOME_EVALUATION (
         branched_stats_results.genome_evaluation_input,
-        params.checkm2_db,
-        params.checkm2_db_zenodo_id
+        checkm2_db_input,
+        checkm2_db_id_input
     )
 
     // Create a value channel with the version string
