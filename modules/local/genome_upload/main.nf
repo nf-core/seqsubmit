@@ -9,6 +9,10 @@ process GENOME_UPLOAD {
     path(table_for_upload)
     val(mags_or_bins_flag)
     val(submission_study)
+    val(centre_name)
+    val(is_tpa)
+    val(upload_force)
+    val(test_upload)
 
     output:
     path "results/{MAG,bin}_upload/manifests*/*.manifest"      , emit: manifests
@@ -22,16 +26,16 @@ process GENOME_UPLOAD {
     task.ext.when == null || task.ext.when
 
     script:
-    def args     = task.ext.args         ?: ''
-    def tpa      = params.upload_tpa     ? "--tpa"  : ""
-    def force    = params.upload_force   ? "--force"  : ""
-    def mode     = (!params.test_upload) ? "--live" : ""
+    def args     = task.ext.args  ?: ''
+    def tpa      = is_tpa         ? "--tpa"  : ""
+    def force    = upload_force   ? "--force"  : ""
+    def mode     = (!test_upload) ? "--live" : ""
 
     """
     genome_upload \\
-        -u $submission_study \\
+        -u ${submission_study} \\
         --genome_info ${table_for_upload} \\
-        --centre_name $params.centre_name \\
+        --centre_name ${centre_name} \\
         --${mags_or_bins_flag} \\
         ${tpa} \\
         ${force} \\
