@@ -33,9 +33,6 @@ input:
   - is_tpa:
       type: value
       description: Whether genomes are submitted as TPA (Third Party Annotation).
-  - upload_force:
-      type: value
-      description: Whether to force rewrite existing cache of ENA metadata.
   - test_upload:
       type: value
       description: Whether to run in ENA test mode.

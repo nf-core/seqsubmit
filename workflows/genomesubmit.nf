@@ -267,7 +267,6 @@ workflow GENOMESUBMIT {
         study_accession_ch.first(),
         params.centre_name,
         params.upload_tpa,
-        params.upload_force,
         params.test_upload
     )
 
