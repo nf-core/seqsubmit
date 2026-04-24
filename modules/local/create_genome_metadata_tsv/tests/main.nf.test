@@ -1,0 +1,81 @@
+nextflow_process {
+
+    name "Test Process CREATE_GENOME_METADATA_TSV"
+    script "../main.nf"
+    process "CREATE_GENOME_METADATA_TSV"
+    tag "modules"
+    tag "modules_nfcore"
+    tag "create_genome_metadata_tsv"
+
+    test("genome_metadata - complete reference") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [id: 'test_genome'],
+                    file('${projectDir}/assets/genome/sequence/chr1.fa'),
+                    file('${projectDir}/assets/genome/annotation/genes.gtf'),
+                    file('${projectDir}/assets/genome/annotation/repeats.bed'),
+                    file('${projectDir}/assets/genome/annotation/centromeres.bed')
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+    test("genome_metadata - minimal reference (fasta only)") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [id: 'minimal_genome'],
+                    file('${projectDir}/assets/genome/sequence/chr1.fa'),
+                    [],
+                    [],
+                    []
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+    test("genome_metadata - stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [id: 'stub_genome'],
+                    file('${projectDir}/assets/genome/sequence/chr1.fa'),
+                    file('${projectDir}/assets/genome/annotation/genes.gtf'),
+                    [],
+                    []
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}

@@ -8,6 +8,7 @@ include { ENA_WEBIN_CLI_WRAPPER as SUBMIT   } from '../modules/local/ena_webin_c
 include { ENA_WEBIN_CLI_DOWNLOAD            } from '../modules/local/ena_webin_cli_download'
 include { REGISTERSTUDY                     } from '../modules/local/registerstudy/main'
 include { RENAME_FASTA_FOR_CATPACK          } from '../modules/local/rename_fasta_for_catpack'
+include { CREATE_GENOME_METADATA_TSV        } from '../modules/local/create_genome_metadata_tsv/main'
 
 include { FASTAVALIDATOR                    } from '../modules/nf-core/fastavalidator/main'
 include { COVERM_GENOME                     } from '../modules/nf-core/coverm/genome'
@@ -122,7 +123,7 @@ workflow GENOMESUBMIT {
 
     // --------- For genomes without RNA_presence info, calculate rRNA and tRNA
     fasta_updated_with_coverage
-        .branch { meta, fasta ->
+        .branch { meta, _fasta ->
             rna_prediction_input: meta.RNA_presence == null
             rna_present: true  // Everything else goes here
         }
@@ -145,7 +146,7 @@ workflow GENOMESUBMIT {
 
     // --------- Completeness and contamination calculation
     fasta_updated_with_rna
-        .branch { meta, fasta ->
+        .branch { meta, _fasta ->
             genome_evaluation_input: meta.completeness == null || meta.contamination == null || meta.stats_generation_software == null
             evaluation_present: true  // Everything else goes here
         }
@@ -176,7 +177,7 @@ workflow GENOMESUBMIT {
 
     // --------- Taxonomy
     fasta_updated_with_stats
-        .branch { meta, fasta ->
+        .branch { meta, _fasta ->
             genome_taxonomy_input: meta.NCBI_lineage == null
             taxonomy_present: true  // Everything else goes here
         }
@@ -215,52 +216,17 @@ workflow GENOMESUBMIT {
         }
         .mix(branched_taxonomy_results.taxonomy_present)
 
-    // --------- Combine metadata into TSV
-    genome_metadata_csv = fasta_updated_with_taxonomy
-        .map { meta, fasta ->
-            [
-                meta.id,
-                fasta.getName(),
-                meta.accession,
-                meta.assembly_software,
-                meta.binning_software,
-                meta.binning_parameters,
-                meta.stats_generation_software,
-                meta.completeness,
-                meta.contamination,
-                meta.genome_coverage,
-                meta.metagenome,
-                meta.co_assembly == "Yes" ? "True" : "False",
-                meta.broad_environment,
-                meta.local_environment,
-                meta.environmental_medium,
-                meta.RNA_presence == "Yes" ? "True" : "False",
-                meta.NCBI_lineage
-            ].join('\t')
-        }
+    // --------- Combine metadata into TSV using module
+    CREATE_GENOME_METADATA_TSV (
+        fasta_updated_with_taxonomy
+    )
+    ch_versions = ch_versions.mix(CREATE_GENOME_METADATA_TSV.out.versions)
+
+    // Collect all TSV rows into a single file
+    genome_metadata_tsv = CREATE_GENOME_METADATA_TSV.out.tsv
         .collectFile(
-            name: 'genomes_metadata.csv',
-            storeDir: "${params.outdir}/${params.mode}",
-            seed: [
-                'genome_name',
-                'genome_path',
-                'accessions',
-                'assembly_software',
-                'binning_software',
-                'binning_parameters',
-                'stats_generation_software',
-                'completeness',
-                'contamination',
-                'genome_coverage',
-                'metagenome',
-                'co-assembly',
-                'broad_environment',
-                'local_environment',
-                'environmental_medium',
-                'rRNA_presence',
-                'NCBI_lineage'
-            ].join('\t'),
-            newLine: true
+            name: 'genomes_metadata.tsv',
+            storeDir: "${params.outdir}/${params.mode}"
         )
 
     // --------- Register study if accession not provided
@@ -281,8 +247,8 @@ workflow GENOMESUBMIT {
 
     // --------- Generate manifests
     CREATE_MANIFESTS(
-        fasta_updated_with_stats.map{meta, fasta -> fasta}.collect(),
-        genome_metadata_csv,
+        fasta_updated_with_stats.map{_meta, fasta -> fasta}.collect(),
+        genome_metadata_tsv,
         params.mode,     // mags or bins
         study_accession_ch.first()
     )
@@ -303,7 +269,7 @@ workflow GENOMESUBMIT {
     .join(
         manifests_ch.map { meta, manifest -> [meta.id, manifest] }  // Has only [id: prefix]
     )
-    .map { id, full_meta, fasta, manifest ->
+    .map { _id, full_meta, fasta, manifest ->
         [full_meta, fasta, manifest]
     }
 
