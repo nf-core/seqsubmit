@@ -255,7 +255,11 @@ workflow GENOMESUBMIT {
         fasta_updated_with_stats.map{_meta, fasta -> fasta}.collect(),
         CONCAT_METADATA.out.file_out.map { _meta, file -> file }.first(),
         mags_or_bins_flag,     // mags or bins
-        study_accession_ch.first()
+        study_accession_ch.first(),
+        params.centre_name,
+        params.upload_tpa,
+        params.upload_force,
+        params.test_upload
     )
 
     // All manifests were generated in one run
