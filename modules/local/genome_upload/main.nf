@@ -11,7 +11,6 @@ process GENOME_UPLOAD {
     val(submission_study)
     val(centre_name)
     val(is_tpa)
-    val(upload_force)
     val(test_upload)
 
     output:
@@ -28,7 +27,6 @@ process GENOME_UPLOAD {
     script:
     def args     = task.ext.args  ?: ''
     def tpa      = is_tpa         ? "--tpa"  : ""
-    def force    = upload_force   ? "--force"  : ""
     def mode     = (!test_upload) ? "--live" : ""
 
     """
@@ -38,7 +36,6 @@ process GENOME_UPLOAD {
         --centre_name ${centre_name} \\
         --${mags_or_bins_flag} \\
         ${tpa} \\
-        ${force} \\
         ${mode} \\
         --out results \\
         ${args}
