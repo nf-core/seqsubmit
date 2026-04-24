@@ -30,6 +30,12 @@ input:
       type: file
       description: rRNA annotation file from barrnap (GFF3 format)
       pattern: "*.gff"
+  - min_trna_count:
+      type: value
+      description: Minimum required number of tRNA genes.
+  - min_rrna_percentage:
+      type: value
+      description: Minimum required percentage coverage for each rRNA subunit.
 
 output:
   - meta:
