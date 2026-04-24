@@ -11,6 +11,8 @@ process COUNT_RNA {
 
     input:
     tuple val(meta), path(trnas_stats), path(rrna_gff)
+    val min_trna_count
+    val min_rrna_percentage
 
     output:
     tuple val(meta), path("*rna_decision.tsv"), emit: rna_decision
@@ -22,8 +24,8 @@ process COUNT_RNA {
         --trna ${trnas_stats} \\
         --rrna ${rrna_gff} \\
         --name ${meta.id} \\
-        --trna-limit ${params.trna_limit} \\
-        --rrna-limit ${params.rrna_limit} \\
+        --trna-limit ${min_trna_count} \\
+        --rrna-limit ${min_rrna_percentage} \\
         --output ${meta.id}_rna_decision.tsv
 
     cat <<-END_VERSIONS > versions.yml

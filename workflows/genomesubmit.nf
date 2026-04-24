@@ -132,7 +132,9 @@ workflow GENOMESUBMIT {
     .set { branched_rna_results }
 
     RNA_DETECTION (
-        branched_rna_results.rna_prediction_input
+        branched_rna_results.rna_prediction_input,
+        params.trna_limit,
+        params.rrna_limit
     )
     ch_versions = ch_versions.mix( RNA_DETECTION.out.versions )
 
@@ -155,7 +157,9 @@ workflow GENOMESUBMIT {
     .set { branched_stats_results }
 
     GENOME_EVALUATION (
-        branched_stats_results.genome_evaluation_input
+        branched_stats_results.genome_evaluation_input,
+        params.checkm2_db,
+        params.checkm2_db_zenodo_id
     )
 
     // Create a value channel with the version string
@@ -250,7 +254,7 @@ workflow GENOMESUBMIT {
     CREATE_MANIFESTS(
         fasta_updated_with_stats.map{_meta, fasta -> fasta}.collect(),
         CONCAT_METADATA.out.file_out.map { _meta, file -> file }.first(),
-        params.mode,     // mags or bins
+        mags_or_bins_flag,     // mags or bins
         study_accession_ch.first()
     )
 
