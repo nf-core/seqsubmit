@@ -13,11 +13,6 @@ tools:
       documentation: https://github.com/EBI-Metagenomics/genome_uploader
       licence: ["Apache License"]
 input:
-  - meta:
-      type: map
-      description: |
-        Groovy Map containing sample information.
-        e.g. [ id:'test', single_end:false ]
   - table_for_upload:
       type: file
       description: |
@@ -26,16 +21,29 @@ input:
       type: file
       description: File in FASTA format containing targeted mag/bin/assembly for submission
       pattern: "*.{fasta,fna,fas,fa}*"
+  - mags_or_bins_flag:
+      type: value
+      description: Upload mode selector. Expected values are `mags` or `bins`.
+  - submission_study:
+      type: value
+      description: ENA study accession used for submission.
+  - centre_name:
+      type: value
+      description: Submitting centre name required by ENA.
+  - is_tpa:
+      type: value
+      description: Whether genomes are submitted as TPA (Third Party Annotation).
+  - upload_force:
+      type: value
+      description: Whether to force rewrite existing cache of ENA metadata.
+  - test_upload:
+      type: value
+      description: Whether to run in ENA test mode.
 
 output:
-  - meta:
-      type: map
-      description: |
-        Groovy Map containing sample information
-        e.g. [ id:'test', single_end:false ]
   - manifests:
       type: file
-      description: Maniseft file required for submission with webin-cli
+      description: Manifest file required for submission with webin-cli
       pattern: "*.manifest"
   - ena_upload_backup_json:
       type: file
