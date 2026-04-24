@@ -20,7 +20,9 @@ include { TRNASCANSE     } from '../../modules/nf-core/trnascanse'
 
 workflow RNA_DETECTION {
     take:
-    fasta
+    fasta                // channel: [ val(meta), path(fasta) ]
+    min_trna_count       // val: int - minimum number of tRNAs required to pass MIMAG standard (e.g. 18)
+    min_rrna_percentage  // val: float - minimum percentage of rRNA genes required to pass MIMAG standard (e.g. 75)
 
     main:
 
@@ -36,7 +38,9 @@ workflow RNA_DETECTION {
     ch_versions = ch_versions.mix( TRNASCANSE.out.versions )
 
     COUNT_RNA(
-        TRNASCANSE.out.stats.join(BARRNAP.out.gff)
+        TRNASCANSE.out.stats.join(BARRNAP.out.gff),
+        min_trna_count,
+        min_rrna_percentage
     )
     ch_versions = ch_versions.mix( COUNT_RNA.out.versions )
 
