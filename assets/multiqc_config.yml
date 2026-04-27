@@ -16,30 +16,105 @@ disable_version_detection: true
 
 custom_content:
   order:
+    - assembly_metadata
+    - genome_metadata
     - sample_registration
     - submission_results
+sp:
+  assembly_metadata:
+    fn_re: '.*assembly_metadata.csv$'
+  genome_metadata:
+    fn_re: '.*genomes_metadata.tsv$'
+  sample_registration:
+    fn_re: '.*registered.*\.tsv$'
+  submission_results:
+    fn_re: '.*_accessions\.tsv$'
 
 # Custom data configuration
 custom_data:
 
-  sample_registration:
-    id: 'sample_registration'
-    section_name: 'genpmes_samples'
-    description: 'Sample assigned during registration process'
+  assembly_metadata:
+    id: 'assembly_metadata'
+    section_name: 'Assembly metadata'
+    description: 'Metadata for submitted assemblies'
+    file_format: 'csv'
+    plot_type: 'table'
+    pconfig:
+      id: 'assembly_metadata'
+      title: 'Assembly metadata table'
+    headers:
+      runs:
+        title: 'Runs'
+      assembly_coverage:
+        title: 'Coverage'
+      assembler:
+        title: "Assembler"
+      assembler_version:
+        title: "Version"
+      file_path:
+        title: "Filepath"
+      sample:
+        "Sample"
+
+  genome_metadata:
+    id: 'genome_metadata'
+    section_name: 'Genome metadata'
+    description: 'Metadata for submitted genomes'
     file_format: 'tsv'
     plot_type: 'table'
     pconfig:
-      id: 'sample_registration'
+      id: 'genome_metadata'
+      title: 'Genome metadata table'
+    headers:
+      genome_name:
+        title: 'Genome name'
+      genome_path:
+        title: 'Genome path'
+      accessions:
+        title: 'Accession'
+      assembly_software:
+        title: 'Assembly software'
+      binning_software:
+        title: 'Binning software'
+      binning_parameters:
+        title: 'Binning parameters'
+      stats_generation_software:
+        title: 'Stats software'
+      completeness:
+        title: 'Completeness (%)'
+      contamination:
+        title: 'Contamination (%)'
+      genome_coverage:
+        title: 'Coverage'
+      metagenome:
+        title: 'Metagenome'
+      co-assembly:
+        title: 'Co-assembly'
+      broad_environment:
+        title: 'Broad environment'
+      local_environment:
+        title: 'Local environment'
+      environmental_medium:
+        title: 'Environmental medium'
+      rRNA_presence:
+        title: 'rRNA presence'
+      NCBI_lineage:
+        title: 'NCBI lineage'
+
+  sample_registration:
+    file_format: 'tsv'
+    plot_type: 'table'
+    pconfig:
       title: 'Sample registration assigned accessions'
       col1_header: 'ID'
       col2_header: 'ENA sample accession'
     headers:
       alias:
-        title: 'Uploaded fasta'
+        title: 'ID'
         description: 'FASTA file for upload'
       accession:
         title: 'ENA sample accession'
-        description: 'Assigned sample accession after registration'
+        description: 'Assigned accession after submission'
 
   submission_results:
     id: 'submission_results'
@@ -48,13 +123,13 @@ custom_data:
     file_format: 'tsv'
     plot_type: 'table'
     pconfig:
-      id: 'custom_metrics_table'
+      id: 'Genomes assigned accessions'
       title: 'Submission results'
       col1_header: 'ID'
       col2_header: 'ENA accession'
     headers:
       alias:
-        title: 'Uploaded fasta'
+        title: 'ID'
         description: 'FASTA file for upload'
       accession:
         title: 'ENA accession'
