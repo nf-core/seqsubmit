@@ -176,7 +176,7 @@ The `GENOMESUBMIT` workflow uses `CheckM2` and `CAT_pack` that require specializ
 You can either provide pre-existing databases or let the pipeline prepare them during execution.
 
 - `CheckM2`:
-  - provide the path to local database with `--checkm2_db`, otherwise the pipeline downloads version specified with `--checkm2_db_zenodo_id` (by default `14897628`).
+  - provide the path to local database with `--checkm2_db`, otherwise the pipeline downloads version specified with `--checkm2_db_download_id` (by default `14897628`).
 
 - `CAT_pack`:
   - provide the path to local database (containing `tax/` and `db/` folders or `tar.gz` archive) with `--cat_db`, otherwise the pipeline constructs version specified with `--cat_db_download_id` (by default `nr`).
