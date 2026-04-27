@@ -31,8 +31,21 @@ include { methodsDescriptionText            } from '../subworkflows/local/utils_
 workflow GENOMESUBMIT {
 
     take:
-    ch_samplesheet // channel: samplesheet read in from --input
-    mags_or_bins_flag
+    ch_samplesheet           // channel: samplesheet read in from --input
+    mags_or_bins_flag        // val: submission mode (mags or bins)
+    submission_study         // val: accession of the study to submit to (optional)
+    study_metadata           // val: path to study metadata file for study creation (used if no submission_study provided)
+    trna_limit               // val: tRNA count threshold
+    rrna_limit               // val: rRNA length percentage threshold
+    checkm2_db               // val: path to CheckM2 database
+    checkm2_db_download_id   // val: CheckM2 database download ID
+    cat_db                   // val: path to CAT database
+    cat_db_download_id       // val: CAT database download ID
+    centre_name              // val: submission centre name
+    upload_tpa               // val: upload as TPA (Third Party Annotation)
+    test_upload              // val: true for test upload mode
+    webin_cli_version        // val: WebinCLI tool version to download and use for submission
+    webincli_submit          // val: true to validate and submit via WebinCLI, false to only validate
 
     main:
 
@@ -130,8 +143,8 @@ workflow GENOMESUBMIT {
 
     RNA_DETECTION (
         branched_rna_results.rna_prediction_input,
-        params.trna_limit,
-        params.rrna_limit
+        trna_limit,
+        rrna_limit
     )
     ch_versions = ch_versions.mix( RNA_DETECTION.out.versions )
 
@@ -154,12 +167,12 @@ workflow GENOMESUBMIT {
     .set { branched_stats_results }
 
     // build input structures for CheckM2 DB depending on what provided as input
-    def checkm2_db_input = params.checkm2_db
-        ? channel.of( [['id': 'CHECKM2_DB'], file(params.checkm2_db)] )
+    def checkm2_db_input = checkm2_db
+        ? channel.of( [['id': 'CHECKM2_DB'], file(checkm2_db)] )
         : channel.empty()
 
-    def checkm2_db_id_input = (!params.checkm2_db && params.checkm2_db_download_id)
-        ? channel.of( [['id': 'CHECKM2_DB_id'], params.checkm2_db_download_id] )
+    def checkm2_db_id_input = (!checkm2_db && checkm2_db_download_id)
+        ? channel.of( [['id': 'CHECKM2_DB_id'], checkm2_db_download_id] )
         : channel.empty()
 
     GENOME_EVALUATION (
@@ -201,12 +214,12 @@ workflow GENOMESUBMIT {
     )
 
     // build input structures for CAT_DB depending on what provided as input
-    def cat_db_input = params.cat_db
-        ? channel.of( [['id': 'CAT_DB'], file(params.cat_db)] )
+    def cat_db_input = cat_db
+        ? channel.of( [['id': 'CAT_DB'], file(cat_db)] )
         : channel.empty()
 
-    def cat_db_id_input = (!params.cat_db && params.cat_db_download_id)
-        ? channel.of( [['id': 'CAT_DB_id'], params.cat_db_download_id] )
+    def cat_db_id_input = (!cat_db && cat_db_download_id)
+        ? channel.of( [['id': 'CAT_DB_id'], cat_db_download_id] )
         : channel.empty()
 
     FASTA_CLASSIFY_CATPACK (
@@ -278,11 +291,11 @@ workflow GENOMESUBMIT {
 
     // --------- Register study if accession not provided
     def study_accession_ch
-    if (params.submission_study) {
-        study_accession_ch = channel.of(params.submission_study)
+    if (submission_study) {
+        study_accession_ch = channel.of(submission_study)
     } else {
         REGISTERSTUDY(
-            channel.of([[id: "study"], file(params.study_metadata)])
+            channel.of([[id: "study"], file(study_metadata)])
         )
         ch_versions = ch_versions.mix(REGISTERSTUDY.out.versions)
         study_accession_ch = REGISTERSTUDY.out.accessions
@@ -298,16 +311,16 @@ workflow GENOMESUBMIT {
         genome_metadata_csv,
         mags_or_bins_flag,     // mags or bins
         study_accession_ch.first(),
-        params.centre_name,
-        params.upload_tpa,
-        params.test_upload
+        centre_name,
+        upload_tpa,
+        test_upload
     )
 
     // All manifests were generated in one run
     // Manifests should be separated into different channels using prefix as id
     manifests_ch = CREATE_MANIFESTS.out.manifests.flatten()
         .map { manifest ->
-            def prefix = params.test_upload ?
+            def prefix = test_upload ?
                 manifest.name.replaceAll(/_\d+\.manifest$/, '') :  // Remove extension and hash suffix appended in test mode
                 manifest.name.replaceAll(/\.manifest$/, '')        // Remove only extension in live mode
             def meta = [id: prefix]
@@ -325,14 +338,14 @@ workflow GENOMESUBMIT {
 
     // --------- Upload data to ENA
     ENA_WEBIN_CLI_DOWNLOAD (
-        params.webin_cli_version
+        webin_cli_version
     )
 
     SUBMIT (
         ch_combined,
         ENA_WEBIN_CLI_DOWNLOAD.out.webin_cli_jar,
-        params.test_upload,
-        params.webincli_submit
+        test_upload,
+        webincli_submit
     )
 
     //

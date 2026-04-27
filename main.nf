@@ -42,12 +42,31 @@ workflow NFCORE_SEQSUBMIT {
     if (params.mode == "mags" || params.mode == "bins") {
         GENOMESUBMIT (
             samplesheet,
-            params.mode
+            params.mode,
+            params.submission_study,
+            params.study_metadata,
+            params.trna_limit,
+            params.rrna_limit,
+            params.checkm2_db,
+            params.checkm2_db_download_id,
+            params.cat_db,
+            params.cat_db_download_id,
+            params.centre_name,
+            params.upload_tpa,
+            params.test_upload,
+            params.webin_cli_version,
+            params.webincli_submit
         )
         ch_multiqc_report = GENOMESUBMIT.out.multiqc_report
     } else if (params.mode == "metagenomic_assemblies") {
         ASSEMBLYSUBMIT (
-            samplesheet
+            samplesheet,
+            params.submission_study,
+            params.study_metadata,
+            params.upload_tpa,
+            params.test_upload,
+            params.webin_cli_version,
+            params.webincli_submit
         )
         ch_multiqc_report = ASSEMBLYSUBMIT.out.multiqc_report
     }
