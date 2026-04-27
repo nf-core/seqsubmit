@@ -13,6 +13,7 @@ process REGISTERSTUDY {
 
     input:
     tuple val(meta), path(study_metadata)
+    val(test_upload)
 
     output:
     tuple val(meta), path("*_accessions.json"), emit: accessions
@@ -22,12 +23,14 @@ process REGISTERSTUDY {
     task.ext.when == null || task.ext.when
 
     script:
-    def args   = task.ext.args   ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def args      = task.ext.args   ?: ''
+    def prefix    = task.ext.prefix ?: "${meta.id}"
+    def test_flag = test_upload     ? "--test" : ""
     """
     submit_study.py \\
         --input ${study_metadata} \\
         --output ${prefix}_accessions.json \\
+        ${test_flag} \\
         ${args}
 
     cat <<-END_VERSIONS > versions.yml

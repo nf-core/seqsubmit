@@ -19,6 +19,7 @@ nextflow_process {
                 ]
                 input[1] = "PRJ12345"
                 input[2] = false
+                input[3] = true
                 """
 
             }
@@ -64,6 +65,7 @@ nextflow_process {
                 ]
                 input[1] = "PRJ12345"
                 input[2] = false
+                input[3] = true
                 """
             }
         }

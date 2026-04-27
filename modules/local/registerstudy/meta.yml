@@ -39,6 +39,9 @@ input:
           JSON may be a plain list of dicts or a single dict of study records.
           Required fields per record: study_title, alias.
         pattern: "*.{json,csv,tsv}"
+  - - test_upload:
+        type: value
+        description: Whether to submit to the ENA test server (`true`) instead of production.
 
 output:
   - accessions:
