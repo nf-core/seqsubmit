@@ -262,7 +262,8 @@ workflow GENOMESUBMIT {
         study_accession_ch = channel.of(submission_study)
     } else {
         REGISTERSTUDY(
-            channel.of([[id: "study"], file(study_metadata)])
+            channel.of([[id: "study"], file(study_metadata)]),
+            test_upload
         )
         ch_versions = ch_versions.mix(REGISTERSTUDY.out.versions)
         study_accession_ch = REGISTERSTUDY.out.accessions
