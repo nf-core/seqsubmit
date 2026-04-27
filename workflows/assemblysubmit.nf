@@ -158,7 +158,8 @@ workflow ASSEMBLYSUBMIT {
     } else {
         // Register a new study using the study metadata file
         REGISTERSTUDY(
-            channel.of([[id: "study"], file(study_metadata)])
+            channel.of([[id: "study"], file(study_metadata)]),
+            test_upload
         )
         ch_versions = ch_versions.mix(REGISTERSTUDY.out.versions)
         study_accession_ch = REGISTERSTUDY.out.accessions
@@ -172,7 +173,8 @@ workflow ASSEMBLYSUBMIT {
     GENERATE_ASSEMBLY_MANIFEST(
         assemblies_with_coverage.join(assembly_metadata_csv),
         study_accession_ch.first(),
-        upload_tpa
+        upload_tpa,
+        test_upload
     )
 
     ENA_WEBIN_CLI_DOWNLOAD (
