@@ -97,8 +97,8 @@
                     "description": "Path to pre-downloaded checkm2 database",
                     "fa_icon": "fas fa-users-cog"
                 },
-                "checkm2_db_zenodo_id": {
-                    "type": "number",
+                "checkm2_db_download_id": {
+                    "type": "integer",
                     "description": "Zenodo ID for checkm2 database download",
                     "default": 14897628,
                     "fa_icon": "fas fa-users-cog"
