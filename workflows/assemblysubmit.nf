@@ -30,7 +30,13 @@ include { methodsDescriptionText                } from '../subworkflows/local/ut
 workflow ASSEMBLYSUBMIT {
 
     take:
-    ch_samplesheet // channel: samplesheet read in from --input
+    ch_samplesheet       // channel: samplesheet read in from --input
+    submission_study     // val: accession of the study to submit to (optional)
+    study_metadata       // val: path to study metadata file for study creation (used if no submission_study provided)
+    upload_tpa           // val: upload as TPA (Third Party Annotation)
+    test_upload          // val: true for test upload mode
+    webin_cli_version    // val: WebinCLI tool version to download and use for submission
+    webincli_submit      // val: true to validate and submit via WebinCLI, false to only validate
 
     main:
     ch_versions = channel.empty()
@@ -142,13 +148,13 @@ workflow ASSEMBLYSUBMIT {
     )
 
     def study_accession_ch
-    if (params.submission_study) {
+    if (submission_study) {
         // Use provided study accession directly
-        study_accession_ch = channel.of(params.submission_study)
+        study_accession_ch = channel.of(submission_study)
     } else {
         // Register a new study using the study metadata file
         REGISTERSTUDY(
-            channel.of([[id: "study"], file(params.study_metadata)])
+            channel.of([[id: "study"], file(study_metadata)])
         )
         ch_versions = ch_versions.mix(REGISTERSTUDY.out.versions)
         study_accession_ch = REGISTERSTUDY.out.accessions
@@ -162,19 +168,19 @@ workflow ASSEMBLYSUBMIT {
     GENERATE_ASSEMBLY_MANIFEST(
         assemblies_with_coverage.join(CREATE_ASSEMBLY_METADATA_CSV.out.csv),
         study_accession_ch.first(),
-        params.upload_tpa
+        upload_tpa
     )
     ch_versions = ch_versions.mix(GENERATE_ASSEMBLY_MANIFEST.out.versions.first())
 
     ENA_WEBIN_CLI_DOWNLOAD (
-        params.webin_cli_version
+        webin_cli_version
     )
 
     SUBMIT (
         assemblies_with_coverage.join(GENERATE_ASSEMBLY_MANIFEST.out.manifest),
         ENA_WEBIN_CLI_DOWNLOAD.out.webin_cli_jar,
-        params.test_upload,
-        params.webincli_submit
+        test_upload,
+        webincli_submit
     )
     ch_versions = ch_versions.mix(SUBMIT.out.versions)
 
