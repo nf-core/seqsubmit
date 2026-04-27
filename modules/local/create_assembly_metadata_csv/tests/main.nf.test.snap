@@ -1,0 +1,84 @@
+{
+    "test_create_assembly_metadata_csv": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test_sample",
+                            "run_accession": "ERR123456",
+                            "coverage": 50.5,
+                            "assembler": "metaspades",
+                            "assembler_version": "3.15.5"
+                        },
+                        "test_sample_assembly_metadata.csv:md5,0ad41b6b4e778fb03fc224bae9ba4529"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,1dbd8a6b5ae469b5f51d5c96b7ab3225"
+                ],
+                "csv": [
+                    [
+                        {
+                            "id": "test_sample",
+                            "run_accession": "ERR123456",
+                            "coverage": 50.5,
+                            "assembler": "metaspades",
+                            "assembler_version": "3.15.5"
+                        },
+                        "test_sample_assembly_metadata.csv:md5,0ad41b6b4e778fb03fc224bae9ba4529"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,1dbd8a6b5ae469b5f51d5c96b7ab3225"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.0",
+            "nextflow": "25.04.1"
+        },
+        "timestamp": "2026-04-27T14:51:27.130061"
+    },
+    "test_create_assembly_metadata_csv - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "stub_sample",
+                            "run_accession": "ERR999999",
+                            "coverage": 75.0,
+                            "assembler": "megahit",
+                            "assembler_version": "1.2.9"
+                        },
+                        "stub_sample_assembly_metadata.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,1dbd8a6b5ae469b5f51d5c96b7ab3225"
+                ],
+                "csv": [
+                    [
+                        {
+                            "id": "stub_sample",
+                            "run_accession": "ERR999999",
+                            "coverage": 75.0,
+                            "assembler": "megahit",
+                            "assembler_version": "1.2.9"
+                        },
+                        "stub_sample_assembly_metadata.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,1dbd8a6b5ae469b5f51d5c96b7ab3225"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.0",
+            "nextflow": "25.04.1"
+        },
+        "timestamp": "2026-04-27T14:51:32.249848"
+    }
+}

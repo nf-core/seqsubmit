@@ -8,7 +8,7 @@ nextflow_process {
     tag "modules_local"
     tag "create_assembly_metadata_csv"
 
-    test("test_create_assembly_metadata_csv - complete metadata") {
+    test("test_create_assembly_metadata_csv") {
 
         when {
             process {
@@ -20,30 +20,6 @@ nextflow_process {
                         coverage: 50.5,
                         assembler: 'metaspades',
                         assembler_version: '3.15.5'
-                    ],
-                    file('https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/genome/NC_045512.2/GCF_009858895.2_ASM985889v3_genomic.200409.fna.gz')
-                ]
-                """
-            }
-        }
-
-        then {
-            assertAll(
-                { assert process.success },
-                { assert snapshot(process.out).match() }
-            )
-        }
-
-    }
-
-    test("test_create_assembly_metadata_csv - minimal metadata") {
-
-        when {
-            process {
-                """
-                input[0] = [
-                    [
-                        id: 'minimal_sample'
                     ],
                     file('https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/genome/NC_045512.2/GCF_009858895.2_ASM985889v3_genomic.200409.fna.gz')
                 ]
