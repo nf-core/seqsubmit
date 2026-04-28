@@ -35,9 +35,9 @@ input:
   - - test_upload:
         type: value
         description: Whether to run ENA Webin-CLI in test mode.
-  - - webincli_submit:
+  - - webincli_mode:
         type: value
-        description: Whether to submit (`true`) or only validate (`false`).
+        description: "Webin-CLI mode. Allowed values: `submit` or `validate`."
 
 output:
   - accessions:
