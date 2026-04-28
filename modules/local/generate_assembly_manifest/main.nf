@@ -30,7 +30,7 @@ process GENERATE_ASSEMBLY_MANIFEST {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        assembly_uploader: \$(assembly_manifest --version)
+        assembly_uploader: \$(assembly_manifest --version | sed 's/assembly_uploader //')
     END_VERSIONS
     """
 
@@ -43,7 +43,7 @@ process GENERATE_ASSEMBLY_MANIFEST {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        assembly_uploader: \$(assembly_manifest --version)
+        assembly_uploader: \$(assembly_manifest --version | sed 's/assembly_uploader //')
     END_VERSIONS
     """
 }
