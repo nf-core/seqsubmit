@@ -359,7 +359,7 @@ workflow GENOMESUBMIT {
 
     ch_multiqc_files = ch_multiqc_files.mix(genome_metadata_csv)
     ch_multiqc_files = ch_multiqc_files.mix(CREATE_MANIFESTS.out.upload_registered_mags)
-    ch_multiqc_files = ch_multiqc_files.mix(SUBMIT.out.accessions.map{meta, accessions -> accessions})
+    ch_multiqc_files = ch_multiqc_files.mix(genomes_accessions)
     ch_multiqc_files = ch_multiqc_files.mix(ch_collated_versions)
     ch_multiqc_files = ch_multiqc_files.mix(
         ch_methods_description.collectFile(

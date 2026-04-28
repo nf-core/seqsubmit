@@ -19,7 +19,9 @@ custom_content:
     - assembly_metadata
     - genome_metadata
     - sample_registration
-    - submission_results
+    - submission_results_assemblies
+    - submission_results_genomes
+
 sp:
   assembly_metadata:
     fn_re: '.*assembly_metadata.csv$'
@@ -27,8 +29,10 @@ sp:
     fn_re: '.*genomes_metadata.tsv$'
   sample_registration:
     fn_re: '.*registered.*\.tsv$'
-  submission_results:
-    fn_re: '.*_accessions\.tsv$'
+  submission_results_genomes:
+    fn_re: '.genomes_accessions\.tsv$'
+  submission_results_assemblies:
+    fn_re: '.assemblies_accessions\.tsv$'
 
 # Custom data configuration
 custom_data:
@@ -116,10 +120,39 @@ custom_data:
         title: 'ENA sample accession'
         description: 'Assigned accession after submission'
 
-  submission_results:
-    id: 'submission_results'
+  submission_results_assemblies:
+    id: 'submission_results_assemblies'
     section_name: 'Submission results'
-    description: 'Accessions assigned during upload process'
+    description: 'Accessions assigned during upload process. 
+     
+    As all assemblies in ENA are submitted as ‘analyses’, for each assembly submission, Webin will report a unique accession number that starts with ERZ. 
+    For most assemblies, this accession number is for internal processing only and will not be visible in the browser. 
+    As a result, for most assemblies you will receive additional post-processing accession numbers starting with GCA_. 
+    Always make a note of any accessions you receive as these are the unique identifiers for each of your submissions to ENA. 
+    The ERZ accession can be used to access information on the progress of the internal processing of each assembly through the [Webin Portal](https://ena-docs.readthedocs.io/en/latest/submit/general-guide/submissions-portal.html). 
+    You can also use this service to see the assigned chromosome, contig, and scaffold accessions. 
+    Please follow the Webin Portal link to learn more about this. 
+    See individual submission guidelines for information on what accessions you will receive for each assembly type. 
+    More information about accessions can be found in ENA docs: https://ena-docs.readthedocs.io/en/latest/submit/assembly.html#accessions.'
+    file_format: 'tsv'
+    plot_type: 'table'
+    pconfig:
+      id: 'Assemblies assigned accessions'
+      title: 'Submission results'
+      col1_header: 'ID'
+      col2_header: 'ENA accession'
+    headers:
+      alias:
+        title: 'ID'
+        description: 'FASTA file for upload'
+      accession:
+        title: 'ENA accession'
+        description: 'Assigned accession after submission'
+
+  submission_results_genomes:
+    id: 'submission_results_genomes'
+    section_name: 'Submission results'
+    description: 'Accessions assigned during upload process.'
     file_format: 'tsv'
     plot_type: 'table'
     pconfig:
@@ -134,4 +167,3 @@ custom_data:
       accession:
         title: 'ENA accession'
         description: 'Assigned accession after submission'
-

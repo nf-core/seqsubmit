@@ -50,6 +50,12 @@ When `--mode metagenomic_assemblies` is used, results are written under `metagen
 
 Assembly study registration, manifest generation, and Webin-CLI submission are executed by the workflow, but their intermediate outputs are not currently published into `--outdir` by the pipeline.
 
+> [!NOTE]
+>    As all assemblies in ENA are submitted as ‘analyses’, for each assembly submission, Webin will report a unique accession number that starts with ERZ. 
+>    For most assemblies, this accession number is for **internal processing only** and will not be visible in the browser. 
+>    As a result, for most assemblies you will receive additional post-processing accession numbers starting with GCA_. 
+>    More information about accessions can be found in ENA docs: https://ena-docs.readthedocs.io/en/latest/submit/assembly.html#accessions.'
+
 ## Common outputs
 
 ### MultiQC
