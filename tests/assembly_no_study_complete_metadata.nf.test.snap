@@ -1,10 +1,22 @@
 {
     "-profile test_assembly_no_study_complete_metadata": {
         "content": [
-            6,
+            9,
             {
+                "CREATE_ASSEMBLY_METADATA_CSV": {
+                    "bash": "5.2.37(1)-release"
+                },
+                "FASTAVALIDATOR": {
+                    "py_fasta_validator": 0.6
+                },
+                "GENERATE_ASSEMBLY_MANIFEST": {
+                    "assembly_uploader": "1.3.4"
+                },
                 "REGISTERSTUDY": {
                     "mgnify-pipelines-toolkit": "1.4.21"
+                },
+                "SUBMIT": {
+                    "python": "3.11.15"
                 },
                 "Workflow": {
                     "nf-core/seqsubmit": "v1.0.0dev"
@@ -16,7 +28,9 @@
                 "metagenomic_assemblies/complete_metadata/upload",
                 "metagenomic_assemblies/complete_metadata/upload/webin_cli",
                 "metagenomic_assemblies/complete_metadata/upload/webin_cli/complete_metadata_accessions.tsv",
-                "metagenomic_assemblies/complete_metadata_assembly_metadata.csv",
+                "metagenomic_assemblies/upload",
+                "metagenomic_assemblies/upload/assemblies_metadata.csv",
+                "metagenomic_assemblies/upload/assigned_accessions.tsv",
                 "multiqc",
                 "multiqc/multiqc_data",
                 "multiqc/multiqc_data/multiqc.log",
@@ -29,7 +43,7 @@
                 "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
             ],
             [
-                "complete_metadata_assembly_metadata.csv:md5,d5b1575095ece78d988395b874440bef",
+                "assemblies_metadata.csv:md5,8e4479dcf7b71a1e250789cd63bf0a6e",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
             ]
         ],
@@ -37,6 +51,6 @@
             "nf-test": "0.9.0",
             "nextflow": "25.04.1"
         },
-        "timestamp": "2026-03-27T12:20:59.186788"
+        "timestamp": "2026-04-28T11:35:18.443163"
     }
 }

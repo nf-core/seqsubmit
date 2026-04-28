@@ -4,19 +4,22 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { COVERM_CONTIG                   } from '../modules/nf-core/coverm/contig/main'
-include { FASTAVALIDATOR                  } from '../modules/nf-core/fastavalidator/main'
-include { CREATE_ASSEMBLY_METADATA_CSV    } from '../modules/local/create_assembly_metadata_csv/main'
-include { GENERATE_ASSEMBLY_MANIFEST      } from '../modules/local/generate_assembly_manifest/main'
-include { REGISTERSTUDY                   } from '../modules/local/registerstudy/main'
-include { ENA_WEBIN_CLI_WRAPPER as SUBMIT } from '../modules/local/ena_webin_cli_wrapper'
-include { ENA_WEBIN_CLI_DOWNLOAD          } from '../modules/local/ena_webin_cli_download'
+include { COVERM_CONTIG                         } from '../modules/nf-core/coverm/contig/main'
+include { FASTAVALIDATOR                        } from '../modules/nf-core/fastavalidator/main'
+include { CREATE_ASSEMBLY_METADATA_CSV          } from '../modules/local/create_assembly_metadata_csv/main'
+include { GENERATE_ASSEMBLY_MANIFEST            } from '../modules/local/generate_assembly_manifest/main'
+include { REGISTERSTUDY                         } from '../modules/local/registerstudy/main'
+include { ENA_WEBIN_CLI_WRAPPER as SUBMIT       } from '../modules/local/ena_webin_cli_wrapper'
+include { ENA_WEBIN_CLI_DOWNLOAD                } from '../modules/local/ena_webin_cli_download'
 
-include { MULTIQC                         } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap                } from 'plugin/nf-schema'
-include { paramsSummaryMultiqc            } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText          } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
+include { FIND_CONCATENATE as CONCAT_METADATA   } from '../modules/nf-core/find/concatenate/main'
+include { FIND_CONCATENATE as CONCAT_ACCESSIONS } from '../modules/nf-core/find/concatenate/main'
+include { MULTIQC                               } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap                      } from 'plugin/nf-schema'
+
+include { paramsSummaryMultiqc                  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML                } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText                } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -132,6 +135,12 @@ workflow ASSEMBLYSUBMIT {
     )
     ch_versions = ch_versions.mix(CREATE_ASSEMBLY_METADATA_CSV.out.versions)
 
+    // Concatenate assembly metadata CSVs into single file to publish
+    CONCAT_METADATA (
+        CREATE_ASSEMBLY_METADATA_CSV.out.csv.map { _meta, file -> file }.collect().map { files -> [ [id: "assemblies_metadata"], files ] },
+        'true' // skip_header - we want to keep the header from the first file and skip it for the rest
+    )
+
     def study_accession_ch
     if (params.submission_study) {
         // Use provided study accession directly
@@ -159,13 +168,18 @@ workflow ASSEMBLYSUBMIT {
     ENA_WEBIN_CLI_DOWNLOAD (
         params.webin_cli_version
     )
-    ch_versions = ch_versions.mix(ENA_WEBIN_CLI_DOWNLOAD.out.versions)
 
     SUBMIT (
         assemblies_with_coverage.join(GENERATE_ASSEMBLY_MANIFEST.out.manifest),
         ENA_WEBIN_CLI_DOWNLOAD.out.webin_cli_jar
     )
     ch_versions = ch_versions.mix(SUBMIT.out.versions)
+
+    // Concatenate accessions into single file to publish
+    CONCAT_ACCESSIONS (
+        SUBMIT.out.accessions.map { _meta, file -> file }.collect().map { files -> [ [id: "assigned_accessions"], files ] },
+        'true' // skip_header - we want to keep the header from the first file and skip it for the rest
+    )
 
     //
     // Collate and save software versions

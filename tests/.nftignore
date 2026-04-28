@@ -22,3 +22,4 @@ pipeline_info/*.{html,json,txt,yml}
 **/bin_upload/genome_samples.xml
 **/rna/trnascanse/*.stats
 **/rna/trnascanse/*.log
+**/upload/assigned_accessions.tsv

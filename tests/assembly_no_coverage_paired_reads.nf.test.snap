@@ -1,8 +1,23 @@
 {
     "-profile test_assembly_no_coverage_paired_reads": {
         "content": [
-            6,
+            9,
             {
+                "COVERM_CONTIG": {
+                    "coverm": "0.7.0"
+                },
+                "CREATE_ASSEMBLY_METADATA_CSV": {
+                    "bash": "5.2.37(1)-release"
+                },
+                "FASTAVALIDATOR": {
+                    "py_fasta_validator": 0.6
+                },
+                "GENERATE_ASSEMBLY_MANIFEST": {
+                    "assembly_uploader": "1.3.4"
+                },
+                "SUBMIT": {
+                    "python": "3.11.15"
+                },
                 "Workflow": {
                     "nf-core/seqsubmit": "v1.0.0dev"
                 }
@@ -15,7 +30,9 @@
                 "metagenomic_assemblies/no_coverage_paired_reads/upload",
                 "metagenomic_assemblies/no_coverage_paired_reads/upload/webin_cli",
                 "metagenomic_assemblies/no_coverage_paired_reads/upload/webin_cli/no_coverage_paired_reads_accessions.tsv",
-                "metagenomic_assemblies/no_coverage_paired_reads_assembly_metadata.csv",
+                "metagenomic_assemblies/upload",
+                "metagenomic_assemblies/upload/assemblies_metadata.csv",
+                "metagenomic_assemblies/upload/assigned_accessions.tsv",
                 "multiqc",
                 "multiqc/multiqc_data",
                 "multiqc/multiqc_data/multiqc.log",
@@ -29,7 +46,7 @@
             ],
             [
                 "no_coverage_paired_reads.depth.txt:md5,bb5f99e74d21df3c73e0ae0f388bcbcb",
-                "no_coverage_paired_reads_assembly_metadata.csv:md5,91a2616ccedc6bb93c2209153bec50f0",
+                "assemblies_metadata.csv:md5,60706c21c030ba38af7a402f5e753fd5",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
             ]
         ],
@@ -37,6 +54,6 @@
             "nf-test": "0.9.0",
             "nextflow": "25.04.1"
         },
-        "timestamp": "2026-03-27T12:17:51.720414"
+        "timestamp": "2026-04-28T11:31:55.015806"
     }
 }
