@@ -3,25 +3,27 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { GENOME_UPLOAD as CREATE_MANIFESTS } from '../modules/local/genome_upload'
-include { ENA_WEBIN_CLI_WRAPPER as SUBMIT   } from '../modules/local/ena_webin_cli_wrapper'
-include { ENA_WEBIN_CLI_DOWNLOAD            } from '../modules/local/ena_webin_cli_download'
-include { REGISTERSTUDY                     } from '../modules/local/registerstudy/main'
-include { RENAME_FASTA_FOR_CATPACK          } from '../modules/local/rename_fasta_for_catpack'
-include { CREATE_GENOME_METADATA_TSV        } from '../modules/local/create_genome_metadata_tsv/main'
+include { GENOME_UPLOAD as CREATE_MANIFESTS     } from '../modules/local/genome_upload'
+include { ENA_WEBIN_CLI_WRAPPER as SUBMIT       } from '../modules/local/ena_webin_cli_wrapper'
+include { ENA_WEBIN_CLI_DOWNLOAD                } from '../modules/local/ena_webin_cli_download'
+include { REGISTERSTUDY                         } from '../modules/local/registerstudy/main'
+include { RENAME_FASTA_FOR_CATPACK              } from '../modules/local/rename_fasta_for_catpack'
+include { CREATE_GENOME_METADATA_TSV            } from '../modules/local/create_genome_metadata_tsv/main'
 
-include { FASTAVALIDATOR                    } from '../modules/nf-core/fastavalidator/main'
-include { COVERM_GENOME                     } from '../modules/nf-core/coverm/genome'
-include { MULTIQC                           } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap                  } from 'plugin/nf-schema'
+include { FASTAVALIDATOR                        } from '../modules/nf-core/fastavalidator/main'
+include { COVERM_GENOME                         } from '../modules/nf-core/coverm/genome'
+include { FIND_CONCATENATE as CONCAT_METADATA   } from '../modules/nf-core/find/concatenate/main'
+include { FIND_CONCATENATE as CONCAT_ACCESSIONS } from '../modules/nf-core/find/concatenate/main'
+include { MULTIQC                               } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap                      } from 'plugin/nf-schema'
 
-include { GENOME_EVALUATION                 } from '../subworkflows/local/genome_evaluation'
-include { RNA_DETECTION                     } from '../subworkflows/local/rna_detection'
-include { FASTA_CLASSIFY_CATPACK            } from '../subworkflows/nf-core/fasta_classify_catpack/main'
+include { GENOME_EVALUATION                     } from '../subworkflows/local/genome_evaluation'
+include { RNA_DETECTION                         } from '../subworkflows/local/rna_detection'
+include { FASTA_CLASSIFY_CATPACK                } from '../subworkflows/nf-core/fasta_classify_catpack/main'
 
-include { paramsSummaryMultiqc              } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML            } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText            } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
+include { paramsSummaryMultiqc                  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML                } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText                } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -223,11 +225,10 @@ workflow GENOMESUBMIT {
     ch_versions = ch_versions.mix(CREATE_GENOME_METADATA_TSV.out.versions)
 
     // Collect all TSV rows into a single file
-    genome_metadata_tsv = CREATE_GENOME_METADATA_TSV.out.tsv
-        .collectFile(
-            name: 'genomes_metadata.tsv',
-            storeDir: "${params.outdir}/${params.mode}"
-        )
+    CONCAT_METADATA (
+        CREATE_GENOME_METADATA_TSV.out.tsv.map { _meta, file -> file }.collect().map { files -> [ [id: "genomes_metadata"], files ] },
+        'true' // skip_header - we want to keep the header from the first file and skip it for the rest
+    )
 
     // --------- Register study if accession not provided
     def study_accession_ch
@@ -248,7 +249,7 @@ workflow GENOMESUBMIT {
     // --------- Generate manifests
     CREATE_MANIFESTS(
         fasta_updated_with_stats.map{_meta, fasta -> fasta}.collect(),
-        genome_metadata_tsv,
+        CONCAT_METADATA.out.file_out.map { _meta, file -> file }.first(),
         params.mode,     // mags or bins
         study_accession_ch.first()
     )
@@ -281,6 +282,12 @@ workflow GENOMESUBMIT {
     SUBMIT (
         ch_combined,
         ENA_WEBIN_CLI_DOWNLOAD.out.webin_cli_jar
+    )
+
+    // Concatenate accessions into single file to publish
+    CONCAT_ACCESSIONS (
+        SUBMIT.out.accessions.map { _meta, file -> file }.collect().map { files -> [ [id: "assigned_accessions"], files ] },
+        'true' // skip_header - we want to keep the header from the first file and skip it for the rest
     )
 
     //

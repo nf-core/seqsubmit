@@ -1,15 +1,17 @@
 {
     "-profile test_mag_no_taxonomy": {
         "content": [
-            9,
+            12,
             {
+                "CREATE_GENOME_METADATA_TSV": {
+                    "bash": "5.2.37(1)-release"
+                },
                 "Workflow": {
                     "nf-core/seqsubmit": "v1.0.0dev"
                 }
             },
             [
                 "mags",
-                "mags/genomes_metadata.csv",
                 "mags/no_taxonomy",
                 "mags/no_taxonomy/taxonomy",
                 "mags/no_taxonomy/taxonomy/no_taxonomy.bin2classification.txt",
@@ -18,6 +20,8 @@
                 "mags/no_taxonomy/upload/webin_cli",
                 "mags/no_taxonomy/upload/webin_cli/no_taxonomy_accessions.tsv",
                 "mags/upload",
+                "mags/upload/assigned_accessions.tsv",
+                "mags/upload/genomes_metadata.tsv",
                 "mags/upload/manifests",
                 "mags/upload/manifests/results",
                 "mags/upload/manifests/results/MAG_upload",
@@ -38,9 +42,9 @@
                 "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
             ],
             [
-                "genomes_metadata.csv:md5,b1d01539d787b77e30b9bacd5b23d51f",
                 "no_taxonomy.bin2classification.txt:md5,e24c109efe807c7044a866999fd736f1",
                 "no_taxonomy.txt:md5,0f2082d3e397fd630d605dd60993b131",
+                "genomes_metadata.tsv:md5,b1d01539d787b77e30b9bacd5b23d51f",
                 "ENA_backup.json:md5,e339bef4b1e1e11c37ef72f3d9ef2c93",
                 "submission.xml:md5,4b7d1d7e1b883a3eac57e1267943a8d6",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
@@ -50,6 +54,6 @@
             "nf-test": "0.9.0",
             "nextflow": "25.04.1"
         },
-        "timestamp": "2026-03-27T12:43:17.099315"
+        "timestamp": "2026-04-28T12:00:50.513998"
     }
 }

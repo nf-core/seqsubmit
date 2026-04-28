@@ -8,7 +8,6 @@
                 }
             },
             [
-                "mags",
                 "multiqc",
                 "multiqc/multiqc_data",
                 "multiqc/multiqc_data/multiqc.log",
@@ -28,6 +27,6 @@
             "nf-test": "0.9.0",
             "nextflow": "25.04.1"
         },
-        "timestamp": "2026-03-27T12:43:36.609186"
+        "timestamp": "2026-04-28T12:01:22.175715"
     }
 }
