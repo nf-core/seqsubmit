@@ -150,11 +150,11 @@ The `mags`/`bins` workflow requires databases for completeness/contamination est
 
 ### Optional parameters:
 
-| Parameter           | Description                                                                              |
-| ------------------- | ---------------------------------------------------------------------------------------- |
-| `--upload_tpa`      | Flag to control the type of assembly study (third party assembly or not). Default: false |
-| `--test_upload`     | Upload to TEST ENA server instead of LIVE. Default: true                                 |
-| `--webincli_submit` | If set to false, submissions will be validated, but not submitted. Default: true         |
+| Parameter         | Description                                                                              |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| `--upload_tpa`    | Flag to control the type of assembly study (third party assembly or not). Default: false |
+| `--test_upload`   | Upload to TEST ENA server instead of LIVE. Default: true                                 |
+| `--webincli_mode` | Choose Webin-CLI mode: `submit` or `validate`. Default: `submit`                         |
 
 General command template:
 
@@ -168,7 +168,7 @@ nextflow run nf-core/seqsubmit \
    --outdir <outdir>
 ```
 
-Validation run (submission to the ENA TEST server) in `mags` mode:
+Test run (submission to the ENA TEST server) in `mags` mode:
 
 ```bash
 nextflow run nf-core/seqsubmit \
@@ -177,12 +177,12 @@ nextflow run nf-core/seqsubmit \
    --input assets/samplesheet_genomes.csv \
    --submission_study <your_study> \
    --centre_name TEST_CENTER \
-   --webincli_submit true \
+   --webincli_mode submit \
    --test_upload true \
    --outdir results/validate_mags
 ```
 
-Validation run (submission to the ENA TEST server) in `metagenomic_assemblies` mode:
+Test run (submission to the ENA TEST server) in `metagenomic_assemblies` mode:
 
 ```bash
 nextflow run nf-core/seqsubmit \
@@ -191,7 +191,7 @@ nextflow run nf-core/seqsubmit \
    --input assets/samplesheet_assembly.csv \
    --submission_study <your_study> \
    --centre_name TEST_CENTER \
-   --webincli_submit true \
+   --webincli_mode submit \
    --test_upload true \
    --outdir results/validate_assemblies
 ```
@@ -205,7 +205,7 @@ nextflow run nf-core/seqsubmit \
    --input assets/samplesheet_assembly.csv \
    --submission_study PRJEB98843 \
    --test_upload false \
-   --webincli_submit true \
+   --webincli_mode submit \
    --outdir results/live_assembly
 ```
 

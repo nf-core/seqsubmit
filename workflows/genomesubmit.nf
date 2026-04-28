@@ -45,7 +45,7 @@ workflow GENOMESUBMIT {
     upload_tpa               // val: upload as TPA (Third Party Annotation)
     test_upload              // val: true for test upload mode
     webin_cli_version        // val: WebinCLI tool version to download and use for submission
-    webincli_submit          // val: true to validate and submit via WebinCLI, false to only validate
+    webincli_mode            // val: either 'validate' or 'submit' to specify WebinCLI mode of operation
 
     main:
 
@@ -346,7 +346,7 @@ workflow GENOMESUBMIT {
         ch_combined,
         ENA_WEBIN_CLI_DOWNLOAD.out.webin_cli_jar,
         test_upload,
-        webincli_submit
+        webincli_mode
     )
 
     //
