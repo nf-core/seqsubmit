@@ -27,7 +27,7 @@
             },
             {
                 "GENERATE_ASSEMBLY_MANIFEST": {
-                    "assembly_uploader": "assembly_uploader 1.3.4"
+                    "assembly_uploader": "1.3.4"
                 }
             }
         ],
@@ -41,7 +41,7 @@
         "content": [
             {
                 "GENERATE_ASSEMBLY_MANIFEST": {
-                    "assembly_uploader": "assembly_uploader 1.3.4"
+                    "assembly_uploader": "1.3.4"
                 }
             }
         ],
