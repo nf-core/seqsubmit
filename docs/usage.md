@@ -214,10 +214,10 @@ Key parameters:
 | `--submission_study` | ENA study accession (PRJ/ERP) to submit the data to. For metagenomic assemblies, this is the paper's ENA Assembly Project accession. |
 | `--centre_name`      | Name of the submitter's organisation.                                                                                                |
 | `--test_upload`      | Submit to the ENA TEST server instead of the LIVE server.                                                                            |
-| `--webincli_submit`  | If `true`, submit to ENA. If `false`, validate the submission without uploading.                                                     |
+| `--webincli_mode`    | Webin-CLI mode for ENA interaction: `submit` uploads data, `validate` performs validation only.                                      |
 | `--upload_tpa`       | Mark assemblies as third party assemblies when required.                                                                             |
 
-Validation example for `mags` run with docker:
+Test example for `mags` run with docker:
 
 ```bash
 nextflow run nf-core/seqsubmit \
@@ -226,12 +226,12 @@ nextflow run nf-core/seqsubmit \
     --input assets/samplesheet_genomes.csv \
     --submission_study <your_study> \
     --centre_name TEST_CENTER \
-    --webincli_submit true \
+    --webincli_mode submit \
     --test_upload true \
     --outdir results/validate_mags
 ```
 
-Validation example for `metagenomic_assemblies` run with docker:
+Test example for `metagenomic_assemblies` run with docker:
 
 ```bash
 nextflow run nf-core/seqsubmit \
@@ -240,7 +240,7 @@ nextflow run nf-core/seqsubmit \
     --input assets/samplesheet_assembly.csv \
     --submission_study <your_study> \
     --centre_name TEST_CENTER \
-    --webincli_submit true \
+    --webincli_mode submit \
     --test_upload true \
     --outdir results/validate_assemblies
 ```
