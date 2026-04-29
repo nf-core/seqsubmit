@@ -24,9 +24,9 @@ custom_content:
 
 sp:
   assembly_metadata:
-    fn_re: '.*assemblies_metadata.csv$'
+    fn_re: ".*assemblies_metadata.csv$"
   genome_metadata:
-    fn_re: '.*genomes_metadata.tsv$'
+    fn_re: ".*genomes_metadata.tsv$"
   sample_registration:
     fn_re: '.*registered.*\.tsv$'
   submission_results_genomes:
@@ -36,133 +36,131 @@ sp:
 
 # Custom data configuration
 custom_data:
-
   assembly_metadata:
-    id: 'assembly_metadata'
-    section_name: 'Assembly metadata'
-    description: 'Metadata for submitted assemblies'
-    file_format: 'csv'
-    plot_type: 'table'
+    id: "assembly_metadata"
+    section_name: "Assembly metadata"
+    description: "Metadata for submitted assemblies"
+    file_format: "csv"
+    plot_type: "table"
     pconfig:
-      id: 'assembly_metadata'
-      title: 'Assembly metadata table'
+      id: "assembly_metadata"
+      title: "Assembly metadata table"
     headers:
       runs:
-        title: 'Runs'
+        title: "Runs"
       assembly_coverage:
-        title: 'Coverage'
+        title: "Coverage"
       assembler:
         title: "Assembler"
       assembler_version:
         title: "Version"
       file_path:
         title: "Filepath"
-      sample:
-        "Sample"
+      sample: "Sample"
 
   genome_metadata:
-    id: 'genome_metadata'
-    section_name: 'Genome metadata'
-    description: 'Metadata for submitted genomes'
-    file_format: 'tsv'
-    plot_type: 'table'
+    id: "genome_metadata"
+    section_name: "Genome metadata"
+    description: "Metadata for submitted genomes"
+    file_format: "tsv"
+    plot_type: "table"
     pconfig:
-      id: 'genome_metadata'
-      title: 'Genome metadata table'
+      id: "genome_metadata"
+      title: "Genome metadata table"
     headers:
       genome_name:
-        title: 'Genome name'
+        title: "Genome name"
       genome_path:
-        title: 'Genome path'
+        title: "Genome path"
       accessions:
-        title: 'Accession'
+        title: "Accession"
       assembly_software:
-        title: 'Assembly software'
+        title: "Assembly software"
       binning_software:
-        title: 'Binning software'
+        title: "Binning software"
       binning_parameters:
-        title: 'Binning parameters'
+        title: "Binning parameters"
       stats_generation_software:
-        title: 'Stats software'
+        title: "Stats software"
       completeness:
-        title: 'Completeness (%)'
+        title: "Completeness (%)"
       contamination:
-        title: 'Contamination (%)'
+        title: "Contamination (%)"
       genome_coverage:
-        title: 'Coverage'
+        title: "Coverage"
       metagenome:
-        title: 'Metagenome'
+        title: "Metagenome"
       co-assembly:
-        title: 'Co-assembly'
+        title: "Co-assembly"
       broad_environment:
-        title: 'Broad environment'
+        title: "Broad environment"
       local_environment:
-        title: 'Local environment'
+        title: "Local environment"
       environmental_medium:
-        title: 'Environmental medium'
+        title: "Environmental medium"
       rRNA_presence:
-        title: 'rRNA presence'
+        title: "rRNA presence"
       NCBI_lineage:
-        title: 'NCBI lineage'
+        title: "NCBI lineage"
 
   sample_registration:
-    file_format: 'tsv'
-    plot_type: 'table'
+    file_format: "tsv"
+    plot_type: "table"
     pconfig:
       id: "sample_registration"
-      title: 'Sample registration assigned accessions'
+      title: "Sample registration assigned accessions"
     headers:
       alias:
-        title: 'ID'
-        description: 'FASTA file for upload'
+        title: "ID"
+        description: "FASTA file for upload"
       accession:
-        title: 'ENA sample accession'
-        description: 'Assigned accession after submission'
+        title: "ENA sample accession"
+        description: "Assigned accession after submission"
 
   submission_results_assemblies:
-    id: 'submission_results_assemblies'
-    section_name: 'Submission results'
-    description: 'Accessions assigned during upload process. 
-     
-    As all assemblies in ENA are submitted as ‘analyses’, for each assembly submission, Webin will report a unique accession number that starts with ERZ. 
-    For most assemblies, this accession number is for internal processing only and will not be visible in the browser. 
-    As a result, for most assemblies you will receive additional post-processing accession numbers starting with GCA_. 
-    Always make a note of any accessions you receive as these are the unique identifiers for each of your submissions to ENA. 
-    The ERZ accession can be used to access information on the progress of the internal processing of each assembly through the [Webin Portal](https://ena-docs.readthedocs.io/en/latest/submit/general-guide/submissions-portal.html). 
-    You can also use this service to see the assigned chromosome, contig, and scaffold accessions. 
-    Please follow the Webin Portal link to learn more about this. 
-    See individual submission guidelines for information on what accessions you will receive for each assembly type. 
-    More information about accessions can be found in ENA docs: https://ena-docs.readthedocs.io/en/latest/submit/assembly.html#accessions.'
-    file_format: 'tsv'
-    plot_type: 'table'
+    id: "submission_results_assemblies"
+    section_name: "Submission results"
+    description: >
+      Accessions assigned during upload process.
+      As all assemblies in ENA are submitted as ‘analyses’, for each assembly submission, Webin will report a unique accession number that starts with ERZ.
+      For most assemblies, this accession number is for internal processing only and will not be visible in the browser.
+      As a result, for most assemblies you will receive additional post-processing accession numbers starting with GCA_.
+      Always make a note of any accessions you receive as these are the unique identifiers for each of your submissions to ENA.
+      The ERZ accession can be used to access information on the progress of the internal processing of each assembly through the [Webin Portal](https://ena-docs.readthedocs.io/en/latest/submit/general-guide/submissions-portal.html).
+      You can also use this service to see the assigned chromosome, contig, and scaffold accessions.
+      Please follow the Webin Portal link to learn more about this.
+      See individual submission guidelines for information on what accessions you will receive for each assembly type.
+      More information about accessions can be found in ENA docs: https://ena-docs.readthedocs.io/en/latest/submit/assembly.html#accessions.
+    file_format: "tsv"
+    plot_type: "table"
     pconfig:
-      id: 'Assemblies assigned accessions'
-      title: 'Submission results'
-      col1_header: 'ID'
-      col2_header: 'ENA accession'
+      id: "Assemblies assigned accessions"
+      title: "Submission results"
+      col1_header: "ID"
+      col2_header: "ENA accession"
     headers:
       alias:
-        title: 'ID'
-        description: 'FASTA file for upload'
+        title: "ID"
+        description: "FASTA file for upload"
       accession:
-        title: 'ENA accession'
-        description: 'Assigned accession after submission'
+        title: "ENA accession"
+        description: "Assigned accession after submission"
 
   submission_results_genomes:
-    id: 'submission_results_genomes'
-    section_name: 'Submission results'
-    description: 'Accessions assigned during upload process.'
-    file_format: 'tsv'
-    plot_type: 'table'
+    id: "submission_results_genomes"
+    section_name: "Submission results"
+    description: "Accessions assigned during upload process."
+    file_format: "tsv"
+    plot_type: "table"
     pconfig:
-      id: 'Genomes assigned accessions'
-      title: 'Submission results'
-      col1_header: 'ID'
-      col2_header: 'ENA accession'
+      id: "Genomes assigned accessions"
+      title: "Submission results"
+      col1_header: "ID"
+      col2_header: "ENA accession"
     headers:
       alias:
-        title: 'ID'
-        description: 'FASTA file for upload'
+        title: "ID"
+        description: "FASTA file for upload"
       accession:
-        title: 'ENA accession'
-        description: 'Assigned accession after submission'
+        title: "ENA accession"
+        description: "Assigned accession after submission"

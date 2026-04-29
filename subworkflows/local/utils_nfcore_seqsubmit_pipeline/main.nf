@@ -185,44 +185,43 @@ def validateInputSamplesheet(input) {
 def toolCitationText() {
     // Can use ternary operators to dynamically construct based conditions, e.g. params["run_xyz"] ? "Tool (Foo et al. 2023)" : "",
     // Uncomment function in methodsDescriptionText to render in MultiQC report
-    // fastafalidator
 
     def mgnify_tools = [
-        "assembly_uploader (Richardson et al. 2023)",
-        "genome_uploader (Gurbich et al. 2023)"
+        params.mode == "metagenomic_assemblies" ? "Manifests for metagenomic assemblies upload were created by assembly_uploader (Richardson et al. 2023)." : "",
+        params.mode != "metagenomic_assemblies" ? "Samples registration and upload manifests generation for bins/MAGs were done by genome_uploader (Gurbich et al. 2023).": ""
     ].join(' ').trim()
 
     def ena_tools = [
-        "webin-cli (European Nucleotide Archive)"
+        "Submission to ENA was done by webin-cli (David, Yuan, et al. 2025)."
     ].join(' ').trim()
 
     def preprocessing_tools = [
-        "py_fasta_validator (Edwards et al. 2023)"
+        "Input FASTA validation was done by py_fasta_validator (Edwards et al. 2023)."
     ].join(' ').trim()
 
     def stats_tools = [
-        "CheckM2 (Chklovski et al. 2023)",
-        "CoverM (Aroney et el. 2025)"
+        params.mode != "metagenomic_assemblies" ? "Completeness and contamination metrics was performed by CheckM2 (Chklovski et al. 2023)." : "",
+        "Coverage calculation for metagenomic assemblies/bins/MAGs was done by CoverM (Aroney et el. 2025)."
     ].join(' ').trim()
 
     def taxonomy_tools = [
-        "CAT_pack (Von Meijenfeldt et al. 2019)"
+        params.mode != "metagenomic_assemblies" ? "Taxonomy was assigned by CAT_pack (Von Meijenfeldt et al. 2019)." : ""
     ].join(' ').trim()
 
     def rna_tools = [
-        "barrnap (Author: Torsten Seemann)",
-        "tRNAscan-SE (Chan et al. 2021)"
+        params.mode != "metagenomic_assemblies" ? "Bacterial ribosomal RNA prediction was performed by barrnap (Seemann T. 2013)." : "",
+        params.mode != "metagenomic_assemblies" ? "Transfer RNA genes were detected by tRNAscan-SE (Chan et al. 2021)." : ""
     ].join(' ').trim()
 
-    def postprocessing_text = "MultiQC (Ewels et al. 2016)"
+    def postprocessing_text = "MultiQC (Ewels et al. 2016)."
 
     def citation_text = [
-            mgnify_tools,
-            ena_tools,
             preprocessing_tools,
             stats_tools,
             taxonomy_tools,
             rna_tools,
+            mgnify_tools,
+            ena_tools,
             postprocessing_text
         ].join(' ').trim()
 
@@ -233,16 +232,16 @@ def toolBibliographyText() {
     // Can use ternary operators to dynamically construct based conditions, e.g. params["run_xyz"] ? "<li>Author (2023) Pub name, Journal, DOI</li>" : "",
     // Uncomment function in methodsDescriptionText to render in MultiQC report
     def reference_text = [
-            "<li>Richardson, L., Allen, B., Baldi, G., Beracochea, M., Bileschi, M. L., Burdett, T., ... & Finn, R. D. (2023). MGnify: the microbiome sequence data analysis resource in 2023. Nucleic acids research, 51(D1), D753-D759. doi: /10.1093/nar/gkac1080</li>",
-            "<li>Gurbich, T. A., Almeida, A., Beracochea, M., Burdett, T., Burgin, J., Cochrane, G., ... & Finn, R. D. (2023). MGnify genomes: a resource for biome-specific microbial genome catalogues. Journal of molecular biology, 435(14), 168016. doi: /10.1016/j.jmb.2023.168016</li>",
-            "<li>webin-cli: GitHub: https://github.com/enasequence/webin-cli. Docs: https://ena-docs.readthedocs.io/en/latest/submit/general-guide/webin-cli.html</li>",
-            "<li>Edwards, R. (2023). linsalrob/py_fasta_validator: Compressy. doi: /10.5281/zenodo.5002710</li>",
-            "<li>Chklovski, A., Parks, D. H., Woodcroft, B. J., & Tyson, G. W. (2023). CheckM2: a rapid, scalable and accurate tool for assessing microbial genome quality using machine learning. Nature Methods, 20(8), 1203-1212. doi: 10.1038/s41592-023-01940-w</li>",
-            "<li>Aroney, S. T., Newell, R. J., Nissen, J. N., Camargo, A. P., Tyson, G. W., & Woodcroft, B. J. (2025). CoverM: read alignment statistics for metagenomics. Bioinformatics, 41(4), btaf147. doi: /10.1093/bioinformatics/btaf147</li>",
-            "<li>Von Meijenfeldt, F. B., Arkhipova, K., Cambuy, D. D., Coutinho, F. H., & Dutilh, B. E. (2019). Robust taxonomic classification of uncharted microbial sequences and bins with CAT and BAT. Genome biology, 20(1), 217. doi: /10.1038/s41467-024-47155-1</li>",
-            "<li>barrnap: GitHub: https://github.com/tseemann/barrnap</li>",
-            "<li>Chan, P. P., Lin, B. Y., Mak, A. J., & Lowe, T. M. (2021). tRNAscan-SE 2.0: improved detection and functional classification of transfer RNA genes. Nucleic acids research, 49(16), 9077-9096. doi: /10.1093/nar/gkab688</li>",
-            "<li>Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics , 32(19), 3047–3048. doi: /10.1093/bioinformatics/btw354</li>"
+            '<li>Richardson, L., Allen, B., Baldi, G., Beracochea, M., Bileschi, M. L., Burdett, T., ... & Finn, R. D. (2023). MGnify: the microbiome sequence data analysis resource in 2023. Nucleic acids research, 51(D1), D753-D759. doi: <a href="https://doi.org/10.1093/nar/gkac1080"10.1093/nar/gkac1080</a></li>',
+            '<li>Gurbich, T. A., Almeida, A., Beracochea, M., Burdett, T., Burgin, J., Cochrane, G., ... & Finn, R. D. (2023). MGnify genomes: a resource for biome-specific microbial genome catalogues. Journal of molecular biology, 435(14), 168016. doi: <a href="https://doi.org/10.1016/j.jmb.2023.168016"10.1016/j.jmb.2023.168016</a></li>',
+            '<li>webin-cli: David, Y., Alisha, A., Awais, A., Rajkumar, D., Dipayan, G., Muhammad, H., ... & Ugis, S. (2026). The European Nucleotide Archive in 2025. Nucleic Acids Research, 54(D1), D120-D127. doi: <a href="https://doi.org/10.1093/nar/gkaf1295"10.1093/nar/gkaf1295</a></li>',
+            '<li>Edwards, R. (2023). linsalrob/py_fasta_validator: Compressy. doi: <a href="https://doi.org/10.5281/zenodo.5002710"10.5281/zenodo.5002710</a></li>',
+            '<li>Chklovski, A., Parks, D. H., Woodcroft, B. J., & Tyson, G. W. (2023). CheckM2: a rapid, scalable and accurate tool for assessing microbial genome quality using machine learning. Nature Methods, 20(8), 1203-1212. doi: <a href="https://doi.org/10.1038/s41592-023-01940-w"10.1038/s41592-023-01940-w</a></li>',
+            '<li>Aroney, S. T., Newell, R. J., Nissen, J. N., Camargo, A. P., Tyson, G. W., & Woodcroft, B. J. (2025). CoverM: read alignment statistics for metagenomics. Bioinformatics, 41(4), btaf147. doi: <a href="https://doi.org/10.1093/bioinformatics/btaf147"10.1093/bioinformatics/btaf147</a></li>',
+            '<li>Von Meijenfeldt, F. B., Arkhipova, K., Cambuy, D. D., Coutinho, F. H., & Dutilh, B. E. (2019). Robust taxonomic classification of uncharted microbial sequences and bins with CAT and BAT. Genome biology, 20(1), 217. doi: <a href="https://doi.org/10.1038/s41467-024-47155-1"10.1038/s41467-024-47155-1</a></li>',
+            '<li>barrnap: Seemann, T. (2014). barrnap: Bacterial ribosomal RNA predictor. barrnap: Bacterial ribosomal RNA predictor. <a href="http://vicbioinformatics.com/"vicbioinformatics.com</a></li>',
+            '<li>Chan, P. P., Lin, B. Y., Mak, A. J., & Lowe, T. M. (2021). tRNAscan-SE 2.0: improved detection and functional classification of transfer RNA genes. Nucleic acids research, 49(16), 9077-9096. doi: <a href="https://doi.org/10.1093/nar/gkab688"10.1093/nar/gkab688</a></li>',
+            '<li>Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics , 32(19), 3047–3048. doi: <a href="https://doi.org/10.1093/bioinformatics/btw354"10.1093/bioinformatics/btw354</a></li>'
         ].join(' ').trim()
 
     return reference_text
