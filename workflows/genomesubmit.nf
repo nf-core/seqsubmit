@@ -321,7 +321,7 @@ workflow GENOMESUBMIT {
 
     // Concatenate accessions into single file to publish
     CONCAT_ACCESSIONS (
-        SUBMIT.out.accessions.map { _meta, file -> file }.collect().map { files -> [ [id: "genomes_accessions"], files ] },
+        SUBMIT.out.accessions.map { _meta, file -> file }.collect().map { files -> [ [id: "assigned_accessions"], files ] },
         'true' // skip_header - we want to keep the header from the first file and skip it for the rest
     )
 
