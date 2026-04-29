@@ -11,7 +11,7 @@ report_section_order:
     order: -1002
 
 export_plots: true
-
+disable_general_stats: true
 disable_version_detection: true
 
 custom_content:
@@ -24,15 +24,15 @@ custom_content:
 
 sp:
   assembly_metadata:
-    fn_re: '.*assembly_metadata.csv$'
+    fn_re: '.*assemblies_metadata.csv$'
   genome_metadata:
     fn_re: '.*genomes_metadata.tsv$'
   sample_registration:
     fn_re: '.*registered.*\.tsv$'
   submission_results_genomes:
-    fn_re: '.genomes_accessions\.tsv$'
+    fn_re: 'genomes_accessions\.tsv$'
   submission_results_assemblies:
-    fn_re: '.assemblies_accessions\.tsv$'
+    fn_re: 'assemblies_accessions\.tsv$'
 
 # Custom data configuration
 custom_data:
@@ -109,9 +109,8 @@ custom_data:
     file_format: 'tsv'
     plot_type: 'table'
     pconfig:
+      id: "sample_registration"
       title: 'Sample registration assigned accessions'
-      col1_header: 'ID'
-      col2_header: 'ENA sample accession'
     headers:
       alias:
         title: 'ID'
