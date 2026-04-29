@@ -22,11 +22,12 @@
 ## Introduction
 
 **nf-core/seqsubmit** is a Nextflow pipeline for submitting sequence data to [ENA](https://www.ebi.ac.uk/ena/browser/home).
-Currently, the pipeline supports three submission modes, each routed to a dedicated workflow and requiring its own input samplesheet structure:
+Currently, the pipeline supports four submission modes, each routed to a dedicated workflow and requiring its own input samplesheet structure:
 
 - `mags` for Metagenome Assembled Genomes (MAGs) submission with `GENOMESUBMIT` workflow
 - `bins` for bins submission with `GENOMESUBMIT` workflow
 - `metagenomic_assemblies` for assembly submission with `ASSEMBLYSUBMIT` workflow
+- `reads` for raw sequencing reads submission with `READSUBMIT` workflow
 
 ![seqsubmit workflow diagram](assets/seqsubmit_schema.png)
 
@@ -123,6 +124,38 @@ assembly_2,data/contigs_2.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 > [!IMPORTANT]
 > **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
 
+### `reads` mode (`READSUBMIT`)
+
+The input must follow `assets/schema_input_reads.json`.
+
+Required columns:
+
+- `sample`
+- `sample_accession`
+- `fastq_1`
+- `fastq_2`
+- `platform`
+- `instrument`
+- `library_source`
+- `library_selection`
+- `library_strategy`
+
+Optional columns:
+
+- `insert_size`
+- `library_name`
+- `description`
+
+Example `samplesheet_reads.csv`:
+
+```csv
+sample,sample_accession,fastq_1,fastq_2,platform,instrument,library_source,library_selection,library_strategy,insert_size,library_name,description
+illumina_run_001,SAMEA1234567,data/reads_R1.fastq.gz,data/reads_R2.fastq.gz,ILLUMINA,Illumina HiSeq 2000,GENOMIC,RANDOM,WGS,500,HiSeq_library_001,Illumina sequencing of sample XYZ
+```
+
+> [!IMPORTANT]
+> **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
+
 ## Usage
 
 > [!NOTE]
@@ -142,7 +175,7 @@ The `mags`/`bins` workflow requires databases for completeness/contamination est
 
 | Parameter                                  | Description                                                                                                       |
 | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| `--mode`                                   | Type of the data to be submitted. Options: `[mags, bins, metagenomic_assemblies]`                                 |
+| `--mode`                                   | Type of the data to be submitted. Options: `[mags, bins, metagenomic_assemblies, reads]`                          |
 | `--input`                                  | Path to the samplesheet describing the data to be submitted                                                       |
 | `--outdir`                                 | Path to the output directory for pipeline results                                                                 |
 | `--submission_study` OR `--study_metadata` | ENA study accession (PRJ/ERP) to submit the data to OR metadata file in JSON/TSV/CSV format to register new study |
@@ -161,7 +194,7 @@ General command template:
 ```bash
 nextflow run nf-core/seqsubmit \
    -profile <docker/singularity/...> \
-   --mode <mags|bins|metagenomic_assemblies> \
+   --mode <mags|bins|metagenomic_assemblies|reads> \
    --input <samplesheet.csv> \
    --centre_name <your_centre> \
    --submission_study <your_study> \

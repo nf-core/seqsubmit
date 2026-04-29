@@ -6,12 +6,13 @@
 
 ## Introduction
 
-`nf-core/seqsubmit` is a Nextflow pipeline for submitting metagenomic assemblies, MAGs, and bins to ENA.
+`nf-core/seqsubmit` is a Nextflow pipeline for submitting metagenomic assemblies, MAGs, bins, and raw reads to ENA.
 
-The pipeline supports two workflow paths:
+The pipeline supports three workflow paths:
 
 - `GENOMESUBMIT` for `--mode mags` and `--mode bins`
 - `ASSEMBLYSUBMIT` for `--mode metagenomic_assemblies`
+- `READSUBMIT` for `--mode reads`
 
 ## Before you start
 
@@ -104,6 +105,36 @@ assembly_002,data/assembly_002.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 | `assembler_version` | Version of the assembler software used to generate the assembly.                                                                                      |
 
 An example file is available at [assets/samplesheet_assembly.csv](../assets/samplesheet_assembly.csv).
+
+### `reads` mode (`READSUBMIT`)
+
+Use this samplesheet structure for raw sequencing reads submission. The input format follows [assets/schema_input_reads.json](../assets/schema_input_reads.json).
+
+Example:
+
+```csv title="samplesheet_reads.csv"
+sample,sample_accession,fastq_1,fastq_2,platform,instrument,library_source,library_selection,library_strategy,insert_size,library_name,description
+illumina_run_001,SAMEA1234567,data/reads_R1.fastq.gz,data/reads_R2.fastq.gz,ILLUMINA,Illumina HiSeq 2000,GENOMIC,RANDOM,WGS,500,HiSeq_library_001,Illumina sequencing of sample XYZ
+pacbio_run_001,SAMEA7654321,data/pacbio_reads.fastq.gz,,PACBIO_SMRT,PacBio Sequel,GENOMIC,RANDOM,WGS,,PacBio_library_002,Long-read sequencing
+```
+
+> [!IMPORTANT]
+> **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
+
+| Column              | Type      | Required | Description                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sample`            | str       | Yes      | Unique identifier of this particular data entry. Used as an experiment name.                                                                                                                                                                                                                                                                                    |
+| `sample_accession`  | str       | Yes      | ENA sample accession (starting with SAMEA) of the sample used to generate raw reads.                                                                                                                                                                                                                                                                            |
+| `fastq_1`           | file path | Yes      | Path to forward reads in FASTQ format (optionally gzipped).                                                                                                                                                                                                                                                                                                     |
+| `fastq_2`           | file path | No       | Path to reverse reads for paired-end data. Leave empty for single-end reads.                                                                                                                                                                                                                                                                                    |
+| `platform`          | str       | Yes      | Sequencing platform. Supported values: `ILLUMINA`, `PACBIO_SMRT`, `OXFORD_NANOPORE`, `ION_TORRENT`, `CAPILLARY`, `DNBSEQ`, `ELEMENT`, `GENAPSYS`, `GENEMIND`, `HELICOS`, `LS454`, `BGISEQ`, `ULTIMA`, `VELA_DIAGNOSTICS`. See [ENA documentation](https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#metadata-validation) for complete list. |
+| `instrument`        | str       | Yes      | Sequencer model, e.g. "Illumina HiSeq 2000", "PacBio Sequel", "MinION".                                                                                                                                                                                                                                                                                         |
+| `library_source`    | str       | Yes      | Library source type. Options: `GENOMIC`, `METAGENOMIC`, `TRANSCRIPTOMIC`, `METAGENOMIC SINGLE CELL`, `TRANSCRIPTOMIC SINGLE CELL`, `SYNTHETIC`, `VIRAL RNA`, `OTHER`.                                                                                                                                                                                           |
+| `library_selection` | str       | Yes      | Library selection method. Options: `RANDOM`, `PCR`, `RANDOM PCR`, `RT-PCR`, `MF`, `cDNA`, `cDNA_randomPriming`, `cDNA_oligo_dT`, `PolyA`, `Inverse rRNA`, `ChIP`, `MNase`, `DNase`, `Hybrid Selection`, etc. See [ENA documentation](https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#metadata-validation) for complete list.              |
+| `library_strategy`  | str       | Yes      | Library strategy. Options: `WGS`, `WGA`, `WXS`, `RNA-Seq`, `miRNA-Seq`, `ncRNA-Seq`, `EST`, `Hi-C`, `ATAC-seq`, `WCS`, `RAD-Seq`, `CLONE`, `AMPLICON`, `POOLCLONE`, `etc`. See [ENA documentation](https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#metadata-validation) for complete list.                                                |
+| `insert_size`       | number    | No       | Fragment/insert size for paired-end reads (e.g., 500 for 500 bp inserts). Leave empty if not applicable.                                                                                                                                                                                                                                                        |
+| `library_name`      | str       | No       | Descriptive library name (optional).                                                                                                                                                                                                                                                                                                                            |
+| `description`       | str       | No       | Free-text description of the experiment (optional).                                                                                                                                                                                                                                                                                                             |
 
 ## Submission study
 
@@ -198,7 +229,7 @@ General command template:
 ```bash
 nextflow run nf-core/seqsubmit \
     -profile <docker/singularity/...> \
-    --mode <mags|bins|metagenomic_assemblies> \
+    --mode <mags|bins|metagenomic_assemblies|reads> \
     --input <samplesheet.csv> \
     --centre_name <your_centre> \
     --submission_study <your_study> \
@@ -209,7 +240,7 @@ Key parameters:
 
 | Parameter            | Description                                                                                                                          |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `--mode`             | Submission type. Supported values are `mags`, `bins`, and `metagenomic_assemblies`.                                                  |
+| `--mode`             | Submission type. Supported values are `mags`, `bins`, `metagenomic_assemblies`, and `reads`.                                         |
 | `--input`            | Path to the samplesheet describing the data to submit.                                                                               |
 | `--submission_study` | ENA study accession (PRJ/ERP) to submit the data to. For metagenomic assemblies, this is the paper's ENA Assembly Project accession. |
 | `--centre_name`      | Name of the submitter's organisation.                                                                                                |
@@ -243,6 +274,19 @@ nextflow run nf-core/seqsubmit \
     --webincli_mode submit \
     --test_upload true \
     --outdir results/validate_assemblies
+```
+
+Test example for `reads` run with docker:
+
+```bash
+nextflow run nf-core/seqsubmit \
+    -profile docker \
+    --mode reads \
+    --input samplesheet_reads.csv \
+    --submission_study <your_study> \
+    --webincli_mode submit \
+    --test_upload true \
+    --outdir results/validate_reads
 ```
 
 If you wish to repeatedly use the same parameters for multiple runs, rather than specifying each flag in the command, you can specify these in a params file.

@@ -1,0 +1,127 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/seqsubmit/main/assets/schema_input_reads.json",
+    "title": "nf-core/seqsubmit pipeline - params.input schema",
+    "description": "Schema for the sample sheet provided with params.input if params.mode is set to 'reads'",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "sample": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "Sample must be provided and cannot contain spaces",
+                "meta": ["id"],
+                "description": "Unique experiment/run name"
+            },
+            "sample_accession": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "Sample accession must be provided and cannot contain spaces",
+                "description": "ENA sample accession of the sample used to generate the reads"
+            },
+            "fastq_1": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^\\S+\\.(fq|fastq)(\\.gz)?$",
+                "errorMessage": "FASTQ file must have extension '.fq' or '.fastq' (optionally gzipped)",
+                "description": "Forward reads FASTQ file (single-end or paired-end)"
+            },
+            "fastq_2": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "format": "file-path",
+                        "exists": true,
+                        "pattern": "^\\S+\\.(fq|fastq)(\\.gz)?$"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
+                "errorMessage": "FASTQ file for reverse reads must have extension '.fq' or '.fastq' (optionally gzipped)",
+                "description": "Reverse reads FASTQ file if paired-end. Leave empty for single-end reads"
+            },
+            "platform": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "Platform must be provided and cannot contain spaces",
+                "description": "Sequencing platform (e.g., ILLUMINA, PACBIO_SMRT, OXFORD_NANOPORE, ION_TORRENT)"
+            },
+            "instrument": {
+                "type": "string",
+                "pattern": "^[^\\n]+$",
+                "errorMessage": "Instrument must be provided and cannot span multiple lines",
+                "description": "Sequencer model (e.g., 'Illumina HiSeq 2000', 'PacBio Sequel')"
+            },
+            "library_source": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "Library source must be provided and cannot contain spaces",
+                "description": "Library source (GENOMIC, METAGENOMIC, TRANSCRIPTOMIC, etc.)"
+            },
+            "library_selection": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "Library selection must be provided and cannot contain spaces",
+                "description": "Library selection (RANDOM, PCR, cDNA, etc.)"
+            },
+            "library_strategy": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "Library strategy must be provided and cannot contain spaces",
+                "description": "Library strategy (WGS, RNA-Seq, AMPLICON, etc.)"
+            },
+            "insert_size": {
+                "anyOf": [
+                    {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
+                "errorMessage": "Insert size must be a positive number or empty",
+                "description": "Fragment/insert size for paired-end reads (optional)"
+            },
+            "library_name": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
+                "description": "Descriptive library name (optional)"
+            },
+            "description": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
+                "description": "Free-text description of the experiment (optional)"
+            }
+        },
+        "required": [
+            "sample",
+            "sample_accession",
+            "fastq_1",
+            "platform",
+            "instrument",
+            "library_source",
+            "library_selection",
+            "library_strategy"
+        ]
+    }
+}

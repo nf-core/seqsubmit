@@ -18,7 +18,7 @@
                     "exists": true,
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.csv$",
-                    "description": "Path to comma-separated file describing the data to be submitted. Format depends on the pipeline mode (mags/bins/metagenomic_assemblies).",
+                    "description": "Path to comma-separated file describing the data to be submitted. Format depends on the pipeline mode (mags/bins/metagenomic_assemblies/reads).",
                     "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with a set of columns depending on the type of data being submitted. See [usage docs](https://nf-co.re/seqsubmit/usage#samplesheet-input).",
                     "fa_icon": "fas fa-file-csv"
                 },
@@ -283,8 +283,8 @@
                     "type": "string",
                     "default": null,
                     "description": "Type of upload",
-                    "help_text": "Different types of data require specific upload steps. That mode controls what upload workflow to run depending on type of data (mags/bins/metagenomic_assemblies)",
-                    "enum": ["mags", "bins", "metagenomic_assemblies"]
+                    "help_text": "Different types of data require specific upload steps. That mode controls what upload workflow to run depending on type of data (mags/bins/metagenomic_assemblies/reads)",
+                    "enum": ["mags", "bins", "metagenomic_assemblies", "reads"]
                 },
                 "test_upload": {
                     "type": "boolean",
