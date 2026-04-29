@@ -5,7 +5,6 @@
 */
 include { GENOME_UPLOAD as CREATE_MANIFESTS     } from '../modules/local/genome_upload'
 include { ENA_WEBIN_CLI_WRAPPER as SUBMIT       } from '../modules/local/ena_webin_cli_wrapper'
-include { ENA_WEBIN_CLI_DOWNLOAD                } from '../modules/local/ena_webin_cli_download'
 include { REGISTERSTUDY                         } from '../modules/local/registerstudy/main'
 include { RENAME_FASTA_FOR_CATPACK              } from '../modules/local/rename_fasta_for_catpack'
 include { CREATE_GENOME_METADATA_TSV            } from '../modules/local/create_genome_metadata_tsv/main'
@@ -308,20 +307,16 @@ workflow GENOMESUBMIT {
     }
 
     // --------- Upload data to ENA
-    ENA_WEBIN_CLI_DOWNLOAD (
-        webin_cli_version
-    )
 
     SUBMIT (
         ch_combined,
-        ENA_WEBIN_CLI_DOWNLOAD.out.webin_cli_jar,
         test_upload,
         webincli_mode
     )
 
     // Concatenate accessions into single file to publish
     CONCAT_ACCESSIONS (
-        SUBMIT.out.accessions.map { _meta, file -> file }.collect().map { files -> [ [id: "assigned_accessions"], files ] },
+        SUBMIT.out.accessions.map { _meta, file -> file }.collect().map { files -> [ [id: "genomes_accessions"], files ] },
         'true' // skip_header - we want to keep the header from the first file and skip it for the rest
     )
 
