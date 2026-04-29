@@ -11,7 +11,7 @@
                     ]
                 ],
                 "1": [
-                    "versions.yml:md5,0664035de44b4d88c1a70a357c1a24f2"
+                    "versions.yml:md5,86772cb06086a42af60796d7570b30b8"
                 ],
                 "manifest": [
                     [
@@ -22,12 +22,12 @@
                     ]
                 ],
                 "versions": [
-                    "versions.yml:md5,0664035de44b4d88c1a70a357c1a24f2"
+                    "versions.yml:md5,86772cb06086a42af60796d7570b30b8"
                 ]
             },
             {
                 "GENERATE_ASSEMBLY_MANIFEST": {
-                    "assembly_uploader": "assembly_uploader 1.3.4"
+                    "assembly_uploader": "1.3.4"
                 }
             }
         ],
@@ -41,7 +41,7 @@
         "content": [
             {
                 "GENERATE_ASSEMBLY_MANIFEST": {
-                    "assembly_uploader": "assembly_uploader 1.3.4"
+                    "assembly_uploader": "1.3.4"
                 }
             }
         ],

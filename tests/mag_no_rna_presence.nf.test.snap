@@ -1,13 +1,16 @@
 {
     "-profile test_mag_no_rna_presence": {
         "content": [
-            8,
+            11,
             {
                 "BARRNAP": {
                     "barrnap": 0.9
                 },
                 "COUNT_RNA": {
                     "python": "3.8.13"
+                },
+                "CREATE_GENOME_METADATA_TSV": {
+                    "bash": "5.2.37(1)-release"
                 },
                 "TRNASCANSE": {
                     "tRNAscan-SE": "2.0.12"
@@ -18,7 +21,6 @@
             },
             [
                 "mags",
-                "mags/genomes_metadata.csv",
                 "mags/no_rna_presence",
                 "mags/no_rna_presence/rna",
                 "mags/no_rna_presence/rna/barrnap",
@@ -31,6 +33,8 @@
                 "mags/no_rna_presence/upload/webin_cli",
                 "mags/no_rna_presence/upload/webin_cli/no_rna_presence_accessions.tsv",
                 "mags/upload",
+                "mags/upload/assigned_accessions.tsv",
+                "mags/upload/genomes_metadata.tsv",
                 "mags/upload/manifests",
                 "mags/upload/manifests/results",
                 "mags/upload/manifests/results/MAG_upload",
@@ -51,9 +55,9 @@
                 "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
             ],
             [
-                "genomes_metadata.csv:md5,0f567491f038d4a0c1dbf4c05cdc26c0",
                 "no_rna_presence_bac.gff:md5,df19e1b84ba6f691d20c72b397c88abf",
                 "no_rna_presence.tsv:md5,abd958e8addba39c9e4d7f6b97a1a7c6",
+                "genomes_metadata.tsv:md5,0f567491f038d4a0c1dbf4c05cdc26c0",
                 "ENA_backup.json:md5,e339bef4b1e1e11c37ef72f3d9ef2c93",
                 "submission.xml:md5,4b7d1d7e1b883a3eac57e1267943a8d6",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
@@ -63,6 +67,6 @@
             "nf-test": "0.9.0",
             "nextflow": "25.04.1"
         },
-        "timestamp": "2026-03-27T12:38:24.654035"
+        "timestamp": "2026-04-28T11:55:50.597539"
     }
 }

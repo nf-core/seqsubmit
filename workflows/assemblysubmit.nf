@@ -4,18 +4,22 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { COVERM_CONTIG                   } from '../modules/nf-core/coverm/contig/main'
-include { FASTAVALIDATOR                  } from '../modules/nf-core/fastavalidator/main'
-include { GENERATE_ASSEMBLY_MANIFEST      } from '../modules/local/generate_assembly_manifest/main'
-include { REGISTERSTUDY                   } from '../modules/local/registerstudy/main'
-include { ENA_WEBIN_CLI_WRAPPER as SUBMIT } from '../modules/local/ena_webin_cli_wrapper'
-include { ENA_WEBIN_CLI_DOWNLOAD          } from '../modules/local/ena_webin_cli_download'
+include { COVERM_CONTIG                         } from '../modules/nf-core/coverm/contig/main'
+include { FASTAVALIDATOR                        } from '../modules/nf-core/fastavalidator/main'
+include { CREATE_ASSEMBLY_METADATA_CSV          } from '../modules/local/create_assembly_metadata_csv/main'
+include { GENERATE_ASSEMBLY_MANIFEST            } from '../modules/local/generate_assembly_manifest/main'
+include { REGISTERSTUDY                         } from '../modules/local/registerstudy/main'
+include { ENA_WEBIN_CLI_WRAPPER as SUBMIT       } from '../modules/local/ena_webin_cli_wrapper'
+include { ENA_WEBIN_CLI_DOWNLOAD                } from '../modules/local/ena_webin_cli_download'
 
-include { MULTIQC                         } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap                } from 'plugin/nf-schema'
-include { paramsSummaryMultiqc            } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText          } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
+include { FIND_CONCATENATE as CONCAT_METADATA   } from '../modules/nf-core/find/concatenate/main'
+include { FIND_CONCATENATE as CONCAT_ACCESSIONS } from '../modules/nf-core/find/concatenate/main'
+include { MULTIQC                               } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap                      } from 'plugin/nf-schema'
+
+include { paramsSummaryMultiqc                  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML                } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText                } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -78,6 +82,8 @@ workflow ASSEMBLYSUBMIT {
         assembly_fasta,
         "true" // enables number of contigs check - ENA requires more than 1 contig for an assembly submission
     )
+    ch_versions = ch_versions.mix(FASTAVALIDATOR.out.versions)
+
     validated_fastas = assembly_fasta.join(FASTAVALIDATOR.out.success_log)
         .map { meta, fasta, _log ->
             [meta, fasta]
@@ -91,12 +97,14 @@ workflow ASSEMBLYSUBMIT {
             reads: [ meta, fastq ]
         }
         .set { coverm_input }
+
     COVERM_CONTIG (
         coverm_input.reads,
         coverm_input.assembly,
         false, // bam_input
         false  // interleaved
     )
+    ch_versions = ch_versions.mix(COVERM_CONTIG.out.versions)
 
     // Calculate average coverage using splitCsv operator
     average_coverage_ch = COVERM_CONTIG.out.coverage
@@ -127,29 +135,17 @@ workflow ASSEMBLYSUBMIT {
         .filter { meta, _fasta -> meta.coverage != null }
         .mix( assemblies_with_added_cov_ch )
 
-    assembly_metadata_csv = assemblies_with_coverage
-        .map { meta, fasta ->
-            def header = 'Runs,Coverage,Assembler,Version,Filepath,Sample'
-            def row = [
-                meta.run_accession ?: '',
-                meta.coverage ?: '',
-                meta.assembler ?: '',
-                meta.assembler_version ?: '',
-                fasta.name,
-                ''    // Sample column left empty because co assemblies are not supported
-            ].join(',')
+    // Create CSV with assembly metadata for manifest generation
+    CREATE_ASSEMBLY_METADATA_CSV(
+        assemblies_with_coverage
+    )
+    ch_versions = ch_versions.mix(CREATE_ASSEMBLY_METADATA_CSV.out.versions)
 
-            def content = "${header}\n${row}"
-
-            // Create output directory if it doesn't exist
-            def outDir = file("${params.outdir}/${params.mode}")
-            outDir.mkdirs()
-
-            def csv_file = file("${outDir}/${meta.id}_assembly_metadata.csv")
-            csv_file.text = content
-
-            [meta, csv_file]
-        }
+    // Concatenate assembly metadata CSVs into single file to publish
+    CONCAT_METADATA (
+        CREATE_ASSEMBLY_METADATA_CSV.out.csv.map { _meta, file -> file }.collect().map { files -> [ [id: "assemblies_metadata"], files ] },
+        'true' // skip_header - we want to keep the header from the first file and skip it for the rest
+    )
 
     def study_accession_ch
     if (submission_study) {
@@ -171,11 +167,12 @@ workflow ASSEMBLYSUBMIT {
 
     // Generate assembly manifest files and submit them to ENA
     GENERATE_ASSEMBLY_MANIFEST(
-        assemblies_with_coverage.join(assembly_metadata_csv),
+        assemblies_with_coverage.join(CREATE_ASSEMBLY_METADATA_CSV.out.csv),
         study_accession_ch.first(),
         upload_tpa,
         test_upload
     )
+    ch_versions = ch_versions.mix(GENERATE_ASSEMBLY_MANIFEST.out.versions.first())
 
     ENA_WEBIN_CLI_DOWNLOAD (
         webin_cli_version
@@ -186,6 +183,13 @@ workflow ASSEMBLYSUBMIT {
         ENA_WEBIN_CLI_DOWNLOAD.out.webin_cli_jar,
         test_upload,
         webincli_mode
+    )
+    ch_versions = ch_versions.mix(SUBMIT.out.versions)
+
+    // Concatenate accessions into single file to publish
+    CONCAT_ACCESSIONS (
+        SUBMIT.out.accessions.map { _meta, file -> file }.collect().map { files -> [ [id: "assigned_accessions"], files ] },
+        'true' // skip_header - we want to keep the header from the first file and skip it for the rest
     )
 
     //
