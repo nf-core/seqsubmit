@@ -59,7 +59,6 @@ Assembly study registration, manifest generation, and Webin-CLI submission are e
 > Make sure you read ENA documentation about referencing submitted data: \
 > metagenomic assemblies: https://ena-docs.readthedocs.io/en/latest/submit/assembly/metagenome/primary.html#assigned-accession-numbers
 
-
 ## Common outputs
 
 ### MultiQC
