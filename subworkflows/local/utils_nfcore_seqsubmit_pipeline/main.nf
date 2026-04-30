@@ -198,7 +198,8 @@ def toolCitationText() {
 
     def stats_tools = [
         params.mode == "bins" || params.mode == "mags" ? "Completeness and contamination metrics was performed by CheckM2 (Chklovski et al. 2023)." : "",
-        "Coverage calculation for metagenomic assemblies/bins/MAGs was done by CoverM (Aroney et el. 2025)."
+        params.mode == "metagenomic_assemblies" ? "Coverage calculation for metagenomic assemblies was done by CoverM contig (Aroney et el. 2025)." : "",
+        params.mode == "bins" || params.mode == "mags" ? "Coverage calculation for bins/MAGs was done by CoverM genome (Aroney et el. 2025)." : ""
     ].join(' ').trim()
 
     def taxonomy_tools = [

@@ -3,10 +3,10 @@ process MULTIQC {
 
     conda "${moduleDir}/environment.yml"
 
-    // TODO: version is temporarily set to 1.25.1 to avoid segfault happening in 1.32 on Mac
+    // Container was taken from linux/arm64 instead of linux/amd64
     container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
-        ? 'oras://community.wave.seqera.io/library/multiqc:1.25.1--6d0dfb7dbe16fbf9'
-        : 'community.wave.seqera.io/library/multiqc:1.25.1--214d24b7702218de'}"
+        ? 'oras://community.wave.seqera.io/library/multiqc:1.33--2537ca5f8445e3c2'
+        : 'community.wave.seqera.io/library/multiqc:1.33--58d7dee710ab3aa8'}"
 
     input:
     path  multiqc_files, stageAs: "?/*"
