@@ -313,6 +313,7 @@ workflow GENOMESUBMIT {
         test_upload,
         webincli_mode
     )
+    ch_versions = ch_versions.mix(SUBMIT.out.versions)
 
     // Concatenate accessions into single file to publish
     CONCAT_ACCESSIONS (

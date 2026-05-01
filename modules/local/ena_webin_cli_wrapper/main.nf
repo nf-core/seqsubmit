@@ -36,8 +36,8 @@ process ENA_WEBIN_CLI_WRAPPER {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version 2>&1 | sed 's/Python //g')
-        ena-webin-cli: 9.0.3
-        mgnify-pipelines-toolkit: 1.4.24
+        ena-webin-cli: \$(ena-webin-cli -version)
+        mgnify-pipelines-toolkit: \$(python -c "import importlib.metadata; print(importlib.metadata.version('mgnify-pipelines-toolkit'))")
     END_VERSIONS
     """
 }

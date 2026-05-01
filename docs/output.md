@@ -35,7 +35,7 @@ When `--mode mags` or `--mode bins` is used, results are written under `mags/` o
 Many of these per-sample directories are conditional. For example, if `genome_coverage` is already provided in the samplesheet, the corresponding `coverage/` directory will not be created for that sample.
 
 > [!NOTE] **Assigned accessions (ERZs)** \
-> Make sure you read ENA documentation about referencing submitted data: \
+> Users should read the ENA documentation on referencing submitted data: \
 > mags: https://ena-docs.readthedocs.io/en/latest/submit/assembly/metagenome/mag.html#assigned-accession-numbers \
 > bins: https://ena-docs.readthedocs.io/en/latest/submit/assembly/metagenome/binned.html#assigned-accession-numbers
 
@@ -56,7 +56,7 @@ When `--mode metagenomic_assemblies` is used, results are written under `metagen
 Assembly study registration, manifest generation, and Webin-CLI submission are executed by the workflow, but their intermediate outputs are not currently published into `--outdir` by the pipeline.
 
 > [!NOTE] **Assigned accessions (ERZs)** \
-> Make sure you read ENA documentation about referencing submitted data: \
+> Users should read the ENA documentation on referencing submitted data: \
 > metagenomic assemblies: https://ena-docs.readthedocs.io/en/latest/submit/assembly/metagenome/primary.html#assigned-accession-numbers
 
 ## Common outputs

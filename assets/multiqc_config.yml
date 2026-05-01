@@ -123,7 +123,7 @@ custom_data:
     section_name: "Submission results"
     description: >
       Accessions assigned during upload process.
-      Make sure you read ENA documentation about referencing submitted data.
+      Users should read the ENA documentation on referencing submitted data.
       metagenomic assemblies: https://ena-docs.readthedocs.io/en/latest/submit/assembly/metagenome/primary.html#assigned-accession-numbers
       bins: https://ena-docs.readthedocs.io/en/latest/submit/assembly/metagenome/binned.html#assigned-accession-numbers
       mags: https://ena-docs.readthedocs.io/en/latest/submit/assembly/metagenome/mag.html#assigned-accession-numbers
