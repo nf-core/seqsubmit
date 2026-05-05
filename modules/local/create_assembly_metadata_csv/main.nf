@@ -4,7 +4,7 @@ process CREATE_ASSEMBLY_METADATA_CSV {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'oras://community.wave.seqera.io/library/bash:5.2.26' :
+        'oras://community.wave.seqera.io/library/bash:5.2.37--06dbc4169cb39ae0' :
         'community.wave.seqera.io/library/bash:5.2.37--ae00789afb795adf' }"
 
     input:
