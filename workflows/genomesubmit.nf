@@ -277,7 +277,7 @@ workflow GENOMESUBMIT {
 
     // --------- Generate manifests
     CREATE_MANIFESTS(
-        fasta_updated_with_stats.map{_meta, fasta -> fasta}.collect(),
+        fasta_updated_with_taxonomy.map{_meta, fasta -> fasta}.collect(),
         CONCAT_METADATA.out.file_out.map { _meta, file -> file }.first(),
         mags_or_bins_flag,     // mags or bins
         study_accession_ch.first(),
@@ -297,7 +297,7 @@ workflow GENOMESUBMIT {
             [ meta, manifest ]
     }
     // Combine fasta and manifests
-    ch_combined = fasta_updated_with_stats
+    ch_combined = fasta_updated_with_taxonomy
     .map { meta, fasta -> [meta.id, meta, fasta] }
     .join(
         manifests_ch.map { meta, manifest -> [meta.id, manifest] }  // Has only [id: prefix]
