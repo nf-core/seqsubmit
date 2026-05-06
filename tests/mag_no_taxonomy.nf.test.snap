@@ -1,10 +1,40 @@
 {
     "-profile test_mag_no_taxonomy": {
         "content": [
-            12,
+            11,
             {
+                "CATPACK_ADDNAMES_BINS": {
+                    "catpack": 6.0
+                },
+                "CATPACK_BINS": {
+                    "catpack": 6.0
+                },
+                "CAT_DB_UNTAR": {
+                    "untar": 1.34
+                },
+                "CONCAT_ACCESSIONS": {
+                    "coreutils": 9.4,
+                    "find": "4.6.0",
+                    "pigz": 2.8
+                },
+                "CONCAT_METADATA": {
+                    "coreutils": 9.4,
+                    "find": "4.6.0",
+                    "pigz": 2.8
+                },
                 "CREATE_GENOME_METADATA_TSV": {
                     "bash": "5.2.37(1)-release"
+                },
+                "CREATE_MANIFESTS": {
+                    "genome_uploader": "2.5.2"
+                },
+                "FASTAVALIDATOR": {
+                    "py_fasta_validator": 0.6
+                },
+                "SUBMIT": {
+                    "ena-webin-cli": "9.0.3",
+                    "mgnify-pipelines-toolkit": "1.4.24",
+                    "python": "3.11.15"
                 },
                 "Workflow": {
                     "nf-core/seqsubmit": "v1.0.0dev"
@@ -20,7 +50,7 @@
                 "mags/no_taxonomy/upload/webin_cli",
                 "mags/no_taxonomy/upload/webin_cli/no_taxonomy_accessions.tsv",
                 "mags/upload",
-                "mags/upload/assigned_accessions.tsv",
+                "mags/upload/genomes_accessions.tsv",
                 "mags/upload/genomes_metadata.tsv",
                 "mags/upload/manifests",
                 "mags/upload/manifests/results",
@@ -32,11 +62,29 @@
                 "mags/upload/manifests/results/MAG_upload/submission.xml",
                 "multiqc",
                 "multiqc/multiqc_data",
+                "multiqc/multiqc_data/llms-full.txt",
                 "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc.parquet",
+                "multiqc/multiqc_data/multiqc_Genomes assigned accessions.txt",
                 "multiqc/multiqc_data/multiqc_citations.txt",
                 "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_genome_metadata.txt",
+                "multiqc/multiqc_data/multiqc_sample_registration.txt",
                 "multiqc/multiqc_data/multiqc_software_versions.txt",
                 "multiqc/multiqc_data/multiqc_sources.txt",
+                "multiqc/multiqc_plots",
+                "multiqc/multiqc_plots/pdf",
+                "multiqc/multiqc_plots/pdf/Genomes assigned accessions.pdf",
+                "multiqc/multiqc_plots/pdf/genome_metadata.pdf",
+                "multiqc/multiqc_plots/pdf/sample_registration.pdf",
+                "multiqc/multiqc_plots/png",
+                "multiqc/multiqc_plots/png/Genomes assigned accessions.png",
+                "multiqc/multiqc_plots/png/genome_metadata.png",
+                "multiqc/multiqc_plots/png/sample_registration.png",
+                "multiqc/multiqc_plots/svg",
+                "multiqc/multiqc_plots/svg/Genomes assigned accessions.svg",
+                "multiqc/multiqc_plots/svg/genome_metadata.svg",
+                "multiqc/multiqc_plots/svg/sample_registration.svg",
                 "multiqc/multiqc_report.html",
                 "pipeline_info",
                 "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
@@ -45,15 +93,15 @@
                 "no_taxonomy.bin2classification.txt:md5,e24c109efe807c7044a866999fd736f1",
                 "no_taxonomy.txt:md5,0f2082d3e397fd630d605dd60993b131",
                 "genomes_metadata.tsv:md5,b1d01539d787b77e30b9bacd5b23d51f",
-                "ENA_backup.json:md5,e339bef4b1e1e11c37ef72f3d9ef2c93",
                 "submission.xml:md5,4b7d1d7e1b883a3eac57e1267943a8d6",
-                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
+                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
+                "multiqc_genome_metadata.txt:md5,c2bdf8ba36b55b5f48fa07a26e5222f5"
             ]
         ],
         "meta": {
-            "nf-test": "0.9.0",
-            "nextflow": "25.04.1"
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.0"
         },
-        "timestamp": "2026-04-28T12:00:50.513998"
+        "timestamp": "2026-05-06T13:49:33.998544"
     }
 }

@@ -27,11 +27,6 @@ input:
         type: file
         description: |
           Webin-CLI submission manifest file.
-  - - webin_cli_jar:
-        type: file
-        description: |
-          The Webin-CLI JAR file downloaded by ena_webin_cli_download.
-        pattern: "webin-cli-*.jar"
   - - test_upload:
         type: value
         description: Whether to run ENA Webin-CLI in test mode.

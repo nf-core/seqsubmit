@@ -11,5 +11,150 @@ report_section_order:
     order: -1002
 
 export_plots: true
-
+disable_general_stats: true
 disable_version_detection: true
+
+custom_content:
+  order:
+    - assembly_metadata
+    - genome_metadata
+    - sample_registration
+    - submission_results_assemblies
+    - submission_results_genomes
+
+sp:
+  assembly_metadata:
+    fn_re: ".*assemblies_metadata.csv$"
+  genome_metadata:
+    fn_re: ".*genomes_metadata.tsv$"
+  sample_registration:
+    fn_re: '.*registered.*\.tsv$'
+  submission_results_genomes:
+    fn_re: 'genomes_accessions\.tsv$'
+  submission_results_assemblies:
+    fn_re: 'assemblies_accessions\.tsv$'
+
+# Custom data configuration
+custom_data:
+  assembly_metadata:
+    id: "assembly_metadata"
+    section_name: "Assembly metadata"
+    description: "Metadata for submitted assemblies"
+    file_format: "csv"
+    plot_type: "table"
+    pconfig:
+      id: "assembly_metadata"
+      title: "Assembly metadata table"
+    headers:
+      Runs:
+        title: "Runs"
+      Coverage:
+        title: "Coverage"
+      Assembler:
+        title: "Assembler"
+      Version:
+        title: "Version"
+      Filepath:
+        title: "Filepath"
+      Sample:
+        title: "Sample"
+
+  genome_metadata:
+    id: "genome_metadata"
+    section_name: "Genome metadata"
+    description: "Metadata for submitted genomes"
+    file_format: "tsv"
+    plot_type: "table"
+    pconfig:
+      id: "genome_metadata"
+      title: "Genome metadata table"
+    headers:
+      genome_name:
+        title: "Genome name"
+      genome_path:
+        title: "Genome path"
+      accessions:
+        title: "Accession"
+      assembly_software:
+        title: "Assembly software"
+      binning_software:
+        title: "Binning software"
+      binning_parameters:
+        title: "Binning parameters"
+      stats_generation_software:
+        title: "Stats software"
+      completeness:
+        title: "Completeness (%)"
+      contamination:
+        title: "Contamination (%)"
+      genome_coverage:
+        title: "Coverage"
+      metagenome:
+        title: "Metagenome"
+      co-assembly:
+        title: "Co-assembly"
+      broad_environment:
+        title: "Broad environment"
+      local_environment:
+        title: "Local environment"
+      environmental_medium:
+        title: "Environmental medium"
+      rRNA_presence:
+        title: "rRNA presence"
+      NCBI_lineage:
+        title: "NCBI lineage"
+
+  sample_registration:
+    file_format: "tsv"
+    plot_type: "table"
+    pconfig:
+      id: "sample_registration"
+      title: "Sample registration assigned accessions"
+    headers:
+      alias:
+        title: "ID"
+        description: "FASTA file for upload"
+      sample:
+        title: "ENA sample accession"
+        description: "Assigned accession after submission"
+
+  submission_results_assemblies:
+    id: "submission_results_assemblies"
+    section_name: "Submission results"
+    description: >
+      Accessions assigned during upload process.
+      Users should read the ENA documentation on referencing submitted data.
+      metagenomic assemblies: https://ena-docs.readthedocs.io/en/latest/submit/assembly/metagenome/primary.html#assigned-accession-numbers
+      bins: https://ena-docs.readthedocs.io/en/latest/submit/assembly/metagenome/binned.html#assigned-accession-numbers
+      mags: https://ena-docs.readthedocs.io/en/latest/submit/assembly/metagenome/mag.html#assigned-accession-numbers
+    file_format: "tsv"
+    plot_type: "table"
+    pconfig:
+      id: "Assemblies assigned accessions"
+      title: "Submission results"
+    headers:
+      alias:
+        title: "alias"
+        description: "FASTA file for upload"
+      accession:
+        title: "ENA accession"
+        description: "Assigned accession after submission"
+
+  submission_results_genomes:
+    id: "submission_results_genomes"
+    section_name: "Submission results"
+    description: "Accessions assigned during upload process."
+    file_format: "tsv"
+    plot_type: "table"
+    pconfig:
+      id: "Genomes assigned accessions"
+      title: "Submission results"
+      col1_header: "ID"
+      col2_header: "ENA accession"
+    headers:
+      alias:
+        title: "ID"
+        description: "FASTA file for upload"
+      accession:
+        title: "ENA accession"
+        description: "Assigned accession after submission"

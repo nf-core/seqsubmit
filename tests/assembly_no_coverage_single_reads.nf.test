@@ -1,6 +1,6 @@
 nextflow_pipeline {
 
-    name "Test assembly submission workflow stub - no_coverage_single_reads"
+    name "Test assembly submission workflow - no_coverage_single_reads"
     script "../main.nf"
     tag "pipeline"
     tag "mode_assembly"

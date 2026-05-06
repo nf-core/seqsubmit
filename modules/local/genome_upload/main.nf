@@ -2,10 +2,10 @@ process GENOME_UPLOAD {
     tag "${mags_or_bins_flag}"
     label 'process_low'
 
-    container "quay.io/biocontainers/genome-uploader:2.5.1--pyhdfd78af_1"
+    container "quay.io/biocontainers/genome-uploader:2.5.2--pyhdfd78af_0"
 
     input:
-    path(mags)
+    path(mags)   // required for validation
     path(table_for_upload)
     val(mags_or_bins_flag)
     val(submission_study)

@@ -5,12 +5,12 @@ process ENA_WEBIN_CLI_WRAPPER {
 
     label 'process_low'
     tag "${meta.id}"
-    container "quay.io/microbiome-informatics/java_mgnify-pipelines-toolkit:1.4.21"
+    // ena-webin-cli 9.0.3 + mgnify-pipelines-toolkit 1.4.24
+    container "community.wave.seqera.io/library/ena-webin-cli_mgnify-pipelines-toolkit:0fd318932c5ba88e"
     stageInMode 'copy'
 
     input:
     tuple val(meta), path(submission_item), path(manifest)
-    path(webin_cli_jar)
     val test_upload
     val webincli_mode
 
@@ -22,23 +22,22 @@ process ENA_WEBIN_CLI_WRAPPER {
     def args               = task.ext.args   ?: ""
     def prefix             = task.ext.prefix ?: "${meta.id}"
     def test_flag          = test_upload     ? "--test" : ""
+    def fasta_dir          = submission_item.toRealPath().parent
 
     """
-    # change FASTA path in manifest to current workdir
-    export ITEM_FULL_PATH=\$(readlink -f ${submission_item})
-    sed 's|^FASTA\t.*|FASTA\t'"\${ITEM_FULL_PATH}"'|g' ${manifest} > ${prefix}_updated_manifest.manifest
-
     webin_cli_handler \\
-      -m ${prefix}_updated_manifest.manifest \\
+      -m ${manifest} \\
       -o ${prefix}_accessions.tsv \\
-      --webin-cli-jar ${webin_cli_jar} \\
       --mode ${webincli_mode} \\
+      --fasta-dir ${fasta_dir} \\
       ${test_flag} \\
       ${args}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version 2>&1 | sed 's/Python //g')
+        ena-webin-cli: \$(ena-webin-cli -version)
+        mgnify-pipelines-toolkit: \$(python -c "import importlib.metadata; print(importlib.metadata.version('mgnify-pipelines-toolkit'))")
     END_VERSIONS
     """
 }

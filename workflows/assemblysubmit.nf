@@ -10,7 +10,6 @@ include { CREATE_ASSEMBLY_METADATA_CSV          } from '../modules/local/create_
 include { GENERATE_ASSEMBLY_MANIFEST            } from '../modules/local/generate_assembly_manifest/main'
 include { REGISTERSTUDY                         } from '../modules/local/registerstudy/main'
 include { ENA_WEBIN_CLI_WRAPPER as SUBMIT       } from '../modules/local/ena_webin_cli_wrapper'
-include { ENA_WEBIN_CLI_DOWNLOAD                } from '../modules/local/ena_webin_cli_download'
 
 include { FIND_CONCATENATE as CONCAT_METADATA   } from '../modules/nf-core/find/concatenate/main'
 include { FIND_CONCATENATE as CONCAT_ACCESSIONS } from '../modules/nf-core/find/concatenate/main'
@@ -37,6 +36,7 @@ workflow ASSEMBLYSUBMIT {
     test_upload          // val: true for test upload mode
     webin_cli_version    // val: WebinCLI tool version to download and use for submission
     webincli_mode        // val: either 'validate' or 'submit' to specify WebinCLI mode of operation
+    outdir
 
     main:
     ch_versions = channel.empty()
@@ -174,13 +174,8 @@ workflow ASSEMBLYSUBMIT {
     )
     ch_versions = ch_versions.mix(GENERATE_ASSEMBLY_MANIFEST.out.versions.first())
 
-    ENA_WEBIN_CLI_DOWNLOAD (
-        webin_cli_version
-    )
-
     SUBMIT (
         assemblies_with_coverage.join(GENERATE_ASSEMBLY_MANIFEST.out.manifest),
-        ENA_WEBIN_CLI_DOWNLOAD.out.webin_cli_jar,
         test_upload,
         webincli_mode
     )
@@ -188,20 +183,38 @@ workflow ASSEMBLYSUBMIT {
 
     // Concatenate accessions into single file to publish
     CONCAT_ACCESSIONS (
-        SUBMIT.out.accessions.map { _meta, file -> file }.collect().map { files -> [ [id: "assigned_accessions"], files ] },
+        SUBMIT.out.accessions.map { _meta, file -> file }.collect().map { files -> [ [id: "assemblies_accessions"], files ] },
         'true' // skip_header - we want to keep the header from the first file and skip it for the rest
     )
 
     //
     // Collate and save software versions
     //
-    softwareVersionsToYAML(ch_versions)
+    def topic_versions = channel.topic("versions")
+        .distinct()
+        .branch { entry ->
+            versions_file: entry instanceof Path
+            versions_tuple: true
+        }
+
+    def topic_versions_string = topic_versions.versions_tuple
+        .map { process, tool, version ->
+            [ process[process.lastIndexOf(':')+1..-1], "  ${tool}: ${version}" ]
+        }
+        .groupTuple(by:0)
+        .map { process, tool_versions ->
+            tool_versions.unique().sort()
+            "${process}:\n${tool_versions.join('\n')}"
+        }
+
+    def ch_collated_versions = softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
+        .mix(topic_versions_string)
         .collectFile(
-            storeDir: "${params.outdir}/pipeline_info",
+            storeDir: "${outdir}/pipeline_info",
             name: 'nf_core_'  +  'seqsubmit_software_'  + 'mqc_'  + 'versions.yml',
             sort: true,
             newLine: true
-        ).set { ch_collated_versions }
+        )
 
 
     //
@@ -227,6 +240,8 @@ workflow ASSEMBLYSUBMIT {
     ch_methods_description                = channel.value(
         methodsDescriptionText(ch_multiqc_custom_methods_description))
 
+    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_ACCESSIONS.out.file_out.map{meta, file -> file})
+    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_METADATA.out.file_out.map{meta, file -> file})
     ch_multiqc_files = ch_multiqc_files.mix(ch_collated_versions)
     ch_multiqc_files = ch_multiqc_files.mix(
         ch_methods_description.collectFile(
