@@ -124,20 +124,16 @@
                 "no_rna_presence.tsv:md5,abd958e8addba39c9e4d7f6b97a1a7c6",
                 "no_taxonomy.bin2classification.txt:md5,e24c109efe807c7044a866999fd736f1",
                 "no_taxonomy.txt:md5,0f2082d3e397fd630d605dd60993b131",
-                "genomes_accessions.tsv:md5,015e6f061c27c1eda80f1a854d187072",
                 "genomes_metadata.tsv:md5,2d7b5d99cd3058c7e7cd325e184cc7e9",
-                "ENA_backup.json:md5,d06444dbf5f90f9b56616f7ba091489e",
                 "submission.xml:md5,4b7d1d7e1b883a3eac57e1267943a8d6",
-                "multiqc_Genomes assigned accessions.txt:md5,06112ead0e8175e3611a2045cdb98cf4",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
-                "multiqc_genome_metadata.txt:md5,2f42824e9296d918b7f944037c27c717",
-                "multiqc_sample_registration.txt:md5,e169962a3d1995da2d7184237323c2c3"
+                "multiqc_genome_metadata.txt:md5,2f42824e9296d918b7f944037c27c717"
             ]
         ],
         "meta": {
             "nf-test": "0.9.3",
             "nextflow": "25.10.0"
         },
-        "timestamp": "2026-05-05T20:56:09.367393"
+        "timestamp": "2026-05-06T13:31:02.911782"
     }
 }

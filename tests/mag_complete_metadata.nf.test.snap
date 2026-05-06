@@ -78,20 +78,16 @@
                 "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
             ],
             [
-                "genomes_accessions.tsv:md5,c8abf9fb6087eb6683f87ef17a5a6351",
                 "genomes_metadata.tsv:md5,ae2b884015d1850fa63365e8a64d9fc8",
-                "ENA_backup.json:md5,d06444dbf5f90f9b56616f7ba091489e",
                 "submission.xml:md5,4b7d1d7e1b883a3eac57e1267943a8d6",
-                "multiqc_Genomes assigned accessions.txt:md5,c047ffd98d912317171a9dc2470135a3",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
-                "multiqc_genome_metadata.txt:md5,4364c96b13eb232b290c9f29b0edcf5a",
-                "multiqc_sample_registration.txt:md5,34b25ee941b633ceafca2f96e49f89b5"
+                "multiqc_genome_metadata.txt:md5,4364c96b13eb232b290c9f29b0edcf5a"
             ]
         ],
         "meta": {
             "nf-test": "0.9.3",
             "nextflow": "25.10.0"
         },
-        "timestamp": "2026-05-05T20:57:28.098825"
+        "timestamp": "2026-05-06T13:32:29.27504"
     }
 }

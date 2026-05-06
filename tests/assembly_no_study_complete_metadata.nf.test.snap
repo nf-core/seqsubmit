@@ -69,9 +69,7 @@
                 "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
             ],
             [
-                "assemblies_accessions.tsv:md5,133f130f6508dc81d9a044084ca4fd82",
                 "assemblies_metadata.csv:md5,8e4479dcf7b71a1e250789cd63bf0a6e",
-                "multiqc_Assemblies assigned accessions.txt:md5,dcd5eb0b3a929d276b5c5b18eef3ceb3",
                 "multiqc_assembly_metadata.txt:md5,18cd85bcbc295ab895d2568330fc7854",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
             ]
@@ -80,6 +78,6 @@
             "nf-test": "0.9.3",
             "nextflow": "25.10.0"
         },
-        "timestamp": "2026-05-05T20:41:04.178285"
+        "timestamp": "2026-05-06T13:18:52.449414"
     }
 }

@@ -72,9 +72,7 @@
             ],
             [
                 "no_coverage_paired_reads.depth.txt:md5,bb5f99e74d21df3c73e0ae0f388bcbcb",
-                "assemblies_accessions.tsv:md5,d1ddf84f35e78f892f153f296379fc70",
                 "assemblies_metadata.csv:md5,60706c21c030ba38af7a402f5e753fd5",
-                "multiqc_Assemblies assigned accessions.txt:md5,8c0e26d0c56420944349f8e58b329753",
                 "multiqc_assembly_metadata.txt:md5,9ae2665c6c7b648797758ee66d42ce62",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
             ]
@@ -83,6 +81,6 @@
             "nf-test": "0.9.3",
             "nextflow": "25.10.0"
         },
-        "timestamp": "2026-05-05T20:37:00.882588"
+        "timestamp": "2026-05-06T13:13:38.138649"
     }
 }

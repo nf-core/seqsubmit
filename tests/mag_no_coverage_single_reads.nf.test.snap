@@ -84,20 +84,16 @@
             ],
             [
                 "no_coverage_single_reads.tsv:md5,3791d9be880cbfacbc527e47623e3c9a",
-                "genomes_accessions.tsv:md5,25c7ed025a9a6376389b330b07241f90",
                 "genomes_metadata.tsv:md5,1f56050125362470f351ed99065af980",
-                "ENA_backup.json:md5,d06444dbf5f90f9b56616f7ba091489e",
                 "submission.xml:md5,4b7d1d7e1b883a3eac57e1267943a8d6",
-                "multiqc_Genomes assigned accessions.txt:md5,373ef4ded2c80fbbd97f56f7df59a760",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
-                "multiqc_genome_metadata.txt:md5,f87520e8673df42da7971d6b4723d020",
-                "multiqc_sample_registration.txt:md5,0809b4702aaf0fc830f58f90548f163d"
+                "multiqc_genome_metadata.txt:md5,f87520e8673df42da7971d6b4723d020"
             ]
         ],
         "meta": {
             "nf-test": "0.9.3",
             "nextflow": "25.10.0"
         },
-        "timestamp": "2026-05-05T21:25:30.031633"
+        "timestamp": "2026-05-06T13:35:09.93204"
     }
 }
