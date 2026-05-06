@@ -3,10 +3,11 @@ process MULTIQC {
 
     conda "${moduleDir}/environment.yml"
 
-    // Container was taken from linux/arm64 instead of linux/amd64
-    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
-        ? 'oras://community.wave.seqera.io/library/multiqc:1.33--2537ca5f8445e3c2'
-        : 'community.wave.seqera.io/library/multiqc:1.33--58d7dee710ab3aa8'}"
+    // For local test on Mac M2 use Container from linux/arm64 instead of linux/amd64
+    // community.wave.seqera.io/library/multiqc:1.33--58d7dee710ab3aa8
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/8c/8c6c120d559d7ee04c7442b61ad7cf5a9e8970be5feefb37d68eeaa60c1034eb/data' :
+        'community.wave.seqera.io/library/multiqc:1.32--d58f60e4deb769bf' }"
 
     input:
     path  multiqc_files, stageAs: "?/*"
