@@ -96,19 +96,43 @@ workflow GENOMESUBMIT {
     genome_reads = genome_fasta_and_reads.map{meta, _fasta, reads -> [meta, reads]}
 
     // --------- Filter fasta to have more than 1 contig
-    genome_fasta_filt = genome_fasta.filter { meta, fasta ->
-            fasta.countFasta() > 1
+    genome_fasta_split = genome_fasta.branch { meta, fasta ->
+        valid: fasta.countFasta() > 1
+        too_small: true
     }
 
     // --------- Check fasta files are properly formatted
     FALINT (
-        genome_fasta_filt
+        genome_fasta_split.valid
     )
 
     validated_fastas = genome_fasta.join(FALINT.out.success_log)
         .map { meta, fasta, _log ->
             [meta, fasta]
         }
+
+    // Report failed
+    failed_falint = genome_fasta_split.valid
+        .join(FALINT.out.error_log)
+        .map { meta, fasta, _log ->
+            [meta, fasta]
+        }
+
+    too_small_report = genome_fasta_split.too_small.map { meta, fasta ->
+        "${meta.id}\t${fasta}\tless_than_1_contig"
+    }
+
+    falint_report = failed_falint.map { meta, fasta ->
+        "${meta.id}\t${fasta}\tfalint_failed"
+    }
+
+    too_small_report
+        .mix(falint_report)
+        .collectFile(
+            name: "${params.outdir}/${params.mode}/failed_fastas.tsv",
+            newLine: true,
+            seed: "sample\tfasta\treason\n"
+        )
 
     // --------- Genome coverage calculation
     validated_fastas
