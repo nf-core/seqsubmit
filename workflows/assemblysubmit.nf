@@ -106,9 +106,9 @@ workflow ASSEMBLYSUBMIT {
         coverm_input.reads,
         coverm_input.assembly,
         false, // bam_input
-        false  // interleaved
+        false, // interleaved
+        false  // enable_bam_output
     )
-    ch_versions = ch_versions.mix(COVERM_CONTIG.out.versions)
 
     // Calculate average coverage using splitCsv operator
     average_coverage_ch = COVERM_CONTIG.out.coverage

@@ -127,9 +127,9 @@ workflow GENOMESUBMIT {
         coverm_input.genome,
         false,
         false,
-        'file'
+        'file',
+        false
     )
-    ch_versions = ch_versions.mix( COVERM_GENOME.out.versions )
 
     // Update metadata for records missing coverage
     fasta_updated_with_coverage = COVERM_GENOME.out.coverage.join(branched_coverage_results.genome_coverage_ref_input)

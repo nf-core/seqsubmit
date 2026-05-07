@@ -15,7 +15,11 @@
                     
                 ],
                 "2": [
-                    "versions.yml:md5,05aa059840b3b4dd6d88bc1e4bf976d7"
+                    [
+                        "FASTAVALIDATOR",
+                        "py_fasta_validator",
+                        "0.6"
+                    ]
                 ],
                 "error_log": [
                     
@@ -29,16 +33,20 @@
                         "test.success.log:md5,b0b859eda1db5cd43915846e00ebc22c"
                     ]
                 ],
-                "versions": [
-                    "versions.yml:md5,05aa059840b3b4dd6d88bc1e4bf976d7"
+                "versions_py_fasta_validator": [
+                    [
+                        "FASTAVALIDATOR",
+                        "py_fasta_validator",
+                        "0.6"
+                    ]
                 ]
             }
         ],
+        "timestamp": "2026-03-15T21:53:50.62913298",
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "25.10.0"
-        },
-        "timestamp": "2023-11-28T11:23:25.106872"
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.4"
+        }
     },
     "sarscov2-gff3-invalid": {
         "content": [
@@ -56,7 +64,11 @@
                     ]
                 ],
                 "2": [
-                    "versions.yml:md5,05aa059840b3b4dd6d88bc1e4bf976d7"
+                    [
+                        "FASTAVALIDATOR",
+                        "py_fasta_validator",
+                        "0.6"
+                    ]
                 ],
                 "error_log": [
                     [
@@ -70,56 +82,19 @@
                 "success_log": [
                     
                 ],
-                "versions": [
-                    "versions.yml:md5,05aa059840b3b4dd6d88bc1e4bf976d7"
+                "versions_py_fasta_validator": [
+                    [
+                        "FASTAVALIDATOR",
+                        "py_fasta_validator",
+                        "0.6"
+                    ]
                 ]
             }
         ],
+        "timestamp": "2026-03-15T21:53:59.053193204",
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "25.10.0"
-        },
-        "timestamp": "2023-11-28T11:23:29.40324"
-    },
-    "number-contigs-invalid": {
-        "content": [
-            {
-                "0": [
-                    
-                ],
-                "1": [
-                    [
-                        {
-                            "id": "test",
-                            "single_end": false
-                        },
-                        "test.error.log:md5,772091b11ff0a7378e9e7d2abd993f5a"
-                    ]
-                ],
-                "2": [
-                    "versions.yml:md5,05aa059840b3b4dd6d88bc1e4bf976d7"
-                ],
-                "error_log": [
-                    [
-                        {
-                            "id": "test",
-                            "single_end": false
-                        },
-                        "test.error.log:md5,772091b11ff0a7378e9e7d2abd993f5a"
-                    ]
-                ],
-                "success_log": [
-                    
-                ],
-                "versions": [
-                    "versions.yml:md5,05aa059840b3b4dd6d88bc1e4bf976d7"
-                ]
-            }
-        ],
-        "meta": {
-            "nf-test": "0.9.0",
-            "nextflow": "25.04.1"
-        },
-        "timestamp": "2025-10-29T12:03:33.964183"
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.4"
+        }
     }
 }
