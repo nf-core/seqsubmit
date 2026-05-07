@@ -9,7 +9,7 @@ lint:
     - docs/images/nf-core-seqsubmit_logo_light.png
     - docs/images/nf-core-seqsubmit_logo_dark.png
     - assets/nf-core-seqsubmit_logo_light.png
-nf_core_version: 3.5.1
+nf_core_version: 4.0.2
 repository_type: pipeline
 template:
   author: Martin Beracochea, Ekaterina Sakharova, Sofiia Ochkalova, Evangelos Karatzas
