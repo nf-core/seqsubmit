@@ -9,7 +9,7 @@ include { REGISTERSTUDY                         } from '../modules/local/registe
 include { RENAME_FASTA_FOR_CATPACK              } from '../modules/local/rename_fasta_for_catpack'
 include { CREATE_GENOME_METADATA_TSV            } from '../modules/local/create_genome_metadata_tsv/main'
 
-include { FASTAVALIDATOR                        } from '../modules/nf-core/fastavalidator/main'
+include { FALINT                                } from '../modules/nf-core/falint/main'
 include { COVERM_GENOME                         } from '../modules/nf-core/coverm/genome'
 include { FIND_CONCATENATE as CONCAT_METADATA   } from '../modules/nf-core/find/concatenate/main'
 include { FIND_CONCATENATE as CONCAT_ACCESSIONS } from '../modules/nf-core/find/concatenate/main'
@@ -95,14 +95,17 @@ workflow GENOMESUBMIT {
     genome_fasta = genome_fasta_and_reads.map{meta, fasta, _fq1 -> [meta, fasta]}
     genome_reads = genome_fasta_and_reads.map{meta, _fasta, reads -> [meta, reads]}
 
-    // --------- Check fasta files are properly formatted
-    FASTAVALIDATOR (
-        genome_fasta,
-        "true" // enables number of contigs check - ENA requires more than 1 contig for a bin/MAG submission
-    )
-    ch_versions = ch_versions.mix( FASTAVALIDATOR.out.versions )
+    // --------- Filter fasta to have more than 1 contig
+    genome_fasta_filt = genome_fasta.filter { meta, fasta ->
+            fasta.countFasta() > 1
+    }
 
-    validated_fastas = genome_fasta.join(FASTAVALIDATOR.out.success_log)
+    // --------- Check fasta files are properly formatted
+    FALINT (
+        genome_fasta_filt
+    )
+
+    validated_fastas = genome_fasta.join(FALINT.out.success_log)
         .map { meta, fasta, _log ->
             [meta, fasta]
         }

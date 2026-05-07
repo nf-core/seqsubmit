@@ -5,7 +5,7 @@
 */
 
 include { COVERM_CONTIG                         } from '../modules/nf-core/coverm/contig/main'
-include { FASTAVALIDATOR                        } from '../modules/nf-core/fastavalidator/main'
+include { FALINT                                } from '../modules/nf-core/falint/main'
 include { CREATE_ASSEMBLY_METADATA_CSV          } from '../modules/local/create_assembly_metadata_csv/main'
 include { GENERATE_ASSEMBLY_MANIFEST            } from '../modules/local/generate_assembly_manifest/main'
 include { REGISTERSTUDY                         } from '../modules/local/registerstudy/main'
@@ -80,18 +80,44 @@ workflow ASSEMBLYSUBMIT {
                 [meta, file(row[2])]
             }
         }
+    // --------- Filter fasta to have more than 1 contig
+    assembly_fasta_split = assembly_fasta.branch { meta, fasta ->
+        valid: fasta.countFasta() > 1
+        too_small: true
+    }
 
     // Check fasta files are properly formatted
-    FASTAVALIDATOR (
-        assembly_fasta,
-        "true" // enables number of contigs check - ENA requires more than 1 contig for an assembly submission
+    FALINT (
+        assembly_fasta_split.valid
     )
-    ch_versions = ch_versions.mix(FASTAVALIDATOR.out.versions)
 
-    validated_fastas = assembly_fasta.join(FASTAVALIDATOR.out.success_log)
+    validated_fastas = assembly_fasta.join(FALINT.out.success_log)
         .map { meta, fasta, _log ->
             [meta, fasta]
         }
+
+    // Report failed
+    failed_falint = assembly_fasta_split.valid
+        .join(FALINT.out.error_log)
+        .map { meta, fasta, _log ->
+            [meta, fasta]
+        }
+
+    too_small_report = assembly_fasta_split.too_small.map { meta, fasta ->
+        "${meta.id}\t${fasta}\tless_than_1_contig"
+    }
+
+    falint_report = failed_falint.map { meta, fasta ->
+        "${meta.id}\t${fasta}\tfalint_failed"
+    }
+
+    too_small_report
+        .mix(falint_report)
+        .collectFile(
+            name: "${params.outdir}/${params.mode}/failed_fastas.tsv",
+            newLine: true,
+            seed: "sample\tfasta\treason\n"
+        )
 
     // For assemblies without coverage, calculate coverage with CoverM
     validated_fastas.filter { meta, _fasta -> meta.coverage == null }

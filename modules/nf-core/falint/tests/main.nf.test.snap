@@ -8,7 +8,7 @@
                             "id": "test",
                             "single_end": false
                         },
-                        "test.success.log:md5,b0b859eda1db5cd43915846e00ebc22c"
+                        "test.success.log:md5,7b9802635c4f44d1711e7132ccdb648e"
                     ]
                 ],
                 "1": [
@@ -16,9 +16,9 @@
                 ],
                 "2": [
                     [
-                        "FASTAVALIDATOR",
-                        "py_fasta_validator",
-                        "0.6"
+                        "FALINT",
+                        "falint",
+                        "1.2.0"
                     ]
                 ],
                 "error_log": [
@@ -30,71 +30,89 @@
                             "id": "test",
                             "single_end": false
                         },
-                        "test.success.log:md5,b0b859eda1db5cd43915846e00ebc22c"
+                        "test.success.log:md5,7b9802635c4f44d1711e7132ccdb648e"
                     ]
                 ],
-                "versions_py_fasta_validator": [
+                "versions_falint": [
                     [
-                        "FASTAVALIDATOR",
-                        "py_fasta_validator",
-                        "0.6"
+                        "FALINT",
+                        "falint",
+                        "1.2.0"
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-03-15T21:53:50.62913298",
+        "timestamp": "2026-04-28T11:40:23.744262",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.10.4"
+            "nextflow": "25.10.0"
         }
     },
     "sarscov2-gff3-invalid": {
         "content": [
             {
-                "0": [
-                    
-                ],
-                "1": [
+                "versions_falint": [
                     [
-                        {
-                            "id": "test",
-                            "single_end": false
-                        },
-                        "test.error.log:md5,531d520c0e7767176f743f197f1f87b3"
-                    ]
-                ],
-                "2": [
-                    [
-                        "FASTAVALIDATOR",
-                        "py_fasta_validator",
-                        "0.6"
-                    ]
-                ],
-                "error_log": [
-                    [
-                        {
-                            "id": "test",
-                            "single_end": false
-                        },
-                        "test.error.log:md5,531d520c0e7767176f743f197f1f87b3"
-                    ]
-                ],
-                "success_log": [
-                    
-                ],
-                "versions_py_fasta_validator": [
-                    [
-                        "FASTAVALIDATOR",
-                        "py_fasta_validator",
-                        "0.6"
+                        "FALINT",
+                        "falint",
+                        "1.2.0"
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-03-15T21:53:59.053193204",
+        "timestamp": "2026-04-28T11:40:32.277751",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.10.4"
+            "nextflow": "25.10.0"
+        }
+    },
+    "sarscov2-fasta-valid-stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.success.log:md5,7b9802635c4f44d1711e7132ccdb648e"
+                    ]
+                ],
+                "1": [
+                    
+                ],
+                "2": [
+                    [
+                        "FALINT",
+                        "falint",
+                        "1.2.0"
+                    ]
+                ],
+                "error_log": [
+                    
+                ],
+                "success_log": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.success.log:md5,7b9802635c4f44d1711e7132ccdb648e"
+                    ]
+                ],
+                "versions_falint": [
+                    [
+                        "FALINT",
+                        "falint",
+                        "1.2.0"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-28T11:40:28.13947",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.0"
         }
     }
 }
