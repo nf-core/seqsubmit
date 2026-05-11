@@ -42,6 +42,10 @@ workflow NFCORE_SEQSUBMIT {
     if (params.mode == "mags" || params.mode == "bins") {
         GENOMESUBMIT (
             samplesheet,
+            params.multiqc_config,
+            params.multiqc_logo,
+            params.multiqc_methods_description,
+            params.outdir,
             params.mode,
             params.submission_study,
             params.study_metadata,
@@ -55,20 +59,22 @@ workflow NFCORE_SEQSUBMIT {
             params.upload_tpa,
             params.test_upload,
             params.webin_cli_version,
-            params.webincli_mode,
-            params.outdir
+            params.webincli_mode
         )
         ch_multiqc_report = GENOMESUBMIT.out.multiqc_report
     } else if (params.mode == "metagenomic_assemblies") {
         ASSEMBLYSUBMIT (
             samplesheet,
+            params.multiqc_config,
+            params.multiqc_logo,
+            params.multiqc_methods_description,
+            params.outdir,
             params.submission_study,
             params.study_metadata,
             params.upload_tpa,
             params.test_upload,
             params.webin_cli_version,
-            params.webincli_mode,
-            params.outdir
+            params.webincli_mode
         )
         ch_multiqc_report = ASSEMBLYSUBMIT.out.multiqc_report
     }
@@ -93,6 +99,7 @@ workflow {
     PIPELINE_INITIALISATION (
         params.version,
         params.validate_params,
+        params.monochrome_logs,
         args,
         params.outdir,
         params.input,
@@ -117,7 +124,6 @@ workflow {
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        params.hook_url,
         NFCORE_SEQSUBMIT.out.multiqc_report
     )
 }
