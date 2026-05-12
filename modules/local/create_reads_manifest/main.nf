@@ -2,7 +2,9 @@ process CREATE_READS_MANIFEST {
     tag "$meta.id"
     label 'process_single'
 
-    container "docker://alpine:latest"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'oras://community.wave.seqera.io/library/bash:5.2.37--06dbc4169cb39ae0' :
+        'community.wave.seqera.io/library/bash:5.2.37--ae00789afb795adf' }"
 
     input:
     tuple val(meta), path(fastq_files)
@@ -11,7 +13,6 @@ process CREATE_READS_MANIFEST {
 
     output:
     tuple val(meta), path("${meta.id}.manifest"), emit: manifest
-    path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -37,20 +38,10 @@ LIBRARY_SELECTION	${meta.library_selection}
 LIBRARY_STRATEGY	${meta.library_strategy}
 ${insert_size_line}${library_name_line}${description_line}${fastq_entries}
 EOF
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        bash: \$(echo \$(bash --version | grep "GNU bash" | sed 's/GNU bash, version //; s/ (.*//' ))
-    END_VERSIONS
     """
 
     stub:
     """
     touch ${meta.id}.manifest
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        bash: 5.1.0
-    END_VERSIONS
     """
 }

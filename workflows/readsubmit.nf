@@ -87,7 +87,6 @@ workflow READSUBMIT {
         study_accession_ch,
         test_upload
     )
-    ch_versions = ch_versions.mix(CREATE_READS_MANIFEST.out.versions)
 
     ENA_WEBIN_CLI_DOWNLOAD (
         webin_cli_version

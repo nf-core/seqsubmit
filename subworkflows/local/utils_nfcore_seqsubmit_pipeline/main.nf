@@ -32,7 +32,7 @@ workflow PIPELINE_INITIALISATION {
     nextflow_cli_args //   array: List of positional nextflow CLI args
     outdir            //  string: The output directory where the results will be saved
     input             //  string: Path to input samplesheet
-    mode              //  string: Type of input data (mags, bins, metagenomic_assemblies)
+    mode              //  string: Type of input data (mags, bins, metagenomic_assemblies, reads)
     help              // boolean: Display help message and exit
     help_full         // boolean: Show the full help message
     show_hidden       // boolean: Show hidden parameters in the help message
@@ -102,8 +102,11 @@ workflow PIPELINE_INITIALISATION {
     } else if ( mode == "metagenomic_assemblies" ) {
         ch_samplesheet = channel
             .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input_assembly.json"))
+    } else if ( mode == "reads" ) {
+        ch_samplesheet = channel
+            .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input_reads.json"))
     } else {
-        error("No input was found. Please, point to the location of your samplesheet using --input_genome or --input_assembly")
+        error("Unknown mode specified: '${mode}'. Supported modes are 'mags', 'bins', 'metagenomic_assemblies', and 'reads'.")
     }
 
     emit:
