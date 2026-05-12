@@ -1,6 +1,6 @@
 nextflow_pipeline {
 
-    name "Test assembly submission workflow stub - one_contig"
+    name "Test assembly submission workflow - one_contig"
     script "../main.nf"
     tag "pipeline"
     tag "mode_assembly"

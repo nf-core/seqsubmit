@@ -1,6 +1,6 @@
 nextflow_pipeline {
 
-    name "Test genome submission workflow stub - one_contig"
+    name "Test genome submission workflow - one_contig"
     script "../main.nf"
     tag "pipeline"
     tag "mode_mag"

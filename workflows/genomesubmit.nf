@@ -5,7 +5,6 @@
 */
 include { GENOME_UPLOAD as CREATE_MANIFESTS     } from '../modules/local/genome_upload'
 include { ENA_WEBIN_CLI_WRAPPER as SUBMIT       } from '../modules/local/ena_webin_cli_wrapper'
-include { ENA_WEBIN_CLI_DOWNLOAD                } from '../modules/local/ena_webin_cli_download'
 include { REGISTERSTUDY                         } from '../modules/local/registerstudy/main'
 include { RENAME_FASTA_FOR_CATPACK              } from '../modules/local/rename_fasta_for_catpack'
 include { CREATE_GENOME_METADATA_TSV            } from '../modules/local/create_genome_metadata_tsv/main'
@@ -35,6 +34,10 @@ workflow GENOMESUBMIT {
 
     take:
     ch_samplesheet           // channel: samplesheet read in from --input
+    multiqc_config
+    multiqc_logo
+    multiqc_methods_description
+    outdir
     mags_or_bins_flag        // val: submission mode (mags or bins)
     submission_study         // val: accession of the study to submit to (optional)
     study_metadata           // val: path to study metadata file for study creation (used if no submission_study provided)
@@ -52,8 +55,8 @@ workflow GENOMESUBMIT {
 
     main:
 
-    ch_versions = channel.empty()
-    ch_multiqc_files = channel.empty()
+    def ch_versions = channel.empty()
+    def ch_multiqc_files = channel.empty()
 
      // --------- Create genomes channel with proper metadata structure
     genome_fasta_and_reads = ch_samplesheet
@@ -97,6 +100,8 @@ workflow GENOMESUBMIT {
         genome_fasta,
         "true" // enables number of contigs check - ENA requires more than 1 contig for a bin/MAG submission
     )
+    ch_versions = ch_versions.mix( FASTAVALIDATOR.out.versions )
+
     validated_fastas = genome_fasta.join(FASTAVALIDATOR.out.success_log)
         .map { meta, fasta, _log ->
             [meta, fasta]
@@ -275,7 +280,7 @@ workflow GENOMESUBMIT {
 
     // --------- Generate manifests
     CREATE_MANIFESTS(
-        fasta_updated_with_stats.map{_meta, fasta -> fasta}.collect(),
+        fasta_updated_with_taxonomy.map{_meta, fasta -> fasta}.collect(),
         CONCAT_METADATA.out.file_out.map { _meta, file -> file }.first(),
         mags_or_bins_flag,     // mags or bins
         study_accession_ch.first(),
@@ -295,7 +300,7 @@ workflow GENOMESUBMIT {
             [ meta, manifest ]
     }
     // Combine fasta and manifests
-    ch_combined = fasta_updated_with_stats
+    ch_combined = fasta_updated_with_taxonomy
     .map { meta, fasta -> [meta.id, meta, fasta] }
     .join(
         manifests_ch.map { meta, manifest -> [meta.id, manifest] }  // Has only [id: prefix]
@@ -305,79 +310,82 @@ workflow GENOMESUBMIT {
     }
 
     // --------- Upload data to ENA
-    ENA_WEBIN_CLI_DOWNLOAD (
-        webin_cli_version
-    )
 
     SUBMIT (
         ch_combined,
-        ENA_WEBIN_CLI_DOWNLOAD.out.webin_cli_jar,
         test_upload,
         webincli_mode
     )
+    ch_versions = ch_versions.mix(SUBMIT.out.versions)
 
     // Concatenate accessions into single file to publish
     CONCAT_ACCESSIONS (
-        SUBMIT.out.accessions.map { _meta, file -> file }.collect().map { files -> [ [id: "assigned_accessions"], files ] },
+        SUBMIT.out.accessions.map { _meta, file -> file }.collect().map { files -> [ [id: "genomes_accessions"], files ] },
         'true' // skip_header - we want to keep the header from the first file and skip it for the rest
     )
 
     //
     // Collate and save software versions
     //
-    softwareVersionsToYAML(ch_versions)
+    def topic_versions = channel.topic("versions")
+        .distinct()
+        .branch { entry ->
+            versions_file: entry instanceof Path
+            versions_tuple: true
+        }
+
+    def topic_versions_string = topic_versions.versions_tuple
+        .map { process, tool, version ->
+            [ process[process.lastIndexOf(':')+1..-1], "  ${tool}: ${version}" ]
+        }
+        .groupTuple(by:0)
+        .map { process, tool_versions ->
+            tool_versions.unique().sort()
+            "${process}:\n${tool_versions.join('\n')}"
+        }
+
+    def ch_collated_versions = softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
+        .mix(topic_versions_string)
         .collectFile(
-            storeDir: "${params.outdir}/pipeline_info",
+            storeDir: "${outdir}/pipeline_info",
             name: 'nf_core_'  +  'seqsubmit_software_'  + 'mqc_'  + 'versions.yml',
             sort: true,
             newLine: true
-        ).set { ch_collated_versions }
+        )
 
 
     //
     // MODULE: MultiQC
     //
-    ch_multiqc_config        = channel.fromPath(
-        "$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-    ch_multiqc_custom_config = params.multiqc_config ?
-        channel.fromPath(params.multiqc_config, checkIfExists: true) :
-        channel.empty()
-    ch_multiqc_logo          = params.multiqc_logo ?
-        channel.fromPath(params.multiqc_logo, checkIfExists: true) :
-        channel.empty()
-
-    summary_params      = paramsSummaryMap(
-        workflow, parameters_schema: "nextflow_schema.json")
-    ch_workflow_summary = channel.value(paramsSummaryMultiqc(summary_params))
-    ch_multiqc_files = ch_multiqc_files.mix(
-        ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_custom_methods_description = params.multiqc_methods_description ?
-        file(params.multiqc_methods_description, checkIfExists: true) :
-        file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
-    ch_methods_description                = channel.value(
-        methodsDescriptionText(ch_multiqc_custom_methods_description))
-
     ch_multiqc_files = ch_multiqc_files.mix(ch_collated_versions)
-    ch_multiqc_files = ch_multiqc_files.mix(
-        ch_methods_description.collectFile(
-            name: 'methods_description_mqc.yaml',
-            sort: true
-        )
+    def ch_summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
+    def ch_workflow_summary = channel.value(paramsSummaryMultiqc(ch_summary_params))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+    def ch_multiqc_custom_methods_description = multiqc_methods_description
+        ? file(multiqc_methods_description, checkIfExists: true)
+        : file("${projectDir}/assets/methods_description_template.yml", checkIfExists: true)
+    def ch_methods_description = channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: true))
+    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_METADATA.out.file_out.map{meta, file -> file})
+    ch_multiqc_files = ch_multiqc_files.mix(CREATE_MANIFESTS.out.upload_registered_mags)
+    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_ACCESSIONS.out.file_out.map{meta, file -> file})
+    MULTIQC(
+        ch_multiqc_files.flatten().collect().map { files ->
+            [
+                [id: 'seqsubmit'],
+                files,
+                multiqc_config
+                    ? file(multiqc_config, checkIfExists: true)
+                    : file("${projectDir}/assets/multiqc_config.yml", checkIfExists: true),
+                multiqc_logo ? file(multiqc_logo, checkIfExists: true) : [],
+                [],
+                [],
+            ]
+        }
     )
-
-    MULTIQC (
-        ch_multiqc_files.collect(),
-        ch_multiqc_config.toList(),
-        ch_multiqc_custom_config.toList(),
-        ch_multiqc_logo.toList(),
-        [],
-        []
-    )
-
     emit:
-    multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    multiqc_report = MULTIQC.out.report.map { _meta, report -> [report] }.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
-
 }
 
 /*
