@@ -81,6 +81,10 @@ workflow NFCORE_SEQSUBMIT {
     } else if (params.mode == "reads") {
         READSUBMIT (
             samplesheet,
+            params.multiqc_config,
+            params.multiqc_logo,
+            params.multiqc_methods_description,
+            params.outdir,
             params.submission_study,
             params.study_metadata,
             params.test_upload,
