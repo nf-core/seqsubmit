@@ -19,8 +19,8 @@
                 "CREATE_MANIFESTS": {
                     "genome_uploader": "2.5.2"
                 },
-                "FASTAVALIDATOR": {
-                    "py_fasta_validator": 0.6
+                "FALINT": {
+                    "falint": "1.2.0"
                 },
                 "REGISTERSTUDY": {
                     "mgnify-pipelines-toolkit": "1.4.21"
@@ -88,9 +88,9 @@
             ]
         ],
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "25.10.0"
+            "nf-test": "0.9.2",
+            "nextflow": "26.04.1"
         },
-        "timestamp": "2026-05-06T13:43:21.345279"
+        "timestamp": "2026-05-13T13:36:15.465306"
     }
 }

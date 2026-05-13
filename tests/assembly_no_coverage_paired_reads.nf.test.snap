@@ -19,8 +19,8 @@
                 "CREATE_ASSEMBLY_METADATA_CSV": {
                     "bash": "5.2.37(1)-release"
                 },
-                "FASTAVALIDATOR": {
-                    "py_fasta_validator": 0.6
+                "FALINT": {
+                    "falint": "1.2.0"
                 },
                 "GENERATE_ASSEMBLY_MANIFEST": {
                     "assembly_uploader": "1.3.4"
@@ -38,7 +38,7 @@
                 "metagenomic_assemblies",
                 "metagenomic_assemblies/no_coverage_paired_reads",
                 "metagenomic_assemblies/no_coverage_paired_reads/coverage",
-                "metagenomic_assemblies/no_coverage_paired_reads/coverage/no_coverage_paired_reads.depth.txt",
+                "metagenomic_assemblies/no_coverage_paired_reads/coverage/no_coverage_paired_reads.depth.tsv",
                 "metagenomic_assemblies/no_coverage_paired_reads/upload",
                 "metagenomic_assemblies/no_coverage_paired_reads/upload/webin_cli",
                 "metagenomic_assemblies/no_coverage_paired_reads/upload/webin_cli/no_coverage_paired_reads_accessions.tsv",
@@ -71,16 +71,16 @@
                 "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
             ],
             [
-                "no_coverage_paired_reads.depth.txt:md5,bb5f99e74d21df3c73e0ae0f388bcbcb",
+                "no_coverage_paired_reads.depth.tsv:md5,bb5f99e74d21df3c73e0ae0f388bcbcb",
                 "assemblies_metadata.csv:md5,60706c21c030ba38af7a402f5e753fd5",
                 "multiqc_assembly_metadata.txt:md5,9ae2665c6c7b648797758ee66d42ce62",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
             ]
         ],
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "25.10.0"
+            "nf-test": "0.9.2",
+            "nextflow": "26.04.1"
         },
-        "timestamp": "2026-05-06T13:13:38.138649"
+        "timestamp": "2026-05-13T13:18:47.77148"
     }
 }
