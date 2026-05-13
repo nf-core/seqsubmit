@@ -38,7 +38,6 @@ workflow NFCORE_SEQSUBMIT {
     //
     // WORKFLOW: Run pipeline
     //
-    // Depending on the input type (mags/bins or metagenomic_assemblies), one or the another workflow will be triggered
     if (params.mode == "mags" || params.mode == "bins") {
         GENOMESUBMIT (
             samplesheet,
@@ -77,12 +76,35 @@ workflow NFCORE_SEQSUBMIT {
             params.webincli_mode
         )
         ch_multiqc_report = ASSEMBLYSUBMIT.out.multiqc_report
-    }
-
+    } else if (params.mode == "reads") {
+        GENOMESUBMIT (
+            samplesheet,
+            params.multiqc_config,
+            params.multiqc_logo,
+            params.multiqc_methods_description,
+            params.outdir,
+            params.mode,
+            params.submission_study,
+            params.study_metadata,
+            params.trna_limit,
+            params.rrna_limit,
+            params.checkm2_db,
+            params.checkm2_db_download_id,
+            params.cat_db,
+            params.cat_db_download_id,
+            params.centre_name,
+            params.upload_tpa,
+            params.test_upload,
+            params.webin_cli_version,
+            params.webincli_mode
+        )
+        ch_multiqc_report = GENOMESUBMIT.out.multiqc_report
+    }                                                          // ← closes the if/else chain
 
     emit:
-    multiqc_report = ch_multiqc_report // channel: /path/to/multiqc_report.html
+    multiqc_report = ch_multiqc_report
 }
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW

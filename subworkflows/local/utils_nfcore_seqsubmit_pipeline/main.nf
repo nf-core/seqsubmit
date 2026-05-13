@@ -55,30 +55,9 @@ workflow PIPELINE_INITIALISATION {
     // Validate parameters and generate parameter summary to stdout
     //
 
-    def before_text = ""
-    def after_text = ""
-    before_text = """
--\033[2m----------------------------------------------------\033[0m-
-                                        \033[0;32m,--.\033[0;30m/\033[0;32m,-.\033[0m
-\033[0;34m        ___     __   __   __   ___     \033[0;32m/,-._.--~\'\033[0m
-\033[0;34m  |\\ | |__  __ /  ` /  \\ |__) |__         \033[0;33m}  {\033[0m
-\033[0;34m  | \\| |       \\__, \\__/ |  \\ |___     \033[0;32m\\`-._,-`-,\033[0m
-                                        \033[0;32m`._,._,\'\033[0m
-\033[0;35m  nf-core/seqsubmit ${workflow.manifest.version}\033[0m
--\033[2m----------------------------------------------------\033[0m-
-"""
-    after_text = """${workflow.manifest.doi ? "\n* The pipeline\n" : ""}${workflow.manifest.doi.tokenize(",").collect { doi -> "    https://doi.org/${doi.trim().replace('https://doi.org/','')}"}.join("\n")}${workflow.manifest.doi ? "\n" : ""}
-* The nf-core framework
-    https://doi.org/10.1038/s41587-020-0439-x
-
-* Software dependencies
-    https://github.com/nf-core/seqsubmit/blob/master/CITATIONS.md
-"""
-    if (monochrome_logs) {
-        before_text = before_text.replaceAll(/\033\[[0-9;]*m/, '')
-    }
-
-    command = "nextflow run ${workflow.manifest.name} -profile <docker/singularity/.../institute> --input samplesheet.csv --outdir <OUTDIR>"
+    def before_text = "--- nf-core/seqsubmit ---"
+    def after_text  = "-------------------------"
+    def command     = "nextflow run nf-core/seqsubmit --input samplesheet.csv --outdir <OUTDIR> --mode <MODE>"
 
     UTILS_NFSCHEMA_PLUGIN (
         workflow,
@@ -92,32 +71,24 @@ workflow PIPELINE_INITIALISATION {
         command
     )
 
-    //
-    // Check config provided to the pipeline
-    //
     UTILS_NFCORE_PIPELINE (
         nextflow_cli_args
     )
 
-    //
-    // Create channel from input file provided through params.input
-    //
-
     if ( mode == "mags" || mode == "bins" ) {
-        ch_samplesheet = channel
-            .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input_genome.json"))
+        ch_samplesheet = channel.fromList(samplesheetToList(input, "${projectDir}/assets/schema_input_genome.json"))
     } else if ( mode == "metagenomic_assemblies" ) {
-        ch_samplesheet = channel
-            .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input_assembly.json"))
+        ch_samplesheet = channel.fromList(samplesheetToList(input, "${projectDir}/assets/schema_input_assembly.json"))
+    } else if ( mode == "reads" ) {
+        ch_samplesheet = channel.fromList(samplesheetToList(input, "${projectDir}/assets/schema_input_genome.json"))
     } else {
-        error("No input was found. Please, point to the location of your samplesheet using --input_genome or --input_assembly")
+        error("No input found")
     }
 
     emit:
     samplesheet = ch_samplesheet
     versions    = ch_versions
 }
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     SUBWORKFLOW FOR PIPELINE COMPLETION
