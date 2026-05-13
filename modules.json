@@ -8,115 +8,83 @@
                     "barrnap": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
-                        "installed_by": [
-                            "modules"
-                        ]
+                        "installed_by": ["modules"]
                     },
                     "catpack/addnames": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
-                        "installed_by": [
-                            "fasta_classify_catpack"
-                        ]
+                        "installed_by": ["fasta_classify_catpack"]
                     },
                     "catpack/bins": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
-                        "installed_by": [
-                            "fasta_classify_catpack"
-                        ]
+                        "installed_by": ["fasta_classify_catpack"]
                     },
                     "catpack/contigs": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
-                        "installed_by": [
-                            "fasta_classify_catpack"
-                        ]
+                        "installed_by": ["fasta_classify_catpack"]
                     },
                     "catpack/download": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
-                        "installed_by": [
-                            "fasta_classify_catpack"
-                        ]
+                        "installed_by": ["fasta_classify_catpack"]
                     },
                     "catpack/prepare": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
-                        "installed_by": [
-                            "fasta_classify_catpack"
-                        ]
+                        "installed_by": ["fasta_classify_catpack"]
                     },
                     "catpack/summarise": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
-                        "installed_by": [
-                            "fasta_classify_catpack"
-                        ]
+                        "installed_by": ["fasta_classify_catpack"]
                     },
                     "checkm2/databasedownload": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
-                        "installed_by": [
-                            "modules"
-                        ]
+                        "installed_by": ["modules"]
                     },
                     "checkm2/predict": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
-                        "installed_by": [
-                            "modules"
-                        ]
+                        "installed_by": ["modules"]
                     },
                     "coverm/contig": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
-                        "installed_by": [
-                            "modules"
-                        ]
+                        "installed_by": ["modules"]
                     },
                     "coverm/genome": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
-                        "installed_by": [
-                            "modules"
-                        ]
+                        "installed_by": ["modules"]
                     },
                     "falint": {
                         "branch": "master",
                         "git_sha": "f4952081c36cd091ef1693e7f0b11d8569ae5107",
-                        "installed_by": [
-                            "modules"
-                        ]
+                        "installed_by": ["modules"]
                     },
                     "find/concatenate": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
-                        "installed_by": [
-                            "modules"
-                        ],
+                        "installed_by": ["modules"],
                         "patch": "modules/nf-core/find/concatenate/find-concatenate.diff"
                     },
                     "multiqc": {
                         "branch": "master",
                         "git_sha": "008f9d3e61209bf995edac3ba531f54e269e1215",
-                        "installed_by": [
-                            "modules"
-                        ]
+                        "installed_by": ["modules"]
                     },
                     "trnascanse": {
                         "branch": "master",
                         "git_sha": "0c739827833fdece07eb80618fd085a9a8992406",
-                        "installed_by": [
-                            "modules"
-                        ]
+                        "installed_by": ["modules"]
                     },
                     "untar": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
-                        "installed_by": [
-                            "fasta_classify_catpack"
-                        ]
+                        "installed_by": ["fasta_classify_catpack"]
                     }
                 }
             },
@@ -125,31 +93,23 @@
                     "fasta_classify_catpack": {
                         "branch": "master",
                         "git_sha": "1e1d30d328949507ee5af79b7ff58b09738b8227",
-                        "installed_by": [
-                            "subworkflows"
-                        ],
+                        "installed_by": ["subworkflows"],
                         "patch": "subworkflows/nf-core/fasta_classify_catpack/fasta_classify_catpack.diff"
                     },
                     "utils_nextflow_pipeline": {
                         "branch": "master",
                         "git_sha": "1a545fcbd762911c21a64ced3dbef99b2b51ac75",
-                        "installed_by": [
-                            "subworkflows"
-                        ]
+                        "installed_by": ["subworkflows"]
                     },
                     "utils_nfcore_pipeline": {
                         "branch": "master",
                         "git_sha": "a3fb7351b1fdb2b1de282b765816bbea190e86a8",
-                        "installed_by": [
-                            "subworkflows"
-                        ]
+                        "installed_by": ["subworkflows"]
                     },
                     "utils_nfschema_plugin": {
                         "branch": "master",
                         "git_sha": "ce3424257de288c0ca25f097a68d3a289da23f12",
-                        "installed_by": [
-                            "subworkflows"
-                        ]
+                        "installed_by": ["subworkflows"]
                     }
                 }
             }
