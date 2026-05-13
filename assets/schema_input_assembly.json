@@ -25,33 +25,29 @@
                 "anyOf": [
                     {
                         "type": "string",
-                        "format": "file-path",
-                        "exists": true,
-                        "pattern": "^\\S+\\.(fq|fastq)(\\.gz)?$"
+                        "pattern": "^\\S+\\.(fq|fastq)(\\.gz)?(;\\S+\\.(fq|fastq)(\\.gz)?)*$"
                     },
                     {
                         "type": "string",
                         "maxLength": 0
                     }
                 ],
-                "errorMessage": "FASTQ file must have extension '.fq' or '.fastq' (optionally gzipped)",
-                "description": "Forward reads if paired-end or single-end reads FASTQ file"
+                "errorMessage": "FASTQ file(s) must have extension '.fq' or '.fastq' (optionally gzipped); for co-assemblies use semicolon-separated paths",
+                "description": "Forward reads if paired-end or single-end reads FASTQ file. For co-assemblies, semicolon-separated paths (e.g. run1_R1.fq.gz;run2_R1.fq.gz)"
             },
             "fastq_2": {
                 "anyOf": [
                     {
                         "type": "string",
-                        "format": "file-path",
-                        "exists": true,
-                        "pattern": "^\\S+\\.(fq|fastq)(\\.gz)?$"
+                        "pattern": "^\\S+\\.(fq|fastq)(\\.gz)?(;\\S+\\.(fq|fastq)(\\.gz)?)*$"
                     },
                     {
                         "type": "string",
                         "maxLength": 0
                     }
                 ],
-                "errorMessage": "FASTQ file for reverse reads must have extension '.fq' or '.fastq' (optionally gzipped)",
-                "description": "Reverse reads FASTQ file if paired-end. Leave empty for single-end reads"
+                "errorMessage": "FASTQ file(s) for reverse reads must have extension '.fq' or '.fastq' (optionally gzipped); for co-assemblies use semicolon-separated paths",
+                "description": "Reverse reads FASTQ file if paired-end. Leave empty for single-end reads. For co-assemblies, semicolon-separated paths (e.g. run1_R2.fq.gz;run2_R2.fq.gz)"
             },
             "coverage": {
                 "anyOf": [
@@ -71,7 +67,7 @@
                 "type": "string",
                 "pattern": "^\\S+$",
                 "errorMessage": "Accession must be provided and cannot contain spaces",
-                "description": "Accession of the run used to generate the assembly"
+                "description": "Accession(s) of the run(s) used to generate the assembly. For co-assemblies, use semicolon-separated values (e.g. ERR000001;ERR000002)"
             },
             "assembler": {
                 "type": "string",

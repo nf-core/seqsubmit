@@ -19,8 +19,11 @@ process CREATE_ASSEMBLY_METADATA_CSV {
 
     script:
     def header = 'Runs,Coverage,Assembler,Version,Filepath,Sample'
+    // Format run accessions: wrap in quotes if it's a list (co-assembly) or single value
+    def runs_joined = meta.run_accession instanceof List ? meta.run_accession.join(',') : meta.run_accession
+    def runs = "\"${runs_joined}\""
     def row = [
-        meta.run_accession,
+        runs,
         meta.coverage,
         meta.assembler,
         meta.assembler_version,

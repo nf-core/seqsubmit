@@ -49,11 +49,13 @@ workflow ASSEMBLYSUBMIT {
     // Create assembly channel with proper metadata structure
     assembly_fasta = ch_samplesheet
         .map { row ->
+            // support semicolon-separated values for co-assemblies (e.g. ERR000001;ERR000002)
+            def run_accessions = row[5].split(';').toList()
             def meta = [
                 id: row[0].id,
                 single_end: row[3] ? false : true,
                 coverage: row[4] ?: null,
-                run_accession: row[5],
+                run_accession: run_accessions.size() == 1 ? run_accessions[0] : run_accessions,
                 assembler: row[6],
                 assembler_version: row[7]
             ]
@@ -63,21 +65,36 @@ workflow ASSEMBLYSUBMIT {
     reads_fastq = ch_samplesheet
         .filter { row -> row[2] && row[2] != "" } // Check if fastq_1 exists and is not empty
         .map { row ->
+            def run_accessions = row[5].split(';').toList()
             def meta = [
                 id: row[0].id,
                 single_end: row[3] ? false : true,
                 coverage: row[4] ?: null,
-                run_accession: row[5],
+                run_accession: run_accessions.size() == 1 ? run_accessions[0] : run_accessions,
                 assembler: row[6],
                 assembler_version: row[7]
             ]
 
-            if (row[3] && row[3] != "") {
+            def fastq1_list = row[2].split(';').toList()
+            def fastq2_list = (row[3] && row[3] != "") ? row[3].split(';').toList() : []
+            // Validation: Check that number of read files matches number of accessions
+            if (fastq1_list.size() != run_accessions.size()) {
+                error "Sample ${meta.id}: Number of forward read files (${fastq1_list.size()}) does not match number of run accessions (${run_accessions.size()})"
+            }
+
+            if (fastq2_list && fastq2_list.size() != run_accessions.size()) {
+                error "Sample ${meta.id}: Number of reverse read files (${fastq2_list.size()}) does not match number of run accessions (${run_accessions.size()})"
+            }
+
+            // Convert paths to file objects
+            def fastq1_paths = fastq1_list.collect { path -> file(path) }
+            def fastq2_paths = fastq2_list ? fastq2_list.collect { path -> file(path) } : []
+            if (fastq2_paths) {
                 // If paired end reads
-                [meta, [file(row[2]), file(row[3])]]
+                [meta, fastq1_paths, fastq2_paths]
             } else {
                 // If single end
-                [meta, file(row[2])]
+                [meta, fastq1_paths]
             }
         }
 
@@ -94,11 +111,36 @@ workflow ASSEMBLYSUBMIT {
         }
 
     // For assemblies without coverage, calculate coverage with CoverM
+    // Transform reads into the format CoverM expects: list of all read files
     validated_fastas.filter { meta, _fasta -> meta.coverage == null }
         .join(reads_fastq)
-        .multiMap { meta, fasta, fastq ->
+        .map { tuple ->
+            def meta = tuple[0]
+            def fasta = tuple[1]
+            def reads_data = tuple[2..-1]
+
+            // Transform reads into flat list for CoverM
+            def all_reads = []
+            if (meta.single_end) {
+                // Single-end: just flatten the R1 list
+                def fastq1_list = reads_data[0]
+                all_reads = fastq1_list
+            } else {
+                // Paired-end: interleave R1 and R2 files
+                // Input format: [meta, [R1_1, R1_2, ...], [R2_1, R2_2, ...]]
+                def fastq1_list = reads_data[0]
+                def fastq2_list = reads_data[1]
+
+                // Create list as: R1_1, R2_1, R1_2, R2_2, ...
+                // Use collectMany to flatten the pairs
+                all_reads = [fastq1_list, fastq2_list].transpose().collectMany { pair -> pair }
+            }
+
+            [meta, fasta, all_reads]
+        }
+        .multiMap { meta, fasta, reads ->
             assembly: [ meta, fasta ]
-            reads: [ meta, fastq ]
+            reads: [ meta, reads ]
         }
         .set { coverm_input }
 
@@ -232,8 +274,8 @@ workflow ASSEMBLYSUBMIT {
         : file("${projectDir}/assets/methods_description_template.yml", checkIfExists: true)
     def ch_methods_description = channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: true))
-    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_ACCESSIONS.out.file_out.map{meta, file -> file})
-    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_METADATA.out.file_out.map{meta, file -> file})
+    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_ACCESSIONS.out.file_out.map{_meta, file -> file})
+    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_METADATA.out.file_out.map{_meta, file -> file})
     MULTIQC(
         ch_multiqc_files.flatten().collect().map { files ->
             [
