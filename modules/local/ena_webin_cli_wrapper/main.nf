@@ -22,14 +22,12 @@ process ENA_WEBIN_CLI_WRAPPER {
     def args               = task.ext.args   ?: ""
     def prefix             = task.ext.prefix ?: "${meta.id}"
     def test_flag          = test_upload     ? "--test" : ""
-    def fasta_dir          = submission_item.toRealPath().parent
 
     """
     webin_cli_handler \\
       -m ${manifest} \\
       -o ${prefix}_accessions.tsv \\
       --mode ${webincli_mode} \\
-      --fasta-dir ${fasta_dir} \\
       ${test_flag} \\
       ${args}
 
