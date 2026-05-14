@@ -7,7 +7,6 @@ import hashlib
 import logging
 import os
 import xml.etree.ElementTree as ET
-from collections import OrderedDict
 import re
 
 import requests
@@ -110,7 +109,7 @@ def submit_sample_xml(auth: HTTPBasicAuth, submit_url: str, sample_xml: str) -> 
     return ET.fromstring(response.content)
 
 def merge_or_not_provided(values: list[str]) -> str:
-    unique = list(OrderedDict.fromkeys(values))
+    unique = sorted(set(values))
     logger.debug(f"Merging values: {unique}")
     if any(not v for v in unique):
         logger.info("Merge decision: 'not provided' (at least one value is empty)")
@@ -155,7 +154,7 @@ def get_sample_metadata(sample_accession: str) -> tuple[str, str, str, str]:
         sample_accession (str): The sample accession to query.
 
     Returns:
-        tuple[str, str, str, str]: A tuple containing tax_id, scientific_name, location, and collection_date.
+        tuple[str, str, str, str]: A tuple containing tax_id, scientific_name, country, and collection_date.
     """
     if INSDC_BIOSAMPLE_ACCESSION_REGEX.match(sample_accession):
         query = f'"sample_accession={sample_accession}"'
@@ -345,7 +344,7 @@ def register_virtual_sample(run_accessions: list[str], test: bool) -> str:
         test (bool): Whether to use the test submission endpoint.
 
     Returns:
-        str: The SAMEA accession of the registered virtual sample.
+        str: The sample accession of the registered virtual sample.
 
     Raises:
         CoassemblyRegistrationError: If validation or submission fails.
@@ -358,7 +357,7 @@ def register_virtual_sample(run_accessions: list[str], test: bool) -> str:
     sample_accessions = []
     taxon_ids = []
     scientific_names = []
-    locations = []
+    countries = []
     collection_dates = []
 
     for run in run_accessions:
@@ -374,36 +373,36 @@ def register_virtual_sample(run_accessions: list[str], test: bool) -> str:
             raise CoassemblyRegistrationError(f"Sample {sample_acc} has no scientific_name in ENA portal response")
         taxon_ids.append(taxon_id)
         scientific_names.append(scientific_name)
-        locations.append(country)
+        countries.append(country)
         collection_dates.append(collection_date)
 
-    unique_samples = list(OrderedDict.fromkeys(sample_accessions))
+    unique_samples = sorted(set(sample_accessions))
     if len(unique_samples) == 1:
         logger.info(f"All source runs belong to one sample ({unique_samples[0]}); keeping original row unchanged")
         return ""
 
-    unique_taxa = list(OrderedDict.fromkeys([t for t in taxon_ids if t]))
+    unique_taxa = sorted(set([t for t in taxon_ids if t]))
     if len(unique_taxa) != 1:
         raise CoassemblyRegistrationError(
             f"Co-assembly source samples have mixed taxa: {', '.join(unique_taxa)}"
         )
 
-    unique_scientific_names = list(OrderedDict.fromkeys([s for s in scientific_names if s]))
+    unique_scientific_names = sorted(set([s for s in scientific_names if s]))
     if len(unique_scientific_names) != 1:
         raise CoassemblyRegistrationError(
             f"Co-assembly source samples have mixed scientific names: {', '.join(unique_scientific_names)}"
         )
-
     scientific_name = unique_scientific_names[0]
 
     merged_collection_date = merge_or_not_provided(collection_dates)
-    merged_location = merge_or_not_provided(locations)
+    merged_country = merge_or_not_provided(countries)
 
     allowed_countries = get_allowed_countries()
-    if merged_location != "not provided" and merged_location not in allowed_countries:
+    if merged_country != "not provided" and merged_country not in allowed_countries:
         logger.warning(
-            f"Location '{merged_location}' is not in ERC000011 allowed country/sea values"
+            f"Country '{merged_country}' is not in ERC000011 allowed country/sea values; setting to 'not provided'"
         )
+        merged_country = "not provided"
 
     sample_list = ",".join(unique_samples)
     title = f"Combined sample from {sample_list}"
@@ -422,7 +421,7 @@ def register_virtual_sample(run_accessions: list[str], test: bool) -> str:
         scientific_name=scientific_name,
         composed_of=sample_list,
         collection_date=merged_collection_date,
-        geographic_location=merged_location,
+        geographic_location=merged_country,
     )
 
     with open(f"{alias}.xml", "w", encoding="utf-8") as sample_file:
@@ -430,20 +429,22 @@ def register_virtual_sample(run_accessions: list[str], test: bool) -> str:
 
     username, password = get_credentials()
     receipt = submit_sample_xml(HTTPBasicAuth(username, password), submit_url, sample_xml)
-    samea = extract_accession_from_receipt(receipt)
-    logger.info(f"Registered virtual co-assembly sample: {samea}")
-    return samea
+    virtual_sample = extract_accession_from_receipt(receipt)
+    logger.info(f"Registered virtual co-assembly sample: {virtual_sample}")
+    return virtual_sample
 
 
 def main() -> int:
     args = parse_args()
     setup_logging(args.debug)
 
-    logger.info(f"Starting coassembly registration script: input={args.input}, output={args.output}, test={args.test}")
+    logger.debug(f"Starting coassembly registration script: input={args.input}, output={args.output}, test={args.test}")
 
     with open(args.input, newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
         fieldnames = reader.fieldnames or []
+        if "Runs" not in fieldnames:
+            raise CoassemblyRegistrationError("Input CSV must have a 'Runs' column with ENA run accessions")
         rows = list(reader)
 
     # The script may add/update the Sample value; ensure the output schema includes it
@@ -473,12 +474,6 @@ def main() -> int:
         writer.writeheader()
         writer.writerows(updated_rows)
 
-    return 0
-
 
 if __name__ == "__main__":
-    try:
-        raise SystemExit(main())
-    except Exception as exc:  # noqa: BLE001
-        logger.error(str(exc))
-        raise
+    main()
