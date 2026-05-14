@@ -58,7 +58,6 @@ workflow NFCORE_SEQSUBMIT {
             params.centre_name,
             params.upload_tpa,
             params.test_upload,
-            params.webin_cli_version,
             params.webincli_mode
         )
         ch_multiqc_report = GENOMESUBMIT.out.multiqc_report
@@ -73,7 +72,6 @@ workflow NFCORE_SEQSUBMIT {
             params.study_metadata,
             params.upload_tpa,
             params.test_upload,
-            params.webin_cli_version,
             params.webincli_mode
         )
         ch_multiqc_report = ASSEMBLYSUBMIT.out.multiqc_report
