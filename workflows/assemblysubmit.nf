@@ -7,6 +7,7 @@
 include { COVERM_CONTIG                         } from '../modules/nf-core/coverm/contig/main'
 include { FASTAVALIDATOR                        } from '../modules/nf-core/fastavalidator/main'
 include { CREATE_ASSEMBLY_METADATA_CSV          } from '../modules/local/create_assembly_metadata_csv/main'
+include { REGISTER_COASSEMBLY_SAMPLE            } from '../modules/local/register_coassembly_sample/main'
 include { GENERATE_ASSEMBLY_MANIFEST            } from '../modules/local/generate_assembly_manifest/main'
 include { REGISTERSTUDY                         } from '../modules/local/registerstudy/main'
 include { ENA_WEBIN_CLI_WRAPPER as SUBMIT       } from '../modules/local/ena_webin_cli_wrapper'
@@ -187,9 +188,26 @@ workflow ASSEMBLYSUBMIT {
     )
     ch_versions = ch_versions.mix(CREATE_ASSEMBLY_METADATA_CSV.out.versions)
 
+    // For co-assemblies (multiple run accessions), register a virtual ENA sample and fill Sample column.
+    // Rows with a single run accession bypass this step unchanged.
+    assembly_metadata_by_type = CREATE_ASSEMBLY_METADATA_CSV.out.csv
+        .branch { meta, _csv ->
+            coassembly: meta.run_accession instanceof List && meta.run_accession.size() > 1
+            standard: true
+        }
+
+    REGISTER_COASSEMBLY_SAMPLE(
+        assembly_metadata_by_type.coassembly,
+        test_upload
+    )
+    ch_versions = ch_versions.mix(REGISTER_COASSEMBLY_SAMPLE.out.versions)
+
+    assembly_metadata_with_sample = assembly_metadata_by_type.standard
+        .mix(REGISTER_COASSEMBLY_SAMPLE.out.csv)
+
     // Concatenate assembly metadata CSVs into single file to publish
     CONCAT_METADATA (
-        CREATE_ASSEMBLY_METADATA_CSV.out.csv.map { _meta, file -> file }.collect().map { files -> [ [id: "assemblies_metadata"], files ] },
+        assembly_metadata_with_sample.map { _meta, file -> file }.collect().map { files -> [ [id: "assemblies_metadata"], files ] },
         'true' // skip_header - we want to keep the header from the first file and skip it for the rest
     )
 
@@ -213,7 +231,7 @@ workflow ASSEMBLYSUBMIT {
 
     // Generate assembly manifest files and submit them to ENA
     GENERATE_ASSEMBLY_MANIFEST(
-        assemblies_with_coverage.join(CREATE_ASSEMBLY_METADATA_CSV.out.csv),
+        assemblies_with_coverage.join(assembly_metadata_with_sample),
         study_accession_ch.first(),
         upload_tpa,
         test_upload

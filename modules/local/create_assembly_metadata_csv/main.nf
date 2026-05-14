@@ -28,7 +28,7 @@ process CREATE_ASSEMBLY_METADATA_CSV {
         meta.assembler,
         meta.assembler_version,
         fasta.name,
-        ''    // Sample column left empty because co-assemblies are not supported
+        ''    // Sample column is filled later for co-assemblies that require virtual sample registration
     ].join(',')
     """
     cat <<-END_CSV > ${meta.id}_assembly_metadata.csv

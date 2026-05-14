@@ -1,0 +1,36 @@
+nextflow_process {
+    name "Test Process REGISTER_COASSEMBLY_SAMPLE"
+    script "../main.nf"
+    config "./nextflow.config"
+    process "REGISTER_COASSEMBLY_SAMPLE"
+
+    tag "modules"
+    tag "register_coassembly_sample"
+
+    test("REGISTER_COASSEMBLY_SAMPLE completes with expected outputs") {
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test' ],
+                    file("${moduleDir}/tests/coassembly_metadata.csv", checkIfExists: true)
+                ]
+                input[1] = true
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assertAll(
+                { assert process.out.csv.size() == 1 },
+                { assert process.out.csv[0][1].toString().endsWith("_updated.csv") },
+                {
+                    def csvContent = path(process.out.csv[0][1]).text
+                    assert csvContent.contains("Sample")
+                    assert csvContent.contains("SRR3183853")
+                }
+            )
+        }
+    }
+}
