@@ -32,6 +32,8 @@ EXISTING_ACCESSION_IN_ERROR_REGEX = re.compile(
     re.IGNORECASE,
 )
 
+DEFAULT_NA_VALUE = "not provided"
+
 
 class CoassemblyRegistrationError(RuntimeError):
     """Raised for hard validation/submission errors."""
@@ -113,7 +115,7 @@ def submit_sample_xml(auth: HTTPBasicAuth, submit_url: str, sample_xml: str) -> 
     return ET.fromstring(response.content)
 
 def merge_or_not_provided(values: list[str], default_value=None) -> str:
-    """Merge values or return default/not provided."""
+    """Merge values or return default_value or DEFAULT_NA_VALUE."""
     unique_values = sorted(set(values))
     logger.debug(f"Merging values: {unique_values}")
     if len(unique_values) == 1 and unique_values[0]:
@@ -123,8 +125,8 @@ def merge_or_not_provided(values: list[str], default_value=None) -> str:
         logger.info(f"Merge decision: using default value '{default_value}' due to multiple/conflicting values or missing data")
         return default_value
     else:
-        logger.info("Merge decision: 'not provided' (multiple conflicting values or some missing)")
-        return "not provided"
+        logger.info(f"Merge decision: '{DEFAULT_NA_VALUE}' (multiple conflicting values or some missing)")
+        return DEFAULT_NA_VALUE
 
 def get_run_sample_from_xml(run_accession: str) -> tuple[str, str | None]:
     """
@@ -285,13 +287,6 @@ def build_virtual_sample_alias(source_samples: list[str], max_length: int = 50) 
     if len(alias) <= max_length:
         return alias
 
-    # Keep the hash suffix intact while trimming the front portion for ENA alias limits.
-    # suffix = f"_{hash8}"
-    # max_core_length = max_length - len(suffix)
-    # trimmed_core = alias_core[:max_core_length]
-    # trimmed_alias = f"{trimmed_core}{suffix}"
-    # logger.warning(f"Generated alias is too long, truncated to: {trimmed_alias}")
-    # return trimmed_alias
     raise CoassemblyRegistrationError(
         f"Hash suffix '{alias}' exceeds maximum alias length of {max_length}"
     )
@@ -326,20 +321,14 @@ def extract_accession_from_receipt(receipt: ET.Element) -> str:
             f"ENA sample submission failed: {message_text}"
         )
 
-    biosample = receipt.find(".//SAMPLE/EXT_ID[@type='biosample']")
-    if biosample is not None and biosample.get("accession"):
-        return biosample.get("accession", "")
+    sample_node = receipt.find(".//SAMPLE")
+    if sample_node is not None:
+        ena_accession = sample_node.get("accession", "")
+        if ena_accession:
+            return ena_accession
 
-    external = receipt.find(".//SAMPLE/EXT_ID")
-    if external is not None and external.get("accession", "").startswith("SAMEA"):
-        return external.get("accession", "")
+    raise CoassemblyRegistrationError("ENA sample submission succeeded but no SAMPLE accession found in receipt XML")
 
-    for node in receipt.findall(".//SAMPLE"):
-        accession = node.get("accession", "")
-        if accession.startswith("SAMEA"):
-            return accession
-
-    raise CoassemblyRegistrationError("Could not find sample accession in ENA receipt XML")
 
 def register_virtual_sample(run_accessions: list[str], test: bool, default_country=None, default_date=None, default_taxid=None, default_tax_name=None) -> str:
     """
@@ -392,22 +381,22 @@ def register_virtual_sample(run_accessions: list[str], test: bool, default_count
     merged_taxid = merge_or_not_provided(taxon_ids, default_taxid)
     merged_tax_name = merge_or_not_provided(scientific_names, default_tax_name)
 
-    if merged_taxid == "not provided":
+    if merged_taxid == DEFAULT_NA_VALUE:
         raise CoassemblyRegistrationError(
             f"Co-assembly source samples have mixed taxa: {', '.join(taxon_ids)}"
         )
 
-    if merged_tax_name == "not provided":
+    if merged_tax_name == DEFAULT_NA_VALUE:
         raise CoassemblyRegistrationError(
             f"Co-assembly source samples have mixed scientific names: {', '.join(scientific_names)}"
         )
 
     allowed_countries = get_allowed_countries()
-    if merged_country != "not provided" and merged_country not in allowed_countries:
+    if merged_country != DEFAULT_NA_VALUE and merged_country not in allowed_countries:
         logger.warning(
-            f"Country '{merged_country}' is not in ERC000011 allowed country/sea values; setting to 'not provided'"
+            f"Country '{merged_country}' is not in ERC000011 allowed country/sea values; setting to '{DEFAULT_NA_VALUE}'"
         )
-        merged_country = "not provided"
+        merged_country = DEFAULT_NA_VALUE
 
     sample_list = ",".join(unique_samples)
     title = f"Combined sample from {sample_list}"
@@ -434,6 +423,7 @@ def register_virtual_sample(run_accessions: list[str], test: bool, default_count
 
     username, password = get_credentials()
     receipt = submit_sample_xml(HTTPBasicAuth(username, password), submit_url, sample_xml)
+    logger.debug(f"ENA receipt XML:\n{ET.tostring(receipt, encoding='unicode')}")
     virtual_sample = extract_accession_from_receipt(receipt)
     logger.info(f"Registered virtual co-assembly sample: {virtual_sample}")
     return virtual_sample
