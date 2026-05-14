@@ -9,13 +9,13 @@ include { REGISTERSTUDY                         } from '../modules/local/registe
 include { RENAME_FASTA_FOR_CATPACK              } from '../modules/local/rename_fasta_for_catpack'
 include { CREATE_GENOME_METADATA_TSV            } from '../modules/local/create_genome_metadata_tsv/main'
 
-include { FASTAVALIDATOR                        } from '../modules/nf-core/fastavalidator/main'
 include { COVERM_GENOME                         } from '../modules/nf-core/coverm/genome'
 include { FIND_CONCATENATE as CONCAT_METADATA   } from '../modules/nf-core/find/concatenate/main'
 include { FIND_CONCATENATE as CONCAT_ACCESSIONS } from '../modules/nf-core/find/concatenate/main'
 include { MULTIQC                               } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap                      } from 'plugin/nf-schema'
 
+include { FASTA_VALIDATION                      } from '../subworkflows/local/fasta_validation'
 include { GENOME_EVALUATION                     } from '../subworkflows/local/genome_evaluation'
 include { RNA_DETECTION                         } from '../subworkflows/local/rna_detection'
 include { FASTA_CLASSIFY_CATPACK                } from '../subworkflows/nf-core/fasta_classify_catpack/main'
@@ -50,7 +50,6 @@ workflow GENOMESUBMIT {
     centre_name              // val: submission centre name
     upload_tpa               // val: upload as TPA (Third Party Annotation)
     test_upload              // val: true for test upload mode
-    webin_cli_version        // val: WebinCLI tool version to download and use for submission
     webincli_mode            // val: either 'validate' or 'submit' to specify WebinCLI mode of operation
 
     main:
@@ -95,20 +94,13 @@ workflow GENOMESUBMIT {
     genome_fasta = genome_fasta_and_reads.map{meta, fasta, _fq1 -> [meta, fasta]}
     genome_reads = genome_fasta_and_reads.map{meta, _fasta, reads -> [meta, reads]}
 
-    // --------- Check fasta files are properly formatted
-    FASTAVALIDATOR (
-        genome_fasta,
-        "true" // enables number of contigs check - ENA requires more than 1 contig for a bin/MAG submission
+    // --------- Check fasta files are properly formatted and filter out files with less than 2 contigs
+    FASTA_VALIDATION (
+        genome_fasta
     )
-    ch_versions = ch_versions.mix( FASTAVALIDATOR.out.versions )
-
-    validated_fastas = genome_fasta.join(FASTAVALIDATOR.out.success_log)
-        .map { meta, fasta, _log ->
-            [meta, fasta]
-        }
 
     // --------- Genome coverage calculation
-    validated_fastas
+    FASTA_VALIDATION.out.valid_fastas
         .branch { meta, _fasta ->
             genome_coverage_ref_input: meta.genome_coverage == null
             genome_coverage_present: true  // Everything else goes here
@@ -127,9 +119,9 @@ workflow GENOMESUBMIT {
         coverm_input.genome,
         false,
         false,
-        'file'
+        'file',
+        false
     )
-    ch_versions = ch_versions.mix( COVERM_GENOME.out.versions )
 
     // Update metadata for records missing coverage
     fasta_updated_with_coverage = COVERM_GENOME.out.coverage.join(branched_coverage_results.genome_coverage_ref_input)

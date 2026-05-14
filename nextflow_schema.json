@@ -304,12 +304,6 @@
                     "default": "submit",
                     "enum": ["submit", "validate"],
                     "help": "Controls ENA Webin-CLI mode. Use `submit` to upload data or `validate` to run validation only. Default: submit."
-                },
-                "webin_cli_version": {
-                    "type": "string",
-                    "description": "Version of webin-cli.jar to use for submission",
-                    "default": "9.0.3",
-                    "help": "Check version https://github.com/enasequence/webin-cli"
                 }
             }
         }

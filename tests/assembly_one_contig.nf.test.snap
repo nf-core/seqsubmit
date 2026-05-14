@@ -1,16 +1,15 @@
 {
     "-profile test_assembly_one_contig": {
         "content": [
-            2,
+            1,
             {
-                "FASTAVALIDATOR": {
-                    "py_fasta_validator": 0.6
-                },
                 "Workflow": {
                     "nf-core/seqsubmit": "v1.0.0dev"
                 }
             },
             [
+                "metagenomic_assemblies",
+                "metagenomic_assemblies/invalid_fastas.tsv",
                 "multiqc",
                 "multiqc/multiqc_data",
                 "multiqc/multiqc_data/llms-full.txt",
@@ -25,13 +24,14 @@
                 "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
             ],
             [
+                "invalid_fastas.tsv:md5,8e3efcafacb0f0b78d537052ae1d18e9",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
             ]
         ],
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "25.10.0"
+            "nf-test": "0.9.2",
+            "nextflow": "26.04.1"
         },
-        "timestamp": "2026-05-05T20:41:24.293126"
+        "timestamp": "2026-05-14T10:39:20.087785"
     }
 }

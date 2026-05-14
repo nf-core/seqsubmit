@@ -1,4 +1,5 @@
 lint:
+  container_configs: false
   files_exist:
     - conf/igenomes.config
     - conf/igenomes_ignored.config

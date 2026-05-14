@@ -30,12 +30,10 @@ workflow RNA_DETECTION {
     BARRNAP(
         fasta.map {id, fasta_file -> [id, fasta_file, "bac"]}
     )
-    ch_versions = ch_versions.mix( BARRNAP.out.versions )
 
     TRNASCANSE(
         fasta
     )
-    ch_versions = ch_versions.mix( TRNASCANSE.out.versions )
 
     COUNT_RNA(
         TRNASCANSE.out.stats.join(BARRNAP.out.gff),
