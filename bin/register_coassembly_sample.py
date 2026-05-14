@@ -38,7 +38,7 @@ class CoassemblyRegistrationError(RuntimeError):
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Register virtual ENA sample for co-assemblies in the metadata CSV")
+    parser = argparse.ArgumentParser(description="Register co-assembly samples.")
     parser.add_argument("--input", required=True, help="Input assembly metadata CSV")
     parser.add_argument("--output", required=True, help="Output assembly metadata CSV")
     parser.add_argument(
@@ -51,6 +51,10 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Enable verbose debug logging",
     )
+    parser.add_argument("--default-country", type=str, help="Default country to use if values differ or are missing.")
+    parser.add_argument("--default-date", type=str, help="Default collection date to use if values differ or are missing.")
+    parser.add_argument("--default-taxid", type=str, help="Default taxon ID to use if values differ or are missing.")
+    parser.add_argument("--default-tax-name", type=str, help="Default taxon name to use if values differ or are missing.")
     return parser.parse_args()
 
 
@@ -108,17 +112,19 @@ def submit_sample_xml(auth: HTTPBasicAuth, submit_url: str, sample_xml: str) -> 
     response.raise_for_status()
     return ET.fromstring(response.content)
 
-def merge_or_not_provided(values: list[str]) -> str:
-    unique = sorted(set(values))
-    logger.debug(f"Merging values: {unique}")
-    if any(not v for v in unique):
-        logger.info("Merge decision: 'not provided' (at least one value is empty)")
+def merge_or_not_provided(values: list[str], default_value=None) -> str:
+    """Merge values or return default/not provided."""
+    unique_values = sorted(set(values))
+    logger.debug(f"Merging values: {unique_values}")
+    if len(unique_values) == 1 and unique_values[0]:
+        logger.info(f"Merge decision: using unique value '{unique_values[0]}'")
+        return unique_values[0]
+    elif default_value:
+        logger.info(f"Merge decision: using default value '{default_value}' due to multiple/conflicting values or missing data")
+        return default_value
+    else:
+        logger.info("Merge decision: 'not provided' (multiple conflicting values or some missing)")
         return "not provided"
-    if len(unique) != 1:
-        logger.info("Merge decision: 'not provided' (multiple conflicting values)")
-        return "not provided"
-    logger.info(f"Merge decision: using unique value '{unique[0]}'")
-    return unique[0]
 
 def get_run_sample_from_xml(run_accession: str) -> tuple[str, str | None]:
     """
@@ -293,16 +299,16 @@ def build_virtual_sample_alias(source_samples: list[str], max_length: int = 50) 
 
 def extract_accession_from_receipt(receipt: ET.Element) -> str:
     """
-    Extract the SAMEA accession from the ENA submission receipt XML.
+    Extract the sample accession from the ENA submission receipt XML.
 
     Args:
         receipt (ET.Element): The root element of the receipt XML.
 
     Returns:
-        str: The SAMEA accession.
+        str: The sample accession.
 
     Raises:
-        CoassemblyRegistrationError: If the receipt does not contain a SAMEA accession.
+        CoassemblyRegistrationError: If the receipt does not contain a sample accession.
     """
     success = receipt.attrib.get("success", "false").lower() == "true"
     if not success:
@@ -333,9 +339,9 @@ def extract_accession_from_receipt(receipt: ET.Element) -> str:
         if accession.startswith("SAMEA"):
             return accession
 
-    raise CoassemblyRegistrationError("Could not find SAMEA accession in ENA receipt XML")
+    raise CoassemblyRegistrationError("Could not find sample accession in ENA receipt XML")
 
-def register_virtual_sample(run_accessions: list[str], test: bool) -> str:
+def register_virtual_sample(run_accessions: list[str], test: bool, default_country=None, default_date=None, default_taxid=None, default_tax_name=None) -> str:
     """
     Register a virtual sample for co-assemblies based on run accessions.
 
@@ -381,21 +387,20 @@ def register_virtual_sample(run_accessions: list[str], test: bool) -> str:
         logger.info(f"All source runs belong to one sample ({unique_samples[0]}); keeping original row unchanged")
         return ""
 
-    unique_taxa = sorted(set([t for t in taxon_ids if t]))
-    if len(unique_taxa) != 1:
+    merged_collection_date = merge_or_not_provided(collection_dates, default_date)
+    merged_country = merge_or_not_provided(countries, default_country)
+    merged_taxid = merge_or_not_provided(taxon_ids, default_taxid)
+    merged_tax_name = merge_or_not_provided(scientific_names, default_tax_name)
+
+    if merged_taxid == "not provided":
         raise CoassemblyRegistrationError(
-            f"Co-assembly source samples have mixed taxa: {', '.join(unique_taxa)}"
+            f"Co-assembly source samples have mixed taxa: {', '.join(taxon_ids)}"
         )
 
-    unique_scientific_names = sorted(set([s for s in scientific_names if s]))
-    if len(unique_scientific_names) != 1:
+    if merged_tax_name == "not provided":
         raise CoassemblyRegistrationError(
-            f"Co-assembly source samples have mixed scientific names: {', '.join(unique_scientific_names)}"
+            f"Co-assembly source samples have mixed scientific names: {', '.join(scientific_names)}"
         )
-    scientific_name = unique_scientific_names[0]
-
-    merged_collection_date = merge_or_not_provided(collection_dates)
-    merged_country = merge_or_not_provided(countries)
 
     allowed_countries = get_allowed_countries()
     if merged_country != "not provided" and merged_country not in allowed_countries:
@@ -408,7 +413,7 @@ def register_virtual_sample(run_accessions: list[str], test: bool) -> str:
     title = f"Combined sample from {sample_list}"
     description = (
         "This sample is a virtual sample of co-assembled raw reads from multiple samples "
-        f"of {scientific_name}. Co-assembly was performed from runs of the samples {sample_list}"
+        f"of {merged_tax_name}. Co-assembly was performed from runs of the samples {sample_list}"
     )
     alias = build_virtual_sample_alias(unique_samples)
     logger.info(f"Registering virtual sample with alias '{alias}' for co-assembly of samples: {sample_list}")
@@ -417,8 +422,8 @@ def register_virtual_sample(run_accessions: list[str], test: bool) -> str:
         alias=alias,
         title=title,
         description=description,
-        taxon_id=unique_taxa[0],
-        scientific_name=scientific_name,
+        taxon_id=merged_taxid,
+        scientific_name=merged_tax_name,
         composed_of=sample_list,
         collection_date=merged_collection_date,
         geographic_location=merged_country,
@@ -463,7 +468,14 @@ def main() -> int:
             updated_rows.append(row)
             continue
 
-        virtual_sample = register_virtual_sample(run_accessions, args.test)
+        virtual_sample = register_virtual_sample(
+            run_accessions=run_accessions,
+            test=args.test,
+            default_country=args.default_country,
+            default_date=args.default_date,
+            default_taxid=args.default_taxid,
+            default_tax_name=args.default_tax_name
+        )
         if virtual_sample or virtual_sample == "":
             row["Sample"] = virtual_sample
         updated_rows.append(row)
