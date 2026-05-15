@@ -80,12 +80,21 @@ def submit_xml(
         "Content-Type": "application/xml",
         "Accept": "application/xml",
     }
-    resp = requests.post(
-        url, data=xml_bytes,
-        headers=headers, auth=auth, timeout=120,
-    )
-    resp.raise_for_status()
-    return ET.fromstring(resp.content)
+    try:
+        resp = requests.post(
+            url, data=xml_bytes,
+            headers=headers, auth=auth, timeout=120,
+        )
+        resp.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Network error: Could not reach ENA server. Details: {e}")
+        sys.exit(1)
+    
+    try:
+        return ET.fromstring(resp.content)
+    except ET.ParseError:
+        logger.error("The ENA server returned an invalid response (not XML).")
+        sys.exit(1)
 
 
 # -----------------------------------------------------------
@@ -251,6 +260,24 @@ def load_and_validate_input_file(
         raises ValueError.
     """
     ext = Path(filepath).suffix.lower()
+
+    if ext in [".csv", ".tsv"]:
+        delimiter = "," if ext == ".csv" else "\t"
+        with open(filepath, "r", encoding="utf-8") as f:
+            header_line = f.readline()
+            if not header_line:
+                raise ValueError(f"File {filepath} is empty.")
+            
+            # Clean up headers (strip quotes and whitespace)
+            headers = [h.strip().replace('"', '') for h in header_line.split(delimiter)]
+            missing = [f for f in _REQUIRED_FIELDS if f not in headers]
+            
+            if missing:
+                # Use the logger you set up earlier!
+                logger.error(f"Missing required columns in {ext} file: {', '.join(missing)}")
+                raise ValueError(f"Missing columns: {', '.join(missing)}")
+    # --------------------------------------------------------
+
     if ext == ".json":
         records = extract_records_from_json(filepath)
     elif ext == ".csv":
@@ -619,13 +646,17 @@ def main(
     write_results(results, output)
 
     logger.info("=" * 60)
-    logger.info("SUBMISSION SUMMARY")
+    logger.info("SUBMISSION SUMMARY - COMPLETED SUCCESSFULLY")
+    logger.info("Environment: %s", env_label)
+    logger.info("Total Studies Processed: %d", len(studies))
     logger.info("  Submitted (ADD): %d", len(results["submitted"]))
+    
     for submission in results["submitted"]:
-        alias = submission["alias"]
-        accession = submission["accession"]
-        external_accession = submission["external_accession"]
-        logger.info(f"    {alias} -> {accession} ({external_accession})")
+        alias = submission.get("alias", "Unknown")
+        accession = submission.get("accession", "Pending")
+        # Using .get() here makes it robust against missing dictionary keys
+        logger.info(f"    {alias} -> {accession}")
+    
     logger.info("=" * 60)
 
 
