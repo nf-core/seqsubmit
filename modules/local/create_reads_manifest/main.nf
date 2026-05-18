@@ -3,8 +3,8 @@ process CREATE_READS_MANIFEST {
     label 'process_single'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'oras://community.wave.seqera.io/library/bash:5.2.37--06dbc4169cb39ae0' :
-        'community.wave.seqera.io/library/bash:5.2.37--ae00789afb795adf' }"
+        'https://depot.galaxyproject.org/singularity/mgnify-pipelines-toolkit:1.4.21--pyhdfd78af_0':
+        'biocontainers/mgnify-pipelines-toolkit:1.4.21--pyhdfd78af_0' }"
 
     input:
     tuple val(meta), path(fastq_files)
@@ -18,30 +18,35 @@ process CREATE_READS_MANIFEST {
     task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    def fastq_list = fastq_files instanceof List ? fastq_files : [fastq_files]
-    def fastq_entries = fastq_list.collect { "FASTQ\t${it.name}" }.join('\n')
-    def insert_size_line = meta.insert_size ? "INSERT_SIZE\t${meta.insert_size}\n" : ""
-    def library_name_line = meta.library_name ? "LIBRARY_NAME\t${meta.library_name}\n" : ""
-    def description_line = meta.description ? "DESCRIPTION\t${meta.description}\n" : ""
+    def args         = task.ext.args ?: ''
+    def prefix       = task.ext.prefix ?: "${meta.id}"
+    def fastq_list   = fastq_files instanceof List ? fastq_files : [fastq_files]
+    def fastq_args   = fastq_list.collect { "--fastq ${it.name}" }.join(' \\\n        ')
+    def opt_insert   = meta.insert_size  ? "--insert-size ${meta.insert_size}"      : ''
+    def opt_lib_name = meta.library_name ? "--library-name '${meta.library_name}'"  : ''
+    def opt_desc     = meta.description  ? "--description '${meta.description}'"    : ''
 
     """
-    cat > ${meta.id}.manifest <<'EOF'
-STUDY	${study_accession}
-SAMPLE	${meta.sample_accession}
-NAME	${meta.id}
-PLATFORM	${meta.platform}
-INSTRUMENT	${meta.instrument}
-LIBRARY_SOURCE	${meta.library_source}
-LIBRARY_SELECTION	${meta.library_selection}
-LIBRARY_STRATEGY	${meta.library_strategy}
-${insert_size_line}${library_name_line}${description_line}${fastq_entries}
-EOF
+    create_reads_manifest.py \\
+        --study             ${study_accession} \\
+        --sample            ${meta.sample_accession} \\
+        --name              ${prefix} \\
+        --platform          ${meta.platform} \\
+        --instrument        '${meta.instrument}' \\
+        --library-source    ${meta.library_source} \\
+        --library-selection ${meta.library_selection} \\
+        --library-strategy  ${meta.library_strategy} \\
+        --output            ${prefix}.manifest \\
+        ${fastq_args} \\
+        ${opt_insert} \\
+        ${opt_lib_name} \\
+        ${opt_desc} \\
+        ${args}
     """
 
     stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    touch ${meta.id}.manifest
+    touch ${prefix}.manifest
     """
 }
