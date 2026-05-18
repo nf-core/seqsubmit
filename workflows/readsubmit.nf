@@ -30,7 +30,10 @@ workflow READSUBMIT {
     multiqc_logo
     multiqc_methods_description
     outdir
-    submission_study     // val: accession of the study to submit to (optional)
+    submission_study     // val: ENA study accession for all reads in this run (optional).
+                         // NOTE: all samples must belong to the same study and Webin account.
+                         // Submitting reads across multiple studies or Webin accounts in a
+                         // single pipeline run is not supported.
     study_metadata       // val: path to study metadata file for study creation (used if no submission_study provided)
     test_upload          // val: true for test upload mode
     webin_cli_version    // val: WebinCLI tool version to download and use for submission
@@ -93,7 +96,7 @@ workflow READSUBMIT {
     // Generate reads manifest files
     CREATE_READS_MANIFEST(
         reads_ch,
-        study_accession_ch,
+        study_accession_ch.first(),
         test_upload
     )
 
