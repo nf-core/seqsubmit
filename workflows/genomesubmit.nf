@@ -262,6 +262,9 @@ workflow GENOMESUBMIT {
     )
 
     // --------- Register study if accession not provided
+    if (!submission_study && !study_metadata) {
+        error("Either --submission_study or --study_metadata must be provided")
+    }
     def study_accession_ch
     if (submission_study) {
         study_accession_ch = channel.of(submission_study)
