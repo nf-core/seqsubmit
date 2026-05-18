@@ -43,26 +43,29 @@ workflow READSUBMIT {
     // Create reads channel with proper metadata structure
     reads_ch = ch_samplesheet
         .map { row ->
+            def (meta_in, sample_accession, fastq_1, fastq_2,
+                 platform, instrument, library_source, library_selection, library_strategy,
+                 insert_size, library_name, description) = row
             def meta = [
-                id: row[0].id,
-                sample_accession: row[1],
-                single_end: row[3] ? false : true,
-                platform: row[4],
-                instrument: row[5],
-                library_source: row[6],
-                library_selection: row[7],
-                library_strategy: row[8],
-                insert_size: row[9] ?: null,
-                library_name: row[10] ?: null,
-                description: row[11] ?: null
+                id: meta_in.id,
+                sample_accession: sample_accession,
+                single_end: fastq_2 ? false : true,
+                platform: platform,
+                instrument: instrument,
+                library_source: library_source,
+                library_selection: library_selection,
+                library_strategy: library_strategy,
+                insert_size: insert_size ?: null,
+                library_name: library_name ?: null,
+                description: description ?: null
             ]
 
-            if (row[3] && row[3] != "") {
+            if (fastq_2 && fastq_2 != "") {
                 // If paired end reads
-                [meta, [file(row[2]), file(row[3])]]
+                [meta, [file(fastq_1), file(fastq_2)]]
             } else {
                 // If single end
-                [meta, file(row[2])]
+                [meta, file(fastq_1)]
             }
         }
 
