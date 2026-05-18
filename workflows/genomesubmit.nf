@@ -314,7 +314,8 @@ workflow GENOMESUBMIT {
     SUBMIT (
         ch_combined,
         test_upload,
-        webincli_mode
+        webincli_mode,
+        "genome"
     )
     ch_versions = ch_versions.mix(SUBMIT.out.versions)
 

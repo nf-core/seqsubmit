@@ -181,7 +181,8 @@ workflow ASSEMBLYSUBMIT {
     SUBMIT (
         assemblies_with_coverage.join(GENERATE_ASSEMBLY_MANIFEST.out.manifest),
         test_upload,
-        webincli_mode
+        webincli_mode,
+        "genome"
     )
     ch_versions = ch_versions.mix(SUBMIT.out.versions)
 

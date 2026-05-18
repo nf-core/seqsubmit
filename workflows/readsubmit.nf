@@ -100,7 +100,8 @@ workflow READSUBMIT {
     SUBMIT (
         submission_input,
         test_upload,
-        webincli_mode
+        webincli_mode,
+        "reads"
     )
     ch_versions = ch_versions.mix(SUBMIT.out.versions)
 

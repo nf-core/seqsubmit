@@ -13,6 +13,7 @@ process ENA_WEBIN_CLI_WRAPPER {
     tuple val(meta), path(submission_item), path(manifest)
     val test_upload
     val webincli_mode
+    val webincli_context
 
     output:
     tuple val(meta), path("*_accessions.tsv"),  emit: accessions
@@ -27,6 +28,7 @@ process ENA_WEBIN_CLI_WRAPPER {
     webin_cli_handler \\
       -m ${manifest} \\
       -o ${prefix}_accessions.tsv \\
+      -c ${webincli_context} \\
       --mode ${webincli_mode} \\
       ${test_flag} \\
       ${args}
