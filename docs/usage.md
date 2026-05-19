@@ -258,7 +258,7 @@ nextflow run nf-core/seqsubmit \
     --submission_study <your_study> \
     --centre_name TEST_CENTER \
     --webincli_mode submit \
-    --test_upload true \
+    --test_upload \
     --outdir results/validate_mags
 ```
 
@@ -272,7 +272,7 @@ nextflow run nf-core/seqsubmit \
     --submission_study <your_study> \
     --centre_name TEST_CENTER \
     --webincli_mode submit \
-    --test_upload true \
+    --test_upload \
     --outdir results/validate_assemblies
 ```
 
@@ -285,7 +285,7 @@ nextflow run nf-core/seqsubmit \
     --input samplesheet_reads.csv \
     --submission_study <your_study> \
     --webincli_mode submit \
-    --test_upload true \
+    --test_upload \
     --outdir results/validate_reads
 ```
 
