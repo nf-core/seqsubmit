@@ -30,7 +30,6 @@ nextflow_process {
                     ]
                 ]
                 input[1] = "PRJEB12345"
-                input[2] = false
                 """
             }
         }
@@ -78,7 +77,6 @@ nextflow_process {
                     file(params.pipelines_testdata_base_path + 'test_data/reads/fastq_1.fastq.gz', checkIfExists: true)
                 ]
                 input[1] = "PRJEB12345"
-                input[2] = false
                 """
             }
         }

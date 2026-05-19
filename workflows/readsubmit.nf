@@ -96,8 +96,7 @@ workflow READSUBMIT {
     // Generate reads manifest files
     CREATE_READS_MANIFEST(
         reads_ch,
-        study_accession_ch.first(),
-        test_upload
+        study_accession_ch.first()
     )
 
     // Prepare input for submission with manifest and fastq files

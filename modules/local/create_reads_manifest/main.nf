@@ -9,7 +9,6 @@ process CREATE_READS_MANIFEST {
     input:
     tuple val(meta), path(fastq_files)
     val(study_accession)
-    val(test_upload)
 
     output:
     tuple val(meta), path("${meta.id}.manifest"), emit: manifest
