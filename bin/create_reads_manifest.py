@@ -49,7 +49,7 @@ def generate_reads_manifest(
         fields.append(("DESCRIPTION", description))
 
     for fq in fastq_files:
-        fields.append(("FASTQ", Path(fq).name))
+        fields.append(("FASTQ", fq))
 
     with output_path.open("w") as fh:
         for key, value in fields:
