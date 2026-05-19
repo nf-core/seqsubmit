@@ -88,7 +88,6 @@ workflow NFCORE_SEQSUBMIT {
             params.submission_study,
             params.study_metadata,
             params.test_upload,
-            params.webin_cli_version,
             params.webincli_mode
         )
         ch_multiqc_report = READSUBMIT.out.multiqc_report

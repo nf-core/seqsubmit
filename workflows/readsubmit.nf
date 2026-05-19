@@ -36,7 +36,6 @@ workflow READSUBMIT {
                          // single pipeline run is not supported.
     study_metadata       // val: path to study metadata file for study creation (used if no submission_study provided)
     test_upload          // val: true for test upload mode
-    webin_cli_version    // val: WebinCLI tool version to download and use for submission
     webincli_mode        // val: either 'validate' or 'submit' to specify WebinCLI mode of operation
 
     main:

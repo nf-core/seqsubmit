@@ -26,7 +26,7 @@ process CREATE_READS_MANIFEST {
     def opt_desc     = meta.description  ? "--description '${meta.description}'"    : ''
 
     """
-    create_reads_manifest.py \\
+    create_reads_manifest \\
         --study             ${study_accession} \\
         --sample            ${meta.sample_accession} \\
         --name              ${prefix} \\
