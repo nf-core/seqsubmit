@@ -4,7 +4,7 @@ process MULTIQC {
 
     conda "${moduleDir}/environment.yml"
     // For local test on Mac M2 use Container from linux/arm64 instead of linux/amd64
-    // community.wave.seqera.io/library/multiqc:1.33--58d7dee710ab3aa8
+    // container "community.wave.seqera.io/library/multiqc:1.33--58d7dee710ab3aa8"
     container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
         ? 'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/1b/1bef8af6be88c5733461959c46ac8ef73d18f65277f62a1695d0e1633054f9c2/data'
         : 'community.wave.seqera.io/library/multiqc:1.34--db7c73dae76bc9e6'}"

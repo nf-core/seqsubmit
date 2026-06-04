@@ -5,8 +5,8 @@ process ENA_WEBIN_CLI_WRAPPER {
 
     label 'process_low'
     tag "${meta.id}"
-    // ena-webin-cli 9.0.3 + mgnify-pipelines-toolkit 1.4.24
-    container "community.wave.seqera.io/library/ena-webin-cli_mgnify-pipelines-toolkit:0fd318932c5ba88e"
+    // ena-webin-cli 9.0.3 + mgnify-pipelines-toolkit 1.5.1
+    container "community.wave.seqera.io/library/ena-webin-cli_mgnify-pipelines-toolkit:a64d8c87ebf167ef"
     stageInMode 'copy'
 
     input:
