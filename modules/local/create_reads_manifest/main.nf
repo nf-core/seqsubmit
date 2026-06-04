@@ -30,11 +30,11 @@ process CREATE_READS_MANIFEST {
         --study             ${study_accession} \\
         --sample            ${meta.sample_accession} \\
         --name              ${prefix} \\
-        --platform          ${meta.platform} \\
+        --platform          '${meta.platform}' \\
         --instrument        '${meta.instrument}' \\
-        --library-source    ${meta.library_source} \\
-        --library-selection ${meta.library_selection} \\
-        --library-strategy  ${meta.library_strategy} \\
+        --library-source    '${meta.library_source}' \\
+        --library-selection '${meta.library_selection}' \\
+        --library-strategy  '${meta.library_strategy}' \\
         --output            ${prefix}.manifest \\
         ${fastq_args} \\
         ${opt_insert} \\
