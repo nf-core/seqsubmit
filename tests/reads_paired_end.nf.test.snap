@@ -39,11 +39,10 @@
                 "reads/upload/reads_accessions.tsv"
             ],
             [
-                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
-                "reads_accessions.tsv:md5,20526938df0432bd5a169b25ad552945"
+                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
             ]
         ],
-        "timestamp": "2026-06-04T11:41:38.859457",
+        "timestamp": "2026-06-04T12:21:08.055365",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.1"
