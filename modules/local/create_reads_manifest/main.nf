@@ -3,8 +3,8 @@ process CREATE_READS_MANIFEST {
     label 'process_single'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mgnify-pipelines-toolkit:1.4.21--pyhdfd78af_0':
-        'biocontainers/mgnify-pipelines-toolkit:1.4.21--pyhdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/mgnify-pipelines-toolkit:1.5.1--pyhdfd78af_1':
+        'biocontainers/mgnify-pipelines-toolkit:1.5.1--pyhdfd78af_1' }"
 
     input:
     tuple val(meta), path(fastq_files)
