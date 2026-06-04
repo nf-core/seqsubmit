@@ -5,14 +5,15 @@ process ENA_WEBIN_CLI_WRAPPER {
 
     label 'process_low'
     tag "${meta.id}"
-    // ena-webin-cli 9.0.3 + mgnify-pipelines-toolkit 1.4.24
-    container "community.wave.seqera.io/library/ena-webin-cli_mgnify-pipelines-toolkit:0fd318932c5ba88e"
+    // ena-webin-cli 9.0.3 + mgnify-pipelines-toolkit 1.5.1
+    container "community.wave.seqera.io/library/ena-webin-cli_mgnify-pipelines-toolkit:a64d8c87ebf167ef"
     stageInMode 'copy'
 
     input:
     tuple val(meta), path(submission_item), path(manifest)
     val test_upload
     val webincli_mode
+    val webincli_context
 
     output:
     tuple val(meta), path("*_accessions.tsv"),  emit: accessions
@@ -22,14 +23,13 @@ process ENA_WEBIN_CLI_WRAPPER {
     def args               = task.ext.args   ?: ""
     def prefix             = task.ext.prefix ?: "${meta.id}"
     def test_flag          = test_upload     ? "--test" : ""
-    def fasta_dir          = submission_item.toRealPath().parent
 
     """
     webin_cli_handler \\
       -m ${manifest} \\
       -o ${prefix}_accessions.tsv \\
+      -c ${webincli_context} \\
       --mode ${webincli_mode} \\
-      --fasta-dir ${fasta_dir} \\
       ${test_flag} \\
       ${args}
 

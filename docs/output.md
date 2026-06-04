@@ -8,7 +8,7 @@ The directories listed below will be created in the results directory (set with 
 
 ## Pipeline overview
 
-The pipeline is built using [Nextflow](https://www.nextflow.io/) and performs automated submission of sequence data to ENA. Exact steps and generated outputs depend on the data type and `--mode` executed (`mags`, `bins` or `metagenomic_assemblies`).
+The pipeline is built using [Nextflow](https://www.nextflow.io/) and performs automated submission of sequence data to ENA. Exact steps and generated outputs depend on the data type and `--mode` executed (`mags`, `bins`, `metagenomic_assemblies` or `reads`).
 
 ## `mags` and `bins` outputs
 
@@ -58,6 +58,20 @@ Assembly study registration, manifest generation, and Webin-CLI submission are e
 > [!NOTE] **Assigned accessions (ERZs)** \
 > Users should read the ENA documentation on referencing submitted data: \
 > metagenomic assemblies: https://ena-docs.readthedocs.io/en/latest/submit/assembly/metagenome/primary.html#assigned-accession-numbers
+
+## `reads` outputs
+
+When `--mode reads` is used, results are written under `reads/`.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `reads/`
+  - `upload/reads_accessions.tsv`: run accessions assigned to submitted reads.
+
+</details>
+
+Manifest generation and Webin-CLI submission are executed by the workflow, but their intermediate outputs are not currently published into `--outdir` by the pipeline.
 
 ## Common outputs
 

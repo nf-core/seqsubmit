@@ -42,8 +42,8 @@
                 },
                 "SUBMIT": {
                     "ena-webin-cli": "9.0.3",
-                    "mgnify-pipelines-toolkit": "1.4.24",
-                    "python": "3.11.15"
+                    "mgnify-pipelines-toolkit": "1.5.1",
+                    "python": "3.12.13"
                 },
                 "TRNASCANSE": {
                     "tRNAscan-SE": "2.0.12"

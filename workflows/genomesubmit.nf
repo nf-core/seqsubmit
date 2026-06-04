@@ -254,6 +254,9 @@ workflow GENOMESUBMIT {
     )
 
     // --------- Register study if accession not provided
+    if (!submission_study && !study_metadata) {
+        error("Either --submission_study or --study_metadata must be provided")
+    }
     def study_accession_ch
     if (submission_study) {
         study_accession_ch = channel.of(submission_study)
@@ -306,7 +309,8 @@ workflow GENOMESUBMIT {
     SUBMIT (
         ch_combined,
         test_upload,
-        webincli_mode
+        webincli_mode,
+        "genome"
     )
     ch_versions = ch_versions.mix(SUBMIT.out.versions)
 

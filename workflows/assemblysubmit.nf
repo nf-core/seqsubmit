@@ -145,6 +145,9 @@ workflow ASSEMBLYSUBMIT {
         'true' // skip_header - we want to keep the header from the first file and skip it for the rest
     )
 
+    if (!submission_study && !study_metadata) {
+        error("Either --submission_study or --study_metadata must be provided")
+    }
     def study_accession_ch
     if (submission_study) {
         // Use provided study accession directly
@@ -175,7 +178,8 @@ workflow ASSEMBLYSUBMIT {
     SUBMIT (
         assemblies_with_coverage.join(GENERATE_ASSEMBLY_MANIFEST.out.manifest),
         test_upload,
-        webincli_mode
+        webincli_mode,
+        "genome"
     )
     ch_versions = ch_versions.mix(SUBMIT.out.versions)
 
