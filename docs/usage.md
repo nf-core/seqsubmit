@@ -198,8 +198,6 @@ study-soil-2026	Soil microbiome study	Survey of soil microbiota
 | `existing_study_type` | No       | ENA study type (e.g. `Metagenomics`, `Other`).                               |
 | `new_study_type`      | No       | Custom study type. Only used when `existing_study_type` is set to `Other`.   |
 
-An example metadata file is available at [assets/study_metadata.json](../assets/study_metadata.json).
-
 ## Database preparation (`mags` / `bins`)
 
 The `GENOMESUBMIT` workflow uses `CheckM2` and `CAT_pack` that require specialized databases for completeness/contamination assessment and taxonomy assignment.
