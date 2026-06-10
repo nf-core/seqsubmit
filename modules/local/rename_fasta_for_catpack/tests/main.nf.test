@@ -14,7 +14,7 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id: 'test' ],
-                    file("${moduleDir}/tests/test.fasta", checkIfExists: true)
+                    file(params.modules_testdata_base_path + 'genomics/prokaryotes/metagenome/fasta/sarscov2.fasta', checkIfExists: true)
                 ]
                 """
             }
@@ -38,7 +38,7 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id: 'test_compressed' ],
-                    file("${moduleDir}/tests/test_compressed.fa.gz", checkIfExists: true)
+                    file(params.pipelines_testdata_base_path + 'test_data/bins/ecoli.fna.gz', checkIfExists: true)
                 ]
                 """
             }

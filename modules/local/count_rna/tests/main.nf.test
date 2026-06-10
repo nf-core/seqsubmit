@@ -13,8 +13,8 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'test' ],
-                    file("$moduleDir/tests/data/ecoli.stats", checkIfExists: true),
-                    file("$moduleDir/tests/data/ecoli_bac.gff", checkIfExists: true)
+                    file(params.pipelines_testdata_base_path + 'test_data/rna_search/ecoli.stats', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'test_data/rna_search/ecoli_bac.gff', checkIfExists: true)
                 ]
                 input[1] = 18
                 input[2] = 80
@@ -48,8 +48,8 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'test' ],
-                    file("$moduleDir/tests/data/ecoli.stats", checkIfExists: true),
-                    file("$moduleDir/tests/data/ecoli_bac.gff", checkIfExists: true)
+                    file(params.pipelines_testdata_base_path + 'test_data/rna_search/ecoli.stats', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'test_data/rna_search/ecoli_bac.gff', checkIfExists: true)
                 ]
                 input[1] = 18
                 input[2] = 80
