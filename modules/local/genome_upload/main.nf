@@ -2,7 +2,7 @@ process GENOME_UPLOAD {
     tag "${mags_or_bins_flag}"
     label 'process_low'
 
-    container "quay.io/biocontainers/genome-uploader:2.5.2--pyhdfd78af_0"
+    container "quay.io/biocontainers/genome-uploader:3.0.1--pyhdfd78af_0"
 
     input:
     path(mags)   // required for validation
@@ -18,7 +18,6 @@ process GENOME_UPLOAD {
     path "results/{MAG,bin}_upload/ENA_backup.json"            , emit: ena_upload_backup_json
     path "results/{MAG,bin}_upload/genome_samples.xml"         , emit: upload_genome_samples
     path "results/{MAG,bin}_upload/registered_{MAGs,bins}*.tsv", emit: upload_registered_mags
-    path "results/{MAG,bin}_upload/submission.xml"             , emit: upload_submission_xml
     tuple val("${task.process}"), val('genome_uploader'), eval("genome_upload --version 2>&1 | sed 's/genome_uploader //g'"), topic: versions, emit: versions_genome_uploader
 
     when:
@@ -33,7 +32,7 @@ process GENOME_UPLOAD {
     genome_upload \\
         -u ${submission_study} \\
         --genome_info ${table_for_upload} \\
-        --centre_name ${centre_name} \\
+        --centre_name "${centre_name}" \\
         --${mags_or_bins_flag} \\
         ${tpa} \\
         ${mode} \\
