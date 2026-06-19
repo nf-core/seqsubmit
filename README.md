@@ -167,6 +167,20 @@ All data submitted through this pipeline must be associated with an ENA study (p
 
 See the [usage documentation](docs/usage.md#submission-study) for more details.
 
+### Data privacy
+
+You can use private data from ENA if you have access to it (you can login to Webin account and see the data). If you want to refer to private data you need to specify flag `--private`. Pipeline will use specified credentials to fetch metadata. 
+
+You can also keep submitted data private. If you already have a study and will pass it with `--submission_study` your submitted data will have the same privacy as your study. If you don't have a study then pipeline will register a new study for you. If you need that study being private you should specify **date** when it will become public with `--hold_data_private YYYY-MM-DD` (max 2 years from now).
+
+| Example                                                                                                                                                          | Source of data | Submission data | Necessary arguments                                    | Result                                                  |
+|------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------|-----------------|--------------------------------------------------------|---------------------------------------------------------|
+| Assemblies generated from public reads. Assemblies should be **public** right after submission                                                                   | public         | public          | -                                                      | SUCCESS                                                 |
+| Assemblies generated from public reads. Assemblies should be private for 1 year after submission                                                                 | public         | private         | `--hold_data_private today(YYYY-MM-DD)+1Y`             | SUCCESS                                                 |
+| Bins generated from private reads and assemblies. Bins should be public after submission. User **has access** to reads and assemblies via Webin account              | private        | public          | `--private`                                            | SUCCESS                                                 |
+| Bins generated from private reads and assemblies. Bins should be private for 2 years after submission. User **has access** to reads and assemblies via Webin account | private        | private         | `--private`,`--hold_data_private today(YYYY-MM-DD)+2Y` | SUCCESS                                                 |
+| MAGs generated from private reads and assemblies. MAGs should be public after submission. User **does not have access** to reads and assemblies via Webin account    | private        | public          | -                                                      | ERROR (submission should refer to only accessible data) |
+
 ### Database setup (`CheckM2` and `CAT_pack`)
 
 The `mags`/`bins` workflow requires databases for completeness/contamination estimation and taxonomy assignment. See [Usage documentation](usage.md) for details.
@@ -184,10 +198,12 @@ The `mags`/`bins` workflow requires databases for completeness/contamination est
 ### Optional parameters:
 
 | Parameter         | Description                                                                              |
-| ----------------- | ---------------------------------------------------------------------------------------- |
+|-------------------| ---------------------------------------------------------------------------------------- |
 | `--upload_tpa`    | Flag to control the type of assembly study (third party assembly or not). Default: false |
 | `--test_upload`   | Upload to TEST ENA server instead of LIVE. Default: true                                 |
 | `--webincli_mode` | Choose Webin-CLI mode: `submit` or `validate`. Default: `submit`                         |
+ | `--private`       | Use that flag if you are referring to private data in ENA |
+| `--hold_data_private` | Use that flag if you want to keep your data private after submission until particular date |
 
 General command template:
 
