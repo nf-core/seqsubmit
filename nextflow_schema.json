@@ -285,10 +285,10 @@
                     "default": true,
                     "help": "Use that flag for development purposes or for validation of your submissions. Submission would be done to TEST ENA server instead of LIVE server. TEST server holds data 24h and removes afterwords. LIVE server does not have option to modify your submission, you can only suppress data and re-upload"
                 },
-                "private": {
+                "is_private": {
                     "type": "boolean",
                     "description": "Use that flag if you are referring to private data in ENA",
-                    "default": true,
+                    "default": false,
                     "help": "This flag is used during metadata fetch steps. If you are referring to private data (project/reads/assembly) set to True. That flag does NOT regulate privacy of your submission data (check --hold_data_private)"
                 },
                 "hold_data_private": {

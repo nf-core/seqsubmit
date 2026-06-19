@@ -51,7 +51,7 @@ workflow GENOMESUBMIT {
     upload_tpa               // val: upload as TPA (Third Party Annotation)
     test_upload              // val: true for test upload mode
     webincli_mode            // val: either 'validate' or 'submit' to specify WebinCLI mode of operation
-    private                  // val: fetch metadata from private/public account
+    is_private               // val: fetch metadata from private/public account
     hold_data_private        // val: keep submitted data private until given date
 
     main:
@@ -285,7 +285,7 @@ workflow GENOMESUBMIT {
         centre_name,
         upload_tpa,
         test_upload,
-        private
+        is_private
     )
 
     // All manifests were generated in one run

@@ -60,7 +60,7 @@ workflow NFCORE_SEQSUBMIT {
             params.upload_tpa,
             params.test_upload,
             params.webincli_mode,
-            params.private,
+            params.is_private,
             params.hold_data_private
         )
         ch_multiqc_report = GENOMESUBMIT.out.multiqc_report
@@ -76,7 +76,7 @@ workflow NFCORE_SEQSUBMIT {
             params.upload_tpa,
             params.test_upload,
             params.webincli_mode,
-            params.private,
+            params.is_private,
             params.hold_data_private
         )
         ch_multiqc_report = ASSEMBLYSUBMIT.out.multiqc_report

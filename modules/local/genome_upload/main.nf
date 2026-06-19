@@ -12,7 +12,7 @@ process GENOME_UPLOAD {
     val(centre_name)
     val(is_tpa)
     val(test_upload)
-    val(private)
+    val(is_private)
 
     output:
     path "results/{MAG,bin}_upload/manifests*/*.manifest"      , emit: manifests
@@ -28,7 +28,7 @@ process GENOME_UPLOAD {
     def args     = task.ext.args  ?: ''
     def tpa      = is_tpa         ? "--tpa"  : ""
     def mode     = (!test_upload) ? "--live" : ""
-    def private  = private        ? "--private" : ""
+    def is_private_flag  = is_private   ? "--private" : ""
 
     """
     genome_upload \\
@@ -38,7 +38,7 @@ process GENOME_UPLOAD {
         --${mags_or_bins_flag} \\
         ${tpa} \\
         ${mode} \\
-        ${private} \\
+        ${is_private_flag} \\
         --out results \\
         ${args}
     """
