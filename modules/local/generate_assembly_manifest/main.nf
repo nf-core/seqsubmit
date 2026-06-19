@@ -9,6 +9,7 @@ process GENERATE_ASSEMBLY_MANIFEST {
     val(assembly_study)
     val(is_tpa)
     val(test_upload)
+    val(private)
 
     output:
     tuple val(meta), path("${assembly_study}_upload/*.manifest") , emit: manifest
@@ -22,6 +23,7 @@ process GENERATE_ASSEMBLY_MANIFEST {
     def prefix = task.ext.prefix ?: "${meta.id}"
     def tpa = is_tpa ? "--tpa" : ""
     def test_flag = test_upload ? "--test" : ""
+    def private = private ? "--private" : ""
     """
     assembly_manifest \\
         --study ${assembly_study} \\
@@ -30,6 +32,7 @@ process GENERATE_ASSEMBLY_MANIFEST {
         --output-dir "." \\
         ${tpa} \\
         ${test_flag} \\
+        ${private} \\
         ${args}
 
     cat <<-END_VERSIONS > versions.yml

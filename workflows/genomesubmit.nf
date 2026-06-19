@@ -51,6 +51,8 @@ workflow GENOMESUBMIT {
     upload_tpa               // val: upload as TPA (Third Party Annotation)
     test_upload              // val: true for test upload mode
     webincli_mode            // val: either 'validate' or 'submit' to specify WebinCLI mode of operation
+    private                  // val: fetch metadata from private/public account
+    hold_data_private        // val: keep submitted data private until given date
 
     main:
 
@@ -263,7 +265,8 @@ workflow GENOMESUBMIT {
     } else {
         REGISTERSTUDY(
             channel.of([[id: "study"], file(study_metadata)]),
-            test_upload
+            test_upload,
+            hold_data_private
         )
         ch_versions = ch_versions.mix(REGISTERSTUDY.out.versions)
         study_accession_ch = REGISTERSTUDY.out.accessions
@@ -281,7 +284,8 @@ workflow GENOMESUBMIT {
         study_accession_ch.first(),
         centre_name,
         upload_tpa,
-        test_upload
+        test_upload,
+        private
     )
 
     // All manifests were generated in one run
