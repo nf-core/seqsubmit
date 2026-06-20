@@ -3,6 +3,13 @@ process REGISTERSTUDY {
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
+    // TODO: this still points at the old mgnify-pipelines-toolkit image,
+    // which does NOT have ena-submission-toolkit/ena-api-client/linkml-lib
+    // installed (see environment.yml — submit_study.py no longer depends on
+    // mgnify-pipelines-toolkit at all). Conda profile works as-is; docker/
+    // singularity profiles need a new container image built from
+    // environment.yml's pip dependencies before this module will run under
+    // those engines.
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/mgnify-pipelines-toolkit:1.4.21--pyhdfd78af_0':
         'biocontainers/mgnify-pipelines-toolkit:1.4.21--pyhdfd78af_0' }"
@@ -35,7 +42,7 @@ process REGISTERSTUDY {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        mgnify-pipelines-toolkit: \$(python -c "import importlib.metadata; print(importlib.metadata.version('mgnify-pipelines-toolkit'))")
+        ena-submission-toolkit: \$(python -c "import importlib.metadata; print(importlib.metadata.version('ena-submission-toolkit'))")
     END_VERSIONS
     """
 
@@ -46,7 +53,7 @@ process REGISTERSTUDY {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        mgnify-pipelines-toolkit: \$(python -c "import importlib.metadata; print(importlib.metadata.version('mgnify-pipelines-toolkit'))")
+        ena-submission-toolkit: \$(python -c "import importlib.metadata; print(importlib.metadata.version('ena-submission-toolkit'))")
     END_VERSIONS
     """
 }

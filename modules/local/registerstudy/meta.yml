@@ -14,14 +14,14 @@ keywords:
   - project
   - webin
 tools:
-  - mgnify-pipelines-toolkit:
+  - ena-submission-toolkit:
       description: |
-        A toolkit of utilities used in MGnify metagenomics pipelines,
-        including click, requests, and other dependencies required by
-        the ENA submission scripts.
-      homepage: https://github.com/EBI-Metagenomics/mgnify-pipelines-toolkit
-      documentation: https://github.com/EBI-Metagenomics/mgnify-pipelines-toolkit
-      tool_dev_url: https://github.com/EBI-Metagenomics/mgnify-pipelines-toolkit
+        Build and submit ENA records (studies, samples) from structured data —
+        XML construction, XSD validation, and Webin submission, on top of
+        ena-api-client (transport) and linkml-lib (schema introspection).
+      homepage: https://github.com/timrozday-mgnify/ena-submission-toolkit
+      documentation: https://github.com/timrozday-mgnify/ena-submission-toolkit
+      tool_dev_url: https://github.com/timrozday-mgnify/ena-submission-toolkit
       doi: ""
       licence: ["Apache-2.0"]
       identifier: null
