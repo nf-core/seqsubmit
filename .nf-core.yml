@@ -7,9 +7,9 @@ lint:
     - params.input
   files_unchanged:
     - .github/PULL_REQUEST_TEMPLATE.md
-    - docs/images/nf-core-seqsubmit_logo_light_old.png
+    - docs/images/nf-core-seqsubmit_logo_light.png
     - docs/images/nf-core-seqsubmit_logo_dark.png
-    - assets/nf-core-seqsubmit_logo_light_old.png
+    - assets/nf-core-seqsubmit_logo_light.png
 nf_core_version: 4.0.2
 repository_type: pipeline
 template:
