@@ -61,7 +61,7 @@ workflow NFCORE_SEQSUBMIT {
             params.test_upload,
             params.webincli_mode,
             params.is_private,
-            params.hold_data_private
+            params.release_date ? channel.value(params.release_date): channel.value(false)
         )
         ch_multiqc_report = GENOMESUBMIT.out.multiqc_report
     } else if (params.mode == "metagenomic_assemblies") {
@@ -77,7 +77,7 @@ workflow NFCORE_SEQSUBMIT {
             params.test_upload,
             params.webincli_mode,
             params.is_private,
-            params.hold_data_private
+            params.release_date ? channel.value(params.release_date): channel.value(false)
         )
         ch_multiqc_report = ASSEMBLYSUBMIT.out.multiqc_report
     } else if (params.mode == "reads") {
@@ -91,7 +91,7 @@ workflow NFCORE_SEQSUBMIT {
             params.study_metadata,
             params.test_upload,
             params.webincli_mode,
-            params.hold_data_private
+            params.release_date ? channel.value(params.release_date): channel.value(false)
         )
         ch_multiqc_report = READSUBMIT.out.multiqc_report
     }

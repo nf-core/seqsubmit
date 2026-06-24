@@ -37,6 +37,9 @@ input:
     - test_upload:
         type: value
         description: Whether generated manifests are going to be submitted in test mode.
+    - is_private:
+        type: value
+        description: Referring to private data in ENA.
 
 output:
   - meta:

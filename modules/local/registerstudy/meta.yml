@@ -42,6 +42,9 @@ input:
   - - test_upload:
         type: value
         description: Whether to submit to the ENA test server (`true`) instead of production.
+  - - release_date:
+        type: value
+        description: Date when data should become public (YYYY-MM-DD, max 2 years from now).
 
 output:
   - accessions:

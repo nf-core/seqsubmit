@@ -23,7 +23,7 @@
                     "bash": "5.2.37(1)-release"
                 },
                 "CREATE_MANIFESTS": {
-                    "genome_uploader": "2.5.2"
+                    "genome_uploader": "3.0.1"
                 },
                 "FALINT": {
                     "falint": "1.2.0"
@@ -63,7 +63,6 @@
                 "mags/upload/manifests/results/MAG_upload/genome_samples.xml",
                 "mags/upload/manifests/results/MAG_upload/manifests_test",
                 "mags/upload/manifests/results/MAG_upload/registered_MAGs_test.tsv",
-                "mags/upload/manifests/results/MAG_upload/submission.xml",
                 "multiqc",
                 "multiqc/multiqc_data",
                 "multiqc/multiqc_data/llms-full.txt",
@@ -97,15 +96,14 @@
                 "no_rna_presence_bac.gff:md5,df19e1b84ba6f691d20c72b397c88abf",
                 "no_rna_presence.tsv:md5,abd958e8addba39c9e4d7f6b97a1a7c6",
                 "genomes_metadata.tsv:md5,0f567491f038d4a0c1dbf4c05cdc26c0",
-                "submission.xml:md5,4b7d1d7e1b883a3eac57e1267943a8d6",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
                 "multiqc_genome_metadata.txt:md5,73e2aecbb5233cee71a12237ed4c3f08"
             ]
         ],
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "26.04.1"
+            "nf-test": "0.9.3",
+            "nextflow": "26.04.0"
         },
-        "timestamp": "2026-05-13T13:35:27.954318"
+        "timestamp": "2026-06-24T16:13:51.780521"
     }
 }

@@ -36,6 +36,9 @@ input:
   - test_upload:
       type: value
       description: Whether to run in ENA test mode.
+  - is_private:
+      type: value
+      description: Referring to private data in ENA.
 
 output:
   - manifests:

@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: "create_reads_manifest"
+description: |
+  Create a manifest file for submitting raw reads to ENA via webin-cli.
+  Reads metadata (platform, instrument, library information) from the sample
+  map and generates a manifest file for each sample.
+keywords:
+  - ena
+  - manifest
+  - reads
+  - submission
+  - webin
+tools:
+  - mgnify-pipelines-toolkit:
+      description: |
+        A toolkit of utilities used in MGnify metagenomics pipelines,
+        including click, requests, and other dependencies required by
+        the ENA submission scripts.
+      homepage: https://github.com/EBI-Metagenomics/mgnify-pipelines-toolkit
+      documentation: https://github.com/EBI-Metagenomics/mgnify-pipelines-toolkit
+      tool_dev_url: https://github.com/EBI-Metagenomics/mgnify-pipelines-toolkit
+      doi: ""
+      licence: ["Apache-2.0"]
+      identifier: null
+
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information, including platform,
+          instrument, library_source, library_selection, library_strategy,
+          sample_accession, and optionally insert_size, library_name,
+          description.
+          e.g. `[ id:'sample1', platform:'ILLUMINA', instrument:'Illumina HiSeq 2500' ]`
+    - fastq_files:
+        type: file
+        description: One or two FASTQ files (single-end or paired-end reads).
+        pattern: "*.{fastq,fastq.gz,fq,fq.gz}"
+  - - study_accession:
+        type: value
+        description: ENA study accession to submit reads to.
+
+output:
+  - manifest:
+      - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information.
+            e.g. `[ id:'sample1' ]`
+      - "*.manifest":
+          type: file
+          description: Manifest file required for reads submission with webin-cli.
+          pattern: "*.manifest"
+
+authors:
+  - "@ochkalova"
+  - "@timrozday-mgnify"
+  - "@KateSakharova"
+maintainers:
+  - "@ochkalova"
+  - "@timrozday-mgnify"
+  - "@KateSakharova"
