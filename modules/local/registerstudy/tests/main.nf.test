@@ -17,6 +17,7 @@ nextflow_process {
                     file(params.pipelines_testdata_base_path + 'test_data/study_metadata/study_metadata.json', checkIfExists: true)
                 ]
                 input[1] = true
+                input[2] = false
                 """
             }
         }
@@ -41,6 +42,7 @@ nextflow_process {
                     file(params.pipelines_testdata_base_path + 'test_data/study_metadata/study_metadata.tsv', checkIfExists: true)
                 ]
                 input[1] = true
+                input[2] = false
                 """
             }
         }
@@ -66,6 +68,7 @@ nextflow_process {
                     file(params.pipelines_testdata_base_path + 'test_data/study_metadata/study_metadata.json', checkIfExists: true)
                 ]
                 input[1] = true
+                input[2] = false
                 """
             }
         }
