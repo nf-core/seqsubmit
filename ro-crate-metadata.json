@@ -164,10 +164,10 @@
             },
             "url": [
                 "https://github.com/nf-core/seqsubmit",
-                "https://nf-co.re/seqsubmit/dev/"
+                "https://nf-co.re/seqsubmit/1.0.0/"
             ],
             "version": [
-                "1.0.0dev"
+                "1.0.0"
             ]
         },
         {

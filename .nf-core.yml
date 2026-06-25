@@ -24,4 +24,4 @@ template:
     - igenomes
     - fastqc
     - gpu
-  version: 1.0.0dev
+  version: 1.0.0
