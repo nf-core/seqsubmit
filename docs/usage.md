@@ -52,7 +52,7 @@ mag_001,data/mag_001.fasta.gz,SRR24458089,,,SPAdes 3.15.5,MetaBAT2 2.15,default,
 > **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
 
 | Column                      | Description                                                                                                                                                                                                                                                       |
-| --------------------------- |-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sample`                    | A unique identifier for this data entry. Must be globally unique within the input dataset (used as `meta.id` throughout the pipeline).                                                                                                                            |
 | `fasta`                     | Path to MAG/bin contigs in FASTA format compressed with `gzip`. All names of the FASTA files must be unique to prevent pipeline errors.                                                                                                                           |
 | `accession`                 | ENA accession of the run or metagenomic assembly used to generate the MAG/bin.                                                                                                                                                                                    |
@@ -94,7 +94,7 @@ assembly_002,data/assembly_002.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 > **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
 
 | Column              | Description                                                                                                                                           |
-| ------------------- |-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sample`            | A unique identifier for this data entry. Must be globally unique within the input dataset (used as `meta.id` throughout the pipeline).                |
 | `fasta`             | Path to assembly contigs in FASTA format compressed with `gzip`.                                                                                      |
 | `fastq_1`           | Path to the read file in FASTQ format used to generate the metagenomic assembly. Required if `coverage` is not provided.                              |
