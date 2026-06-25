@@ -40,7 +40,6 @@ workflow RNA_DETECTION {
         min_trna_count,
         min_rrna_percentage
     )
-    ch_versions = ch_versions.mix( COUNT_RNA.out.versions )
 
     emit:
     rna_detected   = COUNT_RNA.out.rna_decision
