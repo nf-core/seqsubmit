@@ -201,7 +201,7 @@ The `mags`/`bins` workflow requires databases for completeness/contamination est
 ### Optional parameters:
 
 | Parameter         | Description                                                                                |
-|-------------------| ------------------------------------------------------------------------------------------ |
+| ----------------- | ------------------------------------------------------------------------------------------ |
 | `--upload_tpa`    | Flag to control the type of assembly study (third party assembly or not). Default: false   |
 | `--test_upload`   | Upload to TEST ENA server instead of LIVE. Default: true                                   |
 | `--webincli_mode` | Choose Webin-CLI mode: `submit` or `validate`. Default: `submit`                           |
