@@ -8,6 +8,9 @@
                     "find": "4.6.0",
                     "pigz": 2.8
                 },
+                "CREATE_READS_MANIFEST": {
+                    "mgnify-pipelines-toolkit": "1.5.1"
+   8            },
                 "SUBMIT": {
                     "ena-webin-cli": "9.0.3",
                     "mgnify-pipelines-toolkit": "1.5.1",

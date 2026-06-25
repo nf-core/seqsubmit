@@ -17,7 +17,7 @@
                     "pigz": 2.8
                 },
                 "COUNT_RNA": {
-                    "python": "3.8.13"
+                    "python": "3.12.12"
                 },
                 "CREATE_GENOME_METADATA_TSV": {
                     "bash": "5.2.37(1)-release"
