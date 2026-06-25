@@ -200,13 +200,13 @@ The `mags`/`bins` workflow requires databases for completeness/contamination est
 
 ### Optional parameters:
 
-| Parameter             | Description                                                                                |
-| --------------------- | ------------------------------------------------------------------------------------------ |
-| `--upload_tpa`        | Flag to control the type of assembly study (third party assembly or not). Default: false   |
-| `--test_upload`       | Upload to TEST ENA server instead of LIVE. Default: true                                   |
-| `--webincli_mode`     | Choose Webin-CLI mode: `submit` or `validate`. Default: `submit`                           |
-| `--private`           | Use that flag if you are referring to private data in ENA                                  |
-| `--hold_data_private` | Use that flag if you want to keep your data private after submission until particular date |
+| Parameter         | Description                                                                                |
+|-------------------| ------------------------------------------------------------------------------------------ |
+| `--upload_tpa`    | Flag to control the type of assembly study (third party assembly or not). Default: false   |
+| `--test_upload`   | Upload to TEST ENA server instead of LIVE. Default: true                                   |
+| `--webincli_mode` | Choose Webin-CLI mode: `submit` or `validate`. Default: `submit`                           |
+| `--private`       | Use that flag if you are referring to private data in ENA                                  |
+| `--release_date`  | Use that flag if you want to keep your data private after submission until particular date |
 
 General command template:
 
