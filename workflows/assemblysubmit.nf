@@ -40,6 +40,8 @@ workflow ASSEMBLYSUBMIT {
     upload_tpa           // val: upload as TPA (Third Party Annotation)
     test_upload          // val: true for test upload mode
     webincli_mode        // val: either 'validate' or 'submit' to specify WebinCLI mode of operation
+    is_private           // val: fetch metadata from private/public account
+    release_date         // val: keep submitted data private until given date
 
     main:
 
@@ -156,7 +158,8 @@ workflow ASSEMBLYSUBMIT {
         // Register a new study using the study metadata file
         REGISTERSTUDY(
             channel.of([[id: "study"], file(study_metadata)]),
-            test_upload
+            test_upload,
+            release_date
         )
         ch_versions = ch_versions.mix(REGISTERSTUDY.out.versions)
         study_accession_ch = REGISTERSTUDY.out.accessions
@@ -171,7 +174,8 @@ workflow ASSEMBLYSUBMIT {
         assemblies_with_coverage.join(CREATE_ASSEMBLY_METADATA_CSV.out.csv),
         study_accession_ch.first(),
         upload_tpa,
-        test_upload
+        test_upload,
+        is_private
     )
     ch_versions = ch_versions.mix(GENERATE_ASSEMBLY_MANIFEST.out.versions.first())
 

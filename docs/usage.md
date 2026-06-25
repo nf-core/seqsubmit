@@ -53,7 +53,7 @@ mag_001,data/mag_001.fasta.gz,SRR24458089,,,SPAdes 3.15.5,MetaBAT2 2.15,default,
 
 | Column                      | Description                                                                                                                                                                                                                                                       |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`                    | Unique identifier of this particular data entry. It is used as the alias when submitting to ENA, so it must be unique within one Webin account.                                                                                                                   |
+| `sample`                    | A unique identifier for this data entry. Must be globally unique within the input dataset (used as `meta.id` throughout the pipeline).                                                                                                                            |
 | `fasta`                     | Path to MAG/bin contigs in FASTA format compressed with `gzip`. All names of the FASTA files must be unique to prevent pipeline errors.                                                                                                                           |
 | `accession`                 | ENA accession of the run or metagenomic assembly used to generate the MAG/bin.                                                                                                                                                                                    |
 | `fastq_1`                   | Path to the read file in FASTQ format used to generate the source metagenomic assembly. Required if `genome_coverage` is not provided.                                                                                                                            |
@@ -95,7 +95,7 @@ assembly_002,data/assembly_002.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 
 | Column              | Description                                                                                                                                           |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`            | Unique identifier of this particular data entry. It is used as the alias when submitting to ENA, so it must be unique within one Webin account.       |
+| `sample`            | A unique identifier for this data entry. Must be globally unique within the input dataset (used as `meta.id` throughout the pipeline).                |
 | `fasta`             | Path to assembly contigs in FASTA format compressed with `gzip`.                                                                                      |
 | `fastq_1`           | Path to the read file in FASTQ format used to generate the metagenomic assembly. Required if `coverage` is not provided.                              |
 | `fastq_2`           | Path to the second read file in FASTQ format for paired-end data used to generate the source metagenomic assembly. Leave empty for single-end reads.  |
