@@ -1,3 +1,17 @@
+def writeStudyMetadataJson = { String alias ->
+    def metadata = new File(System.getProperty("user.dir"), "modules/local/registerstudy/tests/study_metadata_${alias}.json")
+    metadata.text = """\
+{
+    "alias": "${alias}",
+    "study_title": "Example metagenome study",
+    "study_abstract": "Description of the study aims and methods.",
+    "existing_study_type": "Metagenomics"
+}
+"""
+    metadata.deleteOnExit()
+    return metadata.absolutePath
+}
+
 nextflow_process {
     name "Test Process REGISTERSTUDY"
     script "../main.nf"
@@ -8,13 +22,14 @@ nextflow_process {
     tag "registerstudy"
 
     test("registerstudy - submission to ENA test server (JSON metadata)") {
+        def studyMetadata = writeStudyMetadataJson("study-example-json-registerstudy")
 
         when {
             process {
                 """
                 input[0] = [
                     [ id:'example_study' ],
-                    file(params.pipelines_testdata_base_path + 'test_data/study_metadata/study_metadata.json', checkIfExists: true)
+                    file("${studyMetadata}", checkIfExists: true)
                 ]
                 input[1] = true
                 input[2] = false
@@ -59,13 +74,14 @@ nextflow_process {
 
     test("registerstudy - stub") {
         options "-stub"
+        def studyMetadata = writeStudyMetadataJson("study-example-json-registerstudy-stub")
 
         when {
             process {
                 """
                 input[0] = [
                     [ id:'example_study' ],
-                    file(params.pipelines_testdata_base_path + 'test_data/study_metadata/study_metadata.json', checkIfExists: true)
+                    file("${studyMetadata}", checkIfExists: true)
                 ]
                 input[1] = true
                 input[2] = false
