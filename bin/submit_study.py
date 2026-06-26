@@ -7,6 +7,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 import sys
 import xml.etree.ElementTree as ET
 from io import BytesIO
@@ -58,6 +59,9 @@ def get_credentials() -> tuple[str, str]:
 
 PROD_URL: Final = "https://www.ebi.ac.uk/ena/submit/webin-v2"
 TEST_URL: Final = "https://wwwdev.ebi.ac.uk/ena/submit/webin-v2"
+_DUPLICATE_OBJECT_RE: Final[re.Pattern[str]] = re.compile(
+    r"The object being added already exists .*? accession: \"(?P<accession>[A-Z]+[0-9]+)\"",
+)
 
 
 def submit_xml(
@@ -86,6 +90,22 @@ def submit_xml(
     )
     resp.raise_for_status()
     return ET.fromstring(resp.content)
+
+
+def cancel_xml(
+    base_url: str,
+    auth: HTTPBasicAuth,
+    accession: str,
+) -> ET.Element:
+    """Cancel a private ENA object by accession via Webin REST API v2."""
+    webin = ET.Element("WEBIN")
+    submission_set = ET.SubElement(webin, "SUBMISSION_SET")
+    submission = ET.SubElement(submission_set, "SUBMISSION")
+    submission.set("alias", f"cancel-{accession}-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}")
+    actions = ET.SubElement(submission, "ACTIONS")
+    action = ET.SubElement(actions, "ACTION")
+    ET.SubElement(action, "CANCEL", {"target": accession})
+    return submit_xml(base_url, auth, xml_to_bytes(webin))
 
 
 # -----------------------------------------------------------
@@ -456,6 +476,55 @@ def parse_xml_receipt(
     return success, accessions, messages
 
 
+def get_duplicate_object_accession(messages: list[str]) -> str | None:
+    """Return an existing ENA object accession from a duplicate ADD receipt."""
+    for message in messages:
+        match = _DUPLICATE_OBJECT_RE.search(message)
+        if match:
+            return match.group("accession")
+    return None
+
+
+def duplicate_object_error_message(accession: str) -> str:
+    """Build a user-facing message for duplicate ENA study submissions."""
+    if accession.startswith("ERA"):
+        return (
+            f"ENA reports that the object being added already exists with submission "
+            f"accession {accession}. This is a submission accession, not a study "
+            "accession; check the existing study/project in Webin and re-run with "
+            "--submission_study <study accession> if you intended to use it."
+        )
+    return (
+        f"ENA reports that the study being added already exists with accession "
+        f"{accession}. Re-run with --submission_study {accession} if you intended "
+        "to use this existing study."
+    )
+
+
+def cancel_existing_object(
+    base_url: str,
+    auth: HTTPBasicAuth,
+    accession: str,
+) -> bool:
+    """Cancel a private test object and return whether ENA accepted the action."""
+    logger.info("Cancelling existing ENA test object %s before retrying...", accession)
+    try:
+        receipt_root = cancel_xml(base_url, auth, accession)
+    except requests.exceptions.HTTPError as exc:
+        logger.error("HTTP error during CANCEL submission for %s: %s", accession, exc)
+        if exc.response is not None:
+            logger.error("Response body: %s", exc.response.text)
+        return False
+
+    success, _, receipt_messages = parse_xml_receipt(receipt_root)
+    for msg in receipt_messages:
+        logger.info("  CANCEL receipt: %s", msg)
+    if not success:
+        logger.error("CANCEL FAILED for %s", accession)
+        logger.error("CANCEL Receipt XML: %s", ET.tostring(receipt_root, encoding="unicode"))
+    return success
+
+
 # -----------------------------------------------------------
 # Submission helper
 # -----------------------------------------------------------
@@ -469,6 +538,7 @@ def _do_submission(
     results: dict[str, list[dict[str, Any]]],
     env_label: str,
     dry_run: bool,
+    replace_existing_test_study: bool = False,
 ) -> bool:
     """Validate, optionally submit, and parse one batch.
 
@@ -481,6 +551,8 @@ def _do_submission(
         results: Results dict to accumulate into.
         env_label: ``"TEST server"`` or ``"LIVE server"``.
         dry_run: If ``True``, skip the actual submission.
+        replace_existing_test_study: If ``True``, cancel a duplicate object
+            on the test server and retry the ADD submission once.
 
     Returns:
         ``True`` if the batch succeeded (or dry run).
@@ -515,6 +587,20 @@ def _do_submission(
             results["submitted"].append(acc)
     else:
         logger.error("%s FAILED", action)
+        duplicate_accession = get_duplicate_object_accession(receipt_messages)
+        if duplicate_accession:
+            logger.error("%s", duplicate_object_error_message(duplicate_accession))
+            if replace_existing_test_study and action.upper() == "ADD" and base_url == TEST_URL:
+                if cancel_existing_object(base_url, auth, duplicate_accession):
+                    logger.info("Retrying ADD submission after cancelling %s...", duplicate_accession)
+                    return _do_submission(
+                        base_url, auth, xml_bytes,
+                        action=action,
+                        results=results,
+                        env_label=env_label,
+                        dry_run=dry_run,
+                        replace_existing_test_study=False,
+                    )
         receipt_xml_str = ET.tostring(
             receipt_root, encoding="unicode",
         )
@@ -558,12 +644,18 @@ def _do_submission(
     is_flag=True, default=False,
     help="Validate and build XML but do not submit to ENA",
 )
+@click.option(
+    "--replace-existing-test-study",
+    is_flag=True, default=False,
+    help="Test-only: cancel a duplicate private object on the ENA test server and retry once",
+)
 def main(
     input_file: Path,
     use_test: bool,
     hold_until: str | None,
     output: Path | None,
     validate: bool,
+    replace_existing_test_study: bool,
 ) -> None:
     """Submit studies to ENA via the Webin REST API v2."""
     username, password = get_credentials()
@@ -574,6 +666,12 @@ def main(
 
     auth = HTTPBasicAuth(username, password)
     logger.debug("Auth username: %s", username)
+
+    if replace_existing_test_study and not use_test:
+        raise click.BadParameter(
+            "--replace-existing-test-study can only be used with --test",
+            param_hint="--replace-existing-test-study",
+        )
 
     if hold_until:
         validate_hold_until(hold_until)
@@ -610,6 +708,7 @@ def main(
         results=results,
         env_label=env_label,
         dry_run=validate,
+        replace_existing_test_study=replace_existing_test_study,
     )
 
     if not ok:
