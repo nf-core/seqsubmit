@@ -28,13 +28,6 @@ def test_get_duplicate_object_accession_extracts_accession():
     assert submit_study.get_duplicate_object_accession(messages) == "PRJEB12345"
 
 
-def test_duplicate_object_error_message_warns_for_submission_accession():
-    message = submit_study.duplicate_object_error_message("ERA36583436")
-
-    assert "submission accession" in message
-    assert "--submission_study <study accession>" in message
-
-
 def test_do_submission_reports_duplicate_without_retrying(monkeypatch, caplog):
     duplicate_error = (
         'In submission, alias: "study-submission". The object being added already exists '

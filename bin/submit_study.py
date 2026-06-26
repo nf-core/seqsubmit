@@ -469,22 +469,6 @@ def get_duplicate_object_accession(messages: list[str]) -> str | None:
     return None
 
 
-def duplicate_object_error_message(accession: str) -> str:
-    """Build a user-facing message for duplicate ENA study submissions."""
-    if accession.startswith("ERA"):
-        return (
-            f"ENA reports that the object being added already exists with submission "
-            f"accession {accession}. This is a submission accession, not a study "
-            "accession; check the existing study/project in Webin and re-run with "
-            "--submission_study <study accession> if you intended to use it."
-        )
-    return (
-        f"ENA reports that the study being added already exists with accession "
-        f"{accession}. Re-run with --submission_study {accession} if you intended "
-        "to use this existing study."
-    )
-
-
 # -----------------------------------------------------------
 # Submission helper
 # -----------------------------------------------------------
@@ -546,7 +530,11 @@ def _do_submission(
         logger.error("%s FAILED", action)
         duplicate_accession = get_duplicate_object_accession(receipt_messages)
         if duplicate_accession:
-            logger.error("%s", duplicate_object_error_message(duplicate_accession))
+            logger.error((
+                f"ENA reports that the study being added already exists with accession "
+                f"{duplicate_accession}. Re-run with --submission_study {duplicate_accession} if you intended "
+                "to use this existing study."
+            ))
         receipt_xml_str = ET.tostring(
             receipt_root, encoding="unicode",
         )
