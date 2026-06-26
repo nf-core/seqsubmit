@@ -1,3 +1,82 @@
+import groovy.json.JsonSlurper
+
+def duplicateObjectAccession(String text) {
+    def matcher = text =~ /The object being added already exists .*? accession: "([A-Z]+[0-9]+)"/
+    return matcher.find() ? matcher.group(1) : null
+}
+
+def workDirFromError(String text) {
+    def matcher = text =~ /Work dir:\s+(\S+)/
+    return matcher.find() ? new File(matcher.group(1)) : null
+}
+
+def processFailureText(process) {
+    return [
+        process.errorReport ?: '',
+        process.errorMessage ?: '',
+        process.stdout ? process.stdout.join('\n') : '',
+        process.stderr ? process.stderr.join('\n') : ''
+    ].join('\n')
+}
+
+def exportedEnv(File commandRun) {
+    def env = [:]
+    commandRun.eachLine { line ->
+        def matcher = line =~ /^\s*export\s+(ENA_WEBIN|ENA_WEBIN_PASSWORD)="(.*)"\s*$/
+        if (matcher.find()) {
+            env[matcher.group(1)] = matcher.group(2)
+        }
+    }
+    return env
+}
+
+def runCommand(List<String> command, File workDir = null, Map<String, String> extraEnv = [:]) {
+    def processBuilder = new ProcessBuilder(command)
+    if (workDir != null) {
+        processBuilder.directory(workDir)
+    }
+    processBuilder.redirectErrorStream(true)
+    processBuilder.environment().putAll(extraEnv)
+    def proc = processBuilder.start()
+    def output = proc.inputStream.text
+    def status = proc.waitFor()
+    assert status == 0 : "Command failed (${command.join(' ')}):\n${output}"
+    return output
+}
+
+def assertRegisterStudySuccessOrCleanup = { process, String accessionFilename ->
+    if (process.success) {
+        assert path(process.out.accessions[0][1]).exists()
+        assert path(process.out.accessions[0][1]).json.submitted instanceof List
+        assert path(process.out.accessions[0][1]).json.failed.size() == 0
+        return
+    }
+
+    def failureText = processFailureText(process)
+    def accession = duplicateObjectAccession(failureText)
+    if (accession == null) {
+        assert process.success
+    }
+
+    def workDir = workDirFromError(failureText)
+    assert workDir != null && workDir.exists() : "Could not find process work directory in failure output"
+
+    def commandRun = new File(workDir, ".command.run")
+    assert commandRun.exists()
+    def env = exportedEnv(commandRun)
+    assert env.ENA_WEBIN && env.ENA_WEBIN_PASSWORD
+
+    def cancelScript = new File(moduleTestDir, "cancel_ena_test_object.py")
+    runCommand(["python3", cancelScript.absolutePath, accession], null, env)
+    runCommand(["bash", ".command.run"], workDir)
+
+    def accessionFile = new File(workDir, accessionFilename)
+    assert accessionFile.exists()
+    def accessions = new JsonSlurper().parse(accessionFile)
+    assert accessions.submitted instanceof List
+    assert accessions.failed.size() == 0
+}
+
 nextflow_process {
     name "Test Process REGISTERSTUDY"
     script "../main.nf"
@@ -22,12 +101,7 @@ nextflow_process {
         }
 
         then {
-            assertAll(
-                { assert process.success },
-                { assert path(process.out.accessions[0][1]).exists() },
-                { assert path(process.out.accessions[0][1]).json.submitted instanceof List },
-                { assert path(process.out.accessions[0][1]).json.failed.size() == 0 }
-            )
+            assertRegisterStudySuccessOrCleanup(process, "example_study_accessions.json")
         }
     }
 
@@ -46,12 +120,7 @@ nextflow_process {
         }
 
         then {
-            assertAll(
-                { assert process.success },
-                { assert path(process.out.accessions[0][1]).exists() },
-                { assert path(process.out.accessions[0][1]).json.submitted instanceof List },
-                { assert path(process.out.accessions[0][1]).json.failed.size() == 0 }
-            )
+            assertRegisterStudySuccessOrCleanup(process, "example_study_tsv_accessions.json")
         }
     }
 

@@ -35,26 +35,17 @@ def test_duplicate_object_error_message_warns_for_submission_accession():
     assert "--submission_study <study accession>" in message
 
 
-def test_do_submission_cancels_duplicate_test_object_and_retries(monkeypatch):
+def test_do_submission_reports_duplicate_without_retrying(monkeypatch, caplog):
     duplicate_error = (
         'In submission, alias: "study-submission". The object being added already exists '
         'in the submission account with accession: "PRJEB12345".'
     )
-    receipts = [
-        _receipt(False, error=duplicate_error),
-        _receipt(True, accession="PRJEB67890"),
-    ]
-    cancelled = []
+    receipts = [_receipt(False, error=duplicate_error)]
 
     def fake_submit_xml(base_url, auth, xml_bytes):
         return receipts.pop(0)
 
-    def fake_cancel_existing_object(base_url, auth, accession):
-        cancelled.append(accession)
-        return True
-
     monkeypatch.setattr(submit_study, "submit_xml", fake_submit_xml)
-    monkeypatch.setattr(submit_study, "cancel_existing_object", fake_cancel_existing_object)
 
     results = {"submitted": [], "failed": []}
     ok = submit_study._do_submission(
@@ -65,10 +56,9 @@ def test_do_submission_cancels_duplicate_test_object_and_retries(monkeypatch):
         results=results,
         env_label="TEST server",
         dry_run=False,
-        replace_existing_test_study=True,
     )
 
-    assert ok
-    assert cancelled == ["PRJEB12345"]
-    assert results["submitted"][0]["accession"] == "PRJEB67890"
+    assert not ok
+    assert "Re-run with --submission_study PRJEB12345" in caplog.text
+    assert results["submitted"] == []
     assert results["failed"] == []
