@@ -14,7 +14,7 @@ keywords:
 components:
   - barrnap
   - trnascanse
-  - count_rna
+  - countrna
 input:
   - fasta:
       type: file

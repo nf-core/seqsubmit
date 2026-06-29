@@ -1,12 +1,17 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
-name: "UTILS_NFCORE_PIPELINE"
+name: "PIPELINE_INITIALISATION"
 description: Subworkflow with utility functions specific to the nf-core pipeline template
 keywords:
   - utility
   - pipeline
   - initialise
   - version
-components: []
+components:
+  - completionemail
+  - completionsummary
+  - utils_nextflow_pipeline
+  - utils_nfcore_pipeline
+  - utils_nfschema_plugin
 input:
   - nextflow_cli_args:
       type: list
