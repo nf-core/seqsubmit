@@ -3,8 +3,8 @@ process RENAME_FASTA_FOR_CATPACK {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/ee/ee3486cff66f82b4c2ea2094dd0f8adf263307b0ef23071bf086f5848e7fcef7/data' :
-        'community.wave.seqera.io/library/bash:5.2.37--ae00789afb795adf' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/aa/aadcc4a9e49e35cbf5578070bcfde2e1e3681f940df8f987b89926ebc1902a8b/data' :
+        'community.wave.seqera.io/library/bash_gzip:f1472fc3c0f46d9c' }"
 
     input:
     tuple val(meta), path(fasta)
