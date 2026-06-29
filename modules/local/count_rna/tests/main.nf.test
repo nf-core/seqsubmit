@@ -26,8 +26,7 @@ nextflow_process {
             assert process.success
             assertAll(
                 { assert snapshot(
-                    process.out,
-                    path(process.out.versions[0]).yaml
+                    process.out.rna_decision
                 ).match() },
                 { assert process.out.rna_decision.size() == 1 },
                 {
@@ -61,8 +60,7 @@ nextflow_process {
             assert process.success
             assertAll(
                 { assert snapshot(
-                    process.out,
-                    path(process.out.versions[0]).yaml
+                    process.out.rna_decision
                 ).match() }
             )
         }

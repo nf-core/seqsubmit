@@ -2,7 +2,10 @@ process GENERATE_ASSEMBLY_MANIFEST {
     tag "$meta.id"
     label 'process_single'
 
-    container "community.wave.seqera.io/library/pip_assembly-uploader:2a65298c0161c561"
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/assembly_uploader:1.3.5--pyhdfd78af_1':
+        'quay.io/biocontainers/assembly_uploader:1.3.5--pyhdfd78af_1' }"
 
     input:
     tuple val(meta), path(assembly_fasta), path(data_csv)

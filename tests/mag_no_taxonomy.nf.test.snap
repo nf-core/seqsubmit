@@ -31,6 +31,9 @@
                 "FALINT": {
                     "falint": "1.2.0"
                 },
+                "RENAME_FASTA_FOR_CATPACK": {
+                    "bash": "5.2.37(1)-release"
+                },
                 "SUBMIT": {
                     "ena-webin-cli": "9.0.3",
                     "mgnify-pipelines-toolkit": "1.5.1",

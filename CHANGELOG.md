@@ -7,17 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Initial release of nf-core/seqsubmit, created with the [nf-core](https://nf-co.re/) template.
 
-### `Added`
+## Added
 
-- [#12](https://github.com/nf-core/seqsubmit/pull/12)
-  - Add initial version of `GENERATE_ASSEMBLY_MANIFEST` (by @fxquah)
+The pipeline supports four submission modes via dedicated workflows:
 
-- [#2](https://github.com/nf-core/proteinfamilies/pull/2)
-  - Added initial versions of local modules for `GENOME_UPLOAD` and `ENA_WEBIN_CLI`. (by @KateSakharova and @vagkaratzas)
-  - Added initial version of the `GENOMESUBMIT` workflow. (by @KateSakharova and @vagkaratzas)
+- mags — Metagenome Assembled Genomes submission (GENOMESUBMIT)
+- bins — Metagenomic bins submission (GENOMESUBMIT)
+- metagenomic_assemblies — Assembly submission (ASSEMBLYSUBMIT)
+- reads — Raw sequencing reads submission (READSUBMIT)
 
-### `Fixed`
+Key features:
 
-### `Dependencies`
+- Automatic study registration with ENA when no existing study accession is provided
+- Support for public and private data submissions, including configurable release dates
+- Coverage calculation from reads when not provided directly (via coverm)
+- Completeness/contamination estimation and taxonomy inference for MAGs/bins (via CheckM2 and CAT_pack) when metadata is incomplete
+- Credentials handled securely via Nextflow secrets (ENA_WEBIN, ENA_WEBIN_PASSWORD)
+- Full nf-core compatibility: runs with conda, Docker, and Singularity
 
-### `Deprecated`
+Authors:
+
+- Sofiia Ochkalova
+- Ekaterina Sakharova
+- Tim Rozday
+- Martin Beracochea
+
+Reviewers:
+
+- Evangelos Karatzas
+- Martin Beracochea

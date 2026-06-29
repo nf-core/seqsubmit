@@ -5,6 +5,9 @@ process ENA_WEBIN_CLI_WRAPPER {
 
     label 'process_low'
     tag "${meta.id}"
+
+    conda "${moduleDir}/environment.yml"
+
     // ena-webin-cli 9.0.3 + mgnify-pipelines-toolkit 1.5.1
     container "community.wave.seqera.io/library/ena-webin-cli_mgnify-pipelines-toolkit:a64d8c87ebf167ef"
     stageInMode 'copy'
@@ -16,8 +19,10 @@ process ENA_WEBIN_CLI_WRAPPER {
     val webincli_context
 
     output:
-    tuple val(meta), path("*_accessions.tsv"),  emit: accessions
-    path "versions.yml",                        emit: versions
+    tuple val(meta), path("*_accessions.tsv"),     emit: accessions,    optional: true // there is no file in mode=validate
+    tuple val("${task.process}"), val('python'), eval('python --version 2>&1 | sed "s/Python //g"'), topic: versions
+    tuple val("${task.process}"), val('ena-webin-cli'), eval('ena-webin-cli -version'),              topic: versions
+    tuple val("${task.process}"), val('mgnify-pipelines-toolkit'), eval('python -c "import importlib.metadata; print(importlib.metadata.version(\'mgnify-pipelines-toolkit\'))"'), topic: versions
 
     script:
     def args               = task.ext.args   ?: ""
@@ -32,12 +37,5 @@ process ENA_WEBIN_CLI_WRAPPER {
       --mode ${webincli_mode} \\
       ${test_flag} \\
       ${args}
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python --version 2>&1 | sed 's/Python //g')
-        ena-webin-cli: \$(ena-webin-cli -version)
-        mgnify-pipelines-toolkit: \$(python -c "import importlib.metadata; print(importlib.metadata.version('mgnify-pipelines-toolkit'))")
-    END_VERSIONS
     """
 }
