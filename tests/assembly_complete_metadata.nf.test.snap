@@ -20,7 +20,7 @@
                     "falint": "1.2.0"
                 },
                 "GENERATE_ASSEMBLY_MANIFEST": {
-                    "assembly_uploader": "1.3.4"
+                    "assembly_uploader": "1.3.5"
                 },
                 "SUBMIT": {
                     "ena-webin-cli": "9.0.3",
@@ -28,7 +28,7 @@
                     "python": "3.12.13"
                 },
                 "Workflow": {
-                    "nf-core/seqsubmit": "v1.0.0dev"
+                    "nf-core/seqsubmit": "v1.0.0"
                 }
             },
             [

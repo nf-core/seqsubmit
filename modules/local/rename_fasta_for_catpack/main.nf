@@ -1,11 +1,18 @@
 process RENAME_FASTA_FOR_CATPACK {
     tag "${meta.id}"
 
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/ee/ee3486cff66f82b4c2ea2094dd0f8adf263307b0ef23071bf086f5848e7fcef7/data' :
+        'community.wave.seqera.io/library/bash:5.2.37--ae00789afb795adf' }"
+
     input:
     tuple val(meta), path(fasta)
 
     output:
     tuple val(meta), path("output/*.fasta"), emit: renamed_fasta
+    tuple val("${task.process}"), val('bash'), eval('bash --version | head -n1 | sed "s/.*version //; s/ .*//"'), topic: versions
+
 
     script:
         def is_compressed = fasta.name.endsWith('.gz')

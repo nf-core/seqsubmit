@@ -2,6 +2,7 @@ process CREATE_READS_MANIFEST {
     tag "$meta.id"
     label 'process_single'
 
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/mgnify-pipelines-toolkit:1.5.1--pyhdfd78af_1':
         'biocontainers/mgnify-pipelines-toolkit:1.5.1--pyhdfd78af_1' }"
@@ -12,6 +13,7 @@ process CREATE_READS_MANIFEST {
 
     output:
     tuple val(meta), path("${meta.id}.manifest"), emit: manifest
+    tuple val("${task.process}"), val('mgnify-pipelines-toolkit'), eval('python -c "import importlib.metadata; print(importlib.metadata.version(\'mgnify-pipelines-toolkit\'))"'), topic: versions
 
     when:
     task.ext.when == null || task.ext.when

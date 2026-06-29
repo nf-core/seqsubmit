@@ -10,6 +10,13 @@
                         "sarscov2.fasta:md5,6e9fe4042a72f2345f644f239272b7e6"
                     ]
                 ],
+                "1": [
+                    [
+                        "RENAME_FASTA_FOR_CATPACK",
+                        "bash",
+                        "5.2.37(1)-release"
+                    ]
+                ],
                 "renamed_fasta": [
                     [
                         {
@@ -20,10 +27,10 @@
                 ]
             }
         ],
-        "timestamp": "2026-06-10T11:55:03.914764",
+        "timestamp": "2026-06-25T22:18:23.130037",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "26.04.1"
+            "nextflow": "26.04.0"
         }
     },
     "RENAME_FASTA_FOR_CATPACK - compressed fasta": {
@@ -37,6 +44,13 @@
                         "ecoli.fasta:md5,f958ab9c196608148e2863d87d64e28a"
                     ]
                 ],
+                "1": [
+                    [
+                        "RENAME_FASTA_FOR_CATPACK",
+                        "bash",
+                        "5.2.37(1)-release"
+                    ]
+                ],
                 "renamed_fasta": [
                     [
                         {
@@ -47,10 +61,10 @@
                 ]
             }
         ],
-        "timestamp": "2026-06-10T11:55:08.127169",
+        "timestamp": "2026-06-25T22:18:30.449385",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "26.04.1"
+            "nextflow": "26.04.0"
         }
     }
 }

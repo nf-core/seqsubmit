@@ -4,7 +4,7 @@
             1,
             {
                 "Workflow": {
-                    "nf-core/seqsubmit": "v1.0.0dev"
+                    "nf-core/seqsubmit": "v1.0.0"
                 }
             },
             [

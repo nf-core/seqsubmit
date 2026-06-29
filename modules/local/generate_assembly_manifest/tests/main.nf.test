@@ -14,7 +14,7 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'test' ],
-                    file(params.pipelines_testdata_base_path + "/test_data/contigs.fasta.gz", checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + "/test_data/assembly/contigs.fasta.gz", checkIfExists: true),
                     file(params.pipelines_testdata_base_path + "/samplesheets/samplesheet_generatemanifest.csv", checkIfExists: true)
                 ]
                 input[1] = "PRJ12345"

@@ -161,7 +161,7 @@ workflow ASSEMBLYSUBMIT {
             test_upload,
             release_date
         )
-        ch_versions = ch_versions.mix(REGISTERSTUDY.out.versions)
+
         study_accession_ch = REGISTERSTUDY.out.accessions
             .map { _meta, json ->
                 def data = new groovy.json.JsonSlurper().parse(json)
@@ -185,7 +185,6 @@ workflow ASSEMBLYSUBMIT {
         webincli_mode,
         "genome"
     )
-    ch_versions = ch_versions.mix(SUBMIT.out.versions)
 
     // Concatenate accessions into single file to publish
     CONCAT_ACCESSIONS (
