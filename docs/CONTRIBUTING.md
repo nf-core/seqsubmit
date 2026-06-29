@@ -182,4 +182,8 @@ If you update images or graphics, follow the nf-core [style guidelines](https://
 
 ## Pipeline specific contribution guidelines
 
-<!-- TODO nf-core: Add any pipeline specific contribution guidelines here, such as coding styles, procedures, checklists etc. -->
+- Always refer to [INSDC](https://www.insdc.org/) documentation about data submission. If you are using [ENA](https://www.ebi.ac.uk/ena/browser/home) follow https://ena-docs.readthedocs.io/en/latest/submit/general-guide.html
+- Follow [ena-webin-cli](https://github.com/enasequence/webin-cli) documentation and keep tool updated to the latest version
+- Use mock tests and submissions to TEST server in tests using `SUBMIT` step
+- Create small tests (reduced databases when needed) and add data to https://github.com/nf-core/test-datasets/tree/seqsubmit
+- Keep `CHANGELOG.md` up to date

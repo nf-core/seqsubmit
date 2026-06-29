@@ -18,7 +18,7 @@ include { paramsSummaryMap                      } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc                  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML                } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
-include { FASTA_VALIDATION                      } from '../subworkflows/local/fasta_validation'
+include { FASTA_VALIDATION                      } from '../subworkflows/local/fasta_validation/main'
 include { methodsDescriptionText                } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 
 /*
