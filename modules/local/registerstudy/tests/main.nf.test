@@ -1,5 +1,7 @@
 def writeStudyMetadataJson = { String alias ->
-    def metadata = new File(System.getProperty("user.dir"), "modules/local/registerstudy/tests/study_metadata_${alias}.json")
+    def metadataDir = new File(System.getenv("NFT_WORKDIR") ?: ".nf-test", "tmp/registerstudy")
+    metadataDir.mkdirs()
+    def metadata = File.createTempFile("study_metadata_${alias}_", ".json", metadataDir)
     metadata.text = """\
 {
     "alias": "${alias}",
@@ -8,7 +10,6 @@ def writeStudyMetadataJson = { String alias ->
     "existing_study_type": "Metagenomics"
 }
 """
-    metadata.deleteOnExit()
     return metadata.absolutePath
 }
 
