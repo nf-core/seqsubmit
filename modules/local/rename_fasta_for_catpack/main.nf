@@ -3,7 +3,7 @@ process RENAME_FASTA_FOR_CATPACK {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'oras://community.wave.seqera.io/library/bash:5.2.37--06dbc4169cb39ae0' :
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/ee/ee3486cff66f82b4c2ea2094dd0f8adf263307b0ef23071bf086f5848e7fcef7/data' :
         'community.wave.seqera.io/library/bash:5.2.37--ae00789afb795adf' }"
 
     input:

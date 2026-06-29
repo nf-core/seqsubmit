@@ -9,7 +9,9 @@ process ENA_WEBIN_CLI_WRAPPER {
     conda "${moduleDir}/environment.yml"
 
     // ena-webin-cli 9.0.3 + mgnify-pipelines-toolkit 1.5.1
-    container "community.wave.seqera.io/library/ena-webin-cli_mgnify-pipelines-toolkit:a64d8c87ebf167ef"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/90/907aee7f61eca630e96a0f50d1bd71d9ba8ac9ca10da02459221930c21076a2a/data':
+        'community.wave.seqera.io/library/ena-webin-cli_mgnify-pipelines-toolkit:a64d8c87ebf167ef' }"
     stageInMode 'copy'
 
     input:
