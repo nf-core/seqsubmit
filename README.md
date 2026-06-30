@@ -279,7 +279,7 @@ For full details, see the [output documentation](https://nf-co.re/seqsubmit/outp
 
 ## Credits
 
-nf-core/seqsubmit was originally written by [Martin Beracochea](https://github.com/mberacochea), [Ekaterina Sakharova](https://github.com/KateSakharova), [Sofiia Ochkalova](https://github.com/ochkalova), [Evangelos Karatzas](https://github.com/vagkaratzas) and [Tim Rozday](https://github.com/timrozday-mgnify).
+nf-core/seqsubmit was originally written by [Martin Beracochea](https://github.com/mberacochea), [Ekaterina Sakharova](https://github.com/KateSakharova), [Sofia Ochkalova](https://github.com/ochkalova), [Evangelos Karatzas](https://github.com/vagkaratzas) and [Tim Rozday](https://github.com/timrozday-mgnify).
 
 ## Contributions and Support
 

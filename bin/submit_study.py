@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-## Originally written by Tim Rozday, modified by Sofiia Ochkalova and released under the MIT license.
+## Originally written by Tim Rozday, modified by Sofia Ochkalova and released under the MIT license.
 ## See git repository (https://github.com/nf-core/seqsubmit) for full license text.
 
 
