@@ -1,0 +1,53 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "rna_detection"
+description: |
+  Detects tRNA and rRNA genes in genome FASTA files using tRNAscan-SE and Barrnap,
+  then evaluates whether the genome meets MIMAG RNA completeness standards.
+keywords:
+  - rna
+  - trna
+  - rrna
+  - mimag
+  - genome
+  - metagenomics
+  - MAGs
+components:
+  - barrnap
+  - trnascanse
+  - countrna
+input:
+  - fasta:
+      type: file
+      description: |
+        Channel containing genome FASTA files.
+        Structure: [ val(meta), path(fasta) ]
+      pattern: "*.{fa,fasta,fna,fa.gz,fasta.gz,fna.gz}"
+      ontologies:
+        - edam: "http://edamontology.org/format_1929" # FASTA
+  - min_trna_count:
+      type: integer
+      description: |
+        Minimum number of distinct tRNA types required to pass the MIMAG standard (e.g. 18).
+  - min_rrna_percentage:
+      type: float
+      description: |
+        Minimum percentage of the three rRNA genes (5S, 16S, 23S) required to pass
+        the MIMAG standard (e.g. 75.0).
+output:
+  - rna_detected:
+      type: file
+      description: |
+        Channel containing per-genome TSV files with tRNA/rRNA counts and a
+        MIMAG pass/fail decision.
+        Structure: [ val(meta), path(tsv) ]
+      pattern: "*.tsv"
+      ontologies:
+        - edam: "http://edamontology.org/format_3475" # TSV
+  - versions:
+      type: file
+      description: |
+        Channel containing software versions.
+        Structure: versions
+authors:
+  - "@KateSakharova"
+  - "@ochkalova"

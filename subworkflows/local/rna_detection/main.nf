@@ -7,10 +7,10 @@
     IMPORT FUNCTIONS / MODULES / SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { COUNT_RNA      } from '../../modules/local/count_rna'
+include { COUNT_RNA      } from '../../../modules/local/count_rna'
 
-include { BARRNAP        } from '../../modules/nf-core/barrnap'
-include { TRNASCANSE     } from '../../modules/nf-core/trnascanse'
+include { BARRNAP        } from '../../../modules/nf-core/barrnap'
+include { TRNASCANSE     } from '../../../modules/nf-core/trnascanse'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

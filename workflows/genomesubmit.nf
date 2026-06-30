@@ -15,9 +15,9 @@ include { FIND_CONCATENATE as CONCAT_ACCESSIONS } from '../modules/nf-core/find/
 include { MULTIQC                               } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap                      } from 'plugin/nf-schema'
 
-include { FASTA_VALIDATION                      } from '../subworkflows/local/fasta_validation'
-include { GENOME_EVALUATION                     } from '../subworkflows/local/genome_evaluation'
-include { RNA_DETECTION                         } from '../subworkflows/local/rna_detection'
+include { FASTA_VALIDATION                      } from '../subworkflows/local/fasta_validation/main'
+include { GENOME_EVALUATION                     } from '../subworkflows/local/genome_evaluation/main'
+include { RNA_DETECTION                         } from '../subworkflows/local/rna_detection/main'
 include { FASTA_CLASSIFY_CATPACK                } from '../subworkflows/nf-core/fasta_classify_catpack/main'
 
 include { paramsSummaryMultiqc                  } from '../subworkflows/nf-core/utils_nfcore_pipeline'

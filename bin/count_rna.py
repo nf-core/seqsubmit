@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-## Originally written by Ekaterina Sakharova, modified by Sofiia Ochkalova and released under the MIT license.
+## Originally written by Ekaterina Sakharova, modified by Sofia Ochkalova and released under the MIT license.
 ## See git repository (https://github.com/nf-core/seqsubmit) for full license text.
 
 

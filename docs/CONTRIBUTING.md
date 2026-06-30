@@ -182,4 +182,123 @@ If you update images or graphics, follow the nf-core [style guidelines](https://
 
 ## Pipeline specific contribution guidelines
 
-<!-- TODO nf-core: Add any pipeline specific contribution guidelines here, such as coding styles, procedures, checklists etc. -->
+To ensure consistency and maintainability of the nf-core/seqsubmit pipeline, contributors should follow these guidelines when implementing new features or modifying existing functionality.
+
+1. Understand Workflow Structure
+
+The pipeline consists of independent workflows, each corresponding to a certain data type:
+
+- GENOMESUBMIT (mags, bins)
+- ASSEMBLYSUBMIT (metagenomic_assemblies)
+- READSUBMIT (raw reads)
+
+When adding new functionality (e.g. a new submission mode such as `isolate_genomes`), ensure that:
+
+- It integrates cleanly into the appropriate workflow or introduces a well-structured new one.
+- Existing workflows remain unaffected unless changes are explicitly required.
+- Shared logic is abstracted into reusable modules or subworkflows where possible.
+
+⸻
+
+2. Follow Samplesheet and Schema-Driven Design
+
+All inputs in seqsubmit are defined via strict samplesheet schemas.
+
+- Any new feature must:
+  - Extend or introduce a corresponding schema (assets/schema*input*\*.json)
+  - Clearly define required and optional fields
+- Maintain:
+  - Column order consistency (critical for pipeline execution)
+  - Backward compatibility where possible
+- Avoid duplicating metadata logic—reuse existing parsing and validation patterns.
+
+⸻
+
+3. ENA Submission Requirements
+
+Submissions to [ENA](https://www.ebi.ac.uk/ena/browser/home) are governed by a well-defined data model and submission process. These include relationships between entities (e.g. studies, samples, experiments, runs, analyses), required submission steps, and accepted file types and formats.
+
+Contributors should refer directly to the [official ENA documentation](https://ena-docs.readthedocs.io/en/latest/submit/general-guide.html) to understand latest submission requirements and ensure that pipeline behaviour remains aligned with ENA standards.
+
+    Follow ENA-defined submission workflows and required steps for each data type
+
+- Ensure that:
+  - New pipeline workflows follow ENA-defined submission workflows and required steps for each data type
+  - Metadata fields align with ENA requirements
+  - Controlled vocabularies (e.g. platform, library strategy) are respected
+- Where possible:
+  - Validate early (before submission steps)
+  - Provide clear error messages for invalid metadata
+
+⸻
+
+4. Integration with Webin-CLI
+
+All submissions are performed via [Webin-CLI](https://github.com/enasequence/webin-cli). Contributors should rely on official Webin-CLI documentation to understand expected inputs, parameters, and modes of operation. Make sure to always use the latest version of the tool.
+
+- Contributions affecting submission logic must:
+  - Respect --webincli_mode (validate vs submit)
+  - Support --test_upload for safe testing against ENA test server
+- Never introduce changes that:
+  - Risk accidental submission to production without explicit user intent
+- Ensure compatibility with:
+  - Credential handling via Nextflow secrets (ENA_WEBIN, ENA_WEBIN_PASSWORD)
+
+⸻
+
+5. Testing Requirements
+
+All new functionality must be covered by tests.
+
+At minimum, include:
+
+- nf-test unit tests for new modules/processes
+- Updates to test profiles where relevant
+- Lightweight test data (small FASTA/FASTQ) stored at https://github.com/nf-core/test-datasets/tree/seqsubmit
+
+Where applicable:
+
+- Test both:
+  - Validation mode (`--webincli_mode validate`)
+  - Submission mode with --test_upload (`--webincli_mode submit --test_upload`)
+- Ensure tests are:
+  - Fast
+  - Reproducible
+  - Independent of large external resources (for example databases download) if possible
+
+⸻
+
+6. Performance and Resource Awareness
+
+Some data processing steps may be resource-intensive (e.g. database preparation for CAT_pack). When introducing new workflows or features avoid unnecessary recomputation. Add option to reuse cached results or provide prebuilt databases when possible.
+
+⸻
+
+7. Documentation and Usability
+
+Every contribution should improve usability:
+
+- Update:
+  - README.md
+  - docs/usage.md
+  - Schema descriptions
+- Provide:
+  - Clear examples (e.g. samplesheets)
+  - Meaningful parameter descriptions
+
+The goal is to ensure that users can successfully submit data without needing deep knowledge of ENA submission requirements.
+
+⸻
+
+8. Design Principles
+
+When contributing, prioritise:
+
+- Reproducibility (consistent results across environments)
+- Automation (minimise manual user intervention)
+- Clarity (explicit inputs and outputs)
+- Extensibility (easy to add new submission types)
+
+⸻
+
+By following these guidelines, contributors help ensure that nf-core/seqsubmit remains a robust, user-friendly, and extensible solution for genomic data submission workflows.

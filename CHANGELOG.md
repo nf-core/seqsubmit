@@ -27,7 +27,7 @@ Key features:
 
 Authors:
 
-- Sofiia Ochkalova
+- Sofia Ochkalova
 - Ekaterina Sakharova
 - Tim Rozday
 - Martin Beracochea
