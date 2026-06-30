@@ -7,13 +7,14 @@ lint:
     - params.input
   files_unchanged:
     - .github/PULL_REQUEST_TEMPLATE.md
+    - .github/workflows/download_pipeline.yml  # have to add that file because we had to add extra env variables
     - docs/images/nf-core-seqsubmit_logo_light.png
     - docs/images/nf-core-seqsubmit_logo_dark.png
     - assets/nf-core-seqsubmit_logo_light.png
 nf_core_version: 4.0.2
 repository_type: pipeline
 template:
-  author: Martin Beracochea, Ekaterina Sakharova, Sofia Ochkalova, Evangelos Karatzas
+  author: Martin Beracochea, Ekaterina Sakharova, Sofia Ochkalova, Evangelos Karatzas, Tim Rozday
   description: Submit sequences, assemblies, MAGs, etc., to public archives
   force: false
   is_nfcore: true
