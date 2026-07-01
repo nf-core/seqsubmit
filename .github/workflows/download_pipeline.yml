@@ -35,7 +35,7 @@ jobs:
         run: |
           echo "REPO_LOWERCASE=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
           echo "REPOTITLE_LOWERCASE=$(basename ${GITHUB_REPOSITORY,,})" >> "$GITHUB_OUTPUT"
-          echo "REPO_BRANCH=${{ github.event.inputs.testbranch || 'dev' }}" >> "$GITHUB_OUTPUT"
+          echo "REPO_BRANCH=${{ github.event.inputs.testbranch || github.head_ref || 'dev' }}" >> "$GITHUB_OUTPUT"
 
   download:
     runs-on: ubuntu-latest
