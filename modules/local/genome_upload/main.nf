@@ -48,7 +48,7 @@ process GENOME_UPLOAD {
 
     stub:
     """
-    mkdir results/MAG_upload
+    mkdir -p results/MAG_upload
     touch results/MAG_upload/ENA_backup.json
     touch results/MAG_upload/genome_samples.xml
     touch results/MAG_upload/submission.xml
