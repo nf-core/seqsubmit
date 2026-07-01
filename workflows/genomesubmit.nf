@@ -157,7 +157,7 @@ workflow GENOMESUBMIT {
         .map{ meta, rna_decision, fasta ->
               def lines = rna_decision.readLines()
               // support for empty decision files required for -stub mode
-              def decision = lines ? lines[1].split('\t')[1] : null
+              def decision = lines ? lines[0].split('\t')[1] : null
               def updated_meta = meta.clone()
               updated_meta.RNA_presence = decision
               return [updated_meta, fasta]
