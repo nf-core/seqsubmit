@@ -129,9 +129,10 @@ workflow GENOMESUBMIT {
     fasta_updated_with_coverage = COVERM_GENOME.out.coverage.join(branched_coverage_results.genome_coverage_ref_input)
         .map{ meta, coverage_tsv, fasta ->
               def lines = coverage_tsv.readLines()
-              def coverage = (lines && lines.size() > 1) ? lines[1].split('\t')[1] : null
+              // support for empty coverage files required for -stub mode
+              def coverage = lines ? lines[1].split('\t')[1] : null
               def updated_meta = meta.clone()
-              updated_meta.genome_coverage = coverage ?: "unknown"
+              updated_meta.genome_coverage = coverage
               return [updated_meta, fasta]
         }
         .mix(branched_coverage_results.genome_coverage_present)
@@ -155,9 +156,10 @@ workflow GENOMESUBMIT {
     fasta_updated_with_rna = RNA_DETECTION.out.rna_detected.join(branched_rna_results.rna_prediction_input)
         .map{ meta, rna_decision, fasta ->
               def lines = rna_decision.readLines()
-              def decision = (lines && lines.size() > 1) ? lines[1].split('\t')[1] : null
+              // support for empty decision files required for -stub mode
+              def decision = lines ? lines[1].split('\t')[1] : null
               def updated_meta = meta.clone()
-              updated_meta.RNA_presence = decision ?: "unknown"
+              updated_meta.RNA_presence = decision
               return [updated_meta, fasta]
         }
         .mix(branched_rna_results.rna_present)
@@ -195,10 +197,10 @@ workflow GENOMESUBMIT {
         .combine(stats_version_ch)
         .map { meta, stats_tsv, fasta, stats_version ->
             def lines = stats_tsv.readLines()
-            def line = (lines && lines.size() > 1) ? lines[1].split('\t') : []
+            // support for empty checkm files required for -stub mode
             def updated_meta = meta.clone()
-            updated_meta.completeness = (line && line.size() > 1) ? line[1] : null
-            updated_meta.contamination = (line && line.size() > 2) ? line[2] : null
+            updated_meta.completeness = lines ? lines[1].split('\t')[1] : null
+            updated_meta.contamination = lines ? lines[1].split('\t')[2] : null
             updated_meta.stats_generation_software = stats_version
             return [updated_meta, fasta]
         }
@@ -239,9 +241,9 @@ workflow GENOMESUBMIT {
         .join(branched_taxonomy_results.genome_taxonomy_input)
         .map { meta, taxa_tsv, fasta ->
             def lines = taxa_tsv.readLines()
-            def lineData = (lines && lines.size() > 1) ? lines[1].split('\t') : []
             def updated_meta = meta.clone()
-            updated_meta.NCBI_lineage = (lineData && lineData.size() > 3) ? lineData[3] : null
+            // support for empty taxonomy files required for -stub mode
+            updated_meta.NCBI_lineage = lines ? lines[1].split('\t')[3] : null
             return [updated_meta, fasta]
         }
         .mix(branched_taxonomy_results.taxonomy_present)
