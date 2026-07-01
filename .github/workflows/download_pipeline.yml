@@ -10,12 +10,11 @@ on:
       testbranch:
         description: "The specific branch you wish to utilize for the test execution of nf-core pipelines download."
         required: true
-        default: "1.0.0"
+        default: "dev"
   pull_request:
     branches:
       - main
       - master
-      - dev
 
 env:
   NXF_ANSI_LOG: false
