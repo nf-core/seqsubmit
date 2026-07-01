@@ -9,7 +9,7 @@ process REGISTERSTUDY {
 
     // ENA_WEBIN and ENA_WEBIN_PASSWORD must be set in the process environment.
     // In the pipeline, map Nextflow secrets via conf/modules.config or nextflow.config:
-    //   env { ENA_WEBIN = secrets.WEBIN_ACCOUNT; ENA_WEBIN_PASSWORD = secrets.WEBIN_PASSWORD }
+    //   env { ENA_WEBIN = secrets.ENA_WEBIN; ENA_WEBIN_PASSWORD = secrets.ENA_WEBIN_PASSWORD }
 
     input:
     tuple val(meta), path(study_metadata)

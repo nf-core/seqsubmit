@@ -23,14 +23,14 @@
                     {
                         "id": "test"
                     },
-                    "test_rna_decision.tsv:md5,cf8ebf06bf0641ceec14c8b034c639af"
+                    "test_rna_decision.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
                 ]
             ]
         ],
-        "timestamp": "2026-06-25T21:38:27.45503",
+        "timestamp": "2026-07-01T18:37:30.337186",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "26.04.0"
+            "nextflow": "26.04.1"
         }
     }
 }

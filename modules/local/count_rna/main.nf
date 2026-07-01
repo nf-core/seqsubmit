@@ -33,6 +33,6 @@ process COUNT_RNA {
 
     stub:
     """
-    echo -e "genome\tYes" > ${meta.id}_rna_decision.tsv
+    touch ${meta.id}_rna_decision.tsv
     """
 }
