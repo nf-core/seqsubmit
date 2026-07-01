@@ -10,7 +10,7 @@ on:
       testbranch:
         description: "The specific branch you wish to utilize for the test execution of nf-core pipelines download."
         required: true
-        default: "dev"
+        default: "1.0.0"
   pull_request:
     branches:
       - main
