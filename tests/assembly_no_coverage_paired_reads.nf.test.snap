@@ -16,9 +16,6 @@
                 "COVERM_CONTIG": {
                     "coverm": "0.7.0"
                 },
-                "CREATE_ASSEMBLY_METADATA_CSV": {
-                    "bash": "5.2.37(1)-release"
-                },
                 "FALINT": {
                     "falint": "1.2.0"
                 },

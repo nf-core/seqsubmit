@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/seqsubmit/master/nextflow_schema.json",
+    "$id": "https://raw.githubusercontent.com/nf-core/seqsubmit/main/nextflow_schema.json",
     "title": "nf-core/seqsubmit pipeline parameters",
     "description": "Submit sequences, assemblies, MAGs, etc., to public archives",
     "type": "object",
@@ -17,7 +17,7 @@
                     "format": "file-path",
                     "exists": true,
                     "mimetype": "text/csv",
-                    "pattern": "^\\S+\\.csv$",
+                    "pattern": "^\\S+\\.(csv|tsv|yaml|yml|json)$",
                     "description": "Path to comma-separated file describing the data to be submitted. Format depends on the pipeline mode (mags/bins/metagenomic_assemblies/reads).",
                     "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with a set of columns depending on the type of data being submitted. See [usage docs](https://nf-co.re/seqsubmit/usage#samplesheet-input).",
                     "fa_icon": "fas fa-file-csv"

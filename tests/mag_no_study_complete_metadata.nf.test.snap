@@ -13,9 +13,6 @@
                     "find": "4.6.0",
                     "pigz": 2.8
                 },
-                "CREATE_GENOME_METADATA_TSV": {
-                    "bash": "5.2.37(1)-release"
-                },
                 "CREATE_MANIFESTS": {
                     "genome_uploader": "3.0.1"
                 },

@@ -26,7 +26,11 @@
                     ]
                 ],
                 "1": [
-                    "versions.yml:md5,aa5a1803455c1cb3200667da8c471d6a"
+                    [
+                        "CREATE_GENOME_METADATA_TSV",
+                        "bash",
+                        "5.2.37(1)-release"
+                    ]
                 ],
                 "tsv": [
                     [
@@ -50,17 +54,14 @@
                         },
                         "test_genome_genome_metadata.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
                     ]
-                ],
-                "versions": [
-                    "versions.yml:md5,aa5a1803455c1cb3200667da8c471d6a"
                 ]
             }
         ],
+        "timestamp": "2026-07-07T13:49:45.599115",
         "meta": {
-            "nf-test": "0.9.0",
-            "nextflow": "25.04.1"
-        },
-        "timestamp": "2026-04-27T14:54:46.395718"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
     },
     "test_create_genome_metadata_tsv": {
         "content": [
@@ -89,7 +90,11 @@
                     ]
                 ],
                 "1": [
-                    "versions.yml:md5,aa5a1803455c1cb3200667da8c471d6a"
+                    [
+                        "CREATE_GENOME_METADATA_TSV",
+                        "bash",
+                        "5.2.37(1)-release"
+                    ]
                 ],
                 "tsv": [
                     [
@@ -113,16 +118,13 @@
                         },
                         "test_genome_genome_metadata.tsv:md5,64562a85d19fe5893cad0e89e894058a"
                     ]
-                ],
-                "versions": [
-                    "versions.yml:md5,aa5a1803455c1cb3200667da8c471d6a"
                 ]
             }
         ],
+        "timestamp": "2026-07-07T13:49:37.674712",
         "meta": {
-            "nf-test": "0.9.0",
-            "nextflow": "25.04.1"
-        },
-        "timestamp": "2026-04-27T14:54:41.692391"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
     }
 }
