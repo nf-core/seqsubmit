@@ -139,7 +139,6 @@ workflow ASSEMBLYSUBMIT {
     CREATE_ASSEMBLY_METADATA_CSV(
         assemblies_with_coverage
     )
-    ch_versions = ch_versions.mix(CREATE_ASSEMBLY_METADATA_CSV.out.versions)
 
     // Concatenate assembly metadata CSVs into single file to publish
     CONCAT_METADATA (

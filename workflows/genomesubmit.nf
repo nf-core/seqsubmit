@@ -252,7 +252,6 @@ workflow GENOMESUBMIT {
     CREATE_GENOME_METADATA_TSV (
         fasta_updated_with_taxonomy
     )
-    ch_versions = ch_versions.mix(CREATE_GENOME_METADATA_TSV.out.versions)
 
     // Collect all TSV rows into a single file
     CONCAT_METADATA (
