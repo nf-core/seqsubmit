@@ -277,6 +277,14 @@ Key output locations in `--outdir`:
 
 For full details, see the [output documentation](https://nf-co.re/seqsubmit/output).
 
+## Scalability
+
+Some processes in this pipeline are resource intensive — in particular coverage calculation (`coverm`), quality assessment (`CheckM2`), and taxonomic classification of MAGs/bins (`BAT`). For real life data these steps should be run on an HPC cluster or another compute environment with sufficient CPU, memory, and job scheduling capacity, rather than on a single local machine.
+
+Depending on the resources available on your machine or cluster, you will likely need to adapt the Nextflow configuration to limit the maximum number of concurrently running jobs and other resource settings (e.g. `max_cpus`, `max_memory`, `max_time`, or `executor.queueSize` in a custom config), so the pipeline doesn't try to claim more resources than are actually available. See the [nf-core configuration documentation](https://nf-co.re/docs/usage/getting_started/configuration) for guidance on writing a custom config for your infrastructure.
+
+When submitting a large number of records, be aware that ENA recommends limiting submissions to 5000 per day to avoid overfilling their processing queue. If you need to submit more than this, consider splitting your samplesheet and spreading the submission across several days.
+
 ## Limitations
 
 nf-core/seqsubmit does not yet support the following data types and scenarios, grouped by the mode they affect:
