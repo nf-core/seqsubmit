@@ -31,26 +31,6 @@ Currently, the pipeline supports four submission modes, each routed to a dedicat
 
 ![seqsubmit workflow diagram](assets/seqsubmit_schema.png)
 
-## Limitations
-
-nf-core/seqsubmit does not yet support the following data types and scenarios:
-
-- **Co-assemblies**: Metagenomic co-assemblies, and MAGs/bins generated from co-assemblies, are not supported. The pipeline currently expects each assembly/MAG/bin to be derived from a single run or an assembly generated from a single run.
-
-- **Eukaryotic and viral bins/MAGs**: Submitting eukaryotic or viral genomes that require additional metadata generation is not supported.
-  - For **eukaryotic bins/MAGs**, RNA prediction and quality assessment (completeness/contamination estimation) are not implemented.
-  - For **viral bins/MAGs**, RNA prediction, quality assessment (completeness/contamination estimation) and taxonomy assignment are not implemented.
-
-- **Reads in non-FASTQ formats**: Only reads provided as FASTQ (`.fastq.gz`) can be submitted with `--mode reads`. Other formats (e.g. BAM) are not supported as input.
-
-- **Submission of MAG/bin without submitting the assembly or raw reads**: If a MAG/bin cannot be traced back to an assembly accession or a reads accession — i.e. only a sample accession is available — it cannot currently be submitted, since the pipeline relies on that lineage to build the required metadata.
-
-- **Submission of assembly without submitting the raw reads**: Similarly, assemblies that have no associated reads accession (`run_accession` column in the sample sheet) are not supported for the same reason.
-
-- **Single-contig assemblies/MAGs/bins**: Assemblies or MAGs/bins that consist of only one contig cannot be uploaded through this pipeline. ENA classifies these as "chromosomal assemblies", which follow a different submission procedure with different metadata requirements. If you have single-contig assembly/MAG/bin to submit, please contact [ENA support](https://www.ebi.ac.uk/ena/browser/support) for guidance.
-
-- **Coverage calculation from long reads**: Coverage calculation via `coverm` has only been tested and validated with short reads (e.g. Illumina). It has not been tested with long reads (PacBio, Nanopore). Exercise caution when processing data generated from long reads, as issues may occur.
-
 ## Requirements
 
 - [Nextflow](https://www.nextflow.io/) `>=25.04.0`
@@ -296,6 +276,36 @@ Key output locations in `--outdir`:
 - `pipeline_info/`: execution reports, trace, DAG, and software versions
 
 For full details, see the [output documentation](https://nf-co.re/seqsubmit/output).
+
+## Limitations
+
+nf-core/seqsubmit does not yet support the following data types and scenarios, grouped by the mode they affect:
+
+#### `mags` and `bins` modes (`GENOMESUBMIT`)
+
+- **Co-assemblies**: MAGs/bins generated from co-assemblies are not supported. The pipeline currently expects each MAG/bin to be derived from an assembly generated from a single run.
+
+- **Eukaryotic and viral bins/MAGs**: Submitting eukaryotic or viral genomes that require additional metadata generation is not supported. For such genomes tRNA and rRNA prediction, quality assessment (completeness/contamination estimation) and taxonomy assignment are not implemented. If all the required metadata (`completeness`, `contamination`, `stats_generation_software`, `RNA_presence` and `NCBI_lineage`) is already provided in the samplesheet, eukaryotic and viral bins/MAGs can still be submitted normally.
+
+- **Submission of a MAG/bin without submitting the assembly or raw reads**: If a MAG/bin cannot be traced back to an assembly accession or a reads accession — i.e. only a sample accession is available — it cannot currently be submitted, since the pipeline relies on that lineage to build the required metadata.
+
+- **Single-contig MAGs/bins**: MAGs/bins that consist of only one contig cannot be uploaded through this pipeline. ENA classifies these as "chromosomal assemblies", which follow a different submission procedure with different metadata requirements. If you have a single-contig MAG/bin to submit, please contact [ENA support](https://www.ebi.ac.uk/ena/browser/support) for guidance.
+
+- **Coverage calculation from long reads**: `genome_coverage` calculation via `coverm` has only been tested and validated with short reads (e.g. Illumina). It has not been tested with long reads (PacBio, Nanopore). Exercise caution when processing data generated from long reads, as issues may occur.
+
+#### `metagenomic_assemblies` mode (`ASSEMBLYSUBMIT`)
+
+- **Co-assemblies**: Metagenomic co-assemblies are not supported. The pipeline currently expects each assembly to be derived from a single run.
+
+- **Submission of an assembly without submitting the raw reads**: Assemblies that have no associated reads accession (`run_accession` column in the samplesheet) are not supported, since the pipeline relies on that lineage to build the required metadata.
+
+- **Single-contig assemblies**: Assemblies that consist of only one contig cannot be uploaded through this pipeline. ENA classifies these as "chromosomal assemblies", which follow a different submission procedure with different metadata requirements. If you have a single-contig assembly to submit, please contact [ENA support](https://www.ebi.ac.uk/ena/browser/support) for guidance.
+
+- **Coverage calculation from long reads**: `coverage` calculation via `coverm` has only been tested and validated with short reads (e.g. Illumina). It has not been tested with long reads (PacBio, Nanopore). Exercise caution when processing data generated from long reads, as issues may occur.
+
+#### `reads` mode (`READSUBMIT`)
+
+- **Reads in non-FASTQ formats**: Only reads provided as FASTQ (`.fastq.gz`) can be submitted. Other formats (e.g. BAM) are not supported as input.
 
 ## Credits
 
