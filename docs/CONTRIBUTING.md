@@ -204,13 +204,11 @@ When adding new functionality (e.g. a new submission mode such as `isolate_genom
 
 All inputs in seqsubmit are defined via strict samplesheet schemas.
 
-- Any new feature must:
-  - Extend or introduce a corresponding schema (assets/schema*input*\*.json)
-  - Clearly define required and optional fields
 - Maintain:
   - Column order consistency (critical for pipeline execution)
   - Backward compatibility where possible
 - Avoid duplicating metadata logic—reuse existing parsing and validation patterns.
+- New feature should extend or introduce a corresponding schema (`assets/schema_\*.json`) if pipeline inputs are affected.
 
 ⸻
 
@@ -219,8 +217,6 @@ All inputs in seqsubmit are defined via strict samplesheet schemas.
 Submissions to [ENA](https://www.ebi.ac.uk/ena/browser/home) are governed by a well-defined data model and submission process. These include relationships between entities (e.g. studies, samples, experiments, runs, analyses), required submission steps, and accepted file types and formats.
 
 Contributors should refer directly to the [official ENA documentation](https://ena-docs.readthedocs.io/en/latest/submit/general-guide.html) to understand latest submission requirements and ensure that pipeline behaviour remains aligned with ENA standards.
-
-    Follow ENA-defined submission workflows and required steps for each data type
 
 - Ensure that:
   - New pipeline workflows follow ENA-defined submission workflows and required steps for each data type
@@ -237,8 +233,8 @@ Contributors should refer directly to the [official ENA documentation](https://e
 All submissions are performed via [Webin-CLI](https://github.com/enasequence/webin-cli). Contributors should rely on official Webin-CLI documentation to understand expected inputs, parameters, and modes of operation. Make sure to always use the latest version of the tool.
 
 - Contributions affecting submission logic must:
-  - Respect --webincli_mode (validate vs submit)
-  - Support --test_upload for safe testing against ENA test server
+  - Respect `--webincli_mode` (validate vs submit)
+  - Support `--test_upload` for safe testing against ENA test server
 - Never introduce changes that:
   - Risk accidental submission to production without explicit user intent
 - Ensure compatibility with:
@@ -276,7 +272,7 @@ Some data processing steps may be resource-intensive (e.g. database preparation 
 
 7. Documentation and Usability
 
-Every contribution should improve usability:
+Every contribution should aim to improve usability:
 
 - Update:
   - README.md
