@@ -92,7 +92,7 @@
             "co-assembly": {
                 "type": "string",
                 "description": "'Yes' if data was co-assembled, 'No' otherwise",
-                "pattern": ['Yes'|'No']
+                "enum": ["Yes", "No"]
             },
             "broad_environment": {
                 "type": "string",
