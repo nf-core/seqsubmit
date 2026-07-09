@@ -51,27 +51,27 @@ mag_001,data/mag_001.fasta.gz,SRR24458089,,,SPAdes 3.15.5,MetaBAT2 2.15,default,
 > [!IMPORTANT]
 > **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
 
-| Column                      | Description                                                                                                                                                                                                                                                       |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`                    | A unique identifier for this data entry. Must be globally unique within the input dataset (used as `meta.id` throughout the pipeline).                                                                                                                            |
-| `fasta`                     | Path to MAG/bin contigs in FASTA format compressed with `gzip`. All names of the FASTA files must be unique to prevent pipeline errors.                                                                                                                           |
-| `accession`                 | ENA accession of the run or metagenomic assembly used to generate the MAG/bin.                                                                                                                                                                                    |
-| `fastq_1`                   | Path to the read file in FASTQ format used to generate the source metagenomic assembly. Required if `genome_coverage` is not provided.                                                                                                                            |
-| `fastq_2`                   | Path to the second read file in FASTQ format for paired-end data used to generate the source metagenomic assembly. Leave empty for single-end reads.                                                                                                              |
-| `assembly_software`         | Tool name and version that were used to generate the source metagenomic assembly.                                                                                                                                                                                 |
-| `binning_software`          | Binning tool, including version, that was used to generate the bins.                                                                                                                                                                                              |
-| `binning_parameters`        | Arguments that were used during binning.                                                                                                                                                                                                                          |
-| `stats_generation_software` | Tool, including version, that was used to calculate completeness and contamination.                                                                                                                                                                               |
-| `completeness`              | Genome completeness value.                                                                                                                                                                                                                                        |
-| `contamination`             | Genome contamination value.                                                                                                                                                                                                                                       |
-| `genome_coverage`           | Estimated average sequencing depth across the genome. If the value is missing, it is computed automatically during pipeline execution when reads are provided.                                                                                                    |
-| `metagenome`                | Registered metagenome taxonomic identifier or name that matches an existing ENA taxonomy entry. For more details see https://ena-docs.readthedocs.io/en/latest/faq/taxonomy.html                                                                                  |
-| `co-assembly`               | Whether a co-assembly strategy was used for the initial metagenomic assembly generation. Options: Yes or No.                                                                                                                                                      |
-| `broad_environment`         | Broad ecological context of the sample, for example 'marine biome', 'desert biome'. It is recommended to use subclasses of EnvO 'biome' class (http://purl.obolibrary.org/obo/ENVO_00000428)                                                                      |
-| `local_environment`         | Local environmental context of the sample, for example 'tropical dry broadleaf forest biome', 'marine abyssal zone biome'. It is recommended to use EnvO terms which are of smaller spatial grain than your entry for "broad-scale environmental context".        |
+| Column                      | Description                                                                                                                                                                                                                                                      |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sample`                    | A unique identifier for this data entry. Must be globally unique within the input dataset.                                                                                                                            |
+| `fasta`                     | Path to MAG/bin contigs in FASTA format compressed with `gzip`. All names of the FASTA files must be unique to prevent pipeline errors.                                                                                                                          |
+| `accession`                 | ENA accession of the run or metagenomic assembly used to generate the MAG/bin.                                                                                                                                                                                   |
+| `fastq_1`                   | Path to the read file in FASTQ format used to generate the source metagenomic assembly. Required if `genome_coverage` is not provided.                                                                                                                           |
+| `fastq_2`                   | Path to the second read file in FASTQ format for paired-end data used to generate the source metagenomic assembly. Leave empty for single-end reads.                                                                                                             |
+| `assembly_software`         | Tool name and version that were used to generate the source metagenomic assembly.                                                                                                                                                                                |
+| `binning_software`          | Binning tool, including version, that was used to generate the bins.                                                                                                                                                                                             |
+| `binning_parameters`        | Arguments that were used during binning.                                                                                                                                                                                                                         |
+| `stats_generation_software` | Tool, including version, that was used to calculate completeness and contamination.                                                                                                                                                                              |
+| `completeness`              | Genome completeness value.                                                                                                                                                                                                                                       |
+| `contamination`             | Genome contamination value.                                                                                                                                                                                                                                      |
+| `genome_coverage`           | Estimated average sequencing depth across the genome. If the value is missing, it is computed automatically during pipeline execution when reads are provided.                                                                                                   |
+| `metagenome`                | Registered metagenome taxonomic identifier or name that matches an existing ENA taxonomy entry. For more details see https://ena-docs.readthedocs.io/en/latest/faq/taxonomy.html                                                                                 |
+| `co-assembly`               | Whether a co-assembly strategy was used for the initial metagenomic assembly generation. Options: Yes or No.                                                                                                                                                     |
+| `broad_environment`         | Broad ecological context of the sample, for example 'marine biome', 'desert biome'. It is recommended to use subclasses of EnvO 'biome' class (http://purl.obolibrary.org/obo/ENVO_00000428)                                                                     |
+| `local_environment`         | Local environmental context of the sample, for example 'tropical dry broadleaf forest biome', 'marine abyssal zone biome'. It is recommended to use EnvO terms which are of smaller spatial grain than your entry for "broad-scale environmental context".       |
 | `environmental_medium`      | Material displaced by the sample, or the material in which the sample was embedded before sampling, for example 'mucus', 'lake water'. It is recommended to use subclasses of EnvO 'environmental material' class (http://purl.obolibrary.org/obo/ENVO_00010483). |
-| `RNA_presence`              | Presence or absence of the 23S, 16S, and 5S rRNA genes and at least 18 tRNAs. This is used for MISAG/MIMAG assembly quality classification. Options: Yes or No.                                                                                                   |
-| `NCBI_lineage`              | NCBI taxonomy lineage of the genome. Can be composted of either numerical IDs or taxon names separated by ";".                                                                                                                                                    |
+| `RNA_presence`              | Presence or absence of the 23S, 16S, and 5S rRNA genes and at least 18 tRNAs. This is used for MISAG/MIMAG assembly quality classification. Options: Yes or No.                                                                                                  |
+| `NCBI_lineage`              | NCBI taxonomy lineage of the genome. Can be composted of either numerical IDs or taxon names separated by ";".                                                                                                                                                   |
 
 > [!NOTE]
 > More information about envioronment tags can be found at checklists [ERC000050](https://www.ebi.ac.uk/ena/browser/view/ERC000050) for bins and [ERC000047](https://www.ebi.ac.uk/ena/browser/view/ERC000047) for MAGs under the field names "broad-scale environmental context", "local environmental context", and "environmental medium".
@@ -93,16 +93,16 @@ assembly_002,data/assembly_002.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 > [!IMPORTANT]
 > **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
 
-| Column              | Description                                                                                                                                           |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`            | A unique identifier for this data entry. Must be globally unique within the input dataset (used as `meta.id` throughout the pipeline).                |
-| `fasta`             | Path to assembly contigs in FASTA format compressed with `gzip`.                                                                                      |
-| `fastq_1`           | Path to the read file in FASTQ format used to generate the metagenomic assembly. Required if `coverage` is not provided.                              |
-| `fastq_2`           | Path to the second read file in FASTQ format for paired-end data used to generate the source metagenomic assembly. Leave empty for single-end reads.  |
+| Column              | Description                                                                                                                                          |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sample`            | A unique identifier for this data entry. Must be globally unique within the input dataset.                |
+| `fasta`             | Path to assembly contigs in FASTA format compressed with `gzip`.                                                                                     |
+| `fastq_1`           | Path to the read file in FASTQ format used to generate the metagenomic assembly. Required if `coverage` is not provided.                             |
+| `fastq_2`           | Path to the second read file in FASTQ format for paired-end data used to generate the source metagenomic assembly. Leave empty for single-end reads. |
 | `coverage`          | Estimated sequencing depth of the assembly. If this value is missing, it is computed automatically during pipeline execution when reads are provided. |
-| `run_accession`     | ENA run accession for the reads used to generate the metagenomic assembly. Reads must already be submitted to ENA.                                    |
-| `assembler`         | Name of the assembler software used to generate the assembly.                                                                                         |
-| `assembler_version` | Version of the assembler software used to generate the assembly.                                                                                      |
+| `run_accession`     | ENA run accession for the reads used to generate the metagenomic assembly. Reads must already be submitted to ENA.                                   |
+| `assembler`         | Name of the assembler software used to generate the assembly.                                                                                        |
+| `assembler_version` | Version of the assembler software used to generate the assembly.                                                                                     |
 
 An example file is available at [assets/samplesheet_assembly.csv](../assets/samplesheet_assembly.csv).
 
@@ -246,7 +246,7 @@ Key parameters:
 | `--webincli_mode`    | Webin-CLI mode for ENA interaction: `submit` uploads data, `validate` performs validation only.                                      |
 | `--upload_tpa`       | Mark assemblies as third party assemblies when required.                                                                             |
 
-Test example for `mags` run with docker:
+Example `mags` mode upload to TEST server, run command with docker:
 
 ```bash
 nextflow run nf-core/seqsubmit \
@@ -260,7 +260,7 @@ nextflow run nf-core/seqsubmit \
     --outdir results/validate_mags
 ```
 
-Test example for `metagenomic_assemblies` run with docker:
+Example `metagenomic_assemblies` mode upload to TEST server, run command with docker:
 
 ```bash
 nextflow run nf-core/seqsubmit \
@@ -274,7 +274,7 @@ nextflow run nf-core/seqsubmit \
     --outdir results/validate_assemblies
 ```
 
-Test example for `reads` run with docker:
+Example `reads` mode upload to TEST server, run command with docker:
 
 ```bash
 nextflow run nf-core/seqsubmit \

@@ -8,7 +8,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { FALINT                                } from '../../../modules/nf-core/falint/main'
+include { FALINT } from '../../../modules/nf-core/falint/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -63,5 +63,5 @@ workflow FASTA_VALIDATION {
         )
 
     emit:
-    valid_fastas    = valid_fastas
+    valid_fastas = valid_fastas  // [meta, fasta_file]
 }

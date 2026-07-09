@@ -176,7 +176,6 @@ workflow ASSEMBLYSUBMIT {
         test_upload,
         is_private
     )
-    ch_versions = ch_versions.mix(GENERATE_ASSEMBLY_MANIFEST.out.versions.first())
 
     SUBMIT (
         assemblies_with_coverage.join(GENERATE_ASSEMBLY_MANIFEST.out.manifest),

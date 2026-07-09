@@ -29,7 +29,7 @@ Currently, the pipeline supports four submission modes, each routed to a dedicat
 - `metagenomic_assemblies` for assembly submission with `ASSEMBLYSUBMIT` workflow
 - `reads` for raw sequencing reads submission with `READSUBMIT` workflow
 
-![seqsubmit workflow diagram](assets/seqsubmit_schema.png)
+![seqsubmit workflow diagram](docs/images/seqsubmit_schema.png)
 
 ## Requirements
 

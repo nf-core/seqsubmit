@@ -98,7 +98,7 @@ Genome coverage values from `coverm genome` output TSV are parsed and merged int
 
 ### Taxonomy assignment
 
-If `NCBI_lineage` is already present in the input samlesheet, the value is retained. If it is missing, the workflow runs taxonomy classification using the `CAT_pack` tool.
+If `NCBI_lineage` is already present in the input samplesheet, the value is retained. If it is missing, the workflow runs taxonomy classification using the `CAT_pack` tool.
 
 Before classification, input FASTA files are normalized to a `.fasta` suffix by `RENAME_FASTA_FOR_CATPACK`. Classification is then run in bin mode (`CAT_pack bins`, followed by `CAT_pack add_names`).
 
