@@ -216,7 +216,7 @@ All submissions are performed via [Webin-CLI](https://github.com/enasequence/web
 
 ### Testing Requirements
 
-All new functionality must be covered by tests.
+All new functionality must be covered by tests. Running nf-tests that perform ENA submission locally requires ENA webin credentials. Contributors may ask for testing credentials on the nf-core Slack [#seqsubmit](https://nfcore.slack.com/channels/seqsubmit) channel.
 
 At minimum, include:
 
