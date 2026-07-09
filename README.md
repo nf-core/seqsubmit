@@ -80,7 +80,7 @@ Additional supported columns:
 - `RNA_presence`
 - `NCBI_lineage`
 
-If `genome_coverage`, `stats_generation_software`, `completeness`, `contamination`, `RNA_presence`, or `NCBI_lineage` are missing, the workflow can calculate or infer them when the required inputs are available.
+If `genome_coverage`, `stats_generation_software`, `completeness`, `contamination`, `RNA_presence`, or `NCBI_lineage` are missing, the workflow can calculate or infer them when the required inputs are available. See the [Methods documentation](docs/methods.md) for more information on how metadata statistics are obtained.
 
 Those fields are metadata required for the [genome_uploader](https://github.com/EBI-Metagenomics/genome_uploader) package.
 
@@ -111,7 +111,7 @@ At least one of the following must be provided per row:
 - reads (`fastq_1`, optional `fastq_2` for paired-end)
 - `coverage`
 
-If `coverage` is missing and reads are provided, the workflow calculates average coverage with `coverm`.
+If `coverage` is missing and reads are provided, the workflow calculates average coverage with `coverm`. See the [Methods documentation](docs/methods.md) for more information on how coverage is calculated.
 
 Example `samplesheet_assembly.csv`:
 
