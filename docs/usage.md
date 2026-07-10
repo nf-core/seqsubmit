@@ -8,11 +8,11 @@
 
 - [Introduction](#introduction)
 - [Before you start](#before-you-start)
+- [Submission study](#submission-study)
 - [Samplesheet input](#samplesheet-input)
   - [`mags` and `bins` modes](#mags-and-bins-modes-genomesubmit)
   - [`metagenomic_assemblies` mode](#metagenomic_assemblies-mode-assemblysubmit)
   - [`reads` mode](#reads-mode-readsubmit)
-- [Submission study](#submission-study)
 - [Data privacy](#data-privacy)
 - [Database preparation (`mags` / `bins` modes)](#database-preparation-mags--bins)
 - [Running the pipeline](#running-the-pipeline)
@@ -45,6 +45,68 @@ Set your Webin credentials as Nextflow secrets:
 nextflow secrets set ENA_WEBIN "Webin-XXX"
 nextflow secrets set ENA_WEBIN_PASSWORD "XXX"
 ```
+
+## Submission study
+
+All data submitted through this pipeline must be associated with an ENA study (project). You have two options:
+
+### Option 1 — Use an existing study
+
+If you already have an ENA study, pass its accession (starting with `PRJ` or `ERP`) via `--submission_study`:
+
+```bash
+--submission_study PRJEB12345
+```
+
+You can create a study manually via the [Webin Portal](https://www.ebi.ac.uk/ena/submit/webin/login) and then use the assigned accession here.
+
+### Option 2 — Register a new study automatically
+
+Provide a study metadata file via `--study_metadata` and the pipeline will register the study with ENA before submitting your data:
+
+```bash
+--study_metadata study_metadata.json
+```
+
+The pipeline accepts JSON, CSV, and TSV formats.
+
+#### JSON formats
+
+Single study as a flat object:
+
+```json
+{
+  "alias": "study-gut-2026",
+  "study_title": "Gut microbiome study",
+  "study_abstract": "Characterisation of gut microbial communities"
+}
+```
+
+#### CSV format
+
+```csv
+alias,study_title,study_abstract
+study-gut-2026,Gut microbiome study,Characterisation of gut microbial communities
+```
+
+#### TSV format
+
+```tsv
+alias	study_title	study_abstract
+study-soil-2026	Soil microbiome study	Survey of soil microbiota
+```
+
+#### Study metadata fields
+
+| Field                 | Required | Description                                                                  |
+| --------------------- | -------- | ---------------------------------------------------------------------------- |
+| `study_title`         | Yes      | Descriptive title of the study.                                              |
+| `alias`               | Yes      | Unique project alias within your Webin account. Max length is 50 characters. |
+| `study_abstract`      | No       | Free-text abstract describing the study.                                     |
+| `study_description`   | No       | Alternative to `study_abstract`.                                             |
+| `project_name`        | No       | Project name. Defaults to `study_title`.                                     |
+| `existing_study_type` | No       | ENA study type (e.g. `Metagenomics`, `Other`).                               |
+| `new_study_type`      | No       | Custom study type. Only used when `existing_study_type` is set to `Other`.   |
 
 ## Samplesheet input
 
@@ -152,68 +214,6 @@ pacbio_run_001,SAMEA7654321,data/pacbio_reads.fastq.gz,,PACBIO_SMRT,PacBio Seque
 | `insert_size`       | No       | Fragment/insert size for paired-end reads (e.g., 500 for 500 bp inserts). Leave empty if not applicable.                                                                                                                                                                                                                                                        |
 | `library_name`      | No       | Descriptive library name (optional).                                                                                                                                                                                                                                                                                                                            |
 | `description`       | No       | Free-text description of the experiment (optional).                                                                                                                                                                                                                                                                                                             |
-
-## Submission study
-
-All data submitted through this pipeline must be associated with an ENA study (project). You have two options:
-
-### Option 1 — Use an existing study
-
-If you already have an ENA study, pass its accession (starting with `PRJ` or `ERP`) via `--submission_study`:
-
-```bash
---submission_study PRJEB12345
-```
-
-You can create a study manually via the [Webin Portal](https://www.ebi.ac.uk/ena/submit/webin/login) and then use the assigned accession here.
-
-### Option 2 — Register a new study automatically
-
-Provide a study metadata file via `--study_metadata` and the pipeline will register the study with ENA before submitting your data:
-
-```bash
---study_metadata study_metadata.json
-```
-
-The pipeline accepts JSON, CSV, and TSV formats.
-
-#### JSON formats
-
-Single study as a flat object:
-
-```json
-{
-  "alias": "study-gut-2026",
-  "study_title": "Gut microbiome study",
-  "study_abstract": "Characterisation of gut microbial communities"
-}
-```
-
-#### CSV format
-
-```csv
-alias,study_title,study_abstract
-study-gut-2026,Gut microbiome study,Characterisation of gut microbial communities
-```
-
-#### TSV format
-
-```tsv
-alias	study_title	study_abstract
-study-soil-2026	Soil microbiome study	Survey of soil microbiota
-```
-
-#### Study metadata fields
-
-| Field                 | Required | Description                                                                  |
-| --------------------- | -------- | ---------------------------------------------------------------------------- |
-| `study_title`         | Yes      | Descriptive title of the study.                                              |
-| `alias`               | Yes      | Unique project alias within your Webin account. Max length is 50 characters. |
-| `study_abstract`      | No       | Free-text abstract describing the study.                                     |
-| `study_description`   | No       | Alternative to `study_abstract`.                                             |
-| `project_name`        | No       | Project name. Defaults to `study_title`.                                     |
-| `existing_study_type` | No       | ENA study type (e.g. `Metagenomics`, `Other`).                               |
-| `new_study_type`      | No       | Custom study type. Only used when `existing_study_type` is set to `Other`.   |
 
 ## Data privacy
 
