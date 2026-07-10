@@ -153,10 +153,10 @@ mag_001,data/mag_001.fasta.gz,SRR24458089,,,SPAdes 3.15.5,MetaBAT2 2.15,default,
 | `local_environment`         | Yes         | Local environmental context of the sample, for example 'tropical dry broadleaf forest biome', 'marine abyssal zone biome'. It is recommended to use EnvO terms which are of smaller spatial grain than your entry for "broad-scale environmental context".        |
 | `environmental_medium`      | Yes         | Material displaced by the sample, or the material in which the sample was embedded before sampling, for example 'mucus', 'lake water'. It is recommended to use subclasses of EnvO 'environmental material' class (http://purl.obolibrary.org/obo/ENVO_00010483). |
 | `RNA_presence`              | No          | Presence or absence of the 23S, 16S, and 5S rRNA genes and at least 18 tRNAs. This is used for MISAG/MIMAG assembly quality classification. Options: Yes or No.                                                                                                   |
-| `NCBI_lineage`              | No          | NCBI taxonomy lineage of the genome. Can be composted of either numerical IDs or taxon names separated by ";".                                                                                                                                                    |
+| `NCBI_lineage`              | No          | NCBI taxonomy lineage of the genome. Can be composted of either numerical IDs or official NCBI taxon names separated by ";".                                                                                                                                      |
 
 > [!NOTE]
-> More information about envioronment tags can be found at checklists [ERC000050](https://www.ebi.ac.uk/ena/browser/view/ERC000050) for bins and [ERC000047](https://www.ebi.ac.uk/ena/browser/view/ERC000047) for MAGs under the field names "broad-scale environmental context", "local environmental context", and "environmental medium".
+> More information about environment tags can be found at checklists [ERC000050](https://www.ebi.ac.uk/ena/browser/view/ERC000050) for bins and [ERC000047](https://www.ebi.ac.uk/ena/browser/view/ERC000047) for MAGs under the field names "broad-scale environmental context", "local environmental context", and "environmental medium".
 
 If `genome_coverage`, `stats_generation_software`, `completeness`, `contamination`, `RNA_presence`, or `NCBI_lineage` are missing, the workflow can calculate or infer them when the required inputs are available. See the [Methods documentation](docs/methods.md) for more information on how metadata statistics are obtained.
 
@@ -210,7 +210,7 @@ pacbio_run_001,SAMEA7654321,data/pacbio_reads.fastq.gz,,PACBIO_SMRT,PacBio Seque
 | `fastq_1`           | Yes      | Path to forward reads in FASTQ format (optionally gzipped).                                                                                                                                                                                                                                                                                                     |
 | `fastq_2`           | No       | Path to reverse reads for paired-end data. Leave empty for single-end reads.                                                                                                                                                                                                                                                                                    |
 | `platform`          | Yes      | Sequencing platform. Supported values: `ILLUMINA`, `PACBIO_SMRT`, `OXFORD_NANOPORE`, `ION_TORRENT`, `CAPILLARY`, `DNBSEQ`, `ELEMENT`, `GENAPSYS`, `GENEMIND`, `HELICOS`, `LS454`, `BGISEQ`, `ULTIMA`, `VELA_DIAGNOSTICS`. See [ENA documentation](https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#metadata-validation) for complete list. |
-| `instrument`        | Yes      | Sequencer model, e.g. "Illumina HiSeq 2000", "PacBio Sequel", "MinION".                                                                                                                                                                                                                                                                                         |
+| `instrument`        | Yes      | Sequencer model, e.g. "Illumina HiSeq 2000", "PacBio Sequel", "MinION". See [ENA documentation](https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#permitted-values-for-instrument)                                                                                                                                                          |
 | `library_source`    | Yes      | Library source type. Options: `GENOMIC`, `METAGENOMIC`, `TRANSCRIPTOMIC`, `METAGENOMIC SINGLE CELL`, `TRANSCRIPTOMIC SINGLE CELL`, `SYNTHETIC`, `VIRAL RNA`, `OTHER`.                                                                                                                                                                                           |
 | `library_selection` | Yes      | Library selection method. Options: `RANDOM`, `PCR`, `RANDOM PCR`, `RT-PCR`, `MF`, `cDNA`, `cDNA_randomPriming`, `cDNA_oligo_dT`, `PolyA`, `Inverse rRNA`, `ChIP`, `MNase`, `DNase`, `Hybrid Selection`, etc. See [ENA documentation](https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#metadata-validation) for complete list.              |
 | `library_strategy`  | Yes      | Library strategy. Options: `WGS`, `WGA`, `WXS`, `RNA-Seq`, `miRNA-Seq`, `ncRNA-Seq`, `EST`, `Hi-C`, `ATAC-seq`, `WCS`, `RAD-Seq`, `CLONE`, `AMPLICON`, `POOLCLONE`, `etc`. See [ENA documentation](https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#metadata-validation) for complete list.                                                |
@@ -241,21 +241,19 @@ The `GENOMESUBMIT` workflow uses `CheckM2` and `CAT_pack` that require specializ
 
 You can either provide pre-existing databases or let the pipeline prepare them during execution.
 
+As databases preparation can take significant time, we strongly recommend downloading them locally and storing them in a local cache folder for reuse across runs.
+In particular the `CAT_pack` database is extremely large and may take a long time to download and compute.
+
 - `CheckM2`:
-  - provide the path to local database with `--checkm2_db`, otherwise the pipeline downloads version specified with `--checkm2_db_download_id` (by default `14897628`).
+  - provide the path to local database with `--checkm2_db`, otherwise the pipeline downloads version specified with `--checkm2_db_download_id` (by default Zenodo accession `14897628`).
 
 - `CAT_pack`:
   - provide the path to local database (containing `tax/` and `db/` folders or `tar.gz` archive) with `--cat_db`, otherwise the pipeline constructs version specified with `--cat_db_download_id` (by default `nr`).
 
 See [CAT_pack documentation](https://github.com/MGXlab/CAT_pack) and [CheckM2 documentation](https://github.com/chklovski/CheckM2) for more details on usage and creation of databases.
 
-> [!IMPORTANT]
-> `CAT_pack` database creation can take significant time.
->
-> Reusing an existing database is strongly recommended for repeated runs.
->
-> Databases created/downloaded by the pipeline are published under:
-> `${params.outdir}/databases/`
+Databases created/downloaded by the pipeline are published under:
+`<output_dir>/databases/`. In the subsequent pipeline runs it is strongly recommended to reuse them using `--cat_db <output_dir>/databases/cat_pack/` and `--cat_db <output_dir>/databases/checkm2/`.
 
 ## Running the pipeline
 
