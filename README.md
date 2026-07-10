@@ -19,6 +19,24 @@
 
 [![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23seqsubmit-4A154B?labelColor=000000&logo=slack)](https://nfcore.slack.com/channels/seqsubmit)[![Follow on Bluesky](https://img.shields.io/badge/bluesky-%40nf__core-1185fe?labelColor=000000&logo=bluesky)](https://bsky.app/profile/nf-co.re)[![Follow on Mastodon](https://img.shields.io/badge/mastodon-nf__core-6364ff?labelColor=FFFFFF&logo=mastodon)](https://mstdn.science/@nf_core)[![Watch on YouTube](http://img.shields.io/badge/youtube-nf--core-FF0000?labelColor=000000&logo=youtube)](https://www.youtube.com/c/nf-core)
 
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Requirements](#requirements)
+- [Input samplesheets](#input-samplesheets)
+- [Usage](#usage)
+  - [Submission study](#submission-study)
+  - [Data privacy](#data-privacy)
+  - [Database setup (`CheckM2` and `CAT_pack`)](#database-setup-checkm2-and-cat_pack)
+  - [Required parameters:](#required-parameters)
+  - [Optional parameters:](#optional-parameters)
+- [Pipeline output](#pipeline-output)
+- [Scalability](#scalability)
+- [Limitations](#limitations)
+- [Credits](#credits)
+- [Contributions and Support](#contributions-and-support)
+- [Citations](#citations)
+
 ## Introduction
 
 **nf-core/seqsubmit** is a Nextflow pipeline for submitting sequence data to [ENA](https://www.ebi.ac.uk/ena/browser/home).
@@ -205,7 +223,7 @@ The `mags`/`bins` workflow requires databases for completeness/contamination est
 | `--upload_tpa`    | Flag to control the type of assembly study (third party assembly or not). Default: false   |
 | `--test_upload`   | Upload to TEST ENA server instead of LIVE. Default: true                                   |
 | `--webincli_mode` | Choose Webin-CLI mode: `submit` or `validate`. Default: `submit`                           |
-| `--private`       | Use that flag if you are referring to private data in ENA                                  |
+| `--is_private`    | Use that flag if you are referring private data accessions in your submission              |
 | `--release_date`  | Use that flag if you want to keep your data private after submission until particular date |
 
 General command template:
