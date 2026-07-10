@@ -4,6 +4,23 @@
 
 > _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
 
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Before you start](#before-you-start)
+- [Samplesheet input](#samplesheet-input)
+  - [`mags` and `bins` modes](#mags-and-bins-modes-genomesubmit)
+  - [`metagenomic_assemblies` mode](#metagenomic_assemblies-mode-assemblysubmit)
+  - [`reads` mode](#reads-mode-readsubmit)
+- [Submission study](#submission-study)
+- [Data privacy](#data-privacy)
+- [Database preparation (`mags` / `bins` modes)](#database-preparation-mags--bins)
+- [Running the pipeline](#running-the-pipeline)
+- [Core Nextflow arguments](#core-nextflow-arguments)
+- [Custom configuration](#custom-configuration)
+- [Running in the background](#running-in-the-background)
+- [Nextflow memory requirements](#nextflow-memory-requirements)
+
 ## Introduction
 
 `nf-core/seqsubmit` is a Nextflow pipeline for submitting metagenomic assemblies, MAGs, bins, and raw reads to ENA.
