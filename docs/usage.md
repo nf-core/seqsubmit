@@ -198,6 +198,23 @@ study-soil-2026	Soil microbiome study	Survey of soil microbiota
 | `existing_study_type` | No       | ENA study type (e.g. `Metagenomics`, `Other`).                               |
 | `new_study_type`      | No       | Custom study type. Only used when `existing_study_type` is set to `Other`.   |
 
+## Data privacy
+
+You can reference private ENA data if you have access to it via your Webin account (it was submitted previously under your credentials). To use private data accessions in your submission metadata, specify the `--is_private` flag. The pipeline will then use your provided Webin credentials to fetch the required metadata.
+
+You can also control the privacy of your submitted data:
+
+- If you provide an existing study via `--submission_study`, your submission will inherit the same privacy status as that study.
+- If no study is provided, the pipeline will register a new one for you. To keep this new study private, you must specify a release date using `--release_date YYYY-MM-DD` (up to 2 years from the current date).
+
+| Example                                                                                                                                                               | Source Data | Submission Visibility | Required Arguments                                     | Result                                                |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | --------------------- | ------------------------------------------------------ | ----------------------------------------------------- |
+| Assemblies generated from public reads. Assemblies should be public immediately after submission                                                                      | public      | public                | –                                                      | SUCCESS                                               |
+| Assemblies generated from public reads. Assemblies should remain private for 1 year after submission                                                                  | public      | private               | `--release_date YYYY-MM-DD` (+1 year)                  | SUCCESS                                               |
+| Bins generated from private reads and assemblies. Bins should be public after submission. User **has access** to the reads and assemblies via Webin account           | private     | public                | `--is_private`                                         | SUCCESS                                               |
+| Bins generated from private reads and assemblies. Bins should remain private for 2 years after submission. User **has access** via Webin account                      | private     | private               | `--is_private`, `--release_date YYYY-MM-DD` (+2 years) | SUCCESS                                               |
+| MAGs generated from private reads and assemblies. MAGs should be public after submission. User **does not have access** to the reads and assemblies via Webin account | private     | public                | –                                                      | ERROR (submission can only reference accessible data) |
+
 ## Database preparation (`mags` / `bins`)
 
 The `GENOMESUBMIT` workflow uses `CheckM2` and `CAT_pack` that require specialized databases for completeness/contamination assessment and taxonomy assignment.
