@@ -76,11 +76,11 @@ mag_001,data/mag_001.fasta.gz,SRR24458089,,,SPAdes 3.15.5,MetaBAT2 2.15,default,
 > [!NOTE]
 > More information about envioronment tags can be found at checklists [ERC000050](https://www.ebi.ac.uk/ena/browser/view/ERC000050) for bins and [ERC000047](https://www.ebi.ac.uk/ena/browser/view/ERC000047) for MAGs under the field names "broad-scale environmental context", "local environmental context", and "environmental medium".
 
+If `genome_coverage`, `stats_generation_software`, `completeness`, `contamination`, `RNA_presence`, or `NCBI_lineage` are missing, the workflow can calculate or infer them when the required inputs are available. See the [Methods documentation](docs/methods.md) for more information on how metadata statistics are obtained.
+
 ### `metagenomic_assemblies` mode (`ASSEMBLYSUBMIT`)
 
 Use this samplesheet structure for metagenomic assembly submission. The input format follows [assets/schema_input_assembly.json](../assets/schema_input_assembly.json).
-
-Provide either read files (`fastq_1`, optionally `fastq_2`) or a `coverage` value for each row. If `coverage` is missing and reads are provided, the workflow calculates average coverage automatically.
 
 Example:
 
@@ -104,7 +104,7 @@ assembly_002,data/assembly_002.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 | `assembler`         | Yes         | Name of the assembler software used to generate the assembly.                                                                                         |
 | `assembler_version` | Yes         | Version of the assembler software used to generate the assembly.                                                                                      |
 
-An example file is available at [assets/samplesheet_assembly.csv](../assets/samplesheet_assembly.csv).
+Provide either read files (`fastq_1`, optionally `fastq_2`) or a `coverage` value for each row. If `coverage` is missing and reads are provided, the workflow calculates average coverage with `coverm`. See the [Methods documentation](docs/methods.md) for more information on how coverage is calculated.
 
 ### `reads` mode (`READSUBMIT`)
 

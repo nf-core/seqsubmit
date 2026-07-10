@@ -65,42 +65,9 @@ Make sure you update commands above with your authorised credentials.
 
 ## Input samplesheets
 
-For detailed descriptions of all samplesheet columns, see the [usage documentation](docs/usage.md#samplesheet-input).
+### `mags` and `bins` modes
 
-### `mags` and `bins` modes (`GENOMESUBMIT`)
-
-The input must follow `assets/schema_input_genome.json`.
-
-Required columns:
-
-- `sample`
-- `fasta` (must end with `.fa.gz`, `.fasta.gz`, or `.fna.gz`)
-- `accession`
-- `assembly_software`
-- `binning_software`
-- `binning_parameters`
-- `metagenome`
-- `environmental_medium`
-- `broad_environment`
-- `local_environment`
-- `co-assembly`
-
-At least one of the following must be provided per row:
-
-- reads (`fastq_1`, optional `fastq_2` for paired-end)
-- `genome_coverage`
-
-Additional supported columns:
-
-- `stats_generation_software`
-- `completeness`
-- `contamination`
-- `RNA_presence`
-- `NCBI_lineage`
-
-If `genome_coverage`, `stats_generation_software`, `completeness`, `contamination`, `RNA_presence`, or `NCBI_lineage` are missing, the workflow can calculate or infer them when the required inputs are available. See the [Methods documentation](docs/methods.md) for more information on how metadata statistics are obtained.
-
-Those fields are metadata required for the [genome_uploader](https://github.com/EBI-Metagenomics/genome_uploader) package.
+The input must follow [assets/schema_input_genome.json](assets/schema_input_genome.json). See the [corresponding samplesheet section](docs/usage.md#mags-and-bins-modes-genomesubmit) of the usage documentation for the full list of required and optional columns.
 
 Example `samplesheet_genomes.csv`:
 
@@ -109,27 +76,9 @@ sample,fasta,accession,fastq_1,fastq_2,assembly_software,binning_software,binnin
 lachnospira_eligens,data/bin_lachnospira_eligens.fa.gz,SRR24458089,,,spades_v3.15.5,metabat2_v2.6,default,CheckM2_v1.0.1,61.0,0.21,32.07,sediment metagenome,No,marine,cable_bacteria,marine_sediment,No,d__Bacteria;p__Proteobacteria;s__unclassified_Proteobacteria
 ```
 
-> [!IMPORTANT]
-> **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
+### `metagenomic_assemblies` mode
 
-### `metagenomic_assemblies` mode (`ASSEMBLYSUBMIT`)
-
-The input must follow `assets/schema_input_assembly.json`.
-
-Required columns:
-
-- `sample`
-- `fasta` (must end with `.fa.gz`, `.fasta.gz`, or `.fna.gz`)
-- `run_accession`
-- `assembler`
-- `assembler_version`
-
-At least one of the following must be provided per row:
-
-- reads (`fastq_1`, optional `fastq_2` for paired-end)
-- `coverage`
-
-If `coverage` is missing and reads are provided, the workflow calculates average coverage with `coverm`. See the [Methods documentation](docs/methods.md) for more information on how coverage is calculated.
+The input must follow [assets/schema_input_assembly.json](assets/schema_input_assembly.json). See the [corresponding samplesheet section](docs/usage.md#metagenomic_assemblies-mode-assemblysubmit) of the usage documentation for more details.
 
 Example `samplesheet_assembly.csv`:
 
@@ -139,30 +88,9 @@ assembly_1,data/contigs_1.fasta.gz,data/reads_1.fastq.gz,data/reads_2.fastq.gz,,
 assembly_2,data/contigs_2.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 ```
 
-> [!IMPORTANT]
-> **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
+### `reads` mode
 
-### `reads` mode (`READSUBMIT`)
-
-The input must follow `assets/schema_input_reads.json`.
-
-Required columns:
-
-- `sample`
-- `sample_accession`
-- `fastq_1`
-- `fastq_2`
-- `platform`
-- `instrument`
-- `library_source`
-- `library_selection`
-- `library_strategy`
-
-Optional columns:
-
-- `insert_size`
-- `library_name`
-- `description`
+The input must follow [assets/schema_input_reads.json](assets/schema_input_reads.json). See the [corresponding samplesheet section](docs/usage.md#reads-mode-readsubmit) of the usage documentation for more details.
 
 Example `samplesheet_reads.csv`:
 
@@ -171,9 +99,6 @@ sample,sample_accession,fastq_1,fastq_2,platform,instrument,library_source,libra
 illumina_run_001,SAMEA1234567,data/reads_R1.fastq.gz,data/reads_R2.fastq.gz,ILLUMINA,Illumina HiSeq 2000,GENOMIC,RANDOM,WGS,500,HiSeq_library_001,Illumina sequencing of sample XYZ
 ```
 
-> [!IMPORTANT]
-> **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
-
 ## Usage
 
 > [!NOTE]
@@ -181,9 +106,7 @@ illumina_run_001,SAMEA1234567,data/reads_R1.fastq.gz,data/reads_R2.fastq.gz,ILLU
 
 ### Submission study
 
-All data submitted through this pipeline must be associated with an ENA study (project). You can either pass an accession of your existing study via `--submission_study`or provide a metadata file via `--study_metadata` and the pipeline will register the study with ENA before submitting your data.
-
-See the [usage documentation](docs/usage.md#submission-study) for more details.
+All data submitted through this pipeline must be associated with an ENA study (project). You can either pass an accession of your existing study via `--submission_study`or provide a metadata file via `--study_metadata` and the pipeline will register the study with ENA before submitting your data. See the [usage documentation](docs/usage.md#submission-study) for more details.
 
 ### Data privacy
 
@@ -191,7 +114,7 @@ The pipeline supports private submissions. See the [usage documentation](docs/us
 
 ### Database setup (`CheckM2` and `CAT_pack`)
 
-The `mags`/`bins` workflow requires databases for completeness/contamination estimation and taxonomy assignment. See [Usage documentation](usage.md) for details.
+The `mags`/`bins` workflow requires databases for completeness/contamination estimation and taxonomy assignment. See [Usage documentation](usage.md) for more details.
 
 ### Required parameters:
 
