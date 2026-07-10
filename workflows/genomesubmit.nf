@@ -150,7 +150,6 @@ workflow GENOMESUBMIT {
         trna_limit,
         rrna_limit
     )
-    ch_versions = ch_versions.mix( RNA_DETECTION.out.versions )
 
     // Update metadata for records missing RNA
     fasta_updated_with_rna = RNA_DETECTION.out.rna_detected.join(branched_rna_results.rna_prediction_input)
@@ -304,13 +303,13 @@ workflow GENOMESUBMIT {
     }
     // Combine fasta and manifests
     ch_combined = fasta_updated_with_taxonomy
-    .map { meta, fasta -> [meta.id, meta, fasta] }
-    .join(
-        manifests_ch.map { meta, manifest -> [meta.id, manifest] }  // Has only [id: prefix]
-    )
-    .map { _id, full_meta, fasta, manifest ->
-        [full_meta, fasta, manifest]
-    }
+        .map { meta, fasta -> [meta.id, meta, fasta] }
+        .join(
+            manifests_ch.map { meta, manifest -> [meta.id, manifest] }  // Has only [id: prefix]
+        )
+        .map { _id, full_meta, fasta, manifest ->
+            [full_meta, fasta, manifest]
+        }
 
     // --------- Upload data to ENA
 
@@ -369,9 +368,9 @@ workflow GENOMESUBMIT {
         : file("${projectDir}/assets/methods_description_template.yml", checkIfExists: true)
     def ch_methods_description = channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: true))
-    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_METADATA.out.file_out.map{meta, file -> file})
+    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_METADATA.out.file_out.map{_meta, file -> file})
     ch_multiqc_files = ch_multiqc_files.mix(CREATE_MANIFESTS.out.upload_registered_mags)
-    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_ACCESSIONS.out.file_out.map{meta, file -> file})
+    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_ACCESSIONS.out.file_out.map{_meta, file -> file})
     MULTIQC(
         ch_multiqc_files.flatten().collect().map { files ->
             [

@@ -57,7 +57,7 @@
                 },
                 "trna_limit": {
                     "type": "number",
-                    "description": "Minimum number of tRNA.",
+                    "description": "Minimum number of tRNA required to pass.",
                     "default": 18,
                     "fa_icon": "fas fa-users-cog"
                 }
@@ -71,9 +71,9 @@
             "help_text": "Provide a path to pre-downloaded DB or DB id for automatic download",
             "properties": {
                 "cat_db": {
-                    "type": "string",
+                    "type": "file-path",
                     "description": "Path to local CAT_pack DB",
-                    "help": "Database should be pre-downloaded using CATpack commands. The folder with database should contain sub-folders 'db' with files .dmnd, .fastaid2LCAtaxid, .taxids_with_multiple_offspring, etc. And subfolder 'tax' that should contain taxonomy files like .dmp, .taxdump.tar.gz, .prot.accession2taxid.FULL.gz, etc",
+                    "help": "Database should be pre-downloaded using CATpack commands. The folder with database should contain sub-folders 'db' with files .dmnd, .fastaid2LCAtaxid, .taxids_with_multiple_offspring, etc, as well as subfolder 'tax' that should contain taxonomy files like .dmp, .taxdump.tar.gz, .prot.accession2taxid.FULL.gz, etc",
                     "fa_icon": "fas fa-users-cog"
                 },
                 "cat_db_download_id": {
@@ -93,7 +93,7 @@
             "help_text": "These options are used to run Checkm2 that will calculate completeness and contamination of genome if those were not provided as input",
             "properties": {
                 "checkm2_db": {
-                    "type": "string",
+                    "type": "file-path",
                     "description": "Path to pre-downloaded checkm2 database",
                     "fa_icon": "fas fa-users-cog"
                 },
@@ -268,7 +268,7 @@
                 },
                 "upload_tpa": {
                     "type": "boolean",
-                    "description": "Flag to control the type of assembly study (third party assembly or not)",
+                    "description": "Flag to control the type of assembly study (third party assembly (TPA) or not). TPA description: https://www.ncbi.nlm.nih.gov/genbank/tpa/.",
                     "default": false,
                     "help": "Use this flag if the study is a third party assembly (TPA). Default: false"
                 },
@@ -289,13 +289,13 @@
                     "type": "boolean",
                     "description": "Use that flag if you are referring to private data in ENA",
                     "default": false,
-                    "help": "This flag is used during metadata fetch steps. If you are referring to private data (project/reads/assembly) set to True. That flag does NOT regulate privacy of your submission data (check --release_date)"
+                    "help": "This flag is used during metadata fetch steps. Specify if you are referring to private data (project/reads/assembly). That flag does NOT regulate privacy of your submission data (check --release_date)"
                 },
                 "release_date": {
                     "type": "string",
                     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
                     "description": "Use that flag if you want to keep your data private after submission",
-                    "help": "This flag regulates privacy of created study for submission. If you want to keep your data private you need to specify a DATE when it can become public (YYYY-MM-DD, max 2 years from now)"
+                    "help": "This flag regulates when the created study for submission will become publically available and indexed on the ENA. If you want to keep your data private until a later date, you need to specify a DATE when it can become public (YYYY-MM-DD, max 2 years from now)"
                 },
                 "submission_study": {
                     "type": "string",
@@ -307,7 +307,7 @@
                     "format": "file-path",
                     "exists": true,
                     "description": "Path to study metadata file (JSON, CSV, or TSV) for registering a new ENA study. Required when submission_study is not provided.",
-                    "help_text": "File containing study metadata fields (required: study_title and alias, optional: study_abstract, existing_study_type, etc.). Used by REGISTERSTUDY to create a new study in ENA when no existing submission_study accession is given.",
+                    "help_text": "File containing study metadata fields (required: study_title and alias, optional: study_abstract, existing_study_type, etc.). Used by REGISTERSTUDY to create a new study in ENA when no existing submission_study accession is given. ENA documentation: https://ena-docs.readthedocs.io/en/latest/submit/study/programmatic.html",
                     "fa_icon": "fas fa-file-alt"
                 },
                 "webincli_mode": {

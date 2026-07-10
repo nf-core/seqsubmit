@@ -27,7 +27,6 @@ workflow GENOME_EVALUATION {
                             //          only used if ch_checkm2_db is empty
 
     main:
-    ch_versions = channel.empty()
 
     //
     // Database preparation

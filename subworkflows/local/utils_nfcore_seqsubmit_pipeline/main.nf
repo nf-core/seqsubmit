@@ -112,10 +112,7 @@ workflow PIPELINE_INITIALISATION {
     } else if ( mode == "reads" ) {
         ch_samplesheet = channel
             .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input_reads.json"))
-    } else {
-        error("Unknown mode specified: '${mode}'. Supported modes are 'mags', 'bins', 'metagenomic_assemblies', and 'reads'.")
     }
-
     emit:
     samplesheet = ch_samplesheet
     versions    = ch_versions
@@ -200,7 +197,7 @@ def toolCitationText() {
     ].join(' ').trim()
 
     def preprocessing_tools = [
-        "Input FASTA validation was done by py_fasta_validator (Edwards et al. 2023)."
+        "Input FASTA validation was done by fa-lint (https://github.com/GallVp/fa-lint)."
     ].join(' ').trim()
 
     def stats_tools = [
