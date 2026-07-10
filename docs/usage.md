@@ -37,14 +37,17 @@ Before running the pipeline, make sure that:
 
 - Nextflow `>=25.04.0` is available.
 - You have a Webin account registered at <https://www.ebi.ac.uk/ena/submit/webin/login>.
-- The raw reads used to generate the submitted assemblies have already been submitted to INSDC/ENA and the relevant accessions are available.
+- For metagenomic assemblies submission the raw reads used to generate the assemblies have to be submitted to INSDC/ENA to obtain the corresponding run accessions. You can use the pipeline in mode `reads` to perform this.
+- For MAGs or bins submission the raw reads only or raw reads and metagenomic assemblies used to generate the MAGs/bins have to be submitted to INSDC/ENA to obtain the corresponding run or assembly accessions. You can use the pipeline in mode `reads` or `metagenomic_assemblies` to perform this.
+- For raw reads submission it is required to register source BioSamples and obtain the sample accessions.
 
-Set your Webin credentials as Nextflow secrets:
+Setup Webin credentials as Nextflow secrets before running the pipeline:
 
-```bash
-nextflow secrets set ENA_WEBIN "Webin-XXX"
-nextflow secrets set ENA_WEBIN_PASSWORD "XXX"
-```
+`nextflow secrets set ENA_WEBIN "Webin-XXX"`
+
+`nextflow secrets set ENA_WEBIN_PASSWORD "XXX"`
+
+Make sure you update commands above with your authorised credentials.
 
 ## Submission study
 

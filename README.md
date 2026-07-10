@@ -53,9 +53,11 @@ Currently, the pipeline supports four submission modes, each routed to a dedicat
 
 - [Nextflow](https://www.nextflow.io/) `>=25.04.0`
 - Webin account registered at https://www.ebi.ac.uk/ena/submit/webin/login
-- Raw reads used to assemble contigs submitted to [INSDC](https://www.insdc.org/) and associated accessions available
+- For metagenomic assemblies submission the raw reads used to generate the assemblies have to be submitted to INSDC/ENA to obtain the corresponding run accessions. You can use the pipeline in mode `reads` to perform this.
+- For MAGs or bins submission the raw reads only or raw reads and metagenomic assemblies used to generate the MAGs/bins have to be submitted to INSDC/ENA to obtain the corresponding run or assembly accessions. You can use the pipeline in mode `reads` or `metagenomic_assemblies` to perform this.
+- For raw reads submission it is required to register source BioSamples and obtain the sample accessions.
 
-Setup your environment secrets before running the pipeline:
+Setup Webin credentials as Nextflow secrets before running the pipeline:
 
 `nextflow secrets set ENA_WEBIN "Webin-XXX"`
 
