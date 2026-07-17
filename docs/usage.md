@@ -9,26 +9,12 @@
 - [Introduction](#introduction)
 - [Before you start](#before-you-start)
 - [Submission study](#submission-study)
-- [`reads` mode](#reads-mode)
-  - [Prerequisites](#prerequisites)
-  - [Samplesheet input](#samplesheet-input)
-  - [Running the pipeline in `reads` mode](#running-the-pipeline-in-reads-mode)
-  - [Limitations](#limitations)
-- [`metagenomic_assemblies` mode](#metagenomic_assemblies-mode)
-  - [Prerequisites](#prerequisites-1)
-  - [Samplesheet input](#samplesheet-input-1)
-  - [Running the pipeline in `metagenomic_assemblies` mode](#running-the-pipeline-in-metagenomic_assemblies-mode)
-  - [Limitations](#limitations-1)
-- [`mags` and `bins` modes](#mags-and-bins-modes)
-  - [Prerequisites](#prerequisites-2)
-  - [Samplesheet input](#samplesheet-input-2)
-  - [Database preparation (`CheckM2` and `CAT_pack`)](#database-preparation-checkm2-and-cat_pack)
-  - [Running the pipeline in `mags` and `bins` modes](#running-the-pipeline-in-mags-and-bins-modes)
-  - [Limitations](#limitations-2)
 - [Data privacy](#data-privacy)
+- [`reads` mode](#reads-mode)
+- [`metagenomic_assemblies` mode](#metagenomic_assemblies-mode)
+- [`mags` and `bins` modes](#mags-and-bins-modes)
+- [Scalability](#scalability)
 - [Running the pipeline](#running-the-pipeline)
-  - [Updating the pipeline](#updating-the-pipeline)
-  - [Reproducibility](#reproducibility)
 - [Core Nextflow arguments](#core-nextflow-arguments)
 - [Custom configuration](#custom-configuration)
 - [Running in the background](#running-in-the-background)
@@ -38,13 +24,14 @@
 
 `nf-core/seqsubmit` is a Nextflow pipeline for submitting sequence data to ENA.
 
-The pipeline supports of the following data types, selected via `--mode` parameter:
+The pipeline supports the following data types, selected via the `--mode` parameter:
 
 - `reads` — raw sequencing reads
 - `metagenomic_assemblies` — metagenomic assemblies
-- `mags` / `bins` — metagenome-assembled genomes (MAGs) or metagenomic bins
+- `mags` — metagenome-assembled genomes (MAGs)
+- `bins` — metagenomic bins
 
-Each mode has its own samplesheet structure, prerequisites, and limitations — see the dedicated section for the mode you want to use below. The [Before you start](#before-you-start), [Submission study](#submission-study), [Running the pipeline](#running-the-pipeline), and [Data privacy](#data-privacy) sections apply to all modes.
+Each mode has its own samplesheet structure, prerequisites, and limitations — see the dedicated section for the mode you want to use below.
 
 ## Before you start
 
@@ -60,9 +47,11 @@ Before running the pipeline in any mode, make sure that:
   nextflow secrets set ENA_WEBIN_PASSWORD "XXX"
   ```
 
-- You prepared either study accession or study metadata file to set a submission study to assosiate the submission with. See [Submission study](#submission-study) section below for details.
+  Make sure to replace the values above with your own credentials.
 
-Each mode also has additional prerequisites — see its own "Prerequisites" subsection below.
+- Provide either a study accession or a study registration metadata file for the study the submission will be associated with. See the [Submission study](#submission-study) section below for details.
+
+- Depending on the chosen mode, samples, reads, or metagenomic assemblies must be pre-submitted to ENA to obtain the corresponding accessions, which you then reference in your submission. Refer to the relevant mode section below for details.
 
 ## Submission study
 
@@ -126,13 +115,30 @@ study-soil-2026	Soil microbiome study	Survey of soil microbiota
 | `existing_study_type` | No       | ENA study type (e.g. `Metagenomics`, `Other`).                               |
 | `new_study_type`      | No       | Custom study type. Only used when `existing_study_type` is set to `Other`.   |
 
+## Data privacy
+
+You can reference private ENA data if you have access to it via your Webin account (it was submitted previously under your credentials). To use private data accessions in your submission metadata, specify the `--is_private` flag. The pipeline will then use your provided Webin credentials to fetch the required metadata.
+
+You can also control the privacy of your submitted data:
+
+- If you provide an existing study via `--submission_study`, your submission will inherit the same privacy status as that study.
+- If no study is provided, the pipeline will register a new one for you. To keep this new study private, you must specify a release date using `--release_date YYYY-MM-DD` (up to 2 years from the current date).
+
+| Example                                                                                                                                                               | Source Data | Submission Visibility | Required Arguments                       | Result                                                |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | --------------------- | ---------------------------------------- | ----------------------------------------------------- |
+| Assemblies generated from public reads. Assemblies should be public immediately after submission                                                                      | public      | public                | –                                        | SUCCESS                                               |
+| Assemblies generated from public reads. Assemblies should remain private until 1 July 2028 submission                                                                 | public      | private               | `--release_date 2028-07-01`              | SUCCESS                                               |
+| Bins generated from private reads and assemblies. Bins should be public after submission. User **has access** to the reads and assemblies via Webin account           | private     | public                | `--is_private`                           | SUCCESS                                               |
+| Bins generated from private reads and assemblies. Bins should remain private until 1 July 2028. User **has access** via Webin account                                 | private     | private               | `--is_private --release_date 2028-07-01` | SUCCESS                                               |
+| MAGs generated from private reads and assemblies. MAGs should be public after submission. User **does not have access** to the reads and assemblies via Webin account | private     | public                | –                                        | ERROR (submission can only reference accessible data) |
+
 ## `reads` mode
 
 ### Prerequisites
 
 In addition to the general [prerequisites](#before-you-start), for `reads` mode:
 
-- You need to register the source BioSamples and obtain the sample accessions as described in [ENA documentation](https://ena-docs.readthedocs.io/en/latest/submit/samples.html). Those have to be provided in `sample_accession` column of the samplesheet.
+- You need to register the source BioSamples and obtain the sample accessions as described in the [ENA documentation](https://ena-docs.readthedocs.io/en/latest/submit/samples.html). These accessions must be provided in the `sample_accession` column of the samplesheet.
 
 ### Samplesheet input
 
@@ -164,7 +170,7 @@ pacbio_run_001,SAMEA7654321,data/pacbio_reads.fastq.gz,,PACBIO_SMRT,PacBio Seque
 | `library_name`      | No       | Descriptive library name (optional).                                                                                                                                                                                                                                                                                                                            |
 | `description`       | No       | Free-text description of the experiment (optional).                                                                                                                                                                                                                                                                                                             |
 
-### Running the pipeline in `reads` mode
+### `reads` parameters and example
 
 `reads` mode does not add any parameters beyond the [common parameters](#running-the-pipeline).
 
@@ -193,7 +199,7 @@ nextflow run nf-core/seqsubmit \
 
 In addition to the general [prerequisites](#before-you-start), for `metagenomic_assemblies` mode:
 
-- The raw reads used to generate the assemblies have have to be submitted to INSDC/ENA to obtain the corresponding run accessions. Refer to the [ENA documentation](https://ena-docs.readthedocs.io/en/latest/submit/reads.html) for details. You can use `seqsubmit` in `reads` mode to do this. Assigned run accessions have to be provided in `run_accession` column of the samplesheet.
+- The raw reads used to generate the assemblies have to be submitted to INSDC/ENA to obtain the corresponding run accessions. Refer to the [ENA documentation](https://ena-docs.readthedocs.io/en/latest/submit/reads.html) for details. You can use `seqsubmit` in `reads` mode to do this. Assigned run accessions must be provided in the `run_accession` column of the samplesheet.
 
 ### Samplesheet input
 
@@ -221,9 +227,9 @@ assembly_002,data/assembly_002.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 | `assembler`         | Yes         | Name of the assembler software used to generate the assembly.                                                                                         |
 | `assembler_version` | Yes         | Version of the assembler software used to generate the assembly.                                                                                      |
 
-Provide either read files (`fastq_1`, optionally `fastq_2`) or a `coverage` value for each row. If `coverage` is missing and reads are provided, the workflow calculates average coverage with `coverm`. See the [Methods documentation](docs/methods.md) for more information on how coverage is calculated.
+Provide either read files (`fastq_1`, optionally `fastq_2`) or a `coverage` value for each row. If `coverage` is missing and reads are provided, the workflow calculates average coverage with CoverM. See the [Methods documentation](docs/methods.md) for more information on how coverage is calculated.
 
-### Running the pipeline in `metagenomic_assemblies` mode
+### `metagenomic_assemblies` parameters and example
 
 In addition to the [common parameters](#running-the-pipeline):
 
@@ -267,7 +273,7 @@ nextflow run nf-core/seqsubmit \
 
 - **Single-contig assemblies**: Assemblies that consist of only one contig cannot be uploaded through this pipeline. ENA classifies these as "chromosomal assemblies", which follow a different submission procedure with different metadata requirements. If you have a single-contig assembly to submit, please contact [ENA support](https://www.ebi.ac.uk/ena/browser/support) for guidance.
 
-- **Coverage calculation from long reads**: `coverage` calculation via `coverm` has only been tested and validated with short reads (e.g. Illumina). It has not been tested with long reads (PacBio, Nanopore). Exercise caution when processing data generated from long reads, as issues may occur.
+- **Coverage calculation from long reads**: `coverage` calculation via CoverM has only been tested and validated with short reads (e.g. Illumina). It has not been tested with long reads (PacBio, Nanopore). Exercise caution when processing data generated from long reads, as issues may occur.
 
 ## `mags` and `bins` modes
 
@@ -275,7 +281,7 @@ nextflow run nf-core/seqsubmit \
 
 In addition to the general [prerequisites](#before-you-start), for `mags` or `bins` mode:
 
-- The raw reads only, or raw reads and metagenomic assemblies, used to generate the MAGs/bins have to be submitted to INSDC/ENA to obtain the corresponding run or assembly accessions. Refer to the [ENA documentation](https://ena-docs.readthedocs.io/en/latest/submit/reads.html) for details. You can use the pipeline in `reads` and `metagenomic_assemblies` mode to do this. Assigned run or assembly accessions have to be provided in `accession` column of the samplesheet.
+- Either the raw reads alone, or the raw reads together with the metagenomic assemblies, used to generate the MAGs/bins must be submitted to INSDC/ENA to obtain the corresponding run or assembly accessions. Refer to the [ENA documentation](https://ena-docs.readthedocs.io/en/latest/submit/reads.html) for details. You can use the pipeline in `reads` and `metagenomic_assemblies` mode to do this. Assigned run or assembly accessions must be provided in the `accession` column of the samplesheet.
 
 ### Samplesheet input
 
@@ -318,35 +324,35 @@ mag_001,data/mag_001.fasta.gz,SRR24458089,,,SPAdes 3.15.5,MetaBAT2 2.15,default,
 
 If `genome_coverage`, `stats_generation_software`, `completeness`, `contamination`, `RNA_presence`, or `NCBI_lineage` are missing, the workflow can calculate or infer them when the required inputs are available. See the [Methods documentation](docs/methods.md) for more information on how metadata statistics are obtained.
 
-### Database preparation (`CheckM2` and `CAT_pack`)
+### Preparing the CheckM2 and CAT_pack databases
 
-`mags` and `bins` submission modes use `CheckM2` and `CAT_pack` tools that require specialized databases for completeness/contamination assessment and taxonomy assignment.
+`mags` and `bins` submission modes use CheckM2 and CAT_pack tools that require specialized databases for completeness/contamination assessment and taxonomy assignment.
 
 You can either provide pre-existing databases or let the pipeline prepare them during execution.
 
-As databases preparation can take significant time, we strongly recommend downloading them locally and storing them in a local cache folder for reuse across runs.
-In particular the `CAT_pack` database is extremely large and may take a long time to download and compute.
+As database preparation can take significant time, we strongly recommend downloading them locally and storing them in a local cache folder for reuse across runs.
+In particular, the CAT_pack database is extremely large and may take a long time to download and compute.
 
-- `CheckM2`:
-  - provide the path to local database with `--checkm2_db`, otherwise the pipeline downloads version specified with `--checkm2_db_download_id` (by default Zenodo accession `14897628`).
+- CheckM2:
+  - provide the path to a local database with `--checkm2_db`, otherwise the pipeline downloads the version specified with `--checkm2_db_download_id` (by default Zenodo accession `14897628`).
 
-- `CAT_pack`:
-  - provide the path to local database (containing `tax/` and `db/` folders or `tar.gz` archive) with `--cat_db`, otherwise the pipeline constructs version specified with `--cat_db_download_id` (by default `nr`).
+- CAT_pack:
+  - provide the path to a local database (containing `tax/` and `db/` folders or a `tar.gz` archive) with `--cat_db`, otherwise the pipeline constructs the version specified with `--cat_db_download_id` (by default `nr`).
 
-See [CAT_pack documentation](https://github.com/MGXlab/CAT_pack) and [CheckM2 documentation](https://github.com/chklovski/CheckM2) for more details on usage and creation of databases.
+See the [CAT_pack documentation](https://github.com/MGXlab/CAT_pack) and [CheckM2 documentation](https://github.com/chklovski/CheckM2) for more details on usage and creation of databases.
 
 Databases created/downloaded by the pipeline are published under:
-`<output_dir>/databases/`. In the subsequent pipeline runs you can reuse them using `--cat_db <output_dir>/databases/cat_pack/` and `--cat_db <output_dir>/databases/checkm2/`.
+`<output_dir>/databases/`. In subsequent pipeline runs you can reuse them using `--cat_db <output_dir>/databases/cat_pack/` and `--checkm2_db <output_dir>/databases/checkm2/`.
 
-### Running the pipeline in `mags` and `bins` modes
+### `mags` and `bins` parameters and example
 
 In addition to the [common parameters](#running-the-pipeline):
 
-| Parameter      | Required | Description                                                                                                                                      |
-| -------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `--upload_tpa` | No       | Mark assemblies as third party assemblies when required. Default: `false`.                                                                       |
-| `--checkm2_db` | No       | Path to a local `CheckM2` database. If omitted, downloads the version set by `--checkm2_db_download_id`. Default: `14897628` (Zenodo accession). |
-| `--cat_db`     | No       | Path to a local `CAT_pack` database. If omitted, constructs the version set by `--cat_db_download_id`. Default: `nr`.                            |
+| Parameter      | Required | Description                                                                                                                                    |
+| -------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--upload_tpa` | No       | Mark assemblies as third party assemblies when required. Default: `false`.                                                                     |
+| `--checkm2_db` | No       | Path to a local CheckM2 database. If omitted, downloads the version set by `--checkm2_db_download_id`. Default: `14897628` (Zenodo accession). |
+| `--cat_db`     | No       | Path to a local CAT_pack database. If omitted, constructs the version set by `--cat_db_download_id`. Default: `nr`.                            |
 
 Example `mags` mode upload to TEST server, run command with docker:
 
@@ -374,24 +380,15 @@ nextflow run nf-core/seqsubmit \
 
 - **Single-contig MAGs/bins**: MAGs/bins that consist of only one contig cannot be uploaded through this pipeline. ENA classifies these as "chromosomal assemblies", which follow a different submission procedure with different metadata requirements. If you have a single-contig MAG/bin to submit, please contact [ENA support](https://www.ebi.ac.uk/ena/browser/support) for guidance.
 
-- **Coverage calculation from long reads**: `genome_coverage` calculation via `coverm` has only been tested and validated with short reads (e.g. Illumina). It has not been tested with long reads (PacBio, Nanopore). Exercise caution when processing data generated from long reads, as issues may occur.
+- **Coverage calculation from long reads**: `genome_coverage` calculation via CoverM has only been tested and validated with short reads (e.g. Illumina). It has not been tested with long reads (PacBio, Nanopore). Exercise caution when processing data generated from long reads, as issues may occur.
 
-## Data privacy
+## Scalability
 
-You can reference private ENA data if you have access to it via your Webin account (it was submitted previously under your credentials). To use private data accessions in your submission metadata, specify the `--is_private` flag. The pipeline will then use your provided Webin credentials to fetch the required metadata.
+Some processes in this pipeline are resource intensive — in particular coverage calculation (CoverM), quality assessment (CheckM2), and taxonomic classification of MAGs/bins (BAT). For real-world data, these steps should be run on an HPC cluster or another compute environment with sufficient CPU, memory, and job scheduling capacity, rather than on a single local machine.
 
-You can also control the privacy of your submitted data:
+Depending on the resources available on your machine or cluster, you will likely need to adapt the Nextflow configuration to limit the maximum number of concurrently running jobs and other resource settings (e.g. `max_cpus`, `max_memory`, `max_time`, or `executor.queueSize` in a custom config), so that the pipeline does not try to claim more resources than are actually available. See the [nf-core configuration documentation](https://nf-co.re/docs/usage/getting_started/configuration) for guidance on writing a custom config for your infrastructure.
 
-- If you provide an existing study via `--submission_study`, your submission will inherit the same privacy status as that study.
-- If no study is provided, the pipeline will register a new one for you. To keep this new study private, you must specify a release date using `--release_date YYYY-MM-DD` (up to 2 years from the current date).
-
-| Example                                                                                                                                                               | Source Data | Submission Visibility | Required Arguments                       | Result                                                |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | --------------------- | ---------------------------------------- | ----------------------------------------------------- |
-| Assemblies generated from public reads. Assemblies should be public immediately after submission                                                                      | public      | public                | –                                        | SUCCESS                                               |
-| Assemblies generated from public reads. Assemblies should remain private until 1 July 2028 submission                                                                 | public      | private               | `--release_date 2028-07-01`              | SUCCESS                                               |
-| Bins generated from private reads and assemblies. Bins should be public after submission. User **has access** to the reads and assemblies via Webin account           | private     | public                | `--is_private`                           | SUCCESS                                               |
-| Bins generated from private reads and assemblies. Bins should remain private until 1 July 2028. User **has access** via Webin account                                 | private     | private               | `--is_private --release_date 2028-07-01` | SUCCESS                                               |
-| MAGs generated from private reads and assemblies. MAGs should be public after submission. User **does not have access** to the reads and assemblies via Webin account | private     | public                | –                                        | ERROR (submission can only reference accessible data) |
+When submitting a large number of records, be aware that ENA recommends limiting submissions to 5000 per day to avoid overfilling their processing queue. If you need to submit more than this, consider splitting your samplesheet and spreading the submission across several days.
 
 ## Running the pipeline
 
@@ -421,7 +418,7 @@ Parameters common to all modes:
 | `--is_private`                             | No           | Use if you are referencing private data accessions in your submission. Default: `false`.                             |
 | `--release_date`                           | No           | Use if you want to keep your data private after submission until a particular date.                                  |
 
-Each mode also has additional parameters and example commands — see its own "Running the pipeline in ... mode" subsection above.
+Each mode also has additional parameters and example commands — see its own "`<mode>` parameters and example" subsection above.
 
 If you wish to repeatedly use the same parameters for multiple runs, rather than specifying each flag in the command, you can specify these in a params file.
 
