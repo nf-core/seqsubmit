@@ -10,6 +10,7 @@
 - [Before you start](#before-you-start)
 - [Submission study](#submission-study)
 - [Data privacy](#data-privacy)
+- [Third party assemblies (TPA)](#third-party-assemblies-tpa)
 - [`reads` mode](#reads-mode)
 - [`metagenomic_assemblies` mode](#metagenomic_assemblies-mode)
 - [`mags` and `bins` modes](#mags-and-bins-modes)
@@ -132,6 +133,14 @@ You can also control the privacy of your submitted data:
 | Bins generated from private reads and assemblies. Bins should remain private until 1 July 2028. User **has access** via Webin account                                 | private     | private               | `--is_private --release_date 2028-07-01` | SUCCESS                                               |
 | MAGs generated from private reads and assemblies. MAGs should be public after submission. User **does not have access** to the reads and assemblies via Webin account | private     | public                | –                                        | ERROR (submission can only reference accessible data) |
 
+## Third party assemblies (TPA)
+
+A Third PArty (TPA) Assembly record is an assembly or reassembly built from primary sequence data that has already been submitted to an INSDC database (ENA, GenBank, or DDBJ), rather than newly generated sequence data. TPA records must be built entirely from publicly available accessions or public sequencing reads — they cannot incorporate proprietary or unpublished data, and any newly generated sequence they contain must first be released as a primary submission in its own right.
+
+If you use `metagenomic_assemblies`, `mags`, or `bins` mode to submit data assembled from public data you did not generate yourself, use `--upload_tpa` to flag the submission as a TPA.
+
+See [ENA's data policies](https://www.ebi.ac.uk/ena/browser/about/policies) for further guidance on when a TPA designation applies to your submission.
+
 ## `reads` mode
 
 ### Prerequisites
@@ -233,9 +242,9 @@ Provide either read files (`fastq_1`, optionally `fastq_2`) or a `coverage` valu
 
 In addition to the [common parameters](#running-the-pipeline):
 
-| Parameter      | Required | Description                                                                |
-| -------------- | -------- | -------------------------------------------------------------------------- |
-| `--upload_tpa` | No       | Mark assemblies as third party assemblies when required. Default: `false`. |
+| Parameter      | Required | Description                                                                                                     |
+| -------------- | -------- | --------------------------------------------------------------------------------------------------------------- |
+| `--upload_tpa` | No       | Mark assemblies as [third party assemblies (TPA)](#third-party-assemblies-tpa) when required. Default: `false`. |
 
 Example `metagenomic_assemblies` mode upload to TEST server, run command with docker:
 
@@ -350,7 +359,7 @@ In addition to the [common parameters](#running-the-pipeline):
 
 | Parameter      | Required | Description                                                                                                                                    |
 | -------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--upload_tpa` | No       | Mark assemblies as third party assemblies when required. Default: `false`.                                                                     |
+| `--upload_tpa` | No       | Mark assemblies as [third party assemblies (TPA)](#third-party-assemblies-tpa) when required. Default: `false`.                                |
 | `--checkm2_db` | No       | Path to a local CheckM2 database. If omitted, downloads the version set by `--checkm2_db_download_id`. Default: `14897628` (Zenodo accession). |
 | `--cat_db`     | No       | Path to a local CAT_pack database. If omitted, constructs the version set by `--cat_db_download_id`. Default: `nr`.                            |
 
