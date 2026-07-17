@@ -19,70 +19,56 @@
 
 [![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23seqsubmit-4A154B?labelColor=000000&logo=slack)](https://nfcore.slack.com/channels/seqsubmit)[![Follow on Bluesky](https://img.shields.io/badge/bluesky-%40nf__core-1185fe?labelColor=000000&logo=bluesky)](https://bsky.app/profile/nf-co.re)[![Follow on Mastodon](https://img.shields.io/badge/mastodon-nf__core-6364ff?labelColor=FFFFFF&logo=mastodon)](https://mstdn.science/@nf_core)[![Watch on YouTube](http://img.shields.io/badge/youtube-nf--core-FF0000?labelColor=000000&logo=youtube)](https://www.youtube.com/c/nf-core)
 
-## Table of Contents
-
-- [Introduction](#introduction)
-- [Requirements](#requirements)
-- [Input samplesheets](#input-samplesheets)
-- [Usage](#usage)
-  - [Submission study](#submission-study)
-  - [Data privacy](#data-privacy)
-  - [Database setup (`CheckM2` and `CAT_pack`)](#database-setup-checkm2-and-cat_pack)
-  - [Required parameters:](#required-parameters)
-  - [Optional parameters:](#optional-parameters)
-- [Pipeline output](#pipeline-output)
-- [Scalability](#scalability)
-- [Limitations](#limitations)
-- [Credits](#credits)
-- [Contributions and Support](#contributions-and-support)
-- [Citations](#citations)
-
 ## Introduction
 
-**nf-core/seqsubmit** is a Nextflow pipeline for submitting sequence data to [ENA](https://www.ebi.ac.uk/ena/browser/home).
-Currently, the pipeline supports four submission modes, each routed to a dedicated workflow and requiring its own input samplesheet structure:
-
-- `mags` for Metagenome Assembled Genomes (MAGs) submission with `GENOMESUBMIT` workflow
-- `bins` for bins submission with `GENOMESUBMIT` workflow
-- `metagenomic_assemblies` for assembly submission with `ASSEMBLYSUBMIT` workflow
-- `reads` for raw sequencing reads submission with `READSUBMIT` workflow
-
 ![seqsubmit workflow diagram](assets/seqsubmit_schema.png)
+
+**nf-core/seqsubmit** is a Nextflow pipeline for submitting sequence data to [ENA](https://www.ebi.ac.uk/ena/browser/home).
+The pipeline currently supports the following submission modes, each routed to a dedicated workflow:
+
+- `reads` — raw sequencing reads submission via the `READSUBMIT` workflow (pink)
+- `metagenomic_assemblies` — assembly submission via the `ASSEMBLYSUBMIT` workflow (green)
+- `mags` — metagenome-assembled genomes (MAGs) submission via the `GENOMESUBMIT` workflow (blue)
+- `bins` — bins submission via the `GENOMESUBMIT` workflow (blue)
+
+<!-- TODO add schema description here -->
+
+Each workflow has its own samplesheet structure, prerequisites, and limitations — they are briefly described below. See the [usage documentation](https://nf-co.re/seqsubmit/usage) for more detailed explanations.
 
 ## Requirements
 
 - [Nextflow](https://www.nextflow.io/) `>=25.04.0`
-- Webin account registered at https://www.ebi.ac.uk/ena/submit/webin/login
-- For metagenomic assemblies submission the raw reads used to generate the assemblies have to be submitted to INSDC/ENA to obtain the corresponding run accessions. You can use the pipeline in mode `reads` to perform this.
-- For MAGs or bins submission the raw reads only or raw reads and metagenomic assemblies used to generate the MAGs/bins have to be submitted to INSDC/ENA to obtain the corresponding run or assembly accessions. You can use the pipeline in mode `reads` or `metagenomic_assemblies` to perform this.
-- For raw reads submission it is required to register source BioSamples and obtain the sample accessions.
+- A Webin account registered at <https://www.ebi.ac.uk/ena/submit/webin/login>
 
-Setup Webin credentials as Nextflow secrets before running the pipeline:
+  Set your Webin credentials as Nextflow secrets:
 
-`nextflow secrets set ENA_WEBIN "Webin-XXX"`
+  ```bash
+  nextflow secrets set ENA_WEBIN "Webin-XXX"
+  nextflow secrets set ENA_WEBIN_PASSWORD "XXX"
+  ```
 
-`nextflow secrets set ENA_WEBIN_PASSWORD "XXX"`
+  Make sure to replace the values above with your own credentials.
 
-Make sure you update commands above with your authorised credentials.
+- Provide either a study accession or a study registration metadata file for the study the submission will be associated with. See the [Submission study](docs/usage.md#submission-study) section of the usage documentation for details.
+
+- Depending on the chosen mode, samples, reads, or metagenomic assemblies must be pre-submitted to ENA to obtain the corresponding accessions, which you then reference in your submission. Refer to the relevant mode section in the [usage documentation](https://nf-co.re/seqsubmit/usage) for details.
 
 ## Input samplesheets
 
-### `mags` and `bins` modes
+### `reads` mode
 
-The input must follow [assets/schema_input_genome.json](assets/schema_input_genome.json). See the [corresponding samplesheet section](docs/usage.md#mags-and-bins-modes-genomesubmit) of the usage documentation for the full list of required and optional columns.
-
-Example `samplesheet_genomes.csv`:
+Example:
 
 ```csv
-sample,fasta,accession,fastq_1,fastq_2,assembly_software,binning_software,binning_parameters,stats_generation_software,completeness,contamination,genome_coverage,metagenome,co-assembly,broad_environment,local_environment,environmental_medium,RNA_presence,NCBI_lineage
-lachnospira_eligens,data/bin_lachnospira_eligens.fa.gz,SRR24458089,,,spades_v3.15.5,metabat2_v2.6,default,CheckM2_v1.0.1,61.0,0.21,32.07,sediment metagenome,No,marine,cable_bacteria,marine_sediment,No,d__Bacteria;p__Proteobacteria;s__unclassified_Proteobacteria
+sample,sample_accession,fastq_1,fastq_2,platform,instrument,library_source,library_selection,library_strategy,insert_size,library_name,description
+illumina_run_001,SAMEA1234567,data/reads_R1.fastq.gz,data/reads_R2.fastq.gz,ILLUMINA,Illumina HiSeq 2000,GENOMIC,RANDOM,WGS,500,HiSeq_library_001,Illumina sequencing of sample XYZ
 ```
+
+See the [`reads` mode section](docs/usage.md#samplesheet-input) of the usage documentation for more details.
 
 ### `metagenomic_assemblies` mode
 
-The input must follow [assets/schema_input_assembly.json](assets/schema_input_assembly.json). See the [corresponding samplesheet section](docs/usage.md#metagenomic_assemblies-mode-assemblysubmit) of the usage documentation for more details.
-
-Example `samplesheet_assembly.csv`:
+Example:
 
 ```csv
 sample,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version
@@ -90,105 +76,36 @@ assembly_1,data/contigs_1.fasta.gz,data/reads_1.fastq.gz,data/reads_2.fastq.gz,,
 assembly_2,data/contigs_2.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 ```
 
-### `reads` mode
+See the [`metagenomic_assemblies` mode section](docs/usage.md#samplesheet-input-1) of the usage documentation for more details.
 
-The input must follow [assets/schema_input_reads.json](assets/schema_input_reads.json). See the [corresponding samplesheet section](docs/usage.md#reads-mode-readsubmit) of the usage documentation for more details.
+### `mags` and `bins` modes
 
-Example `samplesheet_reads.csv`:
+Example:
 
 ```csv
-sample,sample_accession,fastq_1,fastq_2,platform,instrument,library_source,library_selection,library_strategy,insert_size,library_name,description
-illumina_run_001,SAMEA1234567,data/reads_R1.fastq.gz,data/reads_R2.fastq.gz,ILLUMINA,Illumina HiSeq 2000,GENOMIC,RANDOM,WGS,500,HiSeq_library_001,Illumina sequencing of sample XYZ
+sample,fasta,accession,fastq_1,fastq_2,assembly_software,binning_software,binning_parameters,stats_generation_software,completeness,contamination,genome_coverage,metagenome,co-assembly,broad_environment,local_environment,environmental_medium,RNA_presence,NCBI_lineage
+lachnospira_eligens,data/bin_lachnospira_eligens.fa.gz,SRR24458089,,,spades_v3.15.5,metabat2_v2.6,default,CheckM2_v1.0.1,61.0,0.21,32.07,sediment metagenome,No,marine,cable_bacteria,marine_sediment,No,d__Bacteria;p__Proteobacteria;s__unclassified_Proteobacteria
 ```
+
+See the [`mags` and `bins` modes section](docs/usage.md#samplesheet-input-2) of the usage documentation for the full list of required and optional columns.
 
 ## Usage
 
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/get_started/environment_setup/overview) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/get_started/run-your-first-pipeline) with `-profile test` before running the workflow on actual data.
 
-### Submission study
+### Running the pipeline
 
-All data submitted through this pipeline must be associated with an ENA study (project). You can either pass an accession of your existing study via `--submission_study`or provide a metadata file via `--study_metadata` and the pipeline will register the study with ENA before submitting your data. See the [usage documentation](docs/usage.md#submission-study) for more details.
-
-### Data privacy
-
-The pipeline supports private submissions. See the [usage documentation](docs/usage.md#data-privacy) for more details.
-
-### Database setup (`CheckM2` and `CAT_pack`)
-
-The `mags`/`bins` workflow requires databases for completeness/contamination estimation and taxonomy assignment. See [Usage documentation](usage.md) for more details.
-
-### Required parameters:
-
-| Parameter                                  | Description                                                                                                       |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| `--mode`                                   | Type of the data to be submitted. Options: `[mags, bins, metagenomic_assemblies, reads]`                          |
-| `--input`                                  | Path to the samplesheet describing the data to be submitted                                                       |
-| `--outdir`                                 | Path to the output directory for pipeline results                                                                 |
-| `--submission_study` OR `--study_metadata` | ENA study accession (PRJ/ERP) to submit the data to OR metadata file in JSON/TSV/CSV format to register new study |
-| `--centre_name`                            | Name of the submitter's organisation                                                                              |
-
-### Optional parameters:
-
-| Parameter         | Description                                                                                |
-| ----------------- | ------------------------------------------------------------------------------------------ |
-| `--upload_tpa`    | Flag to control the type of assembly study (third party assembly or not). Default: false   |
-| `--test_upload`   | Upload to TEST ENA server instead of LIVE. Default: true                                   |
-| `--webincli_mode` | Choose Webin-CLI mode: `submit` or `validate`. Default: `submit`                           |
-| `--is_private`    | Use that flag if you are referring private data accessions in your submission              |
-| `--release_date`  | Use that flag if you want to keep your data private after submission until particular date |
-
-General command template:
+Each mode also has its own additional parameters and example commands — see the [usage documentation](https://nf-co.re/seqsubmit/usage) for details. General command template:
 
 ```bash
 nextflow run nf-core/seqsubmit \
-   -profile <docker/singularity/...> \
-   --mode <mags|bins|metagenomic_assemblies|reads> \
-   --input <samplesheet.csv> \
-   --centre_name <your_centre> \
-   --submission_study <your_study> \
-   --outdir <outdir>
-```
-
-Test run (submission to the ENA TEST server) in `mags` mode:
-
-```bash
-nextflow run nf-core/seqsubmit \
-   -profile docker \
-   --mode mags \
-   --input assets/samplesheet_genomes.csv \
-   --submission_study <your_study> \
-   --centre_name TEST_CENTER \
-   --webincli_mode submit \
-   --test_upload true \
-   --outdir results/validate_mags
-```
-
-Test run (submission to the ENA TEST server) in `metagenomic_assemblies` mode:
-
-```bash
-nextflow run nf-core/seqsubmit \
-   -profile docker \
-   --mode metagenomic_assemblies \
-   --input assets/samplesheet_assembly.csv \
-   --submission_study <your_study> \
-   --centre_name TEST_CENTER \
-   --webincli_mode submit \
-   --test_upload true \
-   --outdir results/validate_assemblies
-```
-
-Live submission example:
-
-```bash
-nextflow run nf-core/seqsubmit \
-   -profile docker \
-   --mode metagenomic_assemblies \
-   --input assets/samplesheet_assembly.csv \
-   --submission_study PRJEB98843 \
-   --test_upload false \
-   --webincli_mode submit \
-   --outdir results/live_assembly
+    -profile <docker/singularity/...> \
+    --mode <mags|bins|metagenomic_assemblies|reads> \
+    --input <samplesheet.csv> \
+    --centre_name <your_centre> \
+    --submission_study <your_study> \
+    --outdir <outdir>
 ```
 
 > [!WARNING]
@@ -200,50 +117,13 @@ For more details and further functionality, please refer to the [usage documenta
 
 Key output locations in `--outdir`:
 
-- `mags/` or `bins/`: genome metadata, manifests, and per-sample submission support files
+- `reads/`: per-sample submission receipts and accessions
 - `metagenomic_assemblies/`: assembly metadata CSVs and per-sample coverage files
+- `mags/` or `bins/`: genome metadata, manifests, and per-sample submission support files
 - `multiqc/`: MultiQC summary report
 - `pipeline_info/`: execution reports, trace, DAG, and software versions
 
 For full details, see the [output documentation](https://nf-co.re/seqsubmit/output).
-
-## Scalability
-
-Some processes in this pipeline are resource intensive — in particular coverage calculation (`coverm`), quality assessment (`CheckM2`), and taxonomic classification of MAGs/bins (`BAT`). For real life data these steps should be run on an HPC cluster or another compute environment with sufficient CPU, memory, and job scheduling capacity, rather than on a single local machine.
-
-Depending on the resources available on your machine or cluster, you will likely need to adapt the Nextflow configuration to limit the maximum number of concurrently running jobs and other resource settings (e.g. `max_cpus`, `max_memory`, `max_time`, or `executor.queueSize` in a custom config), so the pipeline doesn't try to claim more resources than are actually available. See the [nf-core configuration documentation](https://nf-co.re/docs/usage/getting_started/configuration) for guidance on writing a custom config for your infrastructure.
-
-When submitting a large number of records, be aware that ENA recommends limiting submissions to 5000 per day to avoid overfilling their processing queue. If you need to submit more than this, consider splitting your samplesheet and spreading the submission across several days.
-
-## Limitations
-
-nf-core/seqsubmit does not yet support the following data types and scenarios, grouped by the mode they affect:
-
-#### `mags` and `bins` modes (`GENOMESUBMIT`)
-
-- **Co-assemblies**: MAGs/bins generated from co-assemblies are not supported. The pipeline currently expects each MAG/bin to be derived from an assembly generated from a single run. Tracked in [issue #61](https://github.com/nf-core/seqsubmit/issues/61).
-
-- **Eukaryotic and viral bins/MAGs**: Submitting eukaryotic or viral genomes that require additional metadata generation is not supported. For such genomes tRNA and rRNA prediction, quality assessment (completeness/contamination estimation) and taxonomy assignment are not implemented. If all the required metadata (`completeness`, `contamination`, `stats_generation_software`, `RNA_presence` and `NCBI_lineage`) is already provided in the samplesheet, eukaryotic and viral bins/MAGs can still be submitted normally. Tracked in [issue #40](https://github.com/nf-core/seqsubmit/issues/40) (eukaryotic) and [issue #63](https://github.com/nf-core/seqsubmit/issues/63) (viral).
-
-- **Submission of a MAG/bin without submitting the assembly or raw reads**: If a MAG/bin cannot be traced back to an assembly accession or a reads accession — i.e. only a sample accession is available — it cannot currently be submitted, since the pipeline relies on that lineage to build the required metadata. Tracked in [issue #87](https://github.com/nf-core/seqsubmit/issues/87).
-
-- **Single-contig MAGs/bins**: MAGs/bins that consist of only one contig cannot be uploaded through this pipeline. ENA classifies these as "chromosomal assemblies", which follow a different submission procedure with different metadata requirements. If you have a single-contig MAG/bin to submit, please contact [ENA support](https://www.ebi.ac.uk/ena/browser/support) for guidance.
-
-- **Coverage calculation from long reads**: `genome_coverage` calculation via `coverm` has only been tested and validated with short reads (e.g. Illumina). It has not been tested with long reads (PacBio, Nanopore). Exercise caution when processing data generated from long reads, as issues may occur.
-
-#### `metagenomic_assemblies` mode (`ASSEMBLYSUBMIT`)
-
-- **Co-assemblies**: Metagenomic co-assemblies are not supported. The pipeline currently expects each assembly to be derived from a single run. Tracked in [issue #61](https://github.com/nf-core/seqsubmit/issues/61), addressed in [PR #66](https://github.com/nf-core/seqsubmit/pull/66).
-
-- **Submission of an assembly without submitting the raw reads**: Assemblies that have no associated reads accession (`run_accession` column in the samplesheet) are not supported, since the pipeline relies on that lineage to build the required metadata. Tracked in [issue #29](https://github.com/nf-core/seqsubmit/issues/29).
-
-- **Single-contig assemblies**: Assemblies that consist of only one contig cannot be uploaded through this pipeline. ENA classifies these as "chromosomal assemblies", which follow a different submission procedure with different metadata requirements. If you have a single-contig assembly to submit, please contact [ENA support](https://www.ebi.ac.uk/ena/browser/support) for guidance.
-
-- **Coverage calculation from long reads**: `coverage` calculation via `coverm` has only been tested and validated with short reads (e.g. Illumina). It has not been tested with long reads (PacBio, Nanopore). Exercise caution when processing data generated from long reads, as issues may occur.
-
-#### `reads` mode (`READSUBMIT`)
-
-- **Reads in non-FASTQ formats**: Only reads provided as FASTQ (`.fastq.gz`) can be submitted. Other formats (e.g. BAM) are not supported as input.
 
 ## Credits
 
