@@ -43,11 +43,11 @@
             }
         },
         "rna_detection_options": {
-            "title": "RNA detection options",
+            "title": "rRNA and tRNA detection options",
             "type": "object",
             "fa_icon": "fas fa-university",
-            "description": "Parameters used to make a decision about presence/absence of RNA in data",
-            "help_text": "ENA requires a boolean value (True/False) defining RNA. Decision of presence/absence of RNA is based on number of rRNA and tRNA. If both values are bigger than their corresponding limits - RNA is present (True), otherwise - not (False).",
+            "description": "Parameters affecting a decision about presence/absence of tRNA and rRNA genes (RNA_presence) in a genome",
+            "help_text": "The value of RNA_presence is based on the number of rRNA and tRNA. If at least 18 tRNAs are detected and 16S, 23S, and 5S rRNA subunits pass the recovery threshold - RNA_presence is True, otherwise - False. The resulting value is a decisive factor affecting MISAG/MIMAG assembly quality classification of a genome.",
             "properties": {
                 "rrna_limit": {
                     "type": "number",
@@ -57,7 +57,7 @@
                 },
                 "trna_limit": {
                     "type": "number",
-                    "description": "Minimum number of tRNA.",
+                    "description": "Minimum number of tRNA genes detected to count tRNA as present. This value is defined by the MISAG/MIMAG standard and must not be modified.",
                     "default": 18,
                     "fa_icon": "fas fa-users-cog"
                 }
