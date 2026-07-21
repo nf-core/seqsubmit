@@ -35,6 +35,8 @@ workflow PIPELINE_INITIALISATION {
     help              // boolean: Display help message and exit
     help_full         // boolean: Show the full help message
     show_hidden       // boolean: Show hidden parameters in the help message
+    submission_study  // val: ENA study accession for all reads in this run (optional).
+    study_metadata    // val: path to study metadata file for study creation (used if no submission_study provided)
 
     main:
 
@@ -113,6 +115,12 @@ workflow PIPELINE_INITIALISATION {
         ch_samplesheet = channel
             .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input_reads.json"))
     }
+
+    // check submission study and metadata presence/absence for REGISTER STUDY
+    if (!submission_study && !study_metadata) {
+        error("Either --submission_study or --study_metadata must be provided")
+    }
+
     emit:
     samplesheet = ch_samplesheet
     versions    = ch_versions

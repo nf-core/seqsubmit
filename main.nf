@@ -55,7 +55,7 @@ workflow NFCORE_SEQSUBMIT {
             params.checkm2_db,
             params.checkm2_db_download_id,
             params.cat_db,
-            params.cat_db_download_id,
+            "nr",                            // NCBI non-redundant protein database identifier
             params.centre_name,
             params.upload_tpa,
             params.test_upload,
@@ -123,7 +123,9 @@ workflow {
         params.mode,
         params.help,
         params.help_full,
-        params.show_hidden
+        params.show_hidden,
+        params.submission_study,
+        params.study_metadata
     )
 
     //

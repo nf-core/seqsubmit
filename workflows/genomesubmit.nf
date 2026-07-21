@@ -59,7 +59,7 @@ workflow GENOMESUBMIT {
     def ch_versions = channel.empty()
     def ch_multiqc_files = channel.empty()
 
-     // --------- Create genomes channel with proper metadata structure
+    // --------- Create genomes channel with proper metadata structure
     genome_fasta_and_reads = ch_samplesheet
         .map { row ->
             def meta = [
@@ -102,19 +102,17 @@ workflow GENOMESUBMIT {
     )
 
     // --------- Genome coverage calculation
-    FASTA_VALIDATION.out.valid_fastas
+    branched_coverage_results = FASTA_VALIDATION.out.valid_fastas
         .branch { meta, _fasta ->
             genome_coverage_ref_input: meta.genome_coverage == null
             genome_coverage_present: true  // Everything else goes here
         }
-    .set { branched_coverage_results }
 
-    branched_coverage_results.genome_coverage_ref_input.join(genome_reads)
+    coverm_input = branched_coverage_results.genome_coverage_ref_input.join(genome_reads)
         .multiMap { meta, fasta, fastq ->
             genome: [ meta, fasta ]
             raw_reads: [ meta, fastq ]
         }
-        .set { coverm_input }
 
     COVERM_GENOME (
         coverm_input.raw_reads,
@@ -138,12 +136,11 @@ workflow GENOMESUBMIT {
         .mix(branched_coverage_results.genome_coverage_present)
 
     // --------- For genomes without RNA_presence info, calculate rRNA and tRNA
-    fasta_updated_with_coverage
+    branched_rna_results = fasta_updated_with_coverage
         .branch { meta, _fasta ->
             rna_prediction_input: meta.RNA_presence == null
             rna_present: true  // Everything else goes here
         }
-    .set { branched_rna_results }
 
     RNA_DETECTION (
         branched_rna_results.rna_prediction_input,
@@ -164,26 +161,16 @@ workflow GENOMESUBMIT {
         .mix(branched_rna_results.rna_present)
 
     // --------- Completeness and contamination calculation
-    fasta_updated_with_rna
+    branched_stats_results = fasta_updated_with_rna
         .branch { meta, _fasta ->
             genome_evaluation_input: meta.completeness == null || meta.contamination == null || meta.stats_generation_software == null
             evaluation_present: true  // Everything else goes here
         }
-    .set { branched_stats_results }
-
-    // build input structures for CheckM2 DB depending on what provided as input
-    def checkm2_db_input = checkm2_db
-        ? channel.of( [['id': 'CHECKM2_DB'], file(checkm2_db)] )
-        : channel.empty()
-
-    def checkm2_db_id_input = (!checkm2_db && checkm2_db_download_id)
-        ? channel.of( [['id': 'CHECKM2_DB_id'], checkm2_db_download_id] )
-        : channel.empty()
 
     GENOME_EVALUATION (
         branched_stats_results.genome_evaluation_input,
-        checkm2_db_input,
-        checkm2_db_id_input
+        checkm2_db,
+        checkm2_db_download_id
     )
 
     // Create a value channel with the version string
@@ -206,12 +193,11 @@ workflow GENOMESUBMIT {
         .mix(branched_stats_results.evaluation_present)
 
     // --------- Taxonomy
-    fasta_updated_with_stats
+    branched_taxonomy_results = fasta_updated_with_stats
         .branch { meta, _fasta ->
             genome_taxonomy_input: meta.NCBI_lineage == null
             taxonomy_present: true  // Everything else goes here
         }
-    .set { branched_taxonomy_results }
 
     // Change extension for all files required taxonomy to .fasta because CATPACK requires suffix as input
     RENAME_FASTA_FOR_CATPACK (
@@ -258,10 +244,7 @@ workflow GENOMESUBMIT {
         'true' // skip_header - we want to keep the header from the first file and skip it for the rest
     )
 
-    // --------- Register study if accession not provided
-    if (!submission_study && !study_metadata) {
-        error("Either --submission_study or --study_metadata must be provided")
-    }
+    // --------- Register study if accession not provided via --submission_study
     def study_accession_ch
     if (submission_study) {
         study_accession_ch = channel.of(submission_study)
@@ -312,7 +295,6 @@ workflow GENOMESUBMIT {
         }
 
     // --------- Upload data to ENA
-
     SUBMIT (
         ch_combined,
         test_upload,
@@ -326,9 +308,7 @@ workflow GENOMESUBMIT {
         'true' // skip_header - we want to keep the header from the first file and skip it for the rest
     )
 
-    //
-    // Collate and save software versions
-    //
+    // --------- Collate and save software versions
     def topic_versions = channel.topic("versions")
         .distinct()
         .branch { entry ->
@@ -355,10 +335,7 @@ workflow GENOMESUBMIT {
             newLine: true
         )
 
-
-    //
-    // MODULE: MultiQC
-    //
+    // --------- MODULE: MultiQC
     ch_multiqc_files = ch_multiqc_files.mix(ch_collated_versions)
     def ch_summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
     def ch_workflow_summary = channel.value(paramsSummaryMultiqc(ch_summary_params))

@@ -77,13 +77,13 @@
                 "type": "string",
                 "pattern": "^\\S+$",
                 "errorMessage": "Assembler must be provided and cannot contain spaces",
-                "description": "Name of the assembler software used to generate the assembly"
+                "description": "Name of the assembler software used to generate the assembly, e.g. MEGAHIT, SPAdes, metaSPAdes, Flye, etc"
             },
             "assembler_version": {
                 "anyOf": [{ "type": "string" }, { "type": "number" }],
                 "pattern": "^\\S+$",
                 "errorMessage": "Assembler version must be provided and cannot contain spaces",
-                "description": "Version of the assembler software used to generate the assembly"
+                "description": "Version of the assembler software used to generate the assembly, e.g 1.0.0"
             }
         },
         "required": ["sample", "fasta", "run_accession", "assembler", "assembler_version"],

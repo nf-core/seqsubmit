@@ -32,7 +32,7 @@ The pipeline supports the following data types, selected via the `--mode` parame
 - `mags` — metagenome-assembled genomes (MAGs)
 - `bins` — metagenomic bins
 
-Each mode has its own samplesheet structure, prerequisites, and limitations — see the dedicated section for the mode you want to use below.
+Each mode has its own samplesheet _structure_, _prerequisites_, and _limitations_ — see the dedicated section for the mode you want to use below.
 
 ## Before you start
 
@@ -52,110 +52,7 @@ Before running the pipeline in any mode, make sure that:
 
 - Provide either a study accession or a study registration metadata file for the study the submission will be associated with. See the [Submission study](#submission-study) section below for details.
 
-<<<<<<< HEAD
-```bash
---input '[path to samplesheet.csv]'
-```
-
-### `mags` and `bins` modes (`GENOMESUBMIT`)
-
-Use this samplesheet structure for MAG and bin submission. The input format follows [assets/schema_input_genome.json](../assets/schema_input_genome.json).
-
-Example:
-
-```csv title="samplesheet_genomes.csv"
-sample,fasta,accession,fastq_1,fastq_2,assembly_software,binning_software,binning_parameters,stats_generation_software,completeness,contamination,genome_coverage,metagenome,co-assembly,broad_environment,local_environment,environmental_medium,RNA_presence,NCBI_lineage
-mag_001,data/mag_001.fasta.gz,SRR24458089,,,SPAdes 3.15.5,MetaBAT2 2.15,default,CheckM2 1.0.1,92.81,1.09,66.04,sediment metagenome,No,marine,cable bacteria,marine sediment,No,d__Bacteria;p__Proteobacteria;s__
-```
-
-> [!IMPORTANT]
-> **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
-
-| Column                      | Description                                                                                                                                                                                                                                                       |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`                    | A unique identifier for this data entry. Must be globally unique within the input dataset.                                                                                                                                                                        |
-| `fasta`                     | Path to MAG/bin contigs in FASTA format compressed with `gzip`. All names of the FASTA files must be unique to prevent pipeline errors.                                                                                                                           |
-| `accession`                 | ENA accession of the run or metagenomic assembly used to generate the MAG/bin.                                                                                                                                                                                    |
-| `fastq_1`                   | Path to the read file in FASTQ format used to generate the source metagenomic assembly. Required if `genome_coverage` is not provided.                                                                                                                            |
-| `fastq_2`                   | Path to the second read file in FASTQ format for paired-end data used to generate the source metagenomic assembly. Leave empty for single-end reads.                                                                                                              |
-| `assembly_software`         | Tool name and version that were used to generate the source metagenomic assembly.                                                                                                                                                                                 |
-| `binning_software`          | Binning tool, including version, that was used to generate the bins.                                                                                                                                                                                              |
-| `binning_parameters`        | Arguments that were used during binning.                                                                                                                                                                                                                          |
-| `stats_generation_software` | Tool, including version, that was used to calculate completeness and contamination.                                                                                                                                                                               |
-| `completeness`              | Genome completeness value.                                                                                                                                                                                                                                        |
-| `contamination`             | Genome contamination value.                                                                                                                                                                                                                                       |
-| `genome_coverage`           | Estimated average sequencing depth across the genome. If the value is missing, it is computed automatically during pipeline execution when reads are provided.                                                                                                    |
-| `metagenome`                | Registered metagenome taxonomic identifier or name that matches an existing ENA taxonomy entry. For more details see https://ena-docs.readthedocs.io/en/latest/faq/taxonomy.html                                                                                  |
-| `co-assembly`               | Whether a co-assembly strategy was used for the initial metagenomic assembly generation. Options: Yes or No.                                                                                                                                                      |
-| `broad_environment`         | Broad ecological context of the sample, for example 'marine biome', 'desert biome'. It is recommended to use subclasses of EnvO 'biome' class (http://purl.obolibrary.org/obo/ENVO_00000428)                                                                      |
-| `local_environment`         | Local environmental context of the sample, for example 'tropical dry broadleaf forest biome', 'marine abyssal zone biome'. It is recommended to use EnvO terms which are of smaller spatial grain than your entry for "broad-scale environmental context".        |
-| `environmental_medium`      | Material displaced by the sample, or the material in which the sample was embedded before sampling, for example 'mucus', 'lake water'. It is recommended to use subclasses of EnvO 'environmental material' class (http://purl.obolibrary.org/obo/ENVO_00010483). |
-| `RNA_presence`              | Presence or absence of the 23S, 16S, and 5S rRNA genes and at least 18 tRNAs. This is used for MISAG/MIMAG assembly quality classification. Options: Yes or No.                                                                                                   |
-| `NCBI_lineage`              | NCBI taxonomy lineage of the genome. Can be composted of either numerical IDs or taxon names separated by ";".                                                                                                                                                    |
-
-> [!NOTE]
-> More information about envioronment tags can be found at checklists [ERC000050](https://www.ebi.ac.uk/ena/browser/view/ERC000050) for bins and [ERC000047](https://www.ebi.ac.uk/ena/browser/view/ERC000047) for MAGs under the field names "broad-scale environmental context", "local environmental context", and "environmental medium".
-
-### `metagenomic_assemblies` mode (`ASSEMBLYSUBMIT`)
-
-Use this samplesheet structure for metagenomic assembly submission. The input format follows [assets/schema_input_assembly.json](../assets/schema_input_assembly.json).
-
-Provide either read files (`fastq_1`, optionally `fastq_2`) or a `coverage` value for each row. If `coverage` is missing and reads are provided, the workflow calculates average coverage automatically.
-
-Example:
-
-```csv title="samplesheet_assembly.csv"
-sample,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version
-assembly_001,data/assembly_001.fasta.gz,data/assembly_001_R1.fastq.gz,data/assembly_001_R2.fastq.gz,,ERR011322,SPAdes,3.15.5
-assembly_002,data/assembly_002.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
-```
-
-> [!IMPORTANT]
-> **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
-
-| Column              | Description                                                                                                                                           |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`            | A unique identifier for this data entry. Must be globally unique within the input dataset.                                                            |
-| `fasta`             | Path to assembly contigs in FASTA format compressed with `gzip`.                                                                                      |
-| `fastq_1`           | Path to the read file in FASTQ format used to generate the metagenomic assembly. Required if `coverage` is not provided.                              |
-| `fastq_2`           | Path to the second read file in FASTQ format for paired-end data used to generate the source metagenomic assembly. Leave empty for single-end reads.  |
-| `coverage`          | Estimated sequencing depth of the assembly. If this value is missing, it is computed automatically during pipeline execution when reads are provided. |
-| `run_accession`     | ENA run accession for the reads used to generate the metagenomic assembly. Reads must already be submitted to ENA.                                    |
-| `assembler`         | Name of the assembler software used to generate the assembly.                                                                                         |
-| `assembler_version` | Version of the assembler software used to generate the assembly.                                                                                      |
-
-An example file is available at [assets/samplesheet_assembly.csv](../assets/samplesheet_assembly.csv).
-
-### `reads` mode (`READSUBMIT`)
-
-Use this samplesheet structure for raw sequencing reads submission. The input format follows [assets/schema_input_reads.json](../assets/schema_input_reads.json).
-
-Example:
-
-```csv title="samplesheet_reads.csv"
-sample,sample_accession,fastq_1,fastq_2,platform,instrument,library_source,library_selection,library_strategy,insert_size,library_name,description
-illumina_run_001,SAMEA1234567,data/reads_R1.fastq.gz,data/reads_R2.fastq.gz,ILLUMINA,Illumina HiSeq 2000,GENOMIC,RANDOM,WGS,500,HiSeq_library_001,Illumina sequencing of sample XYZ
-pacbio_run_001,SAMEA7654321,data/pacbio_reads.fastq.gz,,PACBIO_SMRT,PacBio Sequel,GENOMIC,RANDOM,WGS,,PacBio_library_002,Long-read sequencing
-```
-
-> [!IMPORTANT]
-> **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
-
-| Column              | Type      | Required | Description                                                                                                                                                                                                                                                                                                                                                     |
-| ------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`            | str       | Yes      | Unique identifier of this particular data entry. Used as an experiment name.                                                                                                                                                                                                                                                                                    |
-| `sample_accession`  | str       | Yes      | ENA sample accession (starting with SAMEA) of the sample used to generate raw reads.                                                                                                                                                                                                                                                                            |
-| `fastq_1`           | file path | Yes      | Path to forward reads in FASTQ format (optionally gzipped).                                                                                                                                                                                                                                                                                                     |
-| `fastq_2`           | file path | No       | Path to reverse reads for paired-end data. Leave empty for single-end reads.                                                                                                                                                                                                                                                                                    |
-| `platform`          | str       | Yes      | Sequencing platform. Supported values: `ILLUMINA`, `PACBIO_SMRT`, `OXFORD_NANOPORE`, `ION_TORRENT`, `CAPILLARY`, `DNBSEQ`, `ELEMENT`, `GENAPSYS`, `GENEMIND`, `HELICOS`, `LS454`, `BGISEQ`, `ULTIMA`, `VELA_DIAGNOSTICS`. See [ENA documentation](https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#metadata-validation) for complete list. |
-| `instrument`        | str       | Yes      | Sequencer model, e.g. "Illumina HiSeq 2000", "PacBio Sequel", "MinION".                                                                                                                                                                                                                                                                                         |
-| `library_source`    | str       | Yes      | Library source type. Options: `GENOMIC`, `METAGENOMIC`, `TRANSCRIPTOMIC`, `METAGENOMIC SINGLE CELL`, `TRANSCRIPTOMIC SINGLE CELL`, `SYNTHETIC`, `VIRAL RNA`, `OTHER`.                                                                                                                                                                                           |
-| `library_selection` | str       | Yes      | Library selection method. Options: `RANDOM`, `PCR`, `RANDOM PCR`, `RT-PCR`, `MF`, `cDNA`, `cDNA_randomPriming`, `cDNA_oligo_dT`, `PolyA`, `Inverse rRNA`, `ChIP`, `MNase`, `DNase`, `Hybrid Selection`, etc. See [ENA documentation](https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#metadata-validation) for complete list.              |
-| `library_strategy`  | str       | Yes      | Library strategy. Options: `WGS`, `WGA`, `WXS`, `RNA-Seq`, `miRNA-Seq`, `ncRNA-Seq`, `EST`, `Hi-C`, `ATAC-seq`, `WCS`, `RAD-Seq`, `CLONE`, `AMPLICON`, `POOLCLONE`, `etc`. See [ENA documentation](https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#metadata-validation) for complete list.                                                |
-| `insert_size`       | number    | No       | Fragment/insert size for paired-end reads (e.g., 500 for 500 bp inserts). Leave empty if not applicable.                                                                                                                                                                                                                                                        |
-| `library_name`      | str       | No       | Descriptive library name (optional).                                                                                                                                                                                                                                                                                                                            |
-| `description`       | str       | No       | Free-text description of the experiment (optional).                                                                                                                                                                                                                                                                                                             |
-
+- Depending on the chosen mode, samples, reads, or metagenomic assemblies must be pre-submitted to ENA to obtain the corresponding accessions, which you then reference in your submission. Refer to the relevant mode section below for details.
 
 ## Submission study
 
@@ -449,7 +346,7 @@ In particular, the CAT_pack database is extremely large and may take a long time
   - provide the path to a local database with `--checkm2_db`, otherwise the pipeline downloads the version specified with `--checkm2_db_download_id` (by default Zenodo accession `14897628`).
 
 - CAT_pack:
-  - provide the path to a local database (containing `tax/` and `db/` folders or a `tar.gz` archive) with `--cat_db`, otherwise the pipeline constructs the version specified with `--cat_db_download_id` (by default `nr`).
+  - provide the path to a local database (containing `tax/` and `db/` folders or a `tar.gz` archive) with `--cat_db`, otherwise the pipeline constructs NCBI non-redundant protein database.
 
 See the [CAT_pack documentation](https://github.com/MGXlab/CAT_pack) and [CheckM2 documentation](https://github.com/chklovski/CheckM2) for more details on usage and creation of databases.
 
@@ -464,7 +361,7 @@ In addition to the [common parameters](#running-the-pipeline):
 | -------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | `--upload_tpa` | No       | Mark assemblies as [third party assemblies (TPA)](#third-party-assemblies-tpa) when required. Default: `false`.                                |
 | `--checkm2_db` | No       | Path to a local CheckM2 database. If omitted, downloads the version set by `--checkm2_db_download_id`. Default: `14897628` (Zenodo accession). |
-| `--cat_db`     | No       | Path to a local CAT_pack database. If omitted, constructs the version set by `--cat_db_download_id`. Default: `nr`.                            |
+| `--cat_db`     | No       | Path to a local CAT_pack database. If omitted, constructs the NCBI non-redundant protein database.                                             |
 
 Example `mags` mode upload to TEST server, run command with docker:
 
@@ -530,50 +427,7 @@ Parameters common to all modes:
 | `--is_private`                             | No           | Use if you are referencing private data accessions in your submission. Default: `false`.                             |
 | `--release_date`                           | No           | Use if you want to keep your data private after submission until a particular date.                                  |
 
-<<<<<<< HEAD
-Example `mags` mode upload to TEST server, run command with docker:
-
-```bash
-nextflow run nf-core/seqsubmit \
-    -profile docker \
-    --mode mags \
-    --input assets/samplesheet_genomes.csv \
-    --submission_study <your_study> \
-    --centre_name TEST_CENTER \
-    --webincli_mode submit \
-    --test_upload \
-    --outdir results/validate_mags
-```
-
-Example `metagenomic_assemblies` mode upload to TEST server, run command with docker:
-
-```bash
-nextflow run nf-core/seqsubmit \
-    -profile docker \
-    --mode metagenomic_assemblies \
-    --input assets/samplesheet_assembly.csv \
-    --submission_study <your_study> \
-    --centre_name TEST_CENTER \
-    --webincli_mode submit \
-    --test_upload \
-    --outdir results/validate_assemblies
-```
-
-Example `reads` mode upload to TEST server, run command with docker:
-
-```bash
-nextflow run nf-core/seqsubmit \
-    -profile docker \
-    --mode reads \
-    --input samplesheet_reads.csv \
-    --submission_study <your_study> \
-    --webincli_mode submit \
-    --test_upload \
-    --outdir results/validate_reads
-```
-=======
 Each mode also has additional parameters and example commands — see its own "`<mode>` parameters and example" subsection above.
->>>>>>> 1.0.0
 
 If you wish to repeatedly use the same parameters for multiple runs, rather than specifying each flag in the command, you can specify these in a params file.
 

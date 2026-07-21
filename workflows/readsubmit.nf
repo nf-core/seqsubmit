@@ -43,7 +43,7 @@ workflow READSUBMIT {
     def ch_versions = channel.empty()
     def ch_multiqc_files = channel.empty()
 
-    // Create reads channel with proper metadata structure
+    // --------- Create reads channel with proper metadata structure
     reads_ch = ch_samplesheet
         .map { row ->
             def (meta_in, sample_accession, fastq_1, fastq_2,
@@ -72,9 +72,7 @@ workflow READSUBMIT {
             }
         }
 
-    if (!submission_study && !study_metadata) {
-        error("Either --submission_study or --study_metadata must be provided")
-    }
+    // --------- Register study if accession was not provided via --submission_study
     def study_accession_ch
     if (submission_study) {
         // Use provided study accession directly
@@ -94,7 +92,7 @@ workflow READSUBMIT {
             }
     }
 
-    // Generate reads manifest files
+    // --------- Generate reads manifest files
     CREATE_READS_MANIFEST(
         reads_ch,
         study_accession_ch.first()
@@ -106,6 +104,7 @@ workflow READSUBMIT {
             [meta, fastq, manifest]
         }
 
+    // --------- Upload data to ENA
     SUBMIT (
         submission_input,
         test_upload,
@@ -119,9 +118,7 @@ workflow READSUBMIT {
         true // skip_header - we want to keep the header from the first file and skip it for the rest
     )
 
-    //
-    // Collate and save software versions
-    //
+    // --------- Collate and save software versions
     def topic_versions = channel.topic("versions")
         .distinct()
         .branch { entry ->
@@ -148,9 +145,7 @@ workflow READSUBMIT {
             newLine: true
         )
 
-    //
-    // MODULE: MultiQC
-    //
+    // --------- MODULE: MultiQC
     ch_multiqc_files = ch_multiqc_files.mix(ch_collated_versions)
     def ch_summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
     def ch_workflow_summary = channel.value(paramsSummaryMultiqc(ch_summary_params))

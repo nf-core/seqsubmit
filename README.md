@@ -31,14 +31,13 @@ Currently, the pipeline supports four submission modes, each routed to a dedicat
 
 ![seqsubmit workflow diagram](docs/images/seqsubmit_schema.png)
 
-
 **nf-core/seqsubmit** is a Nextflow pipeline for submitting sequence data to [ENA](https://www.ebi.ac.uk/ena/browser/home).
 The pipeline currently supports the following submission modes, each routed to a dedicated workflow:
 
-- `reads` — raw sequencing reads submission via the `READSUBMIT` workflow (pink)
-- `metagenomic_assemblies` — assembly submission via the `ASSEMBLYSUBMIT` workflow (green)
-- `mags` — metagenome-assembled genomes (MAGs) submission via the `GENOMESUBMIT` workflow (blue)
-- `bins` — bins submission via the `GENOMESUBMIT` workflow (blue)
+- `reads` — raw sequencing reads submission via the `READSUBMIT` workflow (<span style="color:pink">pink</span>)
+- `metagenomic_assemblies` — assembly submission via the `ASSEMBLYSUBMIT` workflow (<span style="color:green">green</span>)
+- `mags` — metagenome-assembled genomes (MAGs) submission via the `GENOMESUBMIT` workflow (<span style="color:blue">blue</span>)
+- `bins` — bins submission via the `GENOMESUBMIT` workflow (<span style="color:blue">blue</span>)
 
 <!-- TODO add schema description here -->
 

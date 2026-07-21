@@ -379,7 +379,6 @@ def _add_project_element(
 
     sp = ET.SubElement(project, "SUBMISSION_PROJECT")
     ET.SubElement(sp, "SEQUENCING_PROJECT")
-    # TODO: Check existing_study_type and new_study_type metadata fields, do we need those?
     study_type = study.get("existing_study_type")
     if study_type:
         attrs = ET.SubElement(
