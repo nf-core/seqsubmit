@@ -61,35 +61,14 @@ workflow GENOMESUBMIT {
 
     // --------- Create genomes channel with proper metadata structure
     genome_fasta_and_reads = ch_samplesheet
-        .map { row ->
-            def meta = [
-                id: row[0].id,
-                accession: row[2],
-                single_end: row[4] ? false : true,
-                assembly_software: row[5] ?: null,
-                binning_software: row[6] ?: null,
-                binning_parameters: row[7] ?: null,
-                stats_generation_software: row[8] ?: null,
-                completeness: row[9] ?: null,
-                contamination: row[10] ?: null,
-                genome_coverage: row[11] ?: null,
-                metagenome: row[12] ?: null,
-                co_assembly: row[13] ?: null,
-                broad_environment: row[14] ?: null,
-                local_environment: row[15] ?: null,
-                environmental_medium: row[16] ?: null,
-                RNA_presence: row[17] ?: null,
-                NCBI_lineage: row[18] ?: null
-            ]
-            def read1 = row[3] ? file(row[3]) : null
-            def read2 = row[4] ? file(row[4]) : null
-
-            if (row[4] && row[4] != "") {
+        .map { meta, fasta, reads_1, reads_2 ->
+            def new_meta = meta + [single_end: reads_2 ? false : true]
+            if (reads_2 && reads_2 != "") {
                 // If paired end reads
-                return [meta, file(row[1]), [read1, read2]]
+                return [new_meta, file(fasta), [reads_1, reads_2]]
             } else {
                 // If single end
-                return [meta, file(row[1]), [read1]]
+                return [new_meta, file(fasta), [reads_1]]
             }
         }
 

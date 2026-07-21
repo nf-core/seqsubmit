@@ -21,14 +21,6 @@
 
 ## Introduction
 
-**nf-core/seqsubmit** is a Nextflow pipeline for submitting sequence data to [ENA](https://www.ebi.ac.uk/ena/browser/home).
-Currently, the pipeline supports four submission modes, each routed to a dedicated workflow and requiring its own input samplesheet structure:
-
-- `mags` for Metagenome Assembled Genomes (MAGs) submission with `GENOMESUBMIT` workflow
-- `bins` for bins submission with `GENOMESUBMIT` workflow
-- `metagenomic_assemblies` for assembly submission with `ASSEMBLYSUBMIT` workflow
-- `reads` for raw sequencing reads submission with `READSUBMIT` workflow
-
 ![seqsubmit workflow diagram](docs/images/seqsubmit_schema.png)
 
 **nf-core/seqsubmit** is a Nextflow pipeline for submitting sequence data to [ENA](https://www.ebi.ac.uk/ena/browser/home).
@@ -68,7 +60,7 @@ Each workflow has its own samplesheet structure, prerequisites, and limitations 
 Example:
 
 ```csv
-sample,sample_accession,fastq_1,fastq_2,platform,instrument,library_source,library_selection,library_strategy,insert_size,library_name,description
+id,sample_accession,fastq_1,fastq_2,platform,instrument,library_source,library_selection,library_strategy,insert_size,library_name,description
 illumina_run_001,SAMEA1234567,data/reads_R1.fastq.gz,data/reads_R2.fastq.gz,ILLUMINA,Illumina HiSeq 2000,GENOMIC,RANDOM,WGS,500,HiSeq_library_001,Illumina sequencing of sample XYZ
 ```
 
@@ -79,7 +71,7 @@ See the [`reads` mode section](docs/usage.md#samplesheet-input) of the usage doc
 Example:
 
 ```csv
-sample,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version
+id,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version
 assembly_1,data/contigs_1.fasta.gz,data/reads_1.fastq.gz,data/reads_2.fastq.gz,,ERR011322,SPAdes,3.15.5
 assembly_2,data/contigs_2.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 ```
@@ -91,7 +83,7 @@ See the [`metagenomic_assemblies` mode section](docs/usage.md#samplesheet-input-
 Example:
 
 ```csv
-sample,fasta,accession,fastq_1,fastq_2,assembly_software,binning_software,binning_parameters,stats_generation_software,completeness,contamination,genome_coverage,metagenome,co-assembly,broad_environment,local_environment,environmental_medium,RNA_presence,NCBI_lineage
+id,fasta,accession,fastq_1,fastq_2,assembly_software,binning_software,binning_parameters,stats_generation_software,completeness,contamination,genome_coverage,metagenome,co-assembly,broad_environment,local_environment,environmental_medium,RNA_presence,NCBI_lineage
 lachnospira_eligens,data/bin_lachnospira_eligens.fa.gz,SRR24458089,,,spades_v3.15.5,metabat2_v2.6,default,CheckM2_v1.0.1,61.0,0.21,32.07,sediment metagenome,No,marine,cable_bacteria,marine_sediment,No,d__Bacteria;p__Proteobacteria;s__unclassified_Proteobacteria
 ```
 

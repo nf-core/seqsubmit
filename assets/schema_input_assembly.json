@@ -7,10 +7,11 @@
     "items": {
         "type": "object",
         "properties": {
-            "sample": {
+            "id": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "errorMessage": "Sample must be provided and cannot contain spaces",
+                "description": "Unique assembly identifier",
+                "errorMessage": "ID must be provided and cannot contain spaces",
                 "meta": ["id"]
             },
             "fasta": {
@@ -65,28 +66,32 @@
                     }
                 ],
                 "errorMessage": "Coverage must be a positive number or empty",
-                "description": "Estimated value of assembly coverage"
+                "description": "Estimated value of assembly coverage",
+                "meta": ["coverage"]
             },
             "run_accession": {
                 "type": "string",
                 "pattern": "^\\S+$",
                 "errorMessage": "Accession must be provided and cannot contain spaces",
-                "description": "Accession of the run used to generate the assembly"
+                "description": "Accession of the run used to generate the assembly",
+                "meta": ["run_accession"]
             },
             "assembler": {
                 "type": "string",
                 "pattern": "^\\S+$",
                 "errorMessage": "Assembler must be provided and cannot contain spaces",
-                "description": "Name of the assembler software used to generate the assembly, e.g. MEGAHIT, SPAdes, metaSPAdes, Flye, etc"
+                "description": "Name of the assembler software used to generate the assembly, e.g. MEGAHIT, SPAdes, metaSPAdes, Flye, etc",
+                "meta": ["assembler"]
             },
             "assembler_version": {
                 "anyOf": [{ "type": "string" }, { "type": "number" }],
                 "pattern": "^\\S+$",
                 "errorMessage": "Assembler version must be provided and cannot contain spaces",
-                "description": "Version of the assembler software used to generate the assembly, e.g 1.0.0"
+                "description": "Version of the assembler software used to generate the assembly, e.g 1.0.0",
+                "meta": ["assembler_version"]
             }
         },
-        "required": ["sample", "fasta", "run_accession", "assembler", "assembler_version"],
+        "required": ["id", "fasta", "run_accession", "assembler", "assembler_version"],
         "anyOf": [
             {
                 "properties": {
