@@ -125,7 +125,7 @@
                     "other",
                     "unspecified"
                 ],
-                "description": "Library selection. Must be one of the ENA controlled vocabulary values listed in the enum.",
+                "description": "Library selection. Must be one of the allowed ENA controlled vocabulary values (e.g. PCR, ChIP-Seq, other, etc).",
                 "meta": ["library_selection"]
             },
             "library_strategy": {

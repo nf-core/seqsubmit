@@ -46,8 +46,8 @@ workflow READSUBMIT {
     // --------- Create reads channel with proper metadata structure
     reads_ch = ch_samplesheet
         .map { meta, reads_1, reads_2 ->
-            def new_meta = meta + [single_end: reads_2 ? false : true]
-            if (reads_2 && reads_2 != "") {
+            def new_meta = meta + [single_end: reads_2 == null]
+            if ( !new_meta.single_end ) {
                 // If paired end reads
                 [new_meta, [file(reads_1), file(reads_2)]]
             } else {

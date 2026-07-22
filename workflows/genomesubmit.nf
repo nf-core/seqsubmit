@@ -62,8 +62,8 @@ workflow GENOMESUBMIT {
     // --------- Create genomes channel with proper metadata structure
     genome_fasta_and_reads = ch_samplesheet
         .map { meta, fasta, reads_1, reads_2 ->
-            def new_meta = meta + [single_end: reads_2 ? false : true]
-            if (reads_2 && reads_2 != "") {
+            def new_meta = meta + [single_end: reads_2 == null]
+            if ( !new_meta.single_end ) {
                 // If paired end reads
                 return [new_meta, file(fasta), [reads_1, reads_2]]
             } else {

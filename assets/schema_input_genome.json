@@ -132,7 +132,7 @@
             },
             "NCBI_lineage": {
                 "type": "string",
-                "description": "full NCBI lineage - format: x;y;z. For example, the lineage for E. coli can be: 'Bacteria;Pseudomonadati;Pseudomonadota;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia' or '2;1224;1236;91347;543;561;562'. For more info check https://www.ncbi.nlm.nih.gov/datasets/docs/v2/data-processing/taxonomy-processing/taxonomy/",
+                "description": "Full NCBI lineage - format: x;y;z. For example, the lineage for E. coli can be: 'Bacteria;Pseudomonadati;Pseudomonadota;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia' or '2;1224;1236;91347;543;561;562'. For more info check https://www.ncbi.nlm.nih.gov/datasets/docs/v2/data-processing/taxonomy-processing/taxonomy/",
                 "meta": ["NCBI_lineage"]
             }
         },

@@ -51,7 +51,7 @@ workflow ASSEMBLYSUBMIT {
     // --------- Create assembly channel with proper metadata structure
     assembly_fasta = ch_samplesheet
         .map { meta, fasta, reads_1, reads_2 ->
-            def new_meta = meta + [single_end: reads_2 ? false : true]
+            def new_meta = meta + [single_end: reads_2 == null]
             [new_meta, fasta]
         }
 
@@ -59,8 +59,8 @@ workflow ASSEMBLYSUBMIT {
     reads_fastq = ch_samplesheet
         .filter { row -> row[2] && row[2] != "" } // Check if fastq_1 exists and is not empty
         .map { meta, fasta, reads_1, reads_2 ->
-            def new_meta = meta + [single_end: reads_2 ? false : true]
-            if (reads_2 && reads_2 != "") {
+            def new_meta = meta + [single_end: reads_2 == null]
+            if ( !new_meta.single_end ) {
                 // If paired end reads
                 [new_meta, [file(reads_1), file(reads_2)]]
             } else {
