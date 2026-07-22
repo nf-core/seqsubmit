@@ -18,8 +18,8 @@ process CREATE_GENOME_METADATA_TSV {
     task.ext.when == null || task.ext.when
 
     script:
-    def co_assembly_value = meta.co_assembly == 'Yes' ? 'True' : 'False'
-    def rna_presence_value = meta.RNA_presence == 'Yes' ? 'True' : 'False'
+    def co_assembly_value = meta.co_assembly ? 'True' : 'False'
+    def rna_presence_value = meta.RNA_presence ? 'True' : 'False'
     def header = [
         'genome_name',
         'genome_path',

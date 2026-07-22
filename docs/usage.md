@@ -294,7 +294,7 @@ Example:
 
 ```csv title="samplesheet_genomes.csv"
 id,fasta,accession,fastq_1,fastq_2,assembly_software,binning_software,binning_parameters,stats_generation_software,completeness,contamination,genome_coverage,metagenome,co-assembly,broad_environment,local_environment,environmental_medium,RNA_presence,NCBI_lineage
-mag_001,data/mag_001.fasta.gz,SRR24458089,,,SPAdes 3.15.5,MetaBAT2 2.15,default,CheckM2 1.0.1,92.81,1.09,66.04,sediment metagenome,No,marine,cable bacteria,marine sediment,No,d__Bacteria;p__Proteobacteria;s__
+mag_001,data/mag_001.fasta.gz,SRR24458089,,,SPAdes 3.15.5,MetaBAT2 2.15,default,CheckM2 1.0.1,92.81,1.09,66.04,sediment metagenome,false,marine,cable bacteria,marine sediment,false,d__Bacteria;p__Proteobacteria;s__
 ```
 
 | Column                      | Required    | Description                                                                                                                                                                                                                                                       |
@@ -312,11 +312,11 @@ mag_001,data/mag_001.fasta.gz,SRR24458089,,,SPAdes 3.15.5,MetaBAT2 2.15,default,
 | `contamination`             | No          | Genome contamination value.                                                                                                                                                                                                                                       |
 | `genome_coverage`           | Conditional | Estimated average sequencing depth across the genome. If the value is missing, it is computed automatically during pipeline execution when reads are provided.                                                                                                    |
 | `metagenome`                | Yes         | Registered metagenome taxonomic identifier or name that matches an existing ENA taxonomy entry. For more details see https://ena-docs.readthedocs.io/en/latest/faq/taxonomy.html                                                                                  |
-| `co-assembly`               | Yes         | Whether a co-assembly strategy was used for the initial metagenomic assembly generation. Options: Yes or No.                                                                                                                                                      |
+| `co-assembly`               | Yes         | Whether a co-assembly strategy was used for the initial metagenomic assembly generation. Options: true or false.                                                                                                                                                  |
 | `broad_environment`         | Yes         | Broad ecological context of the sample, for example 'marine biome', 'desert biome'. It is recommended to use subclasses of EnvO 'biome' class (http://purl.obolibrary.org/obo/ENVO_00000428)                                                                      |
 | `local_environment`         | Yes         | Local environmental context of the sample, for example 'tropical dry broadleaf forest biome', 'marine abyssal zone biome'. It is recommended to use EnvO terms which are of smaller spatial grain than your entry for "broad-scale environmental context".        |
 | `environmental_medium`      | Yes         | Material displaced by the sample, or the material in which the sample was embedded before sampling, for example 'mucus', 'lake water'. It is recommended to use subclasses of EnvO 'environmental material' class (http://purl.obolibrary.org/obo/ENVO_00010483). |
-| `RNA_presence`              | No          | Presence or absence of the 23S, 16S, and 5S rRNA genes and at least 18 tRNAs. This is used for MISAG/MIMAG assembly quality classification. Options: Yes or No.                                                                                                   |
+| `RNA_presence`              | No          | Presence or absence of the 23S, 16S, and 5S rRNA genes and at least 18 tRNAs. This is used for MISAG/MIMAG assembly quality classification. Options: true or false.                                                                                               |
 | `NCBI_lineage`              | No          | NCBI taxonomy lineage of the genome. Can be composted of either numerical IDs or official NCBI taxon names separated by ";".                                                                                                                                      |
 
 > [!NOTE]

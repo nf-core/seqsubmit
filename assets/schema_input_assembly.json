@@ -51,13 +51,22 @@
                         "maxLength": 0
                     }
                 ],
+                "default": null,
                 "errorMessage": "FASTQ file for reverse reads must have extension '.fq' or '.fastq' (optionally gzipped)",
                 "description": "Reverse reads FASTQ file if paired-end. Leave empty for single-end reads"
             },
             "coverage": {
-                "type": "number",
+                "anyOf": [
+                    {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
                 "default": null,
-                "minimum": 0,
                 "errorMessage": "Coverage must be a positive number or empty",
                 "description": "Estimated value of assembly coverage",
                 "meta": ["coverage"]

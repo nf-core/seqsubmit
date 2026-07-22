@@ -56,6 +56,7 @@
                         "maxLength": 0
                     }
                 ],
+                "default": null,
                 "errorMessage": "FASTQ file for reverse reads must have extension '.fq' or '.fastq' (optionally gzipped)",
                 "description": "Reverse reads FASTQ file if paired-end. Leave empty for single-end reads"
             },
@@ -81,23 +82,48 @@
                 "meta": ["stats_generation_software"]
             },
             "completeness": {
-                "type": "number",
+                "anyOf": [
+                    {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "exclusiveMaximum": 100
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
                 "default": null,
                 "description": "MAG/bin completeness score: the ratio of observed single-copy marker genes to total single-copy marker genes in chosen marker gene set (%). ENA docs: https://ena-docs.readthedocs.io/en/latest/faq/metagenomes.html#how-is-the-quality-of-a-metagenomic-assembly-defined",
-                "exclusiveMinimum": 0,
-                "exclusiveMaximum": 100,
                 "meta": ["completeness"]
             },
             "contamination": {
-                "type": "number",
+                "anyOf": [
+                    {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "exclusiveMaximum": 100
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
                 "default": null,
                 "description": "MAG/bin contamination score: the ratio of observed single-copy marker genes in ≥2 copies to total single-copy marker genes in chosen marker gene set (%). ENA docs: https://ena-docs.readthedocs.io/en/latest/faq/metagenomes.html#how-is-the-quality-of-a-metagenomic-assembly-defined",
-                "exclusiveMinimum": 0,
-                "exclusiveMaximum": 100,
                 "meta": ["contamination"]
             },
             "genome_coverage": {
-                "type": "number",
+                "anyOf": [
+                    {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
                 "default": null,
                 "description": "MAG/bin coverage value",
                 "meta": ["genome_coverage"]
@@ -108,9 +134,8 @@
                 "meta": ["metagenome"]
             },
             "co-assembly": {
-                "type": "string",
-                "description": "'Yes' if data was co-assembled, 'No' otherwise. Options: 'Yes' or 'No'",
-                "enum": ["Yes", "No"],
+                "type": "boolean",
+                "description": "'true' if data was co-assembled, 'false' otherwise",
                 "meta": ["co_assembly"]
             },
             "broad_environment": {
@@ -129,10 +154,17 @@
                 "meta": ["environmental_medium"]
             },
             "RNA_presence": {
-                "type": "string",
+                "anyOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
                 "default": null,
-                "description": "Presence or absence of the 23S, 16S, and 5S rRNA genes and at least 18 tRNAs. This is used for MISAG/MIMAG assembly quality classification. Options: 'Yes' or 'No'.",
-                "enum": ["Yes", "No"],
+                "description": "Presence or absence of the 23S, 16S, and 5S rRNA genes and at least 18 tRNAs. This is used for MISAG/MIMAG assembly quality classification. Options: true/false",
                 "meta": ["RNA_presence"]
             },
             "NCBI_lineage": {

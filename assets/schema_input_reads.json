@@ -42,6 +42,7 @@
                         "maxLength": 0
                     }
                 ],
+                "default": null,
                 "errorMessage": "FASTQ file for reverse reads must have extension '.fq' or '.fastq' (optionally gzipped)",
                 "description": "Reverse reads FASTQ file if paired-end. Leave empty for single-end reads"
             },

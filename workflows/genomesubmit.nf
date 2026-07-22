@@ -62,14 +62,11 @@ workflow GENOMESUBMIT {
     // --------- Create genomes channel with proper metadata structure
     genome_fasta_and_reads = ch_samplesheet
         .map { meta, fasta, reads_1, reads_2 ->
-            def new_meta = meta + [single_end: reads_2 == null]
-            if ( !new_meta.single_end ) {
-                // If paired end reads
-                return [new_meta, file(fasta), [reads_1, reads_2]]
-            } else {
-                // If single end
-                return [new_meta, file(fasta), [reads_1]]
-            }
+            def new_meta = meta + [single_end: !reads_2]
+            def reads = new_meta.single_end
+                ? [reads_1]
+                : [reads_1, reads_2]
+            [new_meta, fasta, reads]
         }
 
     genome_fasta = genome_fasta_and_reads.map{meta, fasta, _fq1 -> [meta, fasta]}
@@ -117,7 +114,7 @@ workflow GENOMESUBMIT {
     // --------- For genomes without RNA_presence info, calculate rRNA and tRNA
     branched_rna_results = fasta_updated_with_coverage
         .branch { meta, _fasta ->
-            rna_prediction_input: !(meta.RNA_presence)
+            rna_prediction_input: meta.RNA_presence == null  // it might be True/False
             rna_present: true  // Everything else goes here
         }
 
@@ -132,7 +129,7 @@ workflow GENOMESUBMIT {
         .map{ meta, rna_decision, fasta ->
               def lines = rna_decision.readLines()
               // support for empty decision files required for -stub mode
-              def decision = lines ? lines[0].split('\t')[1] : null
+              def decision = lines ? lines[0].split('\t')[1].toLowerCase() == 'true' : null
               def updated_meta = meta.clone()
               updated_meta.RNA_presence = decision
               return [updated_meta, fasta]
