@@ -23,7 +23,7 @@
                     "bash": "5.2.37(1)-release"
                 },
                 "CREATE_MANIFESTS": {
-                    "genome_uploader": "3.0.1"
+                    "genome_uploader": "3.0.4"
                 },
                 "FALINT": {
                     "falint": "1.2.0"

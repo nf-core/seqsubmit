@@ -28,11 +28,11 @@ sp:
   genome_metadata:
     fn_re: ".*genomes_metadata.tsv$"
   sample_registration:
-    fn_re: '.*registered\.*\.tsv$'
+    fn_re: ".*registered*.tsv$"
   submission_results_genomes:
-    fn_re: 'genomes_accessions\.tsv$'
+    fn_re: "genomes_accessions.tsv$"
   submission_results_assemblies:
-    fn_re: 'assemblies_accessions\.tsv$'
+    fn_re: "assemblies_accessions.tsv$"
 
 # Custom data configuration
 custom_data:
