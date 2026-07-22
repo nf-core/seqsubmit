@@ -77,7 +77,7 @@ workflow ASSEMBLYSUBMIT {
     // --------- Assembly coverage calculation
     // For assemblies without coverage, calculate coverage with CoverM
     coverm_input = FASTA_VALIDATION.out.valid_fastas
-        .filter { meta, _fasta -> meta.coverage == null }
+        .filter { meta, _fasta -> !(meta.coverage) }
         .join(reads_fastq)
         .multiMap { meta, fasta, fastq ->
             assembly: [ meta, fasta ]

@@ -83,7 +83,7 @@ workflow GENOMESUBMIT {
     // --------- Genome coverage calculation
     branched_coverage_results = FASTA_VALIDATION.out.valid_fastas
         .branch { meta, _fasta ->
-            genome_coverage_ref_input: meta.genome_coverage == null
+            genome_coverage_ref_input: !(meta.genome_coverage)
             genome_coverage_present: true  // Everything else goes here
         }
 
@@ -117,7 +117,7 @@ workflow GENOMESUBMIT {
     // --------- For genomes without RNA_presence info, calculate rRNA and tRNA
     branched_rna_results = fasta_updated_with_coverage
         .branch { meta, _fasta ->
-            rna_prediction_input: meta.RNA_presence == null
+            rna_prediction_input: !(meta.RNA_presence)
             rna_present: true  // Everything else goes here
         }
 
@@ -142,7 +142,7 @@ workflow GENOMESUBMIT {
     // --------- Completeness and contamination calculation
     branched_stats_results = fasta_updated_with_rna
         .branch { meta, _fasta ->
-            genome_evaluation_input: meta.completeness == null || meta.contamination == null || meta.stats_generation_software == null
+            genome_evaluation_input: !(meta.completeness) || !(meta.contamination) || !(meta.stats_generation_software)
             evaluation_present: true  // Everything else goes here
         }
 
@@ -174,7 +174,7 @@ workflow GENOMESUBMIT {
     // --------- Taxonomy
     branched_taxonomy_results = fasta_updated_with_stats
         .branch { meta, _fasta ->
-            genome_taxonomy_input: meta.NCBI_lineage == null
+            genome_taxonomy_input: !(meta.NCBI_lineage)
             taxonomy_present: true  // Everything else goes here
         }
 

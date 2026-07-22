@@ -76,11 +76,13 @@
             },
             "stats_generation_software": {
                 "type": "string",
+                "default": null,
                 "description": "Tool(s) used to estimate completeness and contamination",
                 "meta": ["stats_generation_software"]
             },
             "completeness": {
                 "type": "number",
+                "default": null,
                 "description": "MAG/bin completeness score: the ratio of observed single-copy marker genes to total single-copy marker genes in chosen marker gene set (%). ENA docs: https://ena-docs.readthedocs.io/en/latest/faq/metagenomes.html#how-is-the-quality-of-a-metagenomic-assembly-defined",
                 "exclusiveMinimum": 0,
                 "exclusiveMaximum": 100,
@@ -88,6 +90,7 @@
             },
             "contamination": {
                 "type": "number",
+                "default": null,
                 "description": "MAG/bin contamination score: the ratio of observed single-copy marker genes in ≥2 copies to total single-copy marker genes in chosen marker gene set (%). ENA docs: https://ena-docs.readthedocs.io/en/latest/faq/metagenomes.html#how-is-the-quality-of-a-metagenomic-assembly-defined",
                 "exclusiveMinimum": 0,
                 "exclusiveMaximum": 100,
@@ -95,6 +98,7 @@
             },
             "genome_coverage": {
                 "type": "number",
+                "default": null,
                 "description": "MAG/bin coverage value",
                 "meta": ["genome_coverage"]
             },
@@ -126,12 +130,14 @@
             },
             "RNA_presence": {
                 "type": "string",
+                "default": null,
                 "description": "Presence or absence of the 23S, 16S, and 5S rRNA genes and at least 18 tRNAs. This is used for MISAG/MIMAG assembly quality classification. Options: 'Yes' or 'No'.",
                 "enum": ["Yes", "No"],
                 "meta": ["RNA_presence"]
             },
             "NCBI_lineage": {
                 "type": "string",
+                "default": null,
                 "description": "Full NCBI lineage - format: x;y;z. For example, the lineage for E. coli can be: 'Bacteria;Pseudomonadati;Pseudomonadota;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia' or '2;1224;1236;91347;543;561;562'. For more info check https://www.ncbi.nlm.nih.gov/datasets/docs/v2/data-processing/taxonomy-processing/taxonomy/",
                 "meta": ["NCBI_lineage"]
             }

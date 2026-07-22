@@ -55,16 +55,9 @@
                 "description": "Reverse reads FASTQ file if paired-end. Leave empty for single-end reads"
             },
             "coverage": {
-                "anyOf": [
-                    {
-                        "type": "number",
-                        "minimum": 0
-                    },
-                    {
-                        "type": "string",
-                        "maxLength": 0
-                    }
-                ],
+                "type": "number",
+                "default": null,
+                "minimum": 0,
                 "errorMessage": "Coverage must be a positive number or empty",
                 "description": "Estimated value of assembly coverage",
                 "meta": ["coverage"]
