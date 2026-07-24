@@ -3,6 +3,7 @@ lint:
   files_exist:
     - conf/igenomes.config
     - conf/igenomes_ignored.config
+    - .github/workflows/linting_comment.yml
   nextflow_config:
     - params.input
   files_unchanged:
@@ -10,6 +11,8 @@ lint:
     - docs/images/nf-core-seqsubmit_logo_light.png
     - docs/images/nf-core-seqsubmit_logo_dark.png
     - assets/nf-core-seqsubmit_logo_light.png
+    - .github/workflows/branch.yml
+    - .github/workflows/linting.yml
 nf_core_version: 4.0.2
 repository_type: pipeline
 template:
