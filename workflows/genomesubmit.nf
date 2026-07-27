@@ -46,7 +46,6 @@ workflow GENOMESUBMIT {
     checkm2_db               // val: path to CheckM2 database
     checkm2_db_download_id   // val: CheckM2 database download ID
     cat_db                   // val: path to CAT database
-    cat_db_download_id       // val: CAT database download ID
     centre_name              // val: submission centre name
     upload_tpa               // val: upload as TPA (Third Party Annotation)
     test_upload              // val: true for test upload mode
@@ -185,9 +184,10 @@ workflow GENOMESUBMIT {
         ? channel.of( [['id': 'CAT_DB'], file(cat_db)] )
         : channel.empty()
 
-    def cat_db_id_input = (!cat_db && cat_db_download_id)
-        ? channel.of( [['id': 'CAT_DB_id'], cat_db_download_id] )
-        : channel.empty()
+    cat_db_download_id = "nr"  // NCBI non-redundant protein database identifier
+    def cat_db_id_input = cat_db
+        ? channel.empty()
+        : channel.of( [['id': 'CAT_DB_id'], cat_db_download_id] )
 
     FASTA_CLASSIFY_CATPACK (
         RENAME_FASTA_FOR_CATPACK.out.renamed_fasta,  // ch_bins
