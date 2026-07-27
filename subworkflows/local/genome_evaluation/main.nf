@@ -29,13 +29,16 @@ workflow GENOME_EVALUATION {
     //
     // Database preparation
     //
+    ch_do_download = ch_fasta
+        .first()
+        .map { _meta_fasta -> ch_checkm2_db_download_id }
 
     // Download and prepare db from scratch if no pre-built db provided
     if (ch_checkm2_db) {
-        ch_checkm2_db = channel.value([[id: 'checkm2_db'], file(params.checkm2_db, checkIfExists: true)])
+        ch_checkm2_db_ready = channel.value([[id: 'checkm2_db'], file(params.checkm2_db, checkIfExists: true)])
     } else {
-        CHECKM2_DATABASEDOWNLOAD(ch_checkm2_db_download_id)
-        ch_checkm2_db = CHECKM2_DATABASEDOWNLOAD.out.database
+        CHECKM2_DATABASEDOWNLOAD(ch_do_download)
+        ch_checkm2_db_ready = CHECKM2_DATABASEDOWNLOAD.out.database
     }
 
     //
@@ -44,7 +47,7 @@ workflow GENOME_EVALUATION {
 
     CHECKM2_PREDICT(
         ch_fasta,
-        ch_checkm2_db,
+        ch_checkm2_db_ready,
     )
 
     emit:

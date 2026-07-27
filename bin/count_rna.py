@@ -151,7 +151,7 @@ def main():
     logging.info(f"Found {rrna_count} rRNA subunit types in total")
 
     # rrna_count should be 3 to make sure all 3 rRNA genes are present
-    decision = "Yes" if trna_count >= args.trna_limit and rrna_count == 3 else "No"
+    decision = "True" if trna_count >= args.trna_limit and rrna_count == 3 else "False"
     logging.info(f"RNA presented: {decision}")
 
     with open(args.output, 'w') as file_out:

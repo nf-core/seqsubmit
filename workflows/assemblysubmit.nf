@@ -50,38 +50,20 @@ workflow ASSEMBLYSUBMIT {
 
     // --------- Create assembly channel with proper metadata structure
     assembly_fasta = ch_samplesheet
-        .map { row ->
-            def meta = [
-                id: row[0].id,
-                single_end: row[3] ? false : true,
-                coverage: row[4] ?: null,
-                run_accession: row[5],
-                assembler: row[6],
-                assembler_version: row[7]
-            ]
-            [meta, file(row[1])]
+        .map { meta, fasta, reads_1, reads_2 ->
+            def new_meta = meta + [single_end: !reads_2]
+            [new_meta, fasta]
         }
 
     // --------- Create reads channel with proper metadata structure
     reads_fastq = ch_samplesheet
         .filter { row -> row[2] && row[2] != "" } // Check if fastq_1 exists and is not empty
-        .map { row ->
-            def meta = [
-                id: row[0].id,
-                single_end: row[3] ? false : true,
-                coverage: row[4] ?: null,
-                run_accession: row[5],
-                assembler: row[6],
-                assembler_version: row[7]
-            ]
-
-            if (row[3] && row[3] != "") {
-                // If paired end reads
-                [meta, [file(row[2]), file(row[3])]]
-            } else {
-                // If single end
-                [meta, file(row[2])]
-            }
+        .map { meta, fasta, reads_1, reads_2 ->
+            def new_meta = meta + [single_end: !reads_2]
+            def reads = new_meta.single_end
+                ? [reads_1]
+                : [reads_1, reads_2]
+            [new_meta, reads]
         }
 
     // --------- Check fasta files are properly formatted and filter out files with less than 2 contigs
@@ -92,7 +74,7 @@ workflow ASSEMBLYSUBMIT {
     // --------- Assembly coverage calculation
     // For assemblies without coverage, calculate coverage with CoverM
     coverm_input = FASTA_VALIDATION.out.valid_fastas
-        .filter { meta, _fasta -> meta.coverage == null }
+        .filter { meta, _fasta -> !(meta.coverage) }
         .join(reads_fastq)
         .multiMap { meta, fasta, fastq ->
             assembly: [ meta, fasta ]

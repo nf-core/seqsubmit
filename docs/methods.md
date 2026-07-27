@@ -108,10 +108,10 @@ The total number of predicted tRNAs is compared against `params.trna_limit`. The
 
 The final decision stored in `RNA_presence` is:
 
-- `Yes` when at least 18 tRNAs are detected and all three required rRNA subunits pass the recovery threshold
-- `No` otherwise
+- `True` when at least 18 tRNAs are detected and all three required rRNA subunits pass the recovery threshold
+- `False` otherwise
 
-The final `Yes`/`No` decision is then merged back into the submission metadata.
+The final `True`/`False` decision is then merged back into the submission metadata.
 
 ### Genome coverage calculation
 

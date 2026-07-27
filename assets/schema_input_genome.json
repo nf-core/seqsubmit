@@ -7,10 +7,11 @@
     "items": {
         "type": "object",
         "properties": {
-            "sample": {
+            "id": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "errorMessage": "Sample name must be provided and cannot contain spaces",
+                "description": "Unique mag/bin identifier",
+                "errorMessage": "ID must be provided and cannot contain spaces",
                 "meta": ["id"]
             },
             "fasta": {
@@ -23,7 +24,8 @@
             },
             "accession": {
                 "type": "string",
-                "description": "Run or assembly ENA accession"
+                "description": "Run or assembly ENA accession",
+                "meta": ["accession"]
             },
             "fastq_1": {
                 "anyOf": [
@@ -38,6 +40,7 @@
                         "maxLength": 0
                     }
                 ],
+                "default": null,
                 "errorMessage": "FASTQ file must have extension '.fq' or '.fastq' (optionally gzipped)",
                 "description": "Forward reads if paired-end or single-end reads FASTQ file"
             },
@@ -54,74 +57,126 @@
                         "maxLength": 0
                     }
                 ],
+                "default": null,
                 "errorMessage": "FASTQ file for reverse reads must have extension '.fq' or '.fastq' (optionally gzipped)",
                 "description": "Reverse reads FASTQ file if paired-end. Leave empty for single-end reads"
             },
             "assembly_software": {
                 "type": "string",
-                "description": "Tool name and version that was used to assemble data, e.g. MEGAHIT_v1.0, SPAdes_v4.0.0, metaSPAdes_v3.15.0"
+                "description": "Tool name and version that was used to assemble data, e.g. MEGAHIT_v1.0, SPAdes_v4.0.0, metaSPAdes_v3.15.0",
+                "meta": ["assembly_software"]
             },
             "binning_software": {
                 "type": "string",
-                "description": "Tool name and version that was used to bin data, e.g. MetaBAT2, VAMB, MaxBin2, CONCOCT, SemiBin2, COMEBin, etc"
+                "description": "Tool name and version that was used to bin data, e.g. MetaBAT2, VAMB, MaxBin2, CONCOCT, SemiBin2, COMEBin, etc",
+                "meta": ["binning_software"]
             },
             "binning_parameters": {
                 "type": "string",
-                "description": "Arguments used to bin data different from default, e.g. -min_contig_length 1000"
+                "description": "Arguments used to bin data different from default, e.g. -min_contig_length 1000",
+                "meta": ["binning_parameters"]
             },
             "stats_generation_software": {
                 "type": "string",
-                "description": "Tool(s) used to estimate completeness and contamination"
+                "default": null,
+                "description": "Tool(s) used to estimate completeness and contamination",
+                "meta": ["stats_generation_software"]
             },
             "completeness": {
-                "type": "number",
+                "anyOf": [
+                    {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
+                "default": null,
                 "description": "MAG/bin completeness score: the ratio of observed single-copy marker genes to total single-copy marker genes in chosen marker gene set (%). ENA docs: https://ena-docs.readthedocs.io/en/latest/faq/metagenomes.html#how-is-the-quality-of-a-metagenomic-assembly-defined",
-                "exclusiveMinimum": 0,
-                "exclusiveMaximum": 100
+                "meta": ["completeness"]
             },
             "contamination": {
-                "type": "number",
+                "anyOf": [
+                    {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
+                "default": null,
                 "description": "MAG/bin contamination score: the ratio of observed single-copy marker genes in ≥2 copies to total single-copy marker genes in chosen marker gene set (%). ENA docs: https://ena-docs.readthedocs.io/en/latest/faq/metagenomes.html#how-is-the-quality-of-a-metagenomic-assembly-defined",
-                "exclusiveMinimum": 0,
-                "exclusiveMaximum": 100
+                "meta": ["contamination"]
             },
             "genome_coverage": {
-                "type": "number",
-                "description": "MAG/bin coverage value"
+                "anyOf": [
+                    {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
+                "default": null,
+                "description": "MAG/bin coverage value",
+                "meta": ["genome_coverage"]
             },
             "metagenome": {
                 "type": "string",
-                "description": "ENA accepted metagenome name. It needs to be listed in the taxonomy tree https://www.ebi.ac.uk/ena/browser/view/408169?show=tax-tree (you might need to press \"Tax tree - Show\" in the right most section of the page). Full list can also be found https://github.com/EBI-Metagenomics/genome_uploader/blob/main/genomeuploader/constants.py#L22"
+                "description": "ENA accepted metagenome name. It needs to be listed in the taxonomy tree https://www.ebi.ac.uk/ena/browser/view/408169?show=tax-tree (you might need to press \"Tax tree - Show\" in the right most section of the page). Full list can also be found https://github.com/EBI-Metagenomics/genome_uploader/blob/main/genomeuploader/constants.py#L22",
+                "meta": ["metagenome"]
             },
             "co-assembly": {
-                "type": "string",
-                "description": "'Yes' if data was co-assembled, 'No' otherwise. Options: 'Yes' or 'No'",
-                "enum": ["Yes", "No"]
+                "type": "boolean",
+                "description": "'true' if data was co-assembled, 'false' otherwise",
+                "meta": ["co_assembly"]
             },
             "broad_environment": {
                 "type": "string",
-                "description": "Broad ecological context of the sample, for example 'marine biome', 'desert biome'. It is recommended to use subclasses of EnvO 'biome' class (http://purl.obolibrary.org/obo/ENVO_00000428). Documentation: https://github.com/EnvironmentOntology/envo/wiki/Using-ENVO-with-MIxS"
+                "description": "Broad ecological context of the sample, for example 'marine biome', 'desert biome'. It is recommended to use subclasses of EnvO 'biome' class (http://purl.obolibrary.org/obo/ENVO_00000428). Documentation: https://github.com/EnvironmentOntology/envo/wiki/Using-ENVO-with-MIxS",
+                "meta": ["broad_environment"]
             },
             "local_environment": {
                 "type": "string",
-                "description": "Local environmental context of the sample, for example 'tropical dry broadleaf forest biome', 'marine abyssal zone biome'. It is recommended to use EnvO terms which are of smaller spatial grain than your entry for \"broad-scale environmental context\". Documentation: https://github.com/EnvironmentOntology/envo/wiki/Using-ENVO-with-MIxS"
+                "description": "Local environmental context of the sample, for example 'tropical dry broadleaf forest biome', 'marine abyssal zone biome'. It is recommended to use EnvO terms which are of smaller spatial grain than your entry for \"broad-scale environmental context\". Documentation: https://github.com/EnvironmentOntology/envo/wiki/Using-ENVO-with-MIxS",
+                "meta": ["local_environment"]
             },
             "environmental_medium": {
                 "type": "string",
-                "description": "Material displaced by the sample, or the material in which the sample was embedded before sampling, for example 'mucus', 'lake water'. It is recommended to use subclasses of EnvO 'environmental material' class (http://purl.obolibrary.org/obo/ENVO_00010483). Documentation: https://github.com/EnvironmentOntology/envo/wiki/Using-ENVO-with-MIxS"
+                "description": "Material displaced by the sample, or the material in which the sample was embedded before sampling, for example 'mucus', 'lake water'. It is recommended to use subclasses of EnvO 'environmental material' class (http://purl.obolibrary.org/obo/ENVO_00010483). Documentation: https://github.com/EnvironmentOntology/envo/wiki/Using-ENVO-with-MIxS",
+                "meta": ["environmental_medium"]
             },
             "RNA_presence": {
-                "type": "string",
-                "description": "Presence or absence of the 23S, 16S, and 5S rRNA genes and at least 18 tRNAs. This is used for MISAG/MIMAG assembly quality classification. Options: 'Yes' or 'No'.",
-                "enum": ["Yes", "No"]
+                "anyOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
+                "default": null,
+                "description": "Presence or absence of the 23S, 16S, and 5S rRNA genes and at least 18 tRNAs. This is used for MISAG/MIMAG assembly quality classification. Options: true/false",
+                "meta": ["RNA_presence"]
             },
             "NCBI_lineage": {
                 "type": "string",
-                "description": "full NCBI lineage - format: x;y;z. For example, the lineage for E. coli can be: 'Bacteria;Pseudomonadati;Pseudomonadota;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia' or '2;1224;1236;91347;543;561;562'. For more info check https://www.ncbi.nlm.nih.gov/datasets/docs/v2/data-processing/taxonomy-processing/taxonomy/"
+                "default": null,
+                "description": "Full NCBI lineage - format: x;y;z. For example, the lineage for E. coli can be: 'Bacteria;Pseudomonadati;Pseudomonadota;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia' or '2;1224;1236;91347;543;561;562'. For more info check https://www.ncbi.nlm.nih.gov/datasets/docs/v2/data-processing/taxonomy-processing/taxonomy/",
+                "meta": ["NCBI_lineage"]
             }
         },
         "required": [
-            "sample",
+            "id",
             "fasta",
             "accession",
             "assembly_software",
@@ -147,7 +202,7 @@
                 "properties": {
                     "genome_coverage": {
                         "type": "number",
-                        "minimum": 0
+                        "exclusiveMinimum": 0
                     }
                 },
                 "required": ["genome_coverage"]

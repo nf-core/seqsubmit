@@ -156,17 +156,14 @@ You will need to create a samplesheet with information about the raw reads you w
 Example:
 
 ```csv title="samplesheet_reads.csv"
-sample,sample_accession,fastq_1,fastq_2,platform,instrument,library_source,library_selection,library_strategy,insert_size,library_name,description
+id,sample_accession,fastq_1,fastq_2,platform,instrument,library_source,library_selection,library_strategy,insert_size,library_name,description
 illumina_run_001,SAMEA1234567,data/reads_R1.fastq.gz,data/reads_R2.fastq.gz,ILLUMINA,Illumina HiSeq 2000,GENOMIC,RANDOM,WGS,500,HiSeq_library_001,Illumina sequencing of sample XYZ
 pacbio_run_001,SAMEA7654321,data/pacbio_reads.fastq.gz,,PACBIO_SMRT,PacBio Sequel,GENOMIC,RANDOM,WGS,,PacBio_library_002,Long-read sequencing
 ```
 
-> [!IMPORTANT]
-> **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
-
 | Column              | Required | Description                                                                                                                                                                                                                                                                                                                                                     |
 | ------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`            | Yes      | Unique identifier of this particular data entry. Used as an experiment name.                                                                                                                                                                                                                                                                                    |
+| `id`                | Yes      | Unique identifier of this particular data entry. Used as an experiment name.                                                                                                                                                                                                                                                                                    |
 | `sample_accession`  | Yes      | ENA sample accession (starting with SAMEA) of the sample used to generate raw reads.                                                                                                                                                                                                                                                                            |
 | `fastq_1`           | Yes      | Path to forward reads in FASTQ format (optionally gzipped).                                                                                                                                                                                                                                                                                                     |
 | `fastq_2`           | No       | Path to reverse reads for paired-end data. Leave empty for single-end reads.                                                                                                                                                                                                                                                                                    |
@@ -217,17 +214,14 @@ You will need to create a samplesheet with information about the metagenomic ass
 Example:
 
 ```csv title="samplesheet_assembly.csv"
-sample,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version
+id,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version
 assembly_001,data/assembly_001.fasta.gz,data/assembly_001_R1.fastq.gz,data/assembly_001_R2.fastq.gz,,ERR011322,SPAdes,3.15.5
 assembly_002,data/assembly_002.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 ```
 
-> [!IMPORTANT]
-> **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
-
 | Column              | Required    | Description                                                                                                                                           |
 | ------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`            | Yes         | A unique identifier for this data entry. Must be globally unique within the input dataset.                                                            |
+| `id`                | Yes         | A unique identifier for this data entry. Must be globally unique within the input dataset.                                                            |
 | `fasta`             | Yes         | Path to assembly contigs in FASTA format compressed with `gzip`.                                                                                      |
 | `fastq_1`           | Conditional | Path to the read file in FASTQ format used to generate the metagenomic assembly. Required if `coverage` is not provided.                              |
 | `fastq_2`           | No          | Path to the second read file in FASTQ format for paired-end data used to generate the source metagenomic assembly. Leave empty for single-end reads.  |
@@ -299,16 +293,13 @@ You will need to create a samplesheet with information about the MAGs/bins you w
 Example:
 
 ```csv title="samplesheet_genomes.csv"
-sample,fasta,accession,fastq_1,fastq_2,assembly_software,binning_software,binning_parameters,stats_generation_software,completeness,contamination,genome_coverage,metagenome,co-assembly,broad_environment,local_environment,environmental_medium,RNA_presence,NCBI_lineage
-mag_001,data/mag_001.fasta.gz,SRR24458089,,,SPAdes 3.15.5,MetaBAT2 2.15,default,CheckM2 1.0.1,92.81,1.09,66.04,sediment metagenome,No,marine,cable bacteria,marine sediment,No,d__Bacteria;p__Proteobacteria;s__
+id,fasta,accession,fastq_1,fastq_2,assembly_software,binning_software,binning_parameters,stats_generation_software,completeness,contamination,genome_coverage,metagenome,co-assembly,broad_environment,local_environment,environmental_medium,RNA_presence,NCBI_lineage
+mag_001,data/mag_001.fasta.gz,SRR24458089,,,SPAdes 3.15.5,MetaBAT2 2.15,default,CheckM2 1.0.1,92.81,1.09,66.04,sediment metagenome,false,marine,cable bacteria,marine sediment,false,d__Bacteria;p__Proteobacteria;s__
 ```
-
-> [!IMPORTANT]
-> **Samplesheet column requirements**: All columns shown in the example above must be present in your samplesheet, even if some values are empty. Columns must be in exactly the same order as shown.
 
 | Column                      | Required    | Description                                                                                                                                                                                                                                                       |
 | --------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`                    | Yes         | A unique identifier for this data entry. Must be globally unique within the input dataset.                                                                                                                                                                        |
+| `id`                        | Yes         | A unique identifier for this data entry. Must be globally unique within the input dataset.                                                                                                                                                                        |
 | `fasta`                     | Yes         | Path to MAG/bin contigs in FASTA format compressed with `gzip`. All names of the FASTA files must be unique to prevent pipeline errors.                                                                                                                           |
 | `accession`                 | Yes         | ENA accession of the run or metagenomic assembly used to generate the MAG/bin.                                                                                                                                                                                    |
 | `fastq_1`                   | Conditional | Path to the read file in FASTQ format used to generate the source metagenomic assembly. Required if `genome_coverage` is not provided.                                                                                                                            |
@@ -321,11 +312,11 @@ mag_001,data/mag_001.fasta.gz,SRR24458089,,,SPAdes 3.15.5,MetaBAT2 2.15,default,
 | `contamination`             | No          | Genome contamination value.                                                                                                                                                                                                                                       |
 | `genome_coverage`           | Conditional | Estimated average sequencing depth across the genome. If the value is missing, it is computed automatically during pipeline execution when reads are provided.                                                                                                    |
 | `metagenome`                | Yes         | Registered metagenome taxonomic identifier or name that matches an existing ENA taxonomy entry. For more details see https://ena-docs.readthedocs.io/en/latest/faq/taxonomy.html                                                                                  |
-| `co-assembly`               | Yes         | Whether a co-assembly strategy was used for the initial metagenomic assembly generation. Options: Yes or No.                                                                                                                                                      |
+| `co-assembly`               | Yes         | Whether a co-assembly strategy was used for the initial metagenomic assembly generation. Options: true or false.                                                                                                                                                  |
 | `broad_environment`         | Yes         | Broad ecological context of the sample, for example 'marine biome', 'desert biome'. It is recommended to use subclasses of EnvO 'biome' class (http://purl.obolibrary.org/obo/ENVO_00000428)                                                                      |
 | `local_environment`         | Yes         | Local environmental context of the sample, for example 'tropical dry broadleaf forest biome', 'marine abyssal zone biome'. It is recommended to use EnvO terms which are of smaller spatial grain than your entry for "broad-scale environmental context".        |
 | `environmental_medium`      | Yes         | Material displaced by the sample, or the material in which the sample was embedded before sampling, for example 'mucus', 'lake water'. It is recommended to use subclasses of EnvO 'environmental material' class (http://purl.obolibrary.org/obo/ENVO_00010483). |
-| `RNA_presence`              | No          | Presence or absence of the 23S, 16S, and 5S rRNA genes and at least 18 tRNAs. This is used for MISAG/MIMAG assembly quality classification. Options: Yes or No.                                                                                                   |
+| `RNA_presence`              | No          | Presence or absence of the 23S, 16S, and 5S rRNA genes and at least 18 tRNAs. This is used for MISAG/MIMAG assembly quality classification. Options: true or false.                                                                                               |
 | `NCBI_lineage`              | No          | NCBI taxonomy lineage of the genome. Can be composted of either numerical IDs or official NCBI taxon names separated by ";".                                                                                                                                      |
 
 > [!NOTE]

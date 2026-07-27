@@ -31,7 +31,7 @@ nextflow_process {
                 { assert process.out.rna_decision.size() == 1 },
                 {
                     def rnaDecisionContent = path(process.out.rna_decision[0][1]).text
-                    assert rnaDecisionContent.contains("Yes")
+                    assert rnaDecisionContent.contains("True")
                 }
             )
         }
