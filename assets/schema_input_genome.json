@@ -40,6 +40,7 @@
                         "maxLength": 0
                     }
                 ],
+                "default": null,
                 "errorMessage": "FASTQ file must have extension '.fq' or '.fastq' (optionally gzipped)",
                 "description": "Forward reads if paired-end or single-end reads FASTQ file"
             },
@@ -85,8 +86,8 @@
                 "anyOf": [
                     {
                         "type": "number",
-                        "exclusiveMinimum": 0,
-                        "exclusiveMaximum": 100
+                        "minimum": 0,
+                        "maximum": 100
                     },
                     {
                         "type": "string",
@@ -101,8 +102,8 @@
                 "anyOf": [
                     {
                         "type": "number",
-                        "exclusiveMinimum": 0,
-                        "exclusiveMaximum": 100
+                        "minimum": 0,
+                        "maximum": 100
                     },
                     {
                         "type": "string",
@@ -117,7 +118,7 @@
                 "anyOf": [
                     {
                         "type": "number",
-                        "minimum": 0
+                        "exclusiveMinimum": 0
                     },
                     {
                         "type": "string",
@@ -201,7 +202,7 @@
                 "properties": {
                     "genome_coverage": {
                         "type": "number",
-                        "minimum": 0
+                        "exclusiveMinimum": 0
                     }
                 },
                 "required": ["genome_coverage"]

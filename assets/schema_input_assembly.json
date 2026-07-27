@@ -59,7 +59,7 @@
                 "anyOf": [
                     {
                         "type": "number",
-                        "minimum": 0
+                        "exclusiveMinimum": 0
                     },
                     {
                         "type": "string",
@@ -108,7 +108,7 @@
                 "properties": {
                     "coverage": {
                         "type": "number",
-                        "minimum": 0
+                        "exclusiveMinimum": 0
                     }
                 },
                 "required": ["coverage"]
