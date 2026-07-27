@@ -21,8 +21,8 @@ workflow GENOME_EVALUATION {
 
     take:
     ch_fasta                    // channel: [ val(meta), path(fasta) ]
-    ch_checkm2_db               // val: path to CheckM2 database or null
-    ch_checkm2_db_download_id   // val: CheckM2 database download ID
+    ch_checkm2_db               // val: path to local CheckM2 database or null to trigger automatic download
+    ch_checkm2_db_download_id   // val: CheckM2 database Zenodo download ID
 
     main:
 
