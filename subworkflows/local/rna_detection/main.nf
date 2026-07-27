@@ -26,7 +26,6 @@ workflow RNA_DETECTION {
 
     main:
 
-    ch_versions = channel.empty()
     BARRNAP(
         fasta.map {id, fasta_file -> [id, fasta_file, "bac"]}
     )
@@ -43,5 +42,4 @@ workflow RNA_DETECTION {
 
     emit:
     rna_detected   = COUNT_RNA.out.rna_decision
-    versions       = ch_versions
 }

@@ -43,11 +43,6 @@ output:
       pattern: "*.tsv"
       ontologies:
         - edam: "http://edamontology.org/format_3475" # TSV
-  - versions:
-      type: file
-      description: |
-        Channel containing software versions.
-        Structure: versions
 authors:
   - "@KateSakharova"
   - "@ochkalova"

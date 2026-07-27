@@ -16,7 +16,7 @@ process GENERATE_ASSEMBLY_MANIFEST {
 
     output:
     tuple val(meta), path("${assembly_study}_upload/*.manifest") , emit: manifest
-    path "versions.yml", emit: versions
+    tuple val("${task.process}"), val('assembly_uploader'), eval("assembly_manifest --version | sed 's/assembly_uploader //'"), topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -37,11 +37,6 @@ process GENERATE_ASSEMBLY_MANIFEST {
         ${test_flag} \\
         ${is_private_flag} \\
         ${args}
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        assembly_uploader: \$(assembly_manifest --version | sed 's/assembly_uploader //')
-    END_VERSIONS
     """
 
     stub:
@@ -50,10 +45,5 @@ process GENERATE_ASSEMBLY_MANIFEST {
     """
     mkdir ${assembly_study}_upload/
     touch ${assembly_study}_upload/test.manifest
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        assembly_uploader: \$(assembly_manifest --version | sed 's/assembly_uploader //')
-    END_VERSIONS
     """
 }

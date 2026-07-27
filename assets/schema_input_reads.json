@@ -7,10 +7,10 @@
     "items": {
         "type": "object",
         "properties": {
-            "sample": {
+            "id": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "errorMessage": "Sample must be provided and cannot contain spaces",
+                "errorMessage": "ID must be provided and cannot contain spaces",
                 "meta": ["id"],
                 "description": "Unique experiment/run name"
             },
@@ -18,7 +18,8 @@
                 "type": "string",
                 "pattern": "^\\S+$",
                 "errorMessage": "Sample accession must be provided and cannot contain spaces",
-                "description": "ENA sample accession of the sample used to generate the reads"
+                "description": "ENA sample accession of the sample used to generate the reads",
+                "meta": ["sample_accession"]
             },
             "fastq_1": {
                 "type": "string",
@@ -41,6 +42,7 @@
                         "maxLength": 0
                     }
                 ],
+                "default": null,
                 "errorMessage": "FASTQ file for reverse reads must have extension '.fq' or '.fastq' (optionally gzipped)",
                 "description": "Reverse reads FASTQ file if paired-end. Leave empty for single-end reads"
             },
@@ -63,13 +65,15 @@
                     "ULTIMA",
                     "VELA_DIAGNOSTICS"
                 ],
-                "description": "Sequencing platform. Must be one of the ENA controlled vocabulary values listed in the enum."
+                "description": "Sequencing platform. Must be one of the ENA controlled vocabulary values listed in the enum.",
+                "meta": ["platform"]
             },
             "instrument": {
                 "type": "string",
                 "pattern": "^[^\\n]+$",
                 "errorMessage": "Instrument must be provided and cannot span multiple lines",
-                "description": "Sequencer model (e.g., 'Illumina HiSeq 2000', 'PacBio Sequel')"
+                "description": "Sequencer model (e.g., 'Illumina HiSeq 2000', 'PacBio Sequel')",
+                "meta": ["instrument"]
             },
             "library_source": {
                 "type": "string",
@@ -84,7 +88,8 @@
                     "VIRAL RNA",
                     "OTHER"
                 ],
-                "description": "Library source. Must be one of the ENA controlled vocabulary values listed in the enum."
+                "description": "Library source. Must be one of the ENA controlled vocabulary values listed in the enum.",
+                "meta": ["library_source"]
             },
             "library_selection": {
                 "type": "string",
@@ -121,7 +126,8 @@
                     "other",
                     "unspecified"
                 ],
-                "description": "Library selection. Must be one of the ENA controlled vocabulary values listed in the enum."
+                "description": "Library selection. Must be one of the allowed ENA controlled vocabulary values (e.g. PCR, ChIP-Seq, other, etc).",
+                "meta": ["library_selection"]
             },
             "library_strategy": {
                 "type": "string",
@@ -168,7 +174,8 @@
                     "Tethered Chromatin Conformation Capture",
                     "OTHER"
                 ],
-                "description": "Library strategy. Must be one of the ENA controlled vocabulary values listed in the enum."
+                "description": "Library strategy. Must be one of the ENA controlled vocabulary values listed in the enum.",
+                "meta": ["library_strategy"]
             },
             "insert_size": {
                 "anyOf": [
@@ -182,7 +189,8 @@
                     }
                 ],
                 "errorMessage": "Insert size must be a positive number or empty",
-                "description": "Fragment/insert size for paired-end reads (optional)"
+                "description": "Fragment/insert size for paired-end reads (optional)",
+                "meta": ["insert_size"]
             },
             "library_name": {
                 "anyOf": [
@@ -194,7 +202,8 @@
                         "maxLength": 0
                     }
                 ],
-                "description": "Descriptive library name (optional)"
+                "description": "Descriptive library name (optional)",
+                "meta": ["library_name"]
             },
             "description": {
                 "anyOf": [
@@ -206,11 +215,12 @@
                         "maxLength": 0
                     }
                 ],
-                "description": "Free-text description of the experiment (optional)"
+                "description": "Free-text description of the experiment (optional)",
+                "meta": ["description"]
             }
         },
         "required": [
-            "sample",
+            "id",
             "sample_accession",
             "fastq_1",
             "platform",

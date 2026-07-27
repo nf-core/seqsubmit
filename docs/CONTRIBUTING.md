@@ -184,6 +184,20 @@ If you update images or graphics, follow the nf-core [style guidelines](https://
 
 To ensure consistency and maintainability of the nf-core/seqsubmit pipeline, contributors should follow these guidelines when implementing new features or modifying existing functionality.
 
+### Code style
+
+The pipeline is organized into three separate workflows, one for each mode (mags, bins, metagenomic_assemblies, reads), because each data type has distinct submission procedures and metadata requirements. Future development should follow the same structure to maintain consistency and readability.
+
+If a new feature extends support for an **existing** data type (for example, _adding support for eukaryotic MAGs_), the corresponding logic should be integrated into the existing workflow rather than creating a new one.
+
+To improve readability, divide the main workflow into logical sections using comments that begin with `// ---------`, for example:
+
+```
+// --------- Upload data to ENA
+```
+
+Use standard `//` comments for shorter explanations within each section.
+
 ### ENA Submission Requirements
 
 Submissions to [ENA](https://www.ebi.ac.uk/ena/browser/home) are governed by a well-defined data model and submission process. These include relationships between entities (e.g. studies, samples, experiments, runs, analyses), required submission steps, and accepted file types and formats.

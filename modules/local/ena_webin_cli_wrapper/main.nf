@@ -26,6 +26,9 @@ process ENA_WEBIN_CLI_WRAPPER {
     tuple val("${task.process}"), val('ena-webin-cli'), eval('ena-webin-cli -version'),              topic: versions
     tuple val("${task.process}"), val('mgnify-pipelines-toolkit'), eval('python -c "import importlib.metadata; print(importlib.metadata.version(\'mgnify-pipelines-toolkit\'))"'), topic: versions
 
+    when:
+    task.ext.when == null || task.ext.when
+
     script:
     def args               = task.ext.args   ?: ""
     def prefix             = task.ext.prefix ?: "${meta.id}"
@@ -40,4 +43,13 @@ process ENA_WEBIN_CLI_WRAPPER {
       ${test_flag} \\
       ${args}
     """
+
+    stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    if (webincli_mode == "submit") {
+        """
+        touch ${prefix}_accessions.tsv
+        """
+    }
+    // there is no file for mode=validate
 }

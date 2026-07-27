@@ -43,38 +43,20 @@ workflow READSUBMIT {
     def ch_versions = channel.empty()
     def ch_multiqc_files = channel.empty()
 
-    // Create reads channel with proper metadata structure
+    // --------- Create reads channel with proper metadata structure
     reads_ch = ch_samplesheet
-        .map { row ->
-            def (meta_in, sample_accession, fastq_1, fastq_2,
-                 platform, instrument, library_source, library_selection, library_strategy,
-                 insert_size, library_name, description) = row
-            def meta = [
-                id: meta_in.id,
-                sample_accession: sample_accession,
-                single_end: fastq_2 ? false : true,
-                platform: platform,
-                instrument: instrument,
-                library_source: library_source,
-                library_selection: library_selection,
-                library_strategy: library_strategy,
-                insert_size: insert_size ?: null,
-                library_name: library_name ?: null,
-                description: description ?: null
-            ]
-
-            if (fastq_2 && fastq_2 != "") {
+        .map { meta, reads_1, reads_2 ->
+            def new_meta = meta + [single_end: !reads_2]
+            if ( !new_meta.single_end ) {
                 // If paired end reads
-                [meta, [file(fastq_1), file(fastq_2)]]
+                [new_meta, [reads_1, reads_2]]
             } else {
                 // If single end
-                [meta, file(fastq_1)]
+                [new_meta, reads_1]
             }
         }
 
-    if (!submission_study && !study_metadata) {
-        error("Either --submission_study or --study_metadata must be provided")
-    }
+    // --------- Register study if accession was not provided via --submission_study
     def study_accession_ch
     if (submission_study) {
         // Use provided study accession directly
@@ -94,7 +76,7 @@ workflow READSUBMIT {
             }
     }
 
-    // Generate reads manifest files
+    // --------- Generate reads manifest files
     CREATE_READS_MANIFEST(
         reads_ch,
         study_accession_ch.first()
@@ -106,6 +88,7 @@ workflow READSUBMIT {
             [meta, fastq, manifest]
         }
 
+    // --------- Upload data to ENA
     SUBMIT (
         submission_input,
         test_upload,
@@ -119,9 +102,7 @@ workflow READSUBMIT {
         true // skip_header - we want to keep the header from the first file and skip it for the rest
     )
 
-    //
-    // Collate and save software versions
-    //
+    // --------- Collate and save software versions
     def topic_versions = channel.topic("versions")
         .distinct()
         .branch { entry ->
@@ -148,9 +129,7 @@ workflow READSUBMIT {
             newLine: true
         )
 
-    //
-    // MODULE: MultiQC
-    //
+    // --------- MODULE: MultiQC
     ch_multiqc_files = ch_multiqc_files.mix(ch_collated_versions)
     def ch_summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
     def ch_workflow_summary = channel.value(paramsSummaryMultiqc(ch_summary_params))
