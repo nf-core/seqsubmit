@@ -261,9 +261,9 @@
                 },
                 "upload_tpa": {
                     "type": "boolean",
-                    "description": "Flag to control the type of assembly study (third party assembly (TPA) or not). TPA description: https://www.ncbi.nlm.nih.gov/genbank/tpa/.",
-                    "default": false,
-                    "help": "Use this flag if the study is a third party assembly (TPA). Default: false"
+                    "description": "Mark the assemblies as a Third PArty (TPA)",
+                    "help": "Set to true if the assembly was built from public sequence data (TPA) rather than original primary data. See NCBI TPA guidance: https://www.ncbi.nlm.nih.gov/genbank/tpa/",
+                    "default": false
                 },
                 "mode": {
                     "type": "string",
@@ -280,15 +280,15 @@
                 },
                 "is_private": {
                     "type": "boolean",
-                    "description": "Use that flag if you are referring to private data in ENA",
                     "default": false,
-                    "help": "This flag is used during metadata fetch steps. Specify if you are referring to private data (project/reads/assembly). That flag does NOT regulate privacy of your submission data (check --release_date)"
+                    "description": "Use that flag if you are referencing private data accessions in the samplesheet",
+                    "help": "Set to true when the referenced project/reads/assembly are still private in ENA, so metadata is fetched via authenticated access. Does NOT affect the privacy of your own submission, use --release_date for that"
                 },
                 "release_date": {
                     "type": "string",
                     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-                    "description": "Use that flag if you want to keep your data private after submission",
-                    "help": "This flag regulates when the created study for submission will become publically available and indexed on the ENA. If you want to keep your data private until a later date, you need to specify a DATE when it can become public (YYYY-MM-DD, max 2 years from now)"
+                    "description": "Date (YYYY-MM-DD) until which the newly created study stays private in ENA.",
+                    "help": "Sets the release date for the study created by the pipeline. Data stays private until this date, then is automatically released and indexed by ENA. Must be no more than 2 years from today. Omit to release the study publicly immediately."
                 },
                 "submission_study": {
                     "type": "string",
@@ -299,8 +299,8 @@
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
-                    "description": "Path to study metadata file (JSON, CSV, or TSV) for registering a new ENA study. Required when submission_study is not provided.",
-                    "help_text": "File containing study metadata fields (required: study_title and alias, optional: study_abstract, existing_study_type, etc.). Used by REGISTERSTUDY to create a new study in ENA when no existing submission_study accession is given. ENA documentation: https://ena-docs.readthedocs.io/en/latest/submit/study/programmatic.html",
+                    "description": "Path to a file (JSON, CSV, or TSV) with metadata for registering a new ENA study. Required if --submission_study is not set.",
+                    "help_text": "File containing study metadata fields (required: study_title, alias; optional: study_abstract, existing_study_type, etc.) used by the pipeline to register a new ENA study when no existing --submission_study accession is given. ENA docs: https://ena-docs.readthedocs.io/en/latest/submit/study/programmatic.html",
                     "fa_icon": "fas fa-file-alt"
                 },
                 "webincli_mode": {

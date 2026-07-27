@@ -186,7 +186,7 @@ To ensure consistency and maintainability of the nf-core/seqsubmit pipeline, con
 
 ### Code style
 
-The pipeline is organized into three separate workflows `(mode`s-) because each mode has distinct procedures and requirements. Future development should follow the same structure to maintain consistency and readability.
+The pipeline is organized into three separate workflows, one for each mode (mags, bins, metagenomic_assemblies, reads), because each data type has distinct submission procedures and metadata requirements. Future development should follow the same structure to maintain consistency and readability.
 
 If a new feature extends support for an **existing** data type (for example, _adding support for eukaryotic MAGs_), the corresponding logic should be integrated into the existing workflow rather than creating a new one.
 

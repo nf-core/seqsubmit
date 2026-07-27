@@ -125,7 +125,7 @@ If `NCBI_lineage` is already present in the input samplesheet, the value is reta
 
 Before classification, input FASTA files are normalized to a `.fasta` suffix by `RENAME_FASTA_FOR_CATPACK`. Classification is then run in bin mode (`CAT_pack bins`, followed by `CAT_pack add_names`).
 
-Database input is taken from `--cat_db` when provided; otherwise the workflow uses `nr` database identifier to download and prepare a CATPACK NCBI database. See [CAT_pack documentation](https://github.com/MGXlab/CAT_pack#downloading-preconstructed-database-files). There are two options available: `nr` - NCBI non-redundant protein database and `gtdb` (Genome Taxonomy Database (GTDB) proteins). We use NCBI proteins because ENA supports only NCBI format of taxonomy for submission. The resulting classification table is parsed, and the lineage field is written to `NCBI_lineage`.
+Database input is taken from `--cat_db` when provided; otherwise the workflow builds CAT_pack database from NCBI non-redundant protein database (`nr`). See [CAT_pack documentation](https://github.com/MGXlab/CAT_pack#downloading-preconstructed-database-files). There are two options available: `nr` - NCBI non-redundant protein database and `gtdb` (Genome Taxonomy Database (GTDB) proteins). We use NCBI proteins because ENA supports only NCBI format of taxonomy for submission. The resulting classification table is parsed, and the lineage field is written to `NCBI_lineage`.
 
 ### Completeness and contamination assessment
 

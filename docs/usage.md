@@ -337,7 +337,7 @@ In particular, the CAT_pack database is extremely large and may take a long time
   - provide the path to a local database with `--checkm2_db`, otherwise the pipeline downloads the version specified with `--checkm2_db_download_id` (by default Zenodo accession `14897628`).
 
 - CAT_pack:
-  - provide the path to a local database (containing `tax/` and `db/` folders or a `tar.gz` archive) with `--cat_db`, otherwise the pipeline constructs NCBI non-redundant protein database.
+  - provide the path to a local database (containing `tax/` and `db/` folders or a `tar.gz` archive) with `--cat_db`, otherwise the pipeline builds CAT_pack DB from NCBI non-redundant protein database (`nr`).
 
 See the [CAT_pack documentation](https://github.com/MGXlab/CAT_pack) and [CheckM2 documentation](https://github.com/chklovski/CheckM2) for more details on usage and creation of databases.
 
@@ -352,7 +352,7 @@ In addition to the [common parameters](#running-the-pipeline):
 | -------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | `--upload_tpa` | No       | Mark assemblies as [third party assemblies (TPA)](#third-party-assemblies-tpa) when required. Default: `false`.                                |
 | `--checkm2_db` | No       | Path to a local CheckM2 database. If omitted, downloads the version set by `--checkm2_db_download_id`. Default: `14897628` (Zenodo accession). |
-| `--cat_db`     | No       | Path to a local CAT_pack database. If omitted, constructs the NCBI non-redundant protein database.                                             |
+| `--cat_db`     | No       | Path to a local CAT_pack database. If omitted, builds CAT_pack DB from NCBI non-redundant protein database (`nr`).                             |
 
 Example `mags` mode upload to TEST server, run command with docker:
 
