@@ -10,7 +10,7 @@
             "id": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "description": "Unique assembly identifier",
+                "description": "A unique identifier for this data entry. Must be globally unique within the input dataset",
                 "errorMessage": "ID must be provided and cannot contain spaces",
                 "meta": ["id"]
             },
@@ -19,7 +19,7 @@
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.(fa|fasta|fna)\\.gz$",
-                "errorMessage": "FASTA file must be provided and have extension '.fa.gz', '.fasta.gz', '.fna.gz'",
+                "errorMessage": "Path to assembly contigs in FASTA format compressed with gzip",
                 "description": "Metagenomic assembly FASTA file"
             },
             "fastq_1": {
@@ -35,8 +35,9 @@
                         "maxLength": 0
                     }
                 ],
+                "default": null,
                 "errorMessage": "FASTQ file must have extension '.fq' or '.fastq' (optionally gzipped)",
-                "description": "Forward reads if paired-end or single-end reads FASTQ file"
+                "description": "Path to single-end/paired-end forward reads in FASTQ format (optionally gzipped). Required if coverage is not provided"
             },
             "fastq_2": {
                 "anyOf": [
@@ -53,7 +54,7 @@
                 ],
                 "default": null,
                 "errorMessage": "FASTQ file for reverse reads must have extension '.fq' or '.fastq' (optionally gzipped)",
-                "description": "Reverse reads FASTQ file if paired-end. Leave empty for single-end reads"
+                "description": "Path to reverse reads in FASTQ format for paired-end data (optionally gzipped). Leave empty for single-end reads"
             },
             "coverage": {
                 "anyOf": [
@@ -68,14 +69,14 @@
                 ],
                 "default": null,
                 "errorMessage": "Coverage must be a positive number or empty",
-                "description": "Estimated value of assembly coverage",
+                "description": "Estimated sequencing depth of the assembly (optional). If this value is missing, it is computed automatically during pipeline execution when reads are provided",
                 "meta": ["coverage"]
             },
             "run_accession": {
                 "type": "string",
                 "pattern": "^\\S+$",
                 "errorMessage": "Accession must be provided and cannot contain spaces",
-                "description": "Accession of the run used to generate the assembly",
+                "description": "ENA run accession for the reads used to generate the metagenomic assembly. Reads must already be submitted to ENA",
                 "meta": ["run_accession"]
             },
             "assembler": {
@@ -89,7 +90,7 @@
                 "anyOf": [{ "type": "string" }, { "type": "number" }],
                 "pattern": "^\\S+$",
                 "errorMessage": "Assembler version must be provided and cannot contain spaces",
-                "description": "Version of the assembler software used to generate the assembly, e.g 1.0.0",
+                "description": "Version of the assembler software used to generate the assembly, e.g. 1.0.0",
                 "meta": ["assembler_version"]
             }
         },
