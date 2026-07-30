@@ -18,7 +18,7 @@
                 "type": "string",
                 "pattern": "^\\S+$",
                 "errorMessage": "Sample accession must be provided and cannot contain spaces",
-                "description": "ENA sample accession (starting with SAMEA) of the sample used to generate raw reads",
+                "description": "ENA sample accession (starting with SAMEA) of the sample used to generate raw reads. Samples must already be submitted to ENA",
                 "meta": ["sample_accession"]
             },
             "fastq_1": {

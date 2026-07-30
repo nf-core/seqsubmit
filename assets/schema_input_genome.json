@@ -19,12 +19,12 @@
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.(fa|fasta|fna)\\.gz$",
-                "errorMessage": "Path to MAG/bin sequences in FASTA format compressed with `gzip`. All names of the FASTA files must be unique to prevent pipeline errors. File should contain at least one sequence",
-                "description": "MAG/bin sequence file"
+                "errorMessage": "Path to the FASTA file must be provided, cannot contain spaces and must have extension '.fa.gz', '.fasta.gz', or '.fna.gz'",
+                "description": "Path to MAG/bin sequences in FASTA format compressed with `gzip`. All names of the FASTA files must be unique to prevent pipeline errors. File should contain at least one sequence"
             },
             "accession": {
                 "type": "string",
-                "description": "ENA accession of the run or metagenomic assembly used to generate the MAG/bin",
+                "description": "ENA accession of the run or metagenomic assembly used to generate the MAG/bin. Reads or assembly must already be submitted to ENA",
                 "meta": ["accession"]
             },
             "fastq_1": {
@@ -73,7 +73,7 @@
             },
             "binning_parameters": {
                 "type": "string",
-                "description": "Arguments used to bin data different from default, e.g. -min_contig_length 1000, otherwise put 'default'",
+                "description": "Arguments used to bin data different from default, e.g. -min_contig_length 1000, otherwise use 'default'",
                 "meta": ["binning_parameters"]
             },
             "stats_generation_software": {
@@ -151,7 +151,7 @@
             },
             "environmental_medium": {
                 "type": "string",
-                "description": "Material displaced by the sample, or the material in which the sample was embedded before sampling, for example 'mucus', 'lake water'. It is recommended to use subclasses of EnvO 'environmental material' class (http://purl.obolibrary.org/obo/ENVO_00010483). Documentation: https://github.com/EnvironmentOntology/envo/wiki/Using-ENVO-with-MIxS",
+                "description": "Material surrounding and in contact with the sample, for example 'mucus', 'lake water'. It is recommended to use subclasses of EnvO 'environmental material' class (http://purl.obolibrary.org/obo/ENVO_00010483). Documentation: https://github.com/EnvironmentOntology/envo/wiki/Using-ENVO-with-MIxS",
                 "meta": ["environmental_medium"]
             },
             "RNA_presence": {

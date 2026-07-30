@@ -19,8 +19,8 @@
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.(fa|fasta|fna)\\.gz$",
-                "errorMessage": "Path to assembly contigs in FASTA format compressed with gzip",
-                "description": "Metagenomic assembly FASTA file"
+                "errorMessage": "FASTA file must be provided and have extension '.fa.gz', '.fasta.gz', '.fna.gz'",
+                "description": "Path to assembly contigs in FASTA format compressed with gzip"
             },
             "fastq_1": {
                 "anyOf": [
