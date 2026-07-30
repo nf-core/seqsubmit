@@ -48,39 +48,22 @@ workflow ASSEMBLYSUBMIT {
     def ch_versions = channel.empty()
     def ch_multiqc_files = channel.empty()
 
-    // Create assembly channel with proper metadata structure
+    // --------- Create assembly channel with proper metadata structure
     assembly_fasta = ch_samplesheet
-        .map { row ->
-            def meta = [
-                id: row[0].id,
-                single_end: row[3] ? false : true,
-                coverage: row[4] ?: null,
-                run_accession: row[5],
-                assembler: row[6],
-                assembler_version: row[7]
-            ]
-            [meta, file(row[1])]
+        .map { meta, fasta, reads_1, reads_2 ->
+            def new_meta = meta + [single_end: !reads_2]
+            [new_meta, fasta]
         }
 
+    // --------- Create reads channel with proper metadata structure
     reads_fastq = ch_samplesheet
         .filter { row -> row[2] && row[2] != "" } // Check if fastq_1 exists and is not empty
-        .map { row ->
-            def meta = [
-                id: row[0].id,
-                single_end: row[3] ? false : true,
-                coverage: row[4] ?: null,
-                run_accession: row[5],
-                assembler: row[6],
-                assembler_version: row[7]
-            ]
-
-            if (row[3] && row[3] != "") {
-                // If paired end reads
-                [meta, [file(row[2]), file(row[3])]]
-            } else {
-                // If single end
-                [meta, file(row[2])]
-            }
+        .map { meta, fasta, reads_1, reads_2 ->
+            def new_meta = meta + [single_end: !reads_2]
+            def reads = new_meta.single_end
+                ? [reads_1]
+                : [reads_1, reads_2]
+            [new_meta, reads]
         }
 
     // --------- Check fasta files are properly formatted and filter out files with less than 2 contigs
@@ -88,15 +71,15 @@ workflow ASSEMBLYSUBMIT {
         assembly_fasta
     )
 
+    // --------- Assembly coverage calculation
     // For assemblies without coverage, calculate coverage with CoverM
-    FASTA_VALIDATION.out.valid_fastas
-        .filter { meta, _fasta -> meta.coverage == null }
+    coverm_input = FASTA_VALIDATION.out.valid_fastas
+        .filter { meta, _fasta -> !(meta.coverage) }
         .join(reads_fastq)
         .multiMap { meta, fasta, fastq ->
             assembly: [ meta, fasta ]
             reads: [ meta, fastq ]
         }
-        .set { coverm_input }
 
     COVERM_CONTIG (
         coverm_input.reads,
@@ -119,7 +102,7 @@ workflow ASSEMBLYSUBMIT {
         }
 
     // Update metadata with calculated coverage
-    FASTA_VALIDATION.out.valid_fastas
+    assemblies_with_added_cov_ch = FASTA_VALIDATION.out.valid_fastas
         .filter { meta, _fasta -> meta.coverage == null }
         .join( average_coverage_ch )
         .map { meta, fasta, avg_coverage ->
@@ -127,7 +110,6 @@ workflow ASSEMBLYSUBMIT {
             updated_meta.coverage = avg_coverage
             [updated_meta, fasta]
         }
-        .set { assemblies_with_added_cov_ch }
 
     // Combine assemblies with updated metadata (for samples that had coverage calculated)
     // and assemblies that already had coverage
@@ -135,20 +117,18 @@ workflow ASSEMBLYSUBMIT {
         .filter { meta, _fasta -> meta.coverage != null }
         .mix( assemblies_with_added_cov_ch )
 
-    // Create CSV with assembly metadata for manifest generation
+    // --------- Create CSV with assembly metadata for manifest generation
     CREATE_ASSEMBLY_METADATA_CSV(
         assemblies_with_coverage
     )
 
-    // Concatenate assembly metadata CSVs into single file to publish
+    // --------- Concatenate assembly metadata CSVs into single file to publish
     CONCAT_METADATA (
         CREATE_ASSEMBLY_METADATA_CSV.out.csv.map { _meta, file -> file }.collect().map { files -> [ [id: "assemblies_metadata"], files ] },
         'true' // skip_header - we want to keep the header from the first file and skip it for the rest
     )
 
-    if (!submission_study && !study_metadata) {
-        error("Either --submission_study or --study_metadata must be provided")
-    }
+    // --------- Register study if accession was not provided via --submission_study
     def study_accession_ch
     if (submission_study) {
         // Use provided study accession directly
@@ -168,7 +148,7 @@ workflow ASSEMBLYSUBMIT {
             }
     }
 
-    // Generate assembly manifest files and submit them to ENA
+    // --------- Generate assembly manifest files and submit them to ENA
     GENERATE_ASSEMBLY_MANIFEST(
         assemblies_with_coverage.join(CREATE_ASSEMBLY_METADATA_CSV.out.csv),
         study_accession_ch.first(),
@@ -176,8 +156,8 @@ workflow ASSEMBLYSUBMIT {
         test_upload,
         is_private
     )
-    ch_versions = ch_versions.mix(GENERATE_ASSEMBLY_MANIFEST.out.versions.first())
 
+    // --------- Upload data to ENA
     SUBMIT (
         assemblies_with_coverage.join(GENERATE_ASSEMBLY_MANIFEST.out.manifest),
         test_upload,
@@ -191,9 +171,7 @@ workflow ASSEMBLYSUBMIT {
         'true' // skip_header - we want to keep the header from the first file and skip it for the rest
     )
 
-    //
-    // Collate and save software versions
-    //
+    // --------- Collate and save software versions
     def topic_versions = channel.topic("versions")
         .distinct()
         .branch { entry ->
@@ -220,9 +198,7 @@ workflow ASSEMBLYSUBMIT {
             newLine: true
         )
 
-    //
-    // MODULE: MultiQC
-    //
+    // --------- MODULE: MultiQC
     ch_multiqc_files = ch_multiqc_files.mix(ch_collated_versions)
     def ch_summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
     def ch_workflow_summary = channel.value(paramsSummaryMultiqc(ch_summary_params))
@@ -232,8 +208,8 @@ workflow ASSEMBLYSUBMIT {
         : file("${projectDir}/assets/methods_description_template.yml", checkIfExists: true)
     def ch_methods_description = channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: true))
-    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_ACCESSIONS.out.file_out.map{meta, file -> file})
-    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_METADATA.out.file_out.map{meta, file -> file})
+    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_ACCESSIONS.out.file_out.map{_meta, file -> file})
+    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_METADATA.out.file_out.map{_meta, file -> file})
     MULTIQC(
         ch_multiqc_files.flatten().collect().map { files ->
             [

@@ -13,24 +13,32 @@ process RENAME_FASTA_FOR_CATPACK {
     tuple val(meta), path("output/*.fasta"), emit: renamed_fasta
     tuple val("${task.process}"), val('bash'), eval('bash --version | head -n1 | sed "s/.*version //; s/ .*//"'), topic: versions
 
+    when:
+    task.ext.when == null || task.ext.when
 
     script:
-        def is_compressed = fasta.name.endsWith('.gz')
-        extension = '.fasta'
-        def base = fasta.name
-            .replaceAll(/\.gz$/, '')
-            .replaceAll(/\.(fa|fasta|fna)$/, '')
-        def output_name = base + extension
+    def is_compressed = fasta.name.endsWith('.gz')
+    extension = '.fasta'
+    def base = fasta.name
+        .replaceAll(/\.gz$/, '')
+        .replaceAll(/\.(fa|fasta|fna)$/, '')
+    def output_name = base + extension
 
-        if (is_compressed) {
-            """
-            mkdir -p output
-            gunzip -c ${fasta} > output/${output_name}
-            """
-        } else {
-            """
-            mkdir -p output
-            ln -s ../${fasta} output/${output_name}
-            """
-        }
+    if (is_compressed) {
+        """
+        mkdir -p output
+        gunzip -c ${fasta} > output/${output_name}
+        """
+    } else {
+        """
+        mkdir -p output
+        ln -s ../${fasta} output/${output_name}
+        """
+    }
+
+    stub:
+    """
+    mkdir -p output
+    touch output/${meta.id}.fasta
+    """
 }

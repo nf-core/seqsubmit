@@ -18,8 +18,8 @@
                     "exists": true,
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.(csv|tsv|yaml|yml|json)$",
-                    "description": "Path to comma-separated file describing the data to be submitted. Format depends on the pipeline mode (mags/bins/metagenomic_assemblies/reads).",
-                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with a set of columns depending on the type of data being submitted. See [usage docs](https://nf-co.re/seqsubmit/usage#samplesheet-input).",
+                    "description": "Path to samplesheet describing the data to be submitted (supported formats: csv, tsv, yaml, yml, json). Columns/fields depend on the pipeline mode",
+                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a file in supported format with a set of columns depending on the type of data being submitted. See [usage docs](https://nf-co.re/seqsubmit/usage#samplesheet-input).",
                     "fa_icon": "fas fa-file-csv"
                 },
                 "outdir": {
@@ -43,11 +43,11 @@
             }
         },
         "rna_detection_options": {
-            "title": "RNA detection options",
+            "title": "rRNA and tRNA detection options",
             "type": "object",
             "fa_icon": "fas fa-university",
-            "description": "Parameters used to make a decision about presence/absence of RNA in data",
-            "help_text": "ENA requires a boolean value (True/False) defining RNA. Decision of presence/absence of RNA is based on number of rRNA and tRNA. If both values are bigger than their corresponding limits - RNA is present (True), otherwise - not (False).",
+            "description": "Parameters affecting a decision about presence/absence of tRNA and rRNA genes (RNA_presence) in a genome",
+            "help_text": "The value of RNA_presence is based on the number of rRNA and tRNA. If at least 18 tRNAs are detected and 16S, 23S, and 5S rRNA subunits pass the recovery threshold - RNA_presence is True, otherwise - False. The resulting value is a decisive factor affecting MISAG/MIMAG assembly quality classification of a genome.",
             "properties": {
                 "rrna_limit": {
                     "type": "number",
@@ -57,7 +57,7 @@
                 },
                 "trna_limit": {
                     "type": "number",
-                    "description": "Minimum number of tRNA.",
+                    "description": "Minimum number of tRNA genes detected to count tRNA as present. This value is defined by the MISAG/MIMAG standard and must not be modified.",
                     "default": 18,
                     "fa_icon": "fas fa-users-cog"
                 }
@@ -71,17 +71,10 @@
             "help_text": "Provide a path to pre-downloaded DB or DB id for automatic download",
             "properties": {
                 "cat_db": {
-                    "type": "string",
+                    "format": "file-path",
                     "description": "Path to local CAT_pack DB",
-                    "help": "Database should be pre-downloaded using CATpack commands. The folder with database should contain sub-folders 'db' with files .dmnd, .fastaid2LCAtaxid, .taxids_with_multiple_offspring, etc. And subfolder 'tax' that should contain taxonomy files like .dmp, .taxdump.tar.gz, .prot.accession2taxid.FULL.gz, etc",
+                    "help_text": "Database should be pre-downloaded using CATpack commands. The folder with database should contain sub-folders 'db' with files .dmnd, .fastaid2LCAtaxid, .taxids_with_multiple_offspring, etc, as well as subfolder 'tax' that should contain taxonomy files like .dmp, .taxdump.tar.gz, .prot.accession2taxid.FULL.gz, etc",
                     "fa_icon": "fas fa-users-cog"
-                },
-                "cat_db_download_id": {
-                    "type": "string",
-                    "description": "CAT_pack database ID for download",
-                    "help": "There are two options available: nr (default) NCBI non-redundant protein database and gtdb (Genome Taxonomy Database (GTDB) proteins). We use NCBI proteins because ENA supports only NCBI format of taxonomy for submission",
-                    "fa_icon": "fas fa-users-cog",
-                    "default": "nr"
                 }
             }
         },
@@ -93,13 +86,13 @@
             "help_text": "These options are used to run Checkm2 that will calculate completeness and contamination of genome if those were not provided as input",
             "properties": {
                 "checkm2_db": {
-                    "type": "string",
-                    "description": "Path to pre-downloaded checkm2 database",
+                    "format": "file-path",
+                    "description": "Path to pre-downloaded CheckM2 database. If omitted, downloads the version set by `--checkm2_db_download_id`",
                     "fa_icon": "fas fa-users-cog"
                 },
                 "checkm2_db_download_id": {
                     "type": "integer",
-                    "description": "Zenodo ID for checkm2 database download",
+                    "description": "Zenodo ID for CheckM2 database download",
                     "default": 14897628,
                     "fa_icon": "fas fa-users-cog"
                 }
@@ -263,39 +256,39 @@
             "properties": {
                 "centre_name": {
                     "type": "string",
-                    "description": "The center name of the submitter (mandatory for broker accounts).",
-                    "help": "ena-webin-cli argument -centerName: the center name of the submitter (mandatory for broker accounts)."
+                    "description": "Name of the submitter's organisation (mandatory for broker accounts).",
+                    "help_text": "ena-webin-cli argument -centerName: the center name of the submitter (mandatory for broker accounts)."
                 },
                 "upload_tpa": {
                     "type": "boolean",
-                    "description": "Flag to control the type of assembly study (third party assembly or not)",
-                    "default": false,
-                    "help": "Use this flag if the study is a third party assembly (TPA). Default: false"
+                    "description": "Mark the assemblies as a Third PArty (TPA)",
+                    "help_text": "Set to true if the assembly was built from public sequence data (TPA) rather than original primary data. See NCBI TPA guidance: https://www.ncbi.nlm.nih.gov/genbank/tpa/",
+                    "default": false
                 },
                 "mode": {
                     "type": "string",
                     "default": null,
-                    "description": "Type of upload",
+                    "description": "Type of the data to be submitted",
                     "help_text": "Different types of data require specific upload steps. That mode controls what upload workflow to run depending on type of data (mags/bins/metagenomic_assemblies/reads)",
                     "enum": ["mags", "bins", "metagenomic_assemblies", "reads"]
                 },
                 "test_upload": {
                     "type": "boolean",
-                    "description": "Upload to TEST server instead of LIVE",
+                    "description": "Upload to ENA TEST server instead of LIVE server",
                     "default": true,
-                    "help": "Use that flag for development purposes or for validation of your submissions. Submission would be done to TEST ENA server instead of LIVE server. TEST server holds data 24h and removes afterwords. LIVE server does not have option to modify your submission, you can only suppress data and re-upload"
+                    "help_text": "Use that flag for development purposes or for validation of your submissions. Submission would be done to TEST ENA server instead of LIVE server. TEST server holds data 24h and removes afterwords. LIVE server does not have option to modify your submission, you can only suppress data and re-upload"
                 },
                 "is_private": {
                     "type": "boolean",
-                    "description": "Use that flag if you are referring to private data in ENA",
                     "default": false,
-                    "help": "This flag is used during metadata fetch steps. If you are referring to private data (project/reads/assembly) set to True. That flag does NOT regulate privacy of your submission data (check --release_date)"
+                    "description": "Use that flag if you are referencing private data accessions in the samplesheet",
+                    "help_text": "Set to true when the referenced project/reads/assembly are still private in ENA, so metadata is fetched via authenticated access. Does NOT affect the privacy of your own submission, use --release_date for that"
                 },
                 "release_date": {
                     "type": "string",
                     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-                    "description": "Use that flag if you want to keep your data private after submission",
-                    "help": "This flag regulates privacy of created study for submission. If you want to keep your data private you need to specify a DATE when it can become public (YYYY-MM-DD, max 2 years from now)"
+                    "description": "Date (YYYY-MM-DD) until which the newly created study stays private in ENA.",
+                    "help_text": "Sets the release date for the study created by the pipeline. Data stays private until this date, then is automatically released and indexed by ENA. Must be no more than 2 years from today. Omit to release the study publicly immediately."
                 },
                 "submission_study": {
                     "type": "string",
@@ -306,16 +299,16 @@
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
-                    "description": "Path to study metadata file (JSON, CSV, or TSV) for registering a new ENA study. Required when submission_study is not provided.",
-                    "help_text": "File containing study metadata fields (required: study_title and alias, optional: study_abstract, existing_study_type, etc.). Used by REGISTERSTUDY to create a new study in ENA when no existing submission_study accession is given.",
+                    "description": "Path to a file (JSON, CSV, or TSV) with metadata for registering a new ENA study. Required if --submission_study is not set.",
+                    "help_text": "File containing study metadata fields (required: study_title, alias; optional: study_abstract, existing_study_type, etc.) used by the pipeline to register a new ENA study when no existing --submission_study accession is given. ENA docs: https://ena-docs.readthedocs.io/en/latest/submit/study/programmatic.html",
                     "fa_icon": "fas fa-file-alt"
                 },
                 "webincli_mode": {
                     "type": "string",
-                    "description": "Webin-CLI mode of operation",
+                    "description": "Webin-CLI mode for ENA interaction: `submit` uploads data, `validate` performs validation only.",
                     "default": "submit",
                     "enum": ["submit", "validate"],
-                    "help": "Controls ENA Webin-CLI mode. Use `submit` to upload data or `validate` to run validation only. Default: submit."
+                    "help_text": "Controls ENA Webin-CLI mode. `validate` mode checks correctness of manifest files, data access and validity. `submit` mode does validation and push data to ENA server. Default: submit."
                 }
             }
         }

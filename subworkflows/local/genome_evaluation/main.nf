@@ -20,32 +20,26 @@ include { CHECKM2_PREDICT          } from '../../../modules/nf-core/checkm2/pred
 workflow GENOME_EVALUATION {
 
     take:
-    ch_fasta                // channel: [ val(meta), path(fasta) ]
-    ch_checkm2_db           // channel: [ val(meta), path(db) ] - pre-built db as directory
-                            //          provide channel.empty() to trigger automatic download via ch_checkm2_db_download_id
-    ch_checkm2_db_download_id // channel: [ val(meta), val(db_id) ] - db ID for CHECKM2_DATABASEDOWNLOAD (e.g. '1234567')
-                            //          only used if ch_checkm2_db is empty
+    ch_fasta                    // channel: [ val(meta), path(fasta) ]
+    ch_checkm2_db               // val: path to local CheckM2 database or null to trigger automatic download
+    ch_checkm2_db_download_id   // val: CheckM2 database Zenodo download ID
 
     main:
-    ch_versions = channel.empty()
 
     //
     // Database preparation
     //
+    ch_do_download = ch_fasta
+        .first()
+        .map { _meta_fasta -> ch_checkm2_db_download_id }
 
     // Download and prepare db from scratch if no pre-built db provided
-    // Only trigger if ch_fasta has items
-    ch_download_trigger = ch_checkm2_db
-        .count()
-        .filter { count -> count == 0 }  // Only proceed if ch_checkm2_db is empty
-        .combine(ch_fasta.first())
-        .combine(ch_checkm2_db_download_id)
-        .map { _count, _meta, _fasta, db_meta, db_id -> [db_meta, db_id] }
-
-    CHECKM2_DATABASEDOWNLOAD(ch_download_trigger)
-
-    // Combine db sources - one of these channels will be empty depending on inputs
-    ch_db = ch_checkm2_db.mix(CHECKM2_DATABASEDOWNLOAD.out.database).first()
+    if (ch_checkm2_db) {
+        ch_checkm2_db_ready = channel.value([[id: 'checkm2_db'], file(params.checkm2_db, checkIfExists: true)])
+    } else {
+        CHECKM2_DATABASEDOWNLOAD(ch_do_download)
+        ch_checkm2_db_ready = CHECKM2_DATABASEDOWNLOAD.out.database
+    }
 
     //
     // Genome evaluation
@@ -53,7 +47,7 @@ workflow GENOME_EVALUATION {
 
     CHECKM2_PREDICT(
         ch_fasta,
-        ch_db,
+        ch_checkm2_db_ready,
     )
 
     emit:

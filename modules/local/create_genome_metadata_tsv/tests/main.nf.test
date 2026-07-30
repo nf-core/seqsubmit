@@ -24,11 +24,50 @@ nextflow_process {
                         contamination: '1.2',
                         genome_coverage: '42.7',
                         metagenome: 'marine metagenome',
-                        co_assembly: 'No',
+                        co_assembly: false,
                         broad_environment: 'marine biome',
                         local_environment: 'coastal water',
                         environmental_medium: 'seawater',
-                        RNA_presence: 'Yes',
+                        RNA_presence: true,
+                        NCBI_lineage: 'Bacteria;Proteobacteria;Gammaproteobacteria'
+                    ],
+                    file('https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/genome/NC_045512.2/GCF_009858895.2_ASM985889v3_genomic.200409.fna.gz')
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+
+    }
+
+    test("test_create_genome_metadata_tsv_bool_reversed") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [
+                        id: 'test_genome',
+                        accession: 'SRR123456',
+                        assembly_software: 'SPAdes_v3.15.5',
+                        binning_software: 'MetaBAT2_v2.15',
+                        binning_parameters: '--minContig 1500',
+                        stats_generation_software: 'CheckM2_v1.0.0',
+                        completeness: '98.4',
+                        contamination: '1.2',
+                        genome_coverage: '42.7',
+                        metagenome: 'marine metagenome',
+                        co_assembly: true,
+                        broad_environment: 'marine biome',
+                        local_environment: 'coastal water',
+                        environmental_medium: 'seawater',
+                        RNA_presence: false,
                         NCBI_lineage: 'Bacteria;Proteobacteria;Gammaproteobacteria'
                     ],
                     file('https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/genome/NC_045512.2/GCF_009858895.2_ASM985889v3_genomic.200409.fna.gz')
@@ -65,11 +104,11 @@ nextflow_process {
                         contamination: '1.2',
                         genome_coverage: '42.7',
                         metagenome: 'marine metagenome',
-                        co_assembly: 'No',
+                        co_assembly: true,
                         broad_environment: 'marine biome',
                         local_environment: 'coastal water',
                         environmental_medium: 'seawater',
-                        RNA_presence: 'Yes',
+                        RNA_presence: false,
                         NCBI_lineage: 'Bacteria;Proteobacteria;Gammaproteobacteria'
                     ],
                     file('https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/genome/NC_045512.2/GCF_009858895.2_ASM985889v3_genomic.200409.fna.gz')

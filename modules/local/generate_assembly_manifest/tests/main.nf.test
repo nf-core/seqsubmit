@@ -12,17 +12,16 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = [
+                input[0] = Channel.of([
                     [ id:'test' ],
                     file(params.pipelines_testdata_base_path + "/test_data/assembly/contigs.fasta.gz", checkIfExists: true),
                     file(params.pipelines_testdata_base_path + "/samplesheets/samplesheet_generatemanifest.csv", checkIfExists: true)
-                ]
+                ])
                 input[1] = "PRJ12345"
                 input[2] = false
                 input[3] = true
                 input[4] = false
                 """
-
             }
         }
 
@@ -30,9 +29,6 @@ nextflow_process {
         assert process.success
         assertAll(
             // Only snapshot versions, not the manifest because it contains a timestamp
-            { assert snapshot(
-                path(process.out.versions[0]).yaml
-            ).match() },
             { assert process.out.manifest.size() == 1 },
             { assert process.out.manifest[0][1].toString().endsWith(".manifest") },
             {
@@ -76,8 +72,7 @@ nextflow_process {
             assert process.success
             assertAll(
                 { assert snapshot(
-                    process.out,
-                    path(process.out.versions[0]).yaml
+                    process.out
                 ).match() }
             )
         }

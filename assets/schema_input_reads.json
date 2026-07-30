@@ -7,18 +7,19 @@
     "items": {
         "type": "object",
         "properties": {
-            "sample": {
+            "id": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "errorMessage": "Sample must be provided and cannot contain spaces",
+                "errorMessage": "ID must be provided and cannot contain spaces",
                 "meta": ["id"],
-                "description": "Unique experiment/run name"
+                "description": "Unique identifier of this particular data entry. Used as an experiment name"
             },
             "sample_accession": {
                 "type": "string",
                 "pattern": "^\\S+$",
                 "errorMessage": "Sample accession must be provided and cannot contain spaces",
-                "description": "ENA sample accession of the sample used to generate the reads"
+                "description": "ENA sample accession (starting with SAMEA) of the sample used to generate raw reads. Samples must already be submitted to ENA",
+                "meta": ["sample_accession"]
             },
             "fastq_1": {
                 "type": "string",
@@ -26,7 +27,7 @@
                 "exists": true,
                 "pattern": "^\\S+\\.(fq|fastq)(\\.gz)?$",
                 "errorMessage": "FASTQ file must have extension '.fq' or '.fastq' (optionally gzipped)",
-                "description": "Forward reads FASTQ file (single-end or paired-end)"
+                "description": "Path to single-end/paired-end forward reads in FASTQ format (optionally gzipped)"
             },
             "fastq_2": {
                 "anyOf": [
@@ -41,8 +42,9 @@
                         "maxLength": 0
                     }
                 ],
+                "default": null,
                 "errorMessage": "FASTQ file for reverse reads must have extension '.fq' or '.fastq' (optionally gzipped)",
-                "description": "Reverse reads FASTQ file if paired-end. Leave empty for single-end reads"
+                "description": "Path to reverse reads in FASTQ format for paired-end data (optionally gzipped). Leave empty for single-end reads"
             },
             "platform": {
                 "type": "string",
@@ -63,13 +65,15 @@
                     "ULTIMA",
                     "VELA_DIAGNOSTICS"
                 ],
-                "description": "Sequencing platform. Must be one of the ENA controlled vocabulary values listed in the enum."
+                "description": "Sequencing platform. Must be one of the ENA controlled vocabulary values listed in https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#metadata-validation.",
+                "meta": ["platform"]
             },
             "instrument": {
                 "type": "string",
                 "pattern": "^[^\\n]+$",
                 "errorMessage": "Instrument must be provided and cannot span multiple lines",
-                "description": "Sequencer model (e.g., 'Illumina HiSeq 2000', 'PacBio Sequel')"
+                "description": "Sequencer model (e.g., 'Illumina HiSeq 2000', 'PacBio Sequel'). Must be one of the allowed ENA controlled vocabulary values listed in https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#permitted-values-for-instrument",
+                "meta": ["instrument"]
             },
             "library_source": {
                 "type": "string",
@@ -84,7 +88,8 @@
                     "VIRAL RNA",
                     "OTHER"
                 ],
-                "description": "Library source. Must be one of the ENA controlled vocabulary values listed in the enum."
+                "description": "Library source type. Must be one of the allowed ENA controlled vocabulary values listed in https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#permitted-values-for-library-source",
+                "meta": ["library_source"]
             },
             "library_selection": {
                 "type": "string",
@@ -121,7 +126,8 @@
                     "other",
                     "unspecified"
                 ],
-                "description": "Library selection. Must be one of the ENA controlled vocabulary values listed in the enum."
+                "description": "Library selection. Must be one of the allowed ENA controlled vocabulary values listed in https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#permitted-values-for-library-selection",
+                "meta": ["library_selection"]
             },
             "library_strategy": {
                 "type": "string",
@@ -168,7 +174,8 @@
                     "Tethered Chromatin Conformation Capture",
                     "OTHER"
                 ],
-                "description": "Library strategy. Must be one of the ENA controlled vocabulary values listed in the enum."
+                "description": "Library strategy. Must be one of the ENA controlled vocabulary values listed in https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#permitted-values-for-library-strategy",
+                "meta": ["library_strategy"]
             },
             "insert_size": {
                 "anyOf": [
@@ -181,8 +188,10 @@
                         "maxLength": 0
                     }
                 ],
+                "default": null,
                 "errorMessage": "Insert size must be a positive number or empty",
-                "description": "Fragment/insert size for paired-end reads (optional)"
+                "description": "Fragment/insert size for paired-end reads (e.g., 500 for 500 bp inserts). Skip if not applicable.",
+                "meta": ["insert_size"]
             },
             "library_name": {
                 "anyOf": [
@@ -194,7 +203,8 @@
                         "maxLength": 0
                     }
                 ],
-                "description": "Descriptive library name (optional)"
+                "description": "Descriptive library name (optional)",
+                "meta": ["library_name"]
             },
             "description": {
                 "anyOf": [
@@ -206,11 +216,12 @@
                         "maxLength": 0
                     }
                 ],
-                "description": "Free-text description of the experiment (optional)"
+                "description": "Free-text description of the experiment (optional)",
+                "meta": ["description"]
             }
         },
         "required": [
-            "sample",
+            "id",
             "sample_accession",
             "fastq_1",
             "platform",

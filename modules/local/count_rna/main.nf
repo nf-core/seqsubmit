@@ -20,15 +20,19 @@ process COUNT_RNA {
     tuple val(meta), path("*rna_decision.tsv"), emit: rna_decision
     tuple val("${task.process}"), val('python'), eval('python --version 2>&1 | sed "s/Python //g"'), topic: versions
 
+    when:
+    task.ext.when == null || task.ext.when
+
     script:
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     count_rna.py \\
         --trna ${trnas_stats} \\
         --rrna ${rrna_gff} \\
-        --name ${meta.id} \\
+        --name ${prefix} \\
         --trna-limit ${min_trna_count} \\
         --rrna-limit ${min_rrna_percentage} \\
-        --output ${meta.id}_rna_decision.tsv
+        --output ${prefix}_rna_decision.tsv
     """
 
     stub:
