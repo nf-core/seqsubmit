@@ -1,0 +1,21 @@
+{
+    "registerstudy - stub": {
+        "content": [
+            {
+                "accessions": [
+                    [
+                        {
+                            "id": "example_study"
+                        },
+                        "example_study_accessions.json:md5,83600b2fb33a560c25351dbd4a9bdba2"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-06-25T22:14:15.99268",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    }
+}

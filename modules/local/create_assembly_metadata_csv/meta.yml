@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: "create_assembly_metadata_csv"
+description: Create input CSV metadata file for assembly_uploader tool
+keywords:
+  - assembly
+  - metadata
+  - ena
+  - submission
+tools:
+  - bash:
+      description: Bash shell scripting
+      homepage: https://www.gnu.org/software/bash/
+
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information:
+          - id: Sample identifier
+          - run_accession: ENA run accession
+          - coverage: Assembly coverage value
+          - assembler: Name of the assembler used
+          - assembler_version: Version of the assembler
+    - fasta:
+        type: file
+        description: Assembly FASTA file
+        pattern: "*.{fasta,fa,fna}"
+
+output:
+  - csv:
+      - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information (same as input)
+      - "*.csv":
+          type: file
+          description: CSV file containing assembly metadata to be used as input for the assembly_uploader
+          pattern: "*_assembly_metadata.csv"
+
+authors:
+  - "@ochkalova"
+maintainers:
+  - "@ochkalova"

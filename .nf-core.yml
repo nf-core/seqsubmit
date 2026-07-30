@@ -3,13 +3,13 @@ lint:
   files_exist:
     - conf/igenomes.config
     - conf/igenomes_ignored.config
+  nextflow_config:
+    - params.input
   files_unchanged:
     - .github/PULL_REQUEST_TEMPLATE.md
     - docs/images/nf-core-seqsubmit_logo_light.png
     - docs/images/nf-core-seqsubmit_logo_dark.png
     - assets/nf-core-seqsubmit_logo_light.png
-  nextflow_config:
-    - params.input
 nf_core_version: 4.0.3
 repository_type: pipeline
 template:

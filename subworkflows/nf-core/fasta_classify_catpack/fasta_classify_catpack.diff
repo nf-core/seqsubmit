@@ -1,0 +1,46 @@
+Changes in component 'nf-core/fasta_classify_catpack'
+'subworkflows/nf-core/fasta_classify_catpack/meta.yml' is unchanged
+Changes in 'fasta_classify_catpack/main.nf':
+--- subworkflows/nf-core/fasta_classify_catpack/main.nf
++++ subworkflows/nf-core/fasta_classify_catpack/main.nf
+@@ -32,11 +32,15 @@
+ 
+     // Handle pre-built db: untar if compressed, or use directory directly
+     ch_cat_db_input = ch_cat_db
+-        .branch { _meta, db ->
++        .map { meta, db ->
++            def dbPath = db instanceof Path ? db : file(db)
++            return [meta, dbPath]
++        }
++        .branch { meta, db ->
+             tar:   db.name.endsWith('.tar.gz')
+             dir:   db.isDirectory()
+             other: true
+-         }
++        }
+ 
+     ch_cat_db_input.other.subscribe { _meta, _db ->
+         error("Error: A DB was provided to FASTA_CLASSIFY_CATPACK that is not a `.tar.gz` or a directory.")
+@@ -51,8 +55,15 @@
+             taxonomy: [meta, dir / 'tax']
+         }
+ 
+-    // Download and prepare db from scratch if no pre-built db provided
+-    CATPACK_DOWNLOAD(ch_cat_db_download_id)
++    // Download and prepare db from scratch if no pre-built db provided - only trigger if ch_bins OR ch_contigs has items
++    // Mix both channels and use first item to trigger download once
++    ch_download_trigger = ch_bins
++        .mix(ch_contigs)
++        .first()
++        .combine(ch_cat_db_download_id)
++        .map { _meta, _fasta, db_meta, db_id -> [db_meta, db_id] }
++
++    CATPACK_DOWNLOAD(ch_download_trigger)
+ 
+     CATPACK_PREPARE(
+         CATPACK_DOWNLOAD.out.fasta,
+
+'subworkflows/nf-core/fasta_classify_catpack/tests/main.nf.test.snap' is unchanged
+'subworkflows/nf-core/fasta_classify_catpack/tests/nextflow.config' is unchanged
+'subworkflows/nf-core/fasta_classify_catpack/tests/main.nf.test' is unchanged
+************************************************************

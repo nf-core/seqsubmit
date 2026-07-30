@@ -1,0 +1,99 @@
+nextflow_process {
+
+    name "Test Process CREATE_READS_MANIFEST"
+    script "../main.nf"
+    process "CREATE_READS_MANIFEST"
+
+    tag "modules"
+    tag "create_reads_manifest"
+
+    test("CREATE_READS_MANIFEST - paired-end") {
+        when {
+            process {
+                """
+                input[0] = [
+                    [
+                        id: 'test_sample',
+                        sample_accession: 'SAMEA12345',
+                        platform: 'ILLUMINA',
+                        instrument: 'Illumina HiSeq 2000',
+                        library_source: 'METAGENOMIC',
+                        library_selection: 'RANDOM',
+                        library_strategy: 'WGS',
+                        insert_size: null,
+                        library_name: null,
+                        description: null
+                    ],
+                    [
+                        file(params.pipelines_testdata_base_path + 'test_data/reads/fastq_1.fastq.gz', checkIfExists: true),
+                        file(params.pipelines_testdata_base_path + 'test_data/reads/fastq_2.fastq.gz', checkIfExists: true)
+                    ]
+                ]
+                input[1] = "PRJEB12345"
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assertAll(
+                { assert process.out.manifest.size() == 1 },
+                { assert process.out.manifest[0][1].toString().endsWith(".manifest") },
+                {
+                    def manifestContent = path(process.out.manifest[0][1]).text
+                    def lines = manifestContent.readLines()
+                    // 8 required fields + 2 FASTQ entries = 10 lines
+                    assert lines.size() == 10
+                    assert manifestContent.contains("STUDY\tPRJEB12345")
+                    assert manifestContent.contains("SAMPLE\tSAMEA12345")
+                    assert manifestContent.contains("PLATFORM\tILLUMINA")
+                    assert manifestContent.contains("LIBRARY_STRATEGY\tWGS")
+                    // NAME has a timestamp suffix — check the base ID is present
+                    assert lines.any { it.startsWith("NAME\ttest_sample_") }
+                    // Both FASTQs present
+                    assert lines.count { it.startsWith("FASTQ\t") } == 2
+                }
+            )
+        }
+    }
+
+    test("CREATE_READS_MANIFEST - single-end") {
+        when {
+            process {
+                """
+                input[0] = [
+                    [
+                        id: 'test_se',
+                        sample_accession: 'SAMEA12345',
+                        platform: 'ILLUMINA',
+                        instrument: 'Illumina HiSeq 2000',
+                        library_source: 'METAGENOMIC',
+                        library_selection: 'RANDOM',
+                        library_strategy: 'WGS',
+                        insert_size: null,
+                        library_name: null,
+                        description: null
+                    ],
+                    file(params.pipelines_testdata_base_path + 'test_data/reads/fastq_1.fastq.gz', checkIfExists: true)
+                ]
+                input[1] = "PRJEB12345"
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assertAll(
+                { assert process.out.manifest.size() == 1 },
+                {
+                    def manifestContent = path(process.out.manifest[0][1]).text
+                    def lines = manifestContent.readLines()
+                    // 8 required fields + 1 FASTQ entry = 9 lines
+                    assert lines.size() == 9
+                    assert lines.count { it.startsWith("FASTQ\t") } == 1
+                }
+            )
+        }
+    }
+
+}

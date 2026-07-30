@@ -1,0 +1,36 @@
+nextflow_process {
+
+    name "Test Process ENA_WEBIN_CLI_WRAPPER"
+    script "../main.nf"
+    config "../nextflow.config"
+    process "ENA_WEBIN_CLI_WRAPPER"
+
+    tag "modules"
+    tag "ena_webin_cli_wrapper"
+
+    test("ENA_WEBIN_CLI_WRAPPER - validates assembly against ENA test server") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test' ],
+                    file(params.pipelines_testdata_base_path + "/test_data/assembly/contigs.fasta.gz", checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + "/test_data/assembly/test.manifest", checkIfExists: true)
+                ]
+                input[1] = true
+                input[2] = "validate"
+                input[3] = "genome"
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success }
+            )
+        }
+
+    }
+
+}

@@ -1,0 +1,100 @@
+def writeStudyMetadataJson = { String alias ->
+    def metadataDir = new File(System.getenv("NFT_WORKDIR") ?: ".nf-test", "tmp/registerstudy")
+    metadataDir.mkdirs()
+    def metadata = File.createTempFile("study_metadata_${alias}_", ".json", metadataDir)
+    metadata.text = """\
+{
+    "alias": "${alias}",
+    "study_title": "Example metagenome study",
+    "study_abstract": "Description of the study aims and methods.",
+    "existing_study_type": "Metagenomics"
+}
+"""
+    return metadata.absolutePath
+}
+
+nextflow_process {
+    name "Test Process REGISTERSTUDY"
+    script "../main.nf"
+    config "./nextflow.config"
+    process "REGISTERSTUDY"
+
+    tag "modules"
+    tag "registerstudy"
+
+    test("registerstudy - submission to ENA test server (JSON metadata)") {
+        def studyMetadata = writeStudyMetadataJson("study-example-json-registerstudy")
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'example_study' ],
+                    file("${studyMetadata}", checkIfExists: true)
+                ]
+                input[1] = true
+                input[2] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert path(process.out.accessions[0][1]).exists() },
+                { assert path(process.out.accessions[0][1]).json.submitted instanceof List },
+                { assert path(process.out.accessions[0][1]).json.failed.size() == 0 }
+            )
+        }
+    }
+
+    test("registerstudy - submission to ENA test server (TSV metadata)") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'example_study_tsv' ],
+                    file(params.pipelines_testdata_base_path + 'test_data/study_metadata/study_metadata.tsv', checkIfExists: true)
+                ]
+                input[1] = true
+                input[2] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert path(process.out.accessions[0][1]).exists() },
+                { assert path(process.out.accessions[0][1]).json.submitted instanceof List },
+                { assert path(process.out.accessions[0][1]).json.failed.size() == 0 }
+            )
+        }
+    }
+
+    test("registerstudy - stub") {
+        options "-stub"
+        def studyMetadata = writeStudyMetadataJson("study-example-json-registerstudy-stub")
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'example_study' ],
+                    file("${studyMetadata}", checkIfExists: true)
+                ]
+                input[1] = true
+                input[2] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(sanitizeOutput(process.out)).match() }
+            )
+        }
+    }
+}
