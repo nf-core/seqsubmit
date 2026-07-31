@@ -1,22 +1,29 @@
-repository_type: pipeline
-
-nf_core_version: 3.4.1
-
 lint:
+  container_configs: false
   files_exist:
     - conf/igenomes.config
     - conf/igenomes_ignored.config
-
+    - .github/workflows/linting_comment.yml
+  nextflow_config:
+    - params.input
+  files_unchanged:
+    - .github/PULL_REQUEST_TEMPLATE.md
+    - docs/images/nf-core-seqsubmit_logo_light.png
+    - docs/images/nf-core-seqsubmit_logo_dark.png
+    - assets/nf-core-seqsubmit_logo_light.png
+nf_core_version: 4.0.3
+repository_type: pipeline
 template:
-  org: nf-core
+  author: Martin Beracochea, Ekaterina Sakharova, Sofia Ochkalova, Evangelos Karatzas,
+    Tim Rozday
+  description: Submit sequences, assemblies, MAGs, etc., to public archives
+  force: false
+  is_nfcore: true
   name: seqsubmit
-  description: Submit sequences, assmeblies, mags, etc., to publich archives
-  author: Martin Beracochea, Ekaterina Sakharova, Sofiia Ochkalova, Evangelos Karatzas
-  version: 1.0.0dev
-  force: true
+  org: nf-core
   outdir: .
   skip_features:
     - igenomes
     - fastqc
     - gpu
-  is_nfcore: true
+  version: 1.0.0

@@ -1,0 +1,70 @@
+nextflow_process {
+
+    name "Test Process COUNT_RNA"
+    script "../main.nf"
+    process "COUNT_RNA"
+
+    tag "modules"
+    tag "count_rna"
+
+    test("COUNT_RNA completes with expected outputs") {
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test' ],
+                    file(params.pipelines_testdata_base_path + 'test_data/rna_search/ecoli.stats', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'test_data/rna_search/ecoli_bac.gff', checkIfExists: true)
+                ]
+                input[1] = 18
+                input[2] = 80
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assertAll(
+                { assert snapshot(
+                    process.out.rna_decision
+                ).match() },
+                { assert process.out.rna_decision.size() == 1 },
+                {
+                    def rnaDecisionContent = path(process.out.rna_decision[0][1]).text
+                    assert rnaDecisionContent.contains("True")
+                }
+            )
+        }
+
+    }
+
+    test("COUNT_RNA completes with expected outputs - stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test' ],
+                    file(params.pipelines_testdata_base_path + 'test_data/rna_search/ecoli.stats', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'test_data/rna_search/ecoli_bac.gff', checkIfExists: true)
+                ]
+                input[1] = 18
+                input[2] = 80
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assertAll(
+                { assert snapshot(
+                    process.out.rna_decision
+                ).match() }
+            )
+        }
+
+    }
+
+}

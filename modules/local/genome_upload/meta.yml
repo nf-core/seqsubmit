@@ -1,0 +1,67 @@
+name: genome_upload
+description: Python package to upload bins and MAGs to ENA (European Nucleotide Archive)
+keywords:
+  - ena upload
+  - ena submission
+  - mags submission
+  - bins submission
+tools:
+  - genome_upload:
+      description: |
+        Generate xmls and manifests necessary for genome submission
+        Link the genomes you want to submit with the samples/runs used to generate them
+      documentation: https://github.com/EBI-Metagenomics/genome_uploader
+      licence: ["Apache License"]
+input:
+  - table_for_upload:
+      type: file
+      description: |
+        Tab-separated table with required information for submission
+  - mags:
+      type: file
+      description: File in FASTA format containing targeted mag/bin/assembly for submission
+      pattern: "*.{fasta,fna,fas,fa}*"
+  - mags_or_bins_flag:
+      type: value
+      description: Upload mode selector. Expected values are `mags` or `bins`.
+  - submission_study:
+      type: value
+      description: ENA study accession used for submission.
+  - centre_name:
+      type: value
+      description: Submitting centre name required by ENA.
+  - is_tpa:
+      type: value
+      description: Whether genomes are submitted as TPA (Third Party Annotation).
+  - test_upload:
+      type: value
+      description: Whether to run in ENA test mode.
+  - is_private:
+      type: value
+      description: Referring to private data in ENA.
+
+output:
+  - manifests:
+      type: file
+      description: Manifest file required for submission with webin-cli
+      pattern: "*.manifest"
+  - ena_upload_backup_json:
+      type: file
+      description: JSON file with ENA metadata
+      pattern: "*ENA_backup.json"
+  - upload_genome_samples:
+      type: file
+      description: Genome samples
+      pattern: "*genome_samples.xml"
+  - upload_registered_mags:
+      type: file
+      description: Table with uploaded data
+      pattern: "registered_{MAGs,bins}*.tsv"
+  - upload_submission_xml:
+      type: file
+      description: XML file required for ENA submission
+      pattern: "*submission.xml"
+
+authors:
+  - "@KateSakharova"
+  - "@ochkalova"

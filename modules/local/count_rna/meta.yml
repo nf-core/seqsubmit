@@ -1,0 +1,58 @@
+name: count_rna
+description: Determine if sufficient tRNA and rRNA genes are present in a genome to classify genome quality according to MIMAG standards
+keywords:
+  - rna
+  - trna
+  - rrna
+  - quality control
+  - genome annotation
+  - submission
+tools:
+  - count_rna:
+      description: |
+        Script that parses tRNAscan-SE output and barrnap GFF output to determine
+        whether RNA genes are present in the genome. Returns 'Yes' if the number of
+        tRNA genes meets the threshold and all three rRNA subunits (16S, 23S, 5S)
+        have sufficient length coverage, otherwise 'No'.
+      licence: ["GPL v3"]
+
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [ id:'test' ]
+  - trnas_stats:
+      type: file
+      description: tRNA statistics file from tRNAscan-SE (.stats format)
+      pattern: "*.stats"
+  - rrna_gff:
+      type: file
+      description: rRNA annotation file from barrnap (GFF3 format)
+      pattern: "*.gff"
+  - min_trna_count:
+      type: value
+      description: Minimum required number of tRNA genes.
+  - min_rrna_percentage:
+      type: value
+      description: Minimum required percentage coverage for each rRNA subunit.
+
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [ id:'test' ]
+  - rna_decision:
+      type: file
+      description: |
+        Tab-separated file containing genome ID and decision (Yes/No) on whether
+        sufficient RNA genes are present
+      pattern: "*_rna_decision.tsv"
+
+authors:
+  - "@KateSakharova"
+  - "@ochkalova"
+maintainers:
+  - "@KateSakharova"
+  - "@ochkalova"
