@@ -42,6 +42,9 @@ input:
   - - test_upload:
         type: value
         description: Whether to submit to the ENA test server (`true`) instead of production.
+  - - release_date:
+        type: value
+        description: Date when data should become public (YYYY-MM-DD, max 2 years from now).
 
 output:
   - accessions:
@@ -56,11 +59,6 @@ output:
             JSON file containing the submission results with keys:
             submitted (newly created accessions) and failed.
           pattern: "*_accessions.json"
-  - versions:
-      - "versions.yml":
-          type: file
-          description: File containing software versions
-          pattern: "versions.yml"
 
 authors:
   - "@timrozday"

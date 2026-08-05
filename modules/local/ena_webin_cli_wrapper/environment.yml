@@ -3,5 +3,6 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - "bioconda::mgnify-pipelines-toolkit"
+  - "bioconda::mgnify-pipelines-toolkit=1.5.1"
   - "conda-forge::openjdk"
+  - "bioconda::ena-webin-cli=9.0.3"

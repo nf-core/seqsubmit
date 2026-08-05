@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+
+## Originally written by Tim Rozday, modified by Sofia Ochkalova and released under the MIT license.
+## See git repository (https://github.com/nf-core/seqsubmit) for full license text.
+
+
 from __future__ import annotations
 
 import csv
@@ -374,7 +379,6 @@ def _add_project_element(
 
     sp = ET.SubElement(project, "SUBMISSION_PROJECT")
     ET.SubElement(sp, "SEQUENCING_PROJECT")
-    # TODO: Check existing_study_type and new_study_type metadata fields, do we need those?
     study_type = study.get("existing_study_type")
     if study_type:
         attrs = ET.SubElement(

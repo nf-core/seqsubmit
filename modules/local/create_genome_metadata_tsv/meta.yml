@@ -35,7 +35,7 @@ input:
             - broad_environment: Broad environmental context
             - local_environment: Local environmental context
             - environmental_medium: Environmental medium description
-            - RNA_presence: RNA presence status ("Yes" or other)
+            - RNA_presence: status of tRNA and rRNA genes presence ("Yes" or other)
             - NCBI_lineage: NCBI taxonomic lineage
     - fasta:
         type: file
@@ -48,11 +48,6 @@ output:
           type: file
           description: Tab-separated TSV file with genome metadata
           pattern: "*.tsv"
-  - versions:
-      - versions.yml:
-          type: file
-          description: File containing software versions
-          pattern: "versions.yml"
 
 authors:
   - "@ochkalova"

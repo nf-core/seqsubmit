@@ -11,7 +11,11 @@
                     ]
                 ],
                 "1": [
-                    "versions.yml:md5,86772cb06086a42af60796d7570b30b8"
+                    [
+                        "GENERATE_ASSEMBLY_MANIFEST",
+                        "assembly_uploader",
+                        "1.3.5"
+                    ]
                 ],
                 "manifest": [
                     [
@@ -20,35 +24,27 @@
                         },
                         "test.manifest:md5,d41d8cd98f00b204e9800998ecf8427e"
                     ]
-                ],
-                "versions": [
-                    "versions.yml:md5,86772cb06086a42af60796d7570b30b8"
                 ]
-            },
-            {
-                "GENERATE_ASSEMBLY_MANIFEST": {
-                    "assembly_uploader": "1.3.4"
-                }
             }
         ],
+        "timestamp": "2026-07-22T21:23:02.99938",
         "meta": {
-            "nf-test": "0.9.0",
-            "nextflow": "25.04.1"
-        },
-        "timestamp": "2026-03-25T16:53:50.281438"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
     },
     "GENERATE_ASSEMBLY_MANIFEST completes with expected outputs": {
         "content": [
             {
                 "GENERATE_ASSEMBLY_MANIFEST": {
-                    "assembly_uploader": "1.3.4"
+                    "assembly_uploader": "1.3.5"
                 }
             }
         ],
+        "timestamp": "2026-06-25T22:01:06.448406",
         "meta": {
-            "nf-test": "0.9.0",
-            "nextflow": "25.04.1"
-        },
-        "timestamp": "2026-03-25T17:34:01.598736"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
     }
 }

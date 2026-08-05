@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+## Originally written by Ekaterina Sakharova, modified by Sofia Ochkalova and released under the MIT license.
+## See git repository (https://github.com/nf-core/seqsubmit) for full license text.
+
+
 import argparse
 import logging
 
@@ -147,7 +151,7 @@ def main():
     logging.info(f"Found {rrna_count} rRNA subunit types in total")
 
     # rrna_count should be 3 to make sure all 3 rRNA genes are present
-    decision = "Yes" if trna_count >= args.trna_limit and rrna_count == 3 else "No"
+    decision = "True" if trna_count >= args.trna_limit and rrna_count == 3 else "False"
     logging.info(f"RNA presented: {decision}")
 
     with open(args.output, 'w') as file_out:

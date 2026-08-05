@@ -12,14 +12,14 @@ process CREATE_GENOME_METADATA_TSV {
 
     output:
     tuple val(meta), path("${meta.id}_genome_metadata.tsv"), emit: tsv
-    path "versions.yml"                                    , emit: versions
+    tuple val("${task.process}"), val('bash'), eval('bash --version | head -n1 | sed "s/.*version //; s/ .*//"'), topic: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    def co_assembly_value = meta.co_assembly == 'Yes' ? 'True' : 'False'
-    def rna_presence_value = meta.RNA_presence == 'Yes' ? 'True' : 'False'
+    def co_assembly_value = meta.co_assembly ? 'True' : 'False'
+    def rna_presence_value = meta.RNA_presence ? 'True' : 'False'
     def header = [
         'genome_name',
         'genome_path',
@@ -63,20 +63,10 @@ process CREATE_GENOME_METADATA_TSV {
     ${header}
     ${row}
     END_TSV
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        bash: \$(bash --version | head -n1 | sed 's/.*version //; s/ .*//')
-    END_VERSIONS
     """
 
     stub:
     """
     touch ${meta.id}_genome_metadata.tsv
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        bash: \$(bash --version | head -n1 | sed 's/.*version //; s/ .*//')
-    END_VERSIONS
     """
 }

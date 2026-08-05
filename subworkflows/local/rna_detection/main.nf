@@ -7,10 +7,10 @@
     IMPORT FUNCTIONS / MODULES / SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { COUNT_RNA      } from '../../modules/local/count_rna'
+include { COUNT_RNA      } from '../../../modules/local/count_rna'
 
-include { BARRNAP        } from '../../modules/nf-core/barrnap'
-include { TRNASCANSE     } from '../../modules/nf-core/trnascanse'
+include { BARRNAP        } from '../../../modules/nf-core/barrnap'
+include { TRNASCANSE     } from '../../../modules/nf-core/trnascanse'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -26,25 +26,20 @@ workflow RNA_DETECTION {
 
     main:
 
-    ch_versions = channel.empty()
     BARRNAP(
         fasta.map {id, fasta_file -> [id, fasta_file, "bac"]}
     )
-    ch_versions = ch_versions.mix( BARRNAP.out.versions )
 
     TRNASCANSE(
         fasta
     )
-    ch_versions = ch_versions.mix( TRNASCANSE.out.versions )
 
     COUNT_RNA(
         TRNASCANSE.out.stats.join(BARRNAP.out.gff),
         min_trna_count,
         min_rrna_percentage
     )
-    ch_versions = ch_versions.mix( COUNT_RNA.out.versions )
 
     emit:
     rna_detected   = COUNT_RNA.out.rna_decision
-    versions       = ch_versions
 }

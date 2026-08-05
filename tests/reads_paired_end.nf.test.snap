@@ -1,0 +1,54 @@
+{
+    "-profile test_reads_paired": {
+        "content": [
+            4,
+            {
+                "CONCAT_ACCESSIONS": {
+                    "coreutils": 9.4,
+                    "find": "4.6.0",
+                    "pigz": 2.8
+                },
+                "CREATE_READS_MANIFEST": {
+                    "mgnify-pipelines-toolkit": "1.5.1"
+               },
+                "SUBMIT": {
+                    "ena-webin-cli": "9.0.3",
+                    "mgnify-pipelines-toolkit": "1.5.1",
+                    "python": "3.12.13"
+                },
+                "Workflow": {
+                    "nf-core/seqsubmit": "v1.0.0"
+                }
+            },
+            [
+                "multiqc",
+                "multiqc/multiqc_data",
+                "multiqc/multiqc_data/llms-full.txt",
+                "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc.parquet",
+                "multiqc/multiqc_data/multiqc_citations.txt",
+                "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_software_versions.txt",
+                "multiqc/multiqc_data/multiqc_sources.txt",
+                "multiqc/multiqc_report.html",
+                "pipeline_info",
+                "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml",
+                "reads",
+                "reads/bacteroides_fragilis",
+                "reads/bacteroides_fragilis/upload",
+                "reads/bacteroides_fragilis/upload/webin_cli",
+                "reads/bacteroides_fragilis/upload/webin_cli/bacteroides_fragilis_accessions.tsv",
+                "reads/upload",
+                "reads/upload/reads_accessions.tsv"
+            ],
+            [
+                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
+            ]
+        ],
+        "timestamp": "2026-06-04T12:21:08.055365",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.1"
+        }
+    }
+}

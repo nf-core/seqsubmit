@@ -27,5 +27,6 @@ pipeline_info/*.{html,json,txt,yml}
 **/rna/trnascanse/*.log
 **/upload/assemblies_accessions.tsv
 **/upload/genomes_accessions.tsv
+**/upload/reads_accessions.tsv
 **/upload/manifests/results/MAG_upload/ENA_backup.json
 **/upload/manifests_test/results/MAG_upload/ENA_backup.json

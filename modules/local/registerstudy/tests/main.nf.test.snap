@@ -9,16 +9,13 @@
                         },
                         "example_study_accessions.json:md5,83600b2fb33a560c25351dbd4a9bdba2"
                     ]
-                ],
-                "versions": [
-                    "versions.yml:md5,29d54944e57cbb7cb12b7605f13fd0fc"
                 ]
             }
         ],
+        "timestamp": "2026-06-25T22:14:15.99268",
         "meta": {
-            "nf-test": "0.9.0",
-            "nextflow": "25.04.1"
-        },
-        "timestamp": "2026-03-25T10:54:18.30373"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
     }
 }

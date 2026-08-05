@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "genome_evaluation"
+description: |
+  Estimates genome completeness and contamination using CheckM2.
+  Downloads the CheckM2 database automatically when no pre-built database is provided.
+keywords:
+  - genome
+  - completeness
+  - contamination
+  - checkm2
+  - metagenomics
+  - MAGs
+  - bins
+components:
+  - checkm2/databasedownload
+  - checkm2/predict
+input:
+  - ch_fasta:
+      type: file
+      description: |
+        Channel containing genome FASTA files to evaluate.
+        Structure: [ val(meta), path(fasta) ]
+      pattern: "*.{fa,fasta,fna,fa.gz,fasta.gz,fna.gz}"
+      ontologies:
+        - edam: "http://edamontology.org/format_1929" # FASTA
+  - ch_checkm2_db:
+      type: directory
+      description: |
+        Channel containing a pre-built CheckM2 database directory.
+        Provide channel.empty() to trigger automatic download via ch_checkm2_db_download_id.
+        Structure: [ val(meta), path(db) ]
+  - ch_checkm2_db_download_id:
+      type: string
+      description: |
+        Channel containing the Zenodo record ID used to download the CheckM2 database
+        via CHECKM2_DATABASEDOWNLOAD (e.g. '1234567').
+        Only used when ch_checkm2_db is channel.empty().
+        Structure: [ val(meta), val(db_id) ]
+output:
+  - genome_evaluation:
+      type: file
+      description: |
+        Channel containing per-genome CheckM2 quality summary TSV files.
+        Structure: [ val(meta), path(tsv) ]
+      pattern: "*.tsv"
+      ontologies:
+        - edam: "http://edamontology.org/format_3475" # TSV
+  - stats_versions:
+      type: file
+      description: |
+        Channel containing software versions from CheckM2.
+        Structure: versions
+authors:
+  - "@KateSakharova"
+  - "@ochkalova"

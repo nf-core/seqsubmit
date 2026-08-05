@@ -7,10 +7,11 @@
     "items": {
         "type": "object",
         "properties": {
-            "sample": {
+            "id": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "errorMessage": "Sample must be provided and cannot contain spaces",
+                "description": "A unique identifier for this data entry. Must be globally unique within the input dataset",
+                "errorMessage": "ID must be provided and cannot contain spaces",
                 "meta": ["id"]
             },
             "fasta": {
@@ -19,7 +20,7 @@
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.(fa|fasta|fna)\\.gz$",
                 "errorMessage": "FASTA file must be provided and have extension '.fa.gz', '.fasta.gz', '.fna.gz'",
-                "description": "Metagenomic assembly FASTA file"
+                "description": "Path to assembly contigs in FASTA format compressed with gzip"
             },
             "fastq_1": {
                 "anyOf": [
@@ -32,8 +33,9 @@
                         "maxLength": 0
                     }
                 ],
-                "errorMessage": "FASTQ file(s) must have extension '.fq' or '.fastq' (optionally gzipped); for co-assemblies use semicolon-separated paths",
-                "description": "Forward reads if paired-end or single-end reads FASTQ file. For co-assemblies, semicolon-separated paths (e.g. run1_R1.fq.gz;run2_R1.fq.gz)"
+                "default": null,
+                "errorMessage": "FASTQ file must have extension '.fq' or '.fastq' (optionally gzipped)",
+                "description": "Path to single-end/paired-end forward reads in FASTQ format (optionally gzipped). Required if coverage is not provided. For co-assemblies, semicolon-separated paths (e.g. run1_R1.fq.gz;run2_R1.fq.gz)"
             },
             "fastq_2": {
                 "anyOf": [
@@ -46,43 +48,49 @@
                         "maxLength": 0
                     }
                 ],
-                "errorMessage": "FASTQ file(s) for reverse reads must have extension '.fq' or '.fastq' (optionally gzipped); for co-assemblies use semicolon-separated paths",
-                "description": "Reverse reads FASTQ file if paired-end. Leave empty for single-end reads. For co-assemblies, semicolon-separated paths (e.g. run1_R2.fq.gz;run2_R2.fq.gz)"
+                "default": null,
+                "errorMessage": "FASTQ file for reverse reads must have extension '.fq' or '.fastq' (optionally gzipped)",
+                "description": "Path to reverse reads in FASTQ format for paired-end data (optionally gzipped). Leave empty for single-end reads. For co-assemblies, use semicolon-separated paths (e.g. run1_R2.fq.gz;run2_R2.fq.gz)"
             },
             "coverage": {
                 "anyOf": [
                     {
                         "type": "number",
-                        "minimum": 0
+                        "exclusiveMinimum": 0
                     },
                     {
                         "type": "string",
                         "maxLength": 0
                     }
                 ],
+                "default": null,
                 "errorMessage": "Coverage must be a positive number or empty",
-                "description": "Estimated value of assembly coverage"
+                "description": "Estimated sequencing depth of the assembly (optional). If this value is missing, it is computed automatically during pipeline execution when reads are provided",
+                "meta": ["coverage"]
             },
             "run_accession": {
                 "type": "string",
                 "pattern": "^\\S+$",
                 "errorMessage": "Accession must be provided and cannot contain spaces",
-                "description": "Accession(s) of the run(s) used to generate the assembly. For co-assemblies, use semicolon-separated values (e.g. ERR000001;ERR000002)"
+                "description": "ENA run accession(s) for the reads used to generate the metagenomic assembly. Reads must already be submitted to ENA. For co-assemblies, use semicolon-separated values (e.g. ERR000001;ERR000002)",
+                "meta": ["run_accession"]
             },
             "assembler": {
                 "type": "string",
                 "pattern": "^\\S+$",
                 "errorMessage": "Assembler must be provided and cannot contain spaces",
-                "description": "Name of the assembler software used to generate the assembly"
+                "description": "Name of the assembler software used to generate the assembly, e.g. MEGAHIT, SPAdes, metaSPAdes, Flye, etc",
+                "meta": ["assembler"]
             },
             "assembler_version": {
                 "anyOf": [{ "type": "string" }, { "type": "number" }],
                 "pattern": "^\\S+$",
                 "errorMessage": "Assembler version must be provided and cannot contain spaces",
-                "description": "Version of the assembler software used to generate the assembly"
+                "description": "Version of the assembler software used to generate the assembly, e.g. 1.0.0",
+                "meta": ["assembler_version"]
             }
         },
-        "required": ["sample", "fasta", "run_accession", "assembler", "assembler_version"],
+        "required": ["id", "fasta", "run_accession", "assembler", "assembler_version"],
         "anyOf": [
             {
                 "properties": {
@@ -97,7 +105,7 @@
                 "properties": {
                     "coverage": {
                         "type": "number",
-                        "minimum": 0
+                        "exclusiveMinimum": 0
                     }
                 },
                 "required": ["coverage"]

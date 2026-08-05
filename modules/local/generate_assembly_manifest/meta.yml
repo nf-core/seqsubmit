@@ -37,6 +37,9 @@ input:
     - test_upload:
         type: value
         description: Whether generated manifests are going to be submitted in test mode.
+    - is_private:
+        type: value
+        description: Referring to private data in ENA.
 
 output:
   - meta:
@@ -47,10 +50,6 @@ output:
   - manifest:
       type: file
       description: Manifest file required for submission with webin-cli.
-  - versions:
-      type: file
-      description: File containing software versions.
-      pattern: "versions.yml"
 
 authors:
   - "@fxquah"

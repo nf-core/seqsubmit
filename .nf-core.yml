@@ -1,7 +1,9 @@
 lint:
+  container_configs: false
   files_exist:
     - conf/igenomes.config
     - conf/igenomes_ignored.config
+    - .github/workflows/linting_comment.yml
   nextflow_config:
     - params.input
   files_unchanged:
@@ -9,10 +11,11 @@ lint:
     - docs/images/nf-core-seqsubmit_logo_light.png
     - docs/images/nf-core-seqsubmit_logo_dark.png
     - assets/nf-core-seqsubmit_logo_light.png
-nf_core_version: 4.0.2
+nf_core_version: 4.0.3
 repository_type: pipeline
 template:
-  author: Martin Beracochea, Ekaterina Sakharova, Sofiia Ochkalova, Evangelos Karatzas
+  author: Martin Beracochea, Ekaterina Sakharova, Sofia Ochkalova, Evangelos Karatzas,
+    Tim Rozday
   description: Submit sequences, assemblies, MAGs, etc., to public archives
   force: false
   is_nfcore: true
@@ -23,4 +26,4 @@ template:
     - igenomes
     - fastqc
     - gpu
-  version: 1.0.0dev
+  version: 1.0.0

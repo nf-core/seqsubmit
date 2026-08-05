@@ -1,78 +1,36 @@
 {
     "COUNT_RNA completes with expected outputs": {
         "content": [
-            {
-                "0": [
-                    [
-                        {
-                            "id": "test"
-                        },
-                        "test_rna_decision.tsv:md5,8162813732f3a353edb6fc3e37e950e1"
-                    ]
-                ],
-                "1": [
-                    "versions.yml:md5,e95935822376c17ae9ca6d59164d29f4"
-                ],
-                "rna_decision": [
-                    [
-                        {
-                            "id": "test"
-                        },
-                        "test_rna_decision.tsv:md5,8162813732f3a353edb6fc3e37e950e1"
-                    ]
-                ],
-                "versions": [
-                    "versions.yml:md5,e95935822376c17ae9ca6d59164d29f4"
+            [
+                [
+                    {
+                        "id": "test"
+                    },
+                    "test_rna_decision.tsv:md5,b760b5d61d0c140d55e97a2fd6c25471"
                 ]
-            },
-            {
-                "COUNT_RNA": {
-                    "python": "3.8.13"
-                }
-            }
+            ]
         ],
+        "timestamp": "2026-07-22T17:43:41.374272",
         "meta": {
-            "nf-test": "0.9.0",
-            "nextflow": "25.04.1"
-        },
-        "timestamp": "2026-03-12T14:29:39.713941"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
     },
     "COUNT_RNA completes with expected outputs - stub": {
         "content": [
-            {
-                "0": [
-                    [
-                        {
-                            "id": "test"
-                        },
-                        "test_rna_decision.tsv:md5,cf8ebf06bf0641ceec14c8b034c639af"
-                    ]
-                ],
-                "1": [
-                    "versions.yml:md5,e95935822376c17ae9ca6d59164d29f4"
-                ],
-                "rna_decision": [
-                    [
-                        {
-                            "id": "test"
-                        },
-                        "test_rna_decision.tsv:md5,cf8ebf06bf0641ceec14c8b034c639af"
-                    ]
-                ],
-                "versions": [
-                    "versions.yml:md5,e95935822376c17ae9ca6d59164d29f4"
+            [
+                [
+                    {
+                        "id": "test"
+                    },
+                    "test_rna_decision.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
                 ]
-            },
-            {
-                "COUNT_RNA": {
-                    "python": "3.8.13"
-                }
-            }
+            ]
         ],
+        "timestamp": "2026-07-01T18:37:30.337186",
         "meta": {
-            "nf-test": "0.9.0",
-            "nextflow": "25.04.1"
-        },
-        "timestamp": "2026-03-12T14:29:43.951744"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.1"
+        }
     }
 }

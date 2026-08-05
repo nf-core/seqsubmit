@@ -17,6 +17,7 @@
 
 include { GENOMESUBMIT            } from './workflows/genomesubmit'
 include { ASSEMBLYSUBMIT          } from './workflows/assemblysubmit'
+include { READSUBMIT              } from './workflows/readsubmit'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 /*
@@ -38,7 +39,7 @@ workflow NFCORE_SEQSUBMIT {
     //
     // WORKFLOW: Run pipeline
     //
-    // Depending on the input type (mags/bins or metagenomic_assemblies), one or the another workflow will be triggered
+    // Depending on the input type (mags/bins, metagenomic_assemblies, or reads), one or another workflow will be triggered
     if (params.mode == "mags" || params.mode == "bins") {
         GENOMESUBMIT (
             samplesheet,
@@ -54,12 +55,12 @@ workflow NFCORE_SEQSUBMIT {
             params.checkm2_db,
             params.checkm2_db_download_id,
             params.cat_db,
-            params.cat_db_download_id,
             params.centre_name,
             params.upload_tpa,
             params.test_upload,
-            params.webin_cli_version,
-            params.webincli_mode
+            params.webincli_mode,
+            params.is_private,
+            params.release_date ? channel.value(params.release_date): channel.value(false)
         )
         ch_multiqc_report = GENOMESUBMIT.out.multiqc_report
     } else if (params.mode == "metagenomic_assemblies") {
@@ -73,10 +74,25 @@ workflow NFCORE_SEQSUBMIT {
             params.study_metadata,
             params.upload_tpa,
             params.test_upload,
-            params.webin_cli_version,
-            params.webincli_mode
+            params.webincli_mode,
+            params.is_private,
+            params.release_date ? channel.value(params.release_date): channel.value(false)
         )
         ch_multiqc_report = ASSEMBLYSUBMIT.out.multiqc_report
+    } else if (params.mode == "reads") {
+        READSUBMIT (
+            samplesheet,
+            params.multiqc_config,
+            params.multiqc_logo,
+            params.multiqc_methods_description,
+            params.outdir,
+            params.submission_study,
+            params.study_metadata,
+            params.test_upload,
+            params.webincli_mode,
+            params.release_date ? channel.value(params.release_date): channel.value(false)
+        )
+        ch_multiqc_report = READSUBMIT.out.multiqc_report
     }
 
 
@@ -106,7 +122,9 @@ workflow {
         params.mode,
         params.help,
         params.help_full,
-        params.show_hidden
+        params.show_hidden,
+        params.submission_study,
+        params.study_metadata
     )
 
     //

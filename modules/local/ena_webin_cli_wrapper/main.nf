@@ -5,39 +5,51 @@ process ENA_WEBIN_CLI_WRAPPER {
 
     label 'process_low'
     tag "${meta.id}"
-    // ena-webin-cli 9.0.3 + mgnify-pipelines-toolkit 1.4.24
-    container "community.wave.seqera.io/library/ena-webin-cli_mgnify-pipelines-toolkit:0fd318932c5ba88e"
+
+    conda "${moduleDir}/environment.yml"
+
+    // ena-webin-cli 9.0.3 + mgnify-pipelines-toolkit 1.5.1
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/90/907aee7f61eca630e96a0f50d1bd71d9ba8ac9ca10da02459221930c21076a2a/data':
+        'community.wave.seqera.io/library/ena-webin-cli_mgnify-pipelines-toolkit:a64d8c87ebf167ef' }"
     stageInMode 'copy'
 
     input:
     tuple val(meta), path(submission_item), path(manifest)
     val test_upload
     val webincli_mode
+    val webincli_context
 
     output:
-    tuple val(meta), path("*_accessions.tsv"),  emit: accessions
-    path "versions.yml",                        emit: versions
+    tuple val(meta), path("*_accessions.tsv"),     emit: accessions,    optional: true // there is no file in mode=validate
+    tuple val("${task.process}"), val('python'), eval('python --version 2>&1 | sed "s/Python //g"'), topic: versions
+    tuple val("${task.process}"), val('ena-webin-cli'), eval('ena-webin-cli -version'),              topic: versions
+    tuple val("${task.process}"), val('mgnify-pipelines-toolkit'), eval('python -c "import importlib.metadata; print(importlib.metadata.version(\'mgnify-pipelines-toolkit\'))"'), topic: versions
+
+    when:
+    task.ext.when == null || task.ext.when
 
     script:
     def args               = task.ext.args   ?: ""
     def prefix             = task.ext.prefix ?: "${meta.id}"
     def test_flag          = test_upload     ? "--test" : ""
-    def fasta_dir          = submission_item.toRealPath().parent
 
     """
     webin_cli_handler \\
       -m ${manifest} \\
       -o ${prefix}_accessions.tsv \\
+      -c ${webincli_context} \\
       --mode ${webincli_mode} \\
-      --fasta-dir ${fasta_dir} \\
       ${test_flag} \\
       ${args}
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python --version 2>&1 | sed 's/Python //g')
-        ena-webin-cli: \$(ena-webin-cli -version)
-        mgnify-pipelines-toolkit: \$(python -c "import importlib.metadata; print(importlib.metadata.version('mgnify-pipelines-toolkit'))")
-    END_VERSIONS
     """
+
+    stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    if (webincli_mode == "submit") {
+        """
+        touch ${prefix}_accessions.tsv
+        """
+    }
+    // there is no file for mode=validate
 }

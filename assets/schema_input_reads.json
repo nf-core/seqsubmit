@@ -1,0 +1,234 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/seqsubmit/main/assets/schema_input_reads.json",
+    "title": "nf-core/seqsubmit pipeline - params.input schema",
+    "description": "Schema for the sample sheet provided with params.input if params.mode is set to 'reads'",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "id": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "ID must be provided and cannot contain spaces",
+                "meta": ["id"],
+                "description": "Unique identifier of this particular data entry. Used as an experiment name"
+            },
+            "sample_accession": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "Sample accession must be provided and cannot contain spaces",
+                "description": "ENA sample accession (starting with SAMEA) of the sample used to generate raw reads. Samples must already be submitted to ENA",
+                "meta": ["sample_accession"]
+            },
+            "fastq_1": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^\\S+\\.(fq|fastq)(\\.gz)?$",
+                "errorMessage": "FASTQ file must have extension '.fq' or '.fastq' (optionally gzipped)",
+                "description": "Path to single-end/paired-end forward reads in FASTQ format (optionally gzipped)"
+            },
+            "fastq_2": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "format": "file-path",
+                        "exists": true,
+                        "pattern": "^\\S+\\.(fq|fastq)(\\.gz)?$"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
+                "default": null,
+                "errorMessage": "FASTQ file for reverse reads must have extension '.fq' or '.fastq' (optionally gzipped)",
+                "description": "Path to reverse reads in FASTQ format for paired-end data (optionally gzipped). Leave empty for single-end reads"
+            },
+            "platform": {
+                "type": "string",
+                "enum": [
+                    "BGISEQ",
+                    "CAPILLARY",
+                    "DNBSEQ",
+                    "ELEMENT",
+                    "GENAPSYS",
+                    "GENEMIND",
+                    "HELICOS",
+                    "ILLUMINA",
+                    "ION_TORRENT",
+                    "LS454",
+                    "OXFORD_NANOPORE",
+                    "PACBIO_SMRT",
+                    "TAPESTRI",
+                    "ULTIMA",
+                    "VELA_DIAGNOSTICS"
+                ],
+                "description": "Sequencing platform. Must be one of the ENA controlled vocabulary values listed in https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#metadata-validation.",
+                "meta": ["platform"]
+            },
+            "instrument": {
+                "type": "string",
+                "pattern": "^[^\\n]+$",
+                "errorMessage": "Instrument must be provided and cannot span multiple lines",
+                "description": "Sequencer model (e.g., 'Illumina HiSeq 2000', 'PacBio Sequel'). Must be one of the allowed ENA controlled vocabulary values listed in https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#permitted-values-for-instrument",
+                "meta": ["instrument"]
+            },
+            "library_source": {
+                "type": "string",
+                "enum": [
+                    "GENOMIC",
+                    "GENOMIC SINGLE CELL",
+                    "TRANSCRIPTOMIC",
+                    "TRANSCRIPTOMIC SINGLE CELL",
+                    "METAGENOMIC",
+                    "METATRANSCRIPTOMIC",
+                    "SYNTHETIC",
+                    "VIRAL RNA",
+                    "OTHER"
+                ],
+                "description": "Library source type. Must be one of the allowed ENA controlled vocabulary values listed in https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#permitted-values-for-library-source",
+                "meta": ["library_source"]
+            },
+            "library_selection": {
+                "type": "string",
+                "enum": [
+                    "RANDOM",
+                    "PCR",
+                    "RANDOM PCR",
+                    "RT-PCR",
+                    "HMPR",
+                    "MF",
+                    "repeat fractionation",
+                    "size fractionation",
+                    "MSLL",
+                    "cDNA",
+                    "cDNA_randomPriming",
+                    "cDNA_oligo_dT",
+                    "PolyA",
+                    "Oligo-dT",
+                    "Inverse rRNA",
+                    "Inverse rRNA selection",
+                    "ChIP",
+                    "ChIP-Seq",
+                    "MNase",
+                    "DNase",
+                    "Hybrid Selection",
+                    "Reduced Representation",
+                    "Restriction Digest",
+                    "5-methylcytidine antibody",
+                    "MBD2 protein methyl-CpG binding domain",
+                    "CAGE",
+                    "RACE",
+                    "MDA",
+                    "padlock probes capture method",
+                    "other",
+                    "unspecified"
+                ],
+                "description": "Library selection. Must be one of the allowed ENA controlled vocabulary values listed in https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#permitted-values-for-library-selection",
+                "meta": ["library_selection"]
+            },
+            "library_strategy": {
+                "type": "string",
+                "enum": [
+                    "WGS",
+                    "WGA",
+                    "WXS",
+                    "RNA-Seq",
+                    "snRNA-seq",
+                    "ssRNA-seq",
+                    "miRNA-Seq",
+                    "ncRNA-Seq",
+                    "FL-cDNA",
+                    "EST",
+                    "Hi-C",
+                    "ATAC-seq",
+                    "WCS",
+                    "RAD-Seq",
+                    "CLONE",
+                    "POOLCLONE",
+                    "AMPLICON",
+                    "CLONEEND",
+                    "FINISHING",
+                    "ChIP-Seq",
+                    "MNase-Seq",
+                    "Ribo-Seq",
+                    "DNase-Hypersensitivity",
+                    "Bisulfite-Seq",
+                    "CTS",
+                    "ChM-Seq",
+                    "GBS",
+                    "MRE-Seq",
+                    "MeDIP-Seq",
+                    "MBD-Seq",
+                    "NOMe-Seq",
+                    "Tn-Seq",
+                    "VALIDATION",
+                    "FAIRE-seq",
+                    "SELEX",
+                    "RIP-Seq",
+                    "ChIA-PET",
+                    "Synthetic-Long-Read",
+                    "Targeted-Capture",
+                    "Tethered Chromatin Conformation Capture",
+                    "OTHER"
+                ],
+                "description": "Library strategy. Must be one of the ENA controlled vocabulary values listed in https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#permitted-values-for-library-strategy",
+                "meta": ["library_strategy"]
+            },
+            "insert_size": {
+                "anyOf": [
+                    {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
+                "default": null,
+                "errorMessage": "Insert size must be a positive number or empty",
+                "description": "Fragment/insert size for paired-end reads (e.g., 500 for 500 bp inserts). Skip if not applicable.",
+                "meta": ["insert_size"]
+            },
+            "library_name": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
+                "description": "Descriptive library name (optional)",
+                "meta": ["library_name"]
+            },
+            "description": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
+                "description": "Free-text description of the experiment (optional)",
+                "meta": ["description"]
+            }
+        },
+        "required": [
+            "id",
+            "sample_accession",
+            "fastq_1",
+            "platform",
+            "instrument",
+            "library_source",
+            "library_selection",
+            "library_strategy"
+        ]
+    }
+}

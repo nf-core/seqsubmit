@@ -7,7 +7,14 @@
                         {
                             "id": "test"
                         },
-                        "test.fasta:md5,3dc842bfe6f1059ccb006fc454437ebf"
+                        "sarscov2.fasta:md5,6e9fe4042a72f2345f644f239272b7e6"
+                    ]
+                ],
+                "1": [
+                    [
+                        "RENAME_FASTA_FOR_CATPACK",
+                        "bash",
+                        "5.2.37(1)-release"
                     ]
                 ],
                 "renamed_fasta": [
@@ -15,16 +22,16 @@
                         {
                             "id": "test"
                         },
-                        "test.fasta:md5,3dc842bfe6f1059ccb006fc454437ebf"
+                        "sarscov2.fasta:md5,6e9fe4042a72f2345f644f239272b7e6"
                     ]
                 ]
             }
         ],
+        "timestamp": "2026-06-25T22:18:23.130037",
         "meta": {
-            "nf-test": "0.9.0",
-            "nextflow": "25.04.1"
-        },
-        "timestamp": "2026-03-25T16:51:01.874131"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
     },
     "RENAME_FASTA_FOR_CATPACK - compressed fasta": {
         "content": [
@@ -34,7 +41,14 @@
                         {
                             "id": "test_compressed"
                         },
-                        "test_compressed.fasta:md5,b349eb81b2fc8db6a6cee870c8d4b054"
+                        "ecoli.fasta:md5,f958ab9c196608148e2863d87d64e28a"
+                    ]
+                ],
+                "1": [
+                    [
+                        "RENAME_FASTA_FOR_CATPACK",
+                        "bash",
+                        "5.2.37(1)-release"
                     ]
                 ],
                 "renamed_fasta": [
@@ -42,15 +56,15 @@
                         {
                             "id": "test_compressed"
                         },
-                        "test_compressed.fasta:md5,b349eb81b2fc8db6a6cee870c8d4b054"
+                        "ecoli.fasta:md5,f958ab9c196608148e2863d87d64e28a"
                     ]
                 ]
             }
         ],
+        "timestamp": "2026-06-25T22:18:30.449385",
         "meta": {
-            "nf-test": "0.9.0",
-            "nextflow": "25.04.1"
-        },
-        "timestamp": "2026-03-25T16:51:04.916201"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
     }
 }

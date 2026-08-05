@@ -36,11 +36,6 @@ output:
           type: file
           description: CSV file containing assembly metadata to be used as input for the assembly_uploader
           pattern: "*_assembly_metadata.csv"
-  - versions:
-      - versions.yml:
-          type: file
-          description: File containing software versions
-          pattern: "versions.yml"
 
 authors:
   - "@ochkalova"

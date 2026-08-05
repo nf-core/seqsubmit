@@ -12,7 +12,7 @@ process CREATE_ASSEMBLY_METADATA_CSV {
 
     output:
     tuple val(meta), path("${meta.id}_assembly_metadata.csv"), emit: csv
-    path "versions.yml"                                      , emit: versions
+    tuple val("${task.process}"), val('bash'), eval('bash --version | head -n1 | sed "s/.*version //; s/ .*//"'), topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -35,20 +35,10 @@ process CREATE_ASSEMBLY_METADATA_CSV {
     ${header}
     ${row}
     END_CSV
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        bash: \$(bash --version | head -n1 | sed 's/.*version //; s/ .*//')
-    END_VERSIONS
     """
 
     stub:
     """
     touch ${meta.id}_assembly_metadata.csv
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        bash: \$(bash --version | head -n1 | sed 's/.*version //; s/ .*//')
-    END_VERSIONS
     """
 }

@@ -5,9 +5,11 @@ process COUNT_RNA {
 
     label 'process_low'
     tag "${meta.id}"
+
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/biopython:1.75':
-        'quay.io/biocontainers/biopython:1.75' }"
+        'https://depot.galaxyproject.org/singularity/biopython:1.84':
+        'quay.io/biocontainers/biopython:1.84' }"
 
     input:
     tuple val(meta), path(trnas_stats), path(rrna_gff)
@@ -16,31 +18,25 @@ process COUNT_RNA {
 
     output:
     tuple val(meta), path("*rna_decision.tsv"), emit: rna_decision
-    path "versions.yml",                        emit: versions
+    tuple val("${task.process}"), val('python'), eval('python --version 2>&1 | sed "s/Python //g"'), topic: versions
+
+    when:
+    task.ext.when == null || task.ext.when
 
     script:
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     count_rna.py \\
         --trna ${trnas_stats} \\
         --rrna ${rrna_gff} \\
-        --name ${meta.id} \\
+        --name ${prefix} \\
         --trna-limit ${min_trna_count} \\
         --rrna-limit ${min_rrna_percentage} \\
-        --output ${meta.id}_rna_decision.tsv
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python --version 2>&1 | sed 's/Python //g')
-    END_VERSIONS
+        --output ${prefix}_rna_decision.tsv
     """
 
     stub:
     """
-    echo -e "genome\tYes" > ${meta.id}_rna_decision.tsv
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python --version 2>&1 | sed 's/Python //g')
-    END_VERSIONS
+    touch ${meta.id}_rna_decision.tsv
     """
 }

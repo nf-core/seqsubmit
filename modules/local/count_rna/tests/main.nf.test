@@ -13,8 +13,8 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'test' ],
-                    file("$moduleDir/tests/data/ecoli.stats", checkIfExists: true),
-                    file("$moduleDir/tests/data/ecoli_bac.gff", checkIfExists: true)
+                    file(params.pipelines_testdata_base_path + 'test_data/rna_search/ecoli.stats', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'test_data/rna_search/ecoli_bac.gff', checkIfExists: true)
                 ]
                 input[1] = 18
                 input[2] = 80
@@ -26,13 +26,12 @@ nextflow_process {
             assert process.success
             assertAll(
                 { assert snapshot(
-                    process.out,
-                    path(process.out.versions[0]).yaml
+                    process.out.rna_decision
                 ).match() },
                 { assert process.out.rna_decision.size() == 1 },
                 {
                     def rnaDecisionContent = path(process.out.rna_decision[0][1]).text
-                    assert rnaDecisionContent.contains("Yes")
+                    assert rnaDecisionContent.contains("True")
                 }
             )
         }
@@ -48,8 +47,8 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'test' ],
-                    file("$moduleDir/tests/data/ecoli.stats", checkIfExists: true),
-                    file("$moduleDir/tests/data/ecoli_bac.gff", checkIfExists: true)
+                    file(params.pipelines_testdata_base_path + 'test_data/rna_search/ecoli.stats', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'test_data/rna_search/ecoli_bac.gff', checkIfExists: true)
                 ]
                 input[1] = 18
                 input[2] = 80
@@ -61,8 +60,7 @@ nextflow_process {
             assert process.success
             assertAll(
                 { assert snapshot(
-                    process.out,
-                    path(process.out.versions[0]).yaml
+                    process.out.rna_decision
                 ).match() }
             )
         }
