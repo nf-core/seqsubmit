@@ -53,7 +53,7 @@ workflow ASSEMBLYSUBMIT {
     assembly_fasta = ch_samplesheet
         .map { meta, fasta, reads_1, reads_2 ->
             // support semicolon-separated values for co-assemblies (e.g. ERR000001;ERR000002)
-            def run_accessions = meta.run_accession.split(';')?.toList() ?: []
+            def run_accessions = meta.run_accession.split(';')?.toList()?.unique() ?: []
             def new_meta = meta + [
                 single_end: !reads_2,
                 run_accession: run_accessions.size() == 1 ? run_accessions[0] : run_accessions
@@ -66,7 +66,7 @@ workflow ASSEMBLYSUBMIT {
         .filter { row -> row[2] && row[2] != "" } // Check if fastq_1 exists and is not empty
         .map { meta, fasta, reads_1, reads_2 ->
             // support semicolon-separated values for co-assemblies (e.g. ERR000001;ERR000002)
-            def run_accessions = meta.run_accession.split(';')?.toList() ?: []
+            def run_accessions = meta.run_accession.split(';')?.toList()?.unique() ?: []
             def new_meta = meta + [
                 single_end: !reads_2,
                 run_accession: run_accessions.size() == 1 ? run_accessions[0] : run_accessions
