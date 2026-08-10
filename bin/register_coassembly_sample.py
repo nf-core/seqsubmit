@@ -6,6 +6,7 @@ import csv
 import hashlib
 import logging
 import os
+import time
 import xml.etree.ElementTree as ET
 import re
 
@@ -117,7 +118,7 @@ def submit_sample_xml(auth: HTTPBasicAuth, submit_url: str, sample_xml: str) -> 
 def merge_or_not_provided(values: list[str], default_value=None) -> str:
     """Merge values or return default_value or DEFAULT_NA_VALUE."""
     unique_values = sorted(set(values))
-    logger.debug(f"Merging values: {unique_values}")
+    logger.info(f"Merging values: {unique_values}")
     if len(unique_values) == 1 and unique_values[0]:
         logger.info(f"Merge decision: using unique value '{unique_values[0]}'")
         return unique_values[0]
@@ -271,19 +272,21 @@ def build_sample_xml(
     return to_pretty_xml(root)
 
 
-def build_virtual_sample_alias(source_samples: list[str], max_length: int = 50) -> str:
-    """Build deterministic alias from source samples with an md5 suffix."""
+def build_virtual_sample_alias(source_samples: list[str], max_length: int = 50, test: bool = False) -> str:
+    """Build deterministic alias from source samples with an md5 suffix.
+
+    When `test` is set, a short timestamp-based hash is appended so repeated
+    test submissions don't collide on alias uniqueness.
+    """
     sorted_samples = sorted(source_samples)
-    hash8 = hashlib.md5(",".join(sorted_samples).encode("utf-8")).hexdigest()[:8]
+    samples_hash = hashlib.md5(",".join(sorted_samples).encode("utf-8")).hexdigest()[:8]
 
-    first_two = sorted_samples[:2]
-    remaining = len(sorted_samples) - len(first_two)
+    alias = f"coassembly_{len(sorted_samples)}_samples_{samples_hash}"
 
-    alias_core = f"coassembly_{'_'.join(first_two)}"
-    if remaining > 0:
-        alias_core = f"{alias_core}_{remaining}_others"
+    if test:
+        timestamp_hash = hashlib.md5(str(time.time()).encode("utf-8")).hexdigest()[:6]
+        alias = f"{alias}_{timestamp_hash}"
 
-    alias = f"{alias_core}_{hash8}"
     if len(alias) <= max_length:
         return alias
 
@@ -357,11 +360,11 @@ def register_virtual_sample(run_accessions: list[str], test: bool, default_count
 
     for run in run_accessions:
         sample_acc = get_run_sample_from_xml(run)
-        logger.debug(f"Run {run} is linked to sample {sample_acc}")
+        logger.info(f"Run {run} is linked to sample {sample_acc}")
         sample_accessions.append(sample_acc)
 
         taxon_id, scientific_name, country, collection_date = get_sample_metadata(sample_acc)
-        logger.debug(f"Metadata for sample {sample_acc}: tax_id={taxon_id}, scientific_name={scientific_name}, country={country}, collection_date={collection_date}")
+        logger.info(f"Metadata for sample {sample_acc}: tax_id={taxon_id}, scientific_name={scientific_name}, country={country}, collection_date={collection_date}")
         if not taxon_id:
             raise CoassemblyRegistrationError(f"Sample {sample_acc} has no tax_id in ENA portal response")
         if not scientific_name:
@@ -404,7 +407,7 @@ def register_virtual_sample(run_accessions: list[str], test: bool, default_count
         "This sample is a virtual sample of co-assembled raw reads from multiple samples "
         f"of {merged_tax_name}. Co-assembly was performed from runs of the samples {sample_list}"
     )
-    alias = build_virtual_sample_alias(unique_samples)
+    alias = build_virtual_sample_alias(unique_samples, test=test)
     logger.info(f"Registering virtual sample with alias '{alias}' for co-assembly of samples: {sample_list}")
 
     sample_xml = build_sample_xml(
@@ -434,6 +437,9 @@ def main() -> int:
     setup_logging(args.debug)
 
     logger.debug(f"Starting coassembly registration script: input={args.input}, output={args.output}, test={args.test}")
+
+    if args.test:
+        logger.info("Running in test mode: submitting to the ENA test server. Submission will be discarded after 24 hours.")
 
     with open(args.input, newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)

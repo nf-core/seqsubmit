@@ -188,7 +188,6 @@ workflow ASSEMBLYSUBMIT {
         assembly_metadata_by_type.coassembly,
         test_upload
     )
-    ch_versions = ch_versions.mix(REGISTER_COASSEMBLY_SAMPLE.out.versions)
 
     assembly_metadata_with_sample = assembly_metadata_by_type.standard
         .mix(REGISTER_COASSEMBLY_SAMPLE.out.csv)
