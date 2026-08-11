@@ -10,6 +10,10 @@ on:
   release:
     types: [published]
 
+env:
+  WEBIN_ACCOUNT: ${{ secrets.WEBIN_ACCOUNT }}
+  WEBIN_PASSWORD: ${{ secrets.WEBIN_PASSWORD }}
+
 jobs:
   run-platform:
     name: Run AWS full tests

@@ -4,6 +4,11 @@ name: nf-core AWS test
 
 on:
   workflow_dispatch:
+
+env:
+  WEBIN_ACCOUNT: ${{ secrets.WEBIN_ACCOUNT }}
+  WEBIN_PASSWORD: ${{ secrets.WEBIN_PASSWORD }}
+
 jobs:
   run-platform:
     name: Run AWS tests
