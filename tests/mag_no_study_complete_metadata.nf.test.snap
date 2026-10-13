@@ -1,0 +1,94 @@
+{
+    "-profile test_mag_no_study_complete_metadata": {
+        "content": [
+            8,
+            {
+                "CONCAT_ACCESSIONS": {
+                    "coreutils": 9.4,
+                    "find": "4.6.0",
+                    "pigz": 2.8
+                },
+                "CONCAT_METADATA": {
+                    "coreutils": 9.4,
+                    "find": "4.6.0",
+                    "pigz": 2.8
+                },
+                "CREATE_GENOME_METADATA_TSV": {
+                    "bash": "5.2.37(1)-release"
+                },
+                "CREATE_MANIFESTS": {
+                    "genome_uploader": "3.0.4"
+                },
+                "FALINT": {
+                    "falint": "1.2.0"
+                },
+                "REGISTERSTUDY": {
+                    "mgnify-pipelines-toolkit": "1.5.1"
+                },
+                "SUBMIT": {
+                    "ena-webin-cli": "9.0.3",
+                    "mgnify-pipelines-toolkit": "1.5.1",
+                    "python": "3.12.13"
+                },
+                "Workflow": {
+                    "nf-core/seqsubmit": "v1.0.0"
+                }
+            },
+            [
+                "mags",
+                "mags/complete_metadata",
+                "mags/complete_metadata/upload",
+                "mags/complete_metadata/upload/webin_cli",
+                "mags/complete_metadata/upload/webin_cli/complete_metadata_accessions.tsv",
+                "mags/upload",
+                "mags/upload/genomes_accessions.tsv",
+                "mags/upload/genomes_metadata.tsv",
+                "mags/upload/manifests",
+                "mags/upload/manifests/results",
+                "mags/upload/manifests/results/MAG_upload",
+                "mags/upload/manifests/results/MAG_upload/ENA_backup.json",
+                "mags/upload/manifests/results/MAG_upload/genome_samples.xml",
+                "mags/upload/manifests/results/MAG_upload/manifests_test",
+                "mags/upload/manifests/results/MAG_upload/registered_MAGs_test.tsv",
+                "multiqc",
+                "multiqc/multiqc_data",
+                "multiqc/multiqc_data/llms-full.txt",
+                "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc.parquet",
+                "multiqc/multiqc_data/multiqc_Genomes assigned accessions.txt",
+                "multiqc/multiqc_data/multiqc_citations.txt",
+                "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_genome_metadata.txt",
+                "multiqc/multiqc_data/multiqc_sample_registration.txt",
+                "multiqc/multiqc_data/multiqc_software_versions.txt",
+                "multiqc/multiqc_data/multiqc_sources.txt",
+                "multiqc/multiqc_plots",
+                "multiqc/multiqc_plots/pdf",
+                "multiqc/multiqc_plots/pdf/Genomes assigned accessions.pdf",
+                "multiqc/multiqc_plots/pdf/genome_metadata.pdf",
+                "multiqc/multiqc_plots/pdf/sample_registration.pdf",
+                "multiqc/multiqc_plots/png",
+                "multiqc/multiqc_plots/png/Genomes assigned accessions.png",
+                "multiqc/multiqc_plots/png/genome_metadata.png",
+                "multiqc/multiqc_plots/png/sample_registration.png",
+                "multiqc/multiqc_plots/svg",
+                "multiqc/multiqc_plots/svg/Genomes assigned accessions.svg",
+                "multiqc/multiqc_plots/svg/genome_metadata.svg",
+                "multiqc/multiqc_plots/svg/sample_registration.svg",
+                "multiqc/multiqc_report.html",
+                "pipeline_info",
+                "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
+            ],
+            [
+                "genomes_metadata.tsv:md5,ae2b884015d1850fa63365e8a64d9fc8",
+                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
+                "multiqc_genome_metadata.txt:md5,4364c96b13eb232b290c9f29b0edcf5a"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "26.04.0"
+        },
+        "timestamp": "2026-06-24T19:28:10.097952"
+    }
+}

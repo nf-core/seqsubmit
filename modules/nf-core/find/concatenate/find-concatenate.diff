@@ -1,0 +1,59 @@
+Changes in component 'nf-core/find/concatenate'
+'modules/nf-core/find/concatenate/environment.yml' is unchanged
+'modules/nf-core/find/concatenate/meta.yml' is unchanged
+Changes in 'find/concatenate/main.nf':
+--- modules/nf-core/find/concatenate/main.nf
++++ modules/nf-core/find/concatenate/main.nf
+@@ -9,6 +9,7 @@
+ 
+     input:
+     tuple val(meta), path(files_in, stageAs: 'to_concatenate/*', arity: '1..*')
++    val(skip_header)
+ 
+     output:
+     tuple val(meta), path("${prefix}"), emit: file_out
+@@ -48,14 +49,32 @@
+     cmd1 = in_zip && !out_zip ? "pigz -cd -p ${task.cpus}" : "cat"
+     cmd2 = !in_zip && out_zip ? "pigz -p ${task.cpus} ${args} ${out_fname}" : ""
+ 
+-    """
+-    while IFS= read -r -d \$'\\0' file; do
+-            ${cmd1} \$file \\
+-                >> ${out_fname}
++    // Added conditional for header handling
++    if (skip_header) {
++        """
++        first_file=true
++        
++        while IFS= read -r -d \$'\\0' file; do
++            if [ "\$first_file" = true ]; then
++                ${cmd1} \$file >> ${out_fname}
++                first_file=false
++            else
++                ${cmd1} \$file | tail -n +2 >> ${out_fname}
++            fi
+         done < <( find to_concatenate/ -mindepth 1 -print0 | sort -z )
+ 
+-    ${cmd2}
+-    """
++        ${cmd2}
++        """
++    } else {
++        """
++        while IFS= read -r -d \$'\\0' file; do
++                ${cmd1} \$file \\
++                    >> ${out_fname}
++            done < <( find to_concatenate/ -mindepth 1 -print0 | sort -z )
++
++        ${cmd2}
++        """
++    }
+ 
+     stub:
+     prefix = task.ext.prefix ?: "${meta.id}"
+
+'modules/nf-core/find/concatenate/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/find/concatenate/tests/nextflow_zipped_unzipped.config' is unchanged
+'modules/nf-core/find/concatenate/tests/nextflow_unzipped_zipped.config' is unchanged
+'modules/nf-core/find/concatenate/tests/main.nf.test' is unchanged
+************************************************************

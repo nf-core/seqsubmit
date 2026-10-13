@@ -1,0 +1,6 @@
+---
+channels:
+  - conda-forge
+dependencies:
+  - "conda-forge::gzip=1.14"
+  - "conda-forge::bash=5.2.37"

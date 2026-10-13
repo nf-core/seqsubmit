@@ -5,6 +5,28 @@ multiqc/multiqc_data/multiqc_data.json
 multiqc/multiqc_data/multiqc_sources.txt
 multiqc/multiqc_data/multiqc_software_versions.txt
 multiqc/multiqc_data/llms-full.txt
+multiqc/multiqc_data/multiqc_Assemblies assigned accessions.txt
+multiqc/multiqc_data/multiqc_Genomes assigned accessions.txt
+multiqc/multiqc_data/multiqc_sample_registration.txt
 multiqc/multiqc_plots/{svg,pdf,png}/*.{svg,pdf,png}
 multiqc/multiqc_report.html
 pipeline_info/*.{html,json,txt,yml}
+**_webin-cli.report
+**/webin_cli/*accessions.tsv
+**/MAG_upload/registered_MAGs.tsv
+**/MAG_upload/registered_MAGs_test.tsv
+**/bin_upload/registered_bins.tsv
+**/bin_upload/registered_bins_test.tsv
+**/MAG_upload/manifests/
+**/bin_upload/manifests/
+**/MAG_upload/manifests_test/*
+**/bin_upload/manifests_test/*
+**/MAG_upload/genome_samples.xml
+**/bin_upload/genome_samples.xml
+**/rna/trnascanse/*.stats
+**/rna/trnascanse/*.log
+**/upload/assemblies_accessions.tsv
+**/upload/genomes_accessions.tsv
+**/upload/reads_accessions.tsv
+**/upload/manifests/results/MAG_upload/ENA_backup.json
+**/upload/manifests_test/results/MAG_upload/ENA_backup.json

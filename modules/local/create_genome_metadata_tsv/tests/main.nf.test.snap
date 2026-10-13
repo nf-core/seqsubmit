@@ -1,0 +1,194 @@
+{
+    "test_create_genome_metadata_tsv_bool_reversed": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test_genome",
+                            "accession": "SRR123456",
+                            "assembly_software": "SPAdes_v3.15.5",
+                            "binning_software": "MetaBAT2_v2.15",
+                            "binning_parameters": "--minContig 1500",
+                            "stats_generation_software": "CheckM2_v1.0.0",
+                            "completeness": "98.4",
+                            "contamination": "1.2",
+                            "genome_coverage": "42.7",
+                            "metagenome": "marine metagenome",
+                            "co_assembly": true,
+                            "broad_environment": "marine biome",
+                            "local_environment": "coastal water",
+                            "environmental_medium": "seawater",
+                            "RNA_presence": false,
+                            "NCBI_lineage": "Bacteria;Proteobacteria;Gammaproteobacteria"
+                        },
+                        "test_genome_genome_metadata.tsv:md5,0f955fb3bbf7da09ce9f449884693806"
+                    ]
+                ],
+                "1": [
+                    [
+                        "CREATE_GENOME_METADATA_TSV",
+                        "bash",
+                        "5.2.37(1)-release"
+                    ]
+                ],
+                "tsv": [
+                    [
+                        {
+                            "id": "test_genome",
+                            "accession": "SRR123456",
+                            "assembly_software": "SPAdes_v3.15.5",
+                            "binning_software": "MetaBAT2_v2.15",
+                            "binning_parameters": "--minContig 1500",
+                            "stats_generation_software": "CheckM2_v1.0.0",
+                            "completeness": "98.4",
+                            "contamination": "1.2",
+                            "genome_coverage": "42.7",
+                            "metagenome": "marine metagenome",
+                            "co_assembly": true,
+                            "broad_environment": "marine biome",
+                            "local_environment": "coastal water",
+                            "environmental_medium": "seawater",
+                            "RNA_presence": false,
+                            "NCBI_lineage": "Bacteria;Proteobacteria;Gammaproteobacteria"
+                        },
+                        "test_genome_genome_metadata.tsv:md5,0f955fb3bbf7da09ce9f449884693806"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-07-23T14:00:57.58563",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    },
+    "test_create_genome_metadata_tsv - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test_genome",
+                            "accession": "SRR123456",
+                            "assembly_software": "SPAdes_v3.15.5",
+                            "binning_software": "MetaBAT2_v2.15",
+                            "binning_parameters": "--minContig 1500",
+                            "stats_generation_software": "CheckM2_v1.0.0",
+                            "completeness": "98.4",
+                            "contamination": "1.2",
+                            "genome_coverage": "42.7",
+                            "metagenome": "marine metagenome",
+                            "co_assembly": true,
+                            "broad_environment": "marine biome",
+                            "local_environment": "coastal water",
+                            "environmental_medium": "seawater",
+                            "RNA_presence": false,
+                            "NCBI_lineage": "Bacteria;Proteobacteria;Gammaproteobacteria"
+                        },
+                        "test_genome_genome_metadata.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        "CREATE_GENOME_METADATA_TSV",
+                        "bash",
+                        "5.2.37(1)-release"
+                    ]
+                ],
+                "tsv": [
+                    [
+                        {
+                            "id": "test_genome",
+                            "accession": "SRR123456",
+                            "assembly_software": "SPAdes_v3.15.5",
+                            "binning_software": "MetaBAT2_v2.15",
+                            "binning_parameters": "--minContig 1500",
+                            "stats_generation_software": "CheckM2_v1.0.0",
+                            "completeness": "98.4",
+                            "contamination": "1.2",
+                            "genome_coverage": "42.7",
+                            "metagenome": "marine metagenome",
+                            "co_assembly": true,
+                            "broad_environment": "marine biome",
+                            "local_environment": "coastal water",
+                            "environmental_medium": "seawater",
+                            "RNA_presence": false,
+                            "NCBI_lineage": "Bacteria;Proteobacteria;Gammaproteobacteria"
+                        },
+                        "test_genome_genome_metadata.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-07-22T23:11:26.015229",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    },
+    "test_create_genome_metadata_tsv": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test_genome",
+                            "accession": "SRR123456",
+                            "assembly_software": "SPAdes_v3.15.5",
+                            "binning_software": "MetaBAT2_v2.15",
+                            "binning_parameters": "--minContig 1500",
+                            "stats_generation_software": "CheckM2_v1.0.0",
+                            "completeness": "98.4",
+                            "contamination": "1.2",
+                            "genome_coverage": "42.7",
+                            "metagenome": "marine metagenome",
+                            "co_assembly": false,
+                            "broad_environment": "marine biome",
+                            "local_environment": "coastal water",
+                            "environmental_medium": "seawater",
+                            "RNA_presence": true,
+                            "NCBI_lineage": "Bacteria;Proteobacteria;Gammaproteobacteria"
+                        },
+                        "test_genome_genome_metadata.tsv:md5,64562a85d19fe5893cad0e89e894058a"
+                    ]
+                ],
+                "1": [
+                    [
+                        "CREATE_GENOME_METADATA_TSV",
+                        "bash",
+                        "5.2.37(1)-release"
+                    ]
+                ],
+                "tsv": [
+                    [
+                        {
+                            "id": "test_genome",
+                            "accession": "SRR123456",
+                            "assembly_software": "SPAdes_v3.15.5",
+                            "binning_software": "MetaBAT2_v2.15",
+                            "binning_parameters": "--minContig 1500",
+                            "stats_generation_software": "CheckM2_v1.0.0",
+                            "completeness": "98.4",
+                            "contamination": "1.2",
+                            "genome_coverage": "42.7",
+                            "metagenome": "marine metagenome",
+                            "co_assembly": false,
+                            "broad_environment": "marine biome",
+                            "local_environment": "coastal water",
+                            "environmental_medium": "seawater",
+                            "RNA_presence": true,
+                            "NCBI_lineage": "Bacteria;Proteobacteria;Gammaproteobacteria"
+                        },
+                        "test_genome_genome_metadata.tsv:md5,64562a85d19fe5893cad0e89e894058a"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-07-22T23:11:19.939886",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    }
+}

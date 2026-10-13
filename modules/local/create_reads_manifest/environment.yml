@@ -1,0 +1,7 @@
+name: create_reads_manifest
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - conda-forge::python>=3.12
+  - bioconda::mgnify-pipelines-toolkit=1.5.1

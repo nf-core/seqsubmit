@@ -21,48 +21,91 @@
 
 ## Introduction
 
-**nf-core/seqsubmit** is a bioinformatics pipeline that ...
+![seqsubmit workflow diagram](docs/images/seqsubmit_schema.png)
 
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
+**nf-core/seqsubmit** is a Nextflow pipeline for submitting sequence data to [ENA](https://www.ebi.ac.uk/ena/browser/home).
+The pipeline currently supports the following submission modes, each routed to a dedicated workflow:
 
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/community/brand/workflow-schematics#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+- `reads` — raw sequencing reads submission via the `READSUBMIT` workflow (<span style="color:pink">pink</span>)
+- `metagenomic_assemblies` — assembly submission via the `ASSEMBLYSUBMIT` workflow (<span style="color:green">green</span>)
+- `mags` — metagenome-assembled genomes (MAGs) submission via the `GENOMESUBMIT` workflow (<span style="color:blue">blue</span>)
+- `bins` — bins submission via the `GENOMESUBMIT` workflow (<span style="color:blue">blue</span>)
+
+<!-- TODO add schema description here -->
+
+Each workflow has its own samplesheet structure, prerequisites, and limitations — they are briefly described below. See the [usage documentation](https://nf-co.re/seqsubmit/usage) for more detailed explanations.
+
+## Requirements
+
+- [Nextflow](https://www.nextflow.io/) `>=25.04.0`
+- A Webin account registered at <https://www.ebi.ac.uk/ena/submit/webin/login>
+
+  Set your Webin credentials as Nextflow secrets:
+
+  ```bash
+  nextflow secrets set ENA_WEBIN "Webin-XXX"
+  nextflow secrets set ENA_WEBIN_PASSWORD "XXX"
+  ```
+
+  Make sure to replace the values above with your own credentials.
+
+- Provide either a study accession or a study registration metadata file for the study the submission will be associated with. See the [Submission study](docs/usage.md#submission-study) section of the usage documentation for details.
+
+- Depending on the chosen mode, samples, reads, or metagenomic assemblies must be pre-submitted to ENA to obtain the corresponding accessions, which you then reference in your submission. Refer to the relevant mode section in the [usage documentation](https://nf-co.re/seqsubmit/usage) for details.
+
+## Input samplesheets
+
+### `reads` mode
+
+Example:
+
+```csv
+id,sample_accession,fastq_1,fastq_2,platform,instrument,library_source,library_selection,library_strategy,insert_size,library_name,description
+illumina_run_001,SAMEA1234567,data/reads_R1.fastq.gz,data/reads_R2.fastq.gz,ILLUMINA,Illumina HiSeq 2000,GENOMIC,RANDOM,WGS,500,HiSeq_library_001,Illumina sequencing of sample XYZ
+```
+
+See the [`reads` mode section](docs/usage.md#samplesheet-input) of the usage documentation for more details.
+
+### `metagenomic_assemblies` mode
+
+Example:
+
+```csv
+id,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version
+assembly_1,data/contigs_1.fasta.gz,data/reads_1.fastq.gz,data/reads_2.fastq.gz,,ERR011322,SPAdes,3.15.5
+assembly_2,data/contigs_2.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
+```
+
+See the [`metagenomic_assemblies` mode section](docs/usage.md#samplesheet-input-1) of the usage documentation for more details.
+
+### `mags` and `bins` modes
+
+Example:
+
+```csv
+id,fasta,accession,fastq_1,fastq_2,assembly_software,binning_software,binning_parameters,stats_generation_software,completeness,contamination,genome_coverage,metagenome,co-assembly,broad_environment,local_environment,environmental_medium,RNA_presence,NCBI_lineage
+lachnospira_eligens,data/bin_lachnospira_eligens.fa.gz,SRR24458089,,,spades_v3.15.5,metabat2_v2.6,default,CheckM2_v1.0.1,61.0,0.21,32.07,sediment metagenome,false,marine,cable_bacteria,marine_sediment,false,d__Bacteria;p__Proteobacteria;s__unclassified_Proteobacteria
+```
+
+See the [`mags` and `bins` modes section](docs/usage.md#samplesheet-input-2) of the usage documentation for the full list of required and optional columns.
 
 ## Usage
 
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/get_started/environment_setup/overview) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/get_started/run-your-first-pipeline) with `-profile test` before running the workflow on actual data.
 
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
+### Running the pipeline
 
-First, prepare a samplesheet with your input data that looks as follows:
-
-`samplesheet.csv`:
-
-```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-```
-
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
-
--->
-
-Now, you can run the pipeline using:
-
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
+Each mode also has its own additional parameters and example commands — see the [usage documentation](https://nf-co.re/seqsubmit/usage) for details. General command template:
 
 ```bash
 nextflow run nf-core/seqsubmit \
-   -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \
-   --outdir <OUTDIR>
+    -profile <docker/singularity/...> \
+    --mode <mags|bins|metagenomic_assemblies|reads> \
+    --input <samplesheet.csv> \
+    --centre_name <your_centre> \
+    --submission_study <your_study> \
+    --outdir <outdir>
 ```
 
 > [!WARNING]
@@ -72,17 +115,22 @@ For more details and further functionality, please refer to the [usage documenta
 
 ## Pipeline output
 
-To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/seqsubmit/results) tab on the nf-core website pipeline page.
-For more details about the output files and reports, please refer to the
-[output documentation](https://nf-co.re/seqsubmit/output).
+Key output locations in `--outdir`:
+
+- `reads/`: per-sample submission receipts and accessions
+- `metagenomic_assemblies/`: assembly metadata CSVs and per-sample coverage files
+- `mags/` or `bins/`: genome metadata, manifests, and per-sample submission support files
+- `multiqc/`: MultiQC summary report
+- `pipeline_info/`: execution reports, trace, DAG, and software versions
+
+For full details, see the [output documentation](https://nf-co.re/seqsubmit/output).
 
 ## Credits
 
-nf-core/seqsubmit was originally written by Martin Beracochea, Ekaterina Sakharova, Sofia Ochkalova, Evangelos Karatzas, Tim Rozday.
+nf-core/seqsubmit was originally written by [Martin Beracochea](https://github.com/mberacochea), [Ekaterina Sakharova](https://github.com/KateSakharova), [Sofia Ochkalova](https://github.com/ochkalova) and [Tim Rozday](https://github.com/timrozday-mgnify).
 
 We thank the following people for their extensive assistance in the development of this pipeline:
-
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
+[Evangelos Karatzas](https://github.com/vagkaratzas)
 
 ## Contributions and Support
 
@@ -93,9 +141,17 @@ For further information or help, don't hesitate to get in touch on the [Slack `#
 ## Citations
 
 <!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
+
 <!-- If you use nf-core/seqsubmit for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
 
-<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
+If you use this pipeline please make sure to cite all used software.
+This pipeline uses code and infrastructure developed and maintained by the [nf-core](https://nf-co.re) community, reused here under the [MIT license](https://github.com/nf-core/tools/blob/main/LICENSE).
+
+> **MGnify: the microbiome sequence data analysis resource in 2023**
+>
+> Richardson L, Allen B, Baldi G, Beracochea M, Bileschi ML, Burdett T, et al.
+>
+> Vol. 51, Nucleic Acids Research. Oxford University Press (OUP); 2022. p. D753–9. Available from: http://dx.doi.org/10.1093/nar/gkac1080
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 

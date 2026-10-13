@@ -56,6 +56,12 @@ runs:
         channel-priority: strict
         conda-remove-defaults: true
 
+    - name: Configure Nextflow secrets
+      shell: bash
+      run: |
+        nextflow secrets set ENA_WEBIN "$WEBIN_ACCOUNT"
+        nextflow secrets set ENA_WEBIN_PASSWORD "$WEBIN_PASSWORD"
+
     - name: Run nf-test
       shell: bash
       env:
