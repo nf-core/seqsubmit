@@ -152,7 +152,7 @@ workflow GENOMESUBMIT {
         }
         .mix(branched_taxonomy_results.taxonomy_present)
 
-    // --------- Split data to eukaryotes (euk) and prokaryotes (bac and arc)
+    // --------- Add meta.domain value for eukaryotes (euk) and prokaryotes (bac and arc)
     domain_identification = fasta_updated_with_taxonomy
         .map { meta, fasta ->
             def lineage = meta.NCBI_lineage
@@ -162,8 +162,6 @@ workflow GENOMESUBMIT {
 
             [ meta + [domain: is_euk ? 'euk' : (is_arc ? 'arc' : 'bac')], fasta ]
         }
-
-    domain_identification.view()
 
     // --------- For genomes without RNA_presence info, calculate rRNA and tRNA
     branched_rna_results = domain_identification

@@ -50,6 +50,9 @@ workflow GENOME_EVALUATION {
         ch_checkm2_db_ready,
     )
 
+
+    BUSCO_BUSCO(ch_bins, 'genome', params.busco_db_lineage, ch_busco_db, [], params.busco_clean)
+
     emit:
     genome_evaluation = CHECKM2_PREDICT.out.checkm2_tsv  // channel: [ val(meta), path(tsv) ]
     stats_versions    = CHECKM2_PREDICT.out.versions_checkm2_predict
