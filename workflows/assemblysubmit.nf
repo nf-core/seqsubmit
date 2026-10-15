@@ -21,6 +21,7 @@ include { softwareVersionsToYAML                } from '../subworkflows/nf-core/
 
 include { FASTA_VALIDATION                      } from '../subworkflows/local/fasta_validation/main'
 include { methodsDescriptionText                } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
+include { calculateCoassemblyCoverage           } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -143,16 +144,10 @@ workflow ASSEMBLYSUBMIT {
         false  // enable_bam_output
     )
 
-    // Calculate average coverage using splitCsv operator
+    // Length-weighted co-assembly coverage (see docs/methods.md)
     average_coverage_ch = COVERM_CONTIG.out.coverage
-        .splitCsv(sep: '\t', skip: 1)
-        .map { meta, row ->
-            [meta, row[1] as Double]
-        }
-        .groupTuple()
-        .map { meta, coverages ->
-            def average = coverages.sum() / coverages.size()
-            [meta, average]
+        .map { meta, coverage_tsv ->
+            [ meta, calculateCoassemblyCoverage(coverage_tsv) ]
         }
 
     // Update metadata with calculated coverage

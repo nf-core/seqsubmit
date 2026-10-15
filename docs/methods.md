@@ -24,14 +24,18 @@ Only assemblies with successful validation are forwarded to coverage estimation,
 
 If the `coverage` column is already populated in the samplesheet, that value is used directly.
 
-If `coverage` is missing, the workflow calculates coverage with `coverm contig`.
+If `coverage` is missing, the workflow maps the reads of all runs listed for the assembly with `coverm contig`, which reports the mean depth of each contig for each run.
 
-`coverm contig` outputs per-contig depth. The workflow then reads this file and calculates the arithmetic mean across all contigs.
-
-If the per-contig coverage values are $c_1, c_2, \ldots, c_n$, the workflow currently computes assembly coverage as an unweighted mean across contigs:
+Because a co-assembly is built from the pooled reads of all runs, the depth of contig $c$ is the sum of its depths across the $N$ runs:
 
 $$
-\bar{c} = \frac{1}{n} \sum_{i=1}^{n} c_i
+D_c = \sum_{i=1}^{N} D_{c,i}
+$$
+
+The assembly coverage is the mean of these per-contig depths, weighted by contig length $L_c$:
+
+$$
+D_{\text{assembly}} = \frac{\sum_{c} L_c \cdot D_c}{\sum_{c} L_c}
 $$
 
 ## `GENOMESUBMIT`
