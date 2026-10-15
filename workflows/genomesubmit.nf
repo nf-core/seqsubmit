@@ -52,6 +52,9 @@ workflow GENOMESUBMIT {
     webincli_mode            // val: either 'validate' or 'submit' to specify WebinCLI mode of operation
     is_private               // val: fetch metadata from private/public account
     release_date             // val: keep submitted data private until given date
+    busco_db_lineage         // val: name of the busco supported lineage
+    busco_db                 // val: download URL or local tar.gz archive/directory
+    busco_clean              // boolean: clean intermediate busco files
 
     main:
 
@@ -198,7 +201,10 @@ workflow GENOMESUBMIT {
     GENOME_EVALUATION (
         branched_stats_results.genome_evaluation_input,
         checkm2_db,
-        checkm2_db_download_id
+        checkm2_db_download_id,
+        busco_db_lineage,
+        busco_db ? file(busco_db, checkIfExists: true) : [],  //channel with busco database
+        busco_clean
     )
 
     // Create a value channel with the version string
