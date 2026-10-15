@@ -1,0 +1,132 @@
+nextflow_workflow {
+
+    name "Test Subworkflow RNA_DETECTION"
+    script "../main.nf"
+    workflow "RNA_DETECTION"
+
+    tag "subworkflows"
+    tag "subworkflows_local"
+    tag "subworkflows/rna_detection"
+    tag "barrnap"
+    tag "trnascanse"
+    tag "count_rna"
+
+    test("bacteroides_fragilis - bac") {
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of([
+                    [ id:'test_bac', domain:'bac' ],
+                    file(params.modules_testdata_base_path + 'genomics/prokaryotes/bacteroides_fragilis/genome/genome.fna.gz', checkIfExists: true)
+                ])
+                input[1] = 18
+                input[2] = 80
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assertAll(
+                { assert snapshot(workflow.out.rna_detected).match() },
+                { assert workflow.out.rna_detected.size() == 1 },
+                // complete bacterial isolate genome - all rRNA genes and enough tRNAs are expected
+                { assert path(workflow.out.rna_detected[0][1]).text.contains("True") }
+            )
+        }
+
+    }
+
+    test("homo_sapiens - euk") {
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of([
+                    [ id:'test_euk', domain:'euk' ],
+                    file(params.modules_testdata_base_path + 'genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true)
+                ])
+                input[1] = 18
+                input[2] = 80
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assertAll(
+                { assert snapshot(workflow.out.rna_detected).match() },
+                { assert workflow.out.rna_detected.size() == 1 },
+                // small chromosome fragment - eukaryotic rRNA set is not expected to be complete
+                { assert path(workflow.out.rna_detected[0][1]).text.contains("False") }
+            )
+        }
+
+    }
+
+    test("multiple genomes - mixed domains") {
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of(
+                    [
+                        [ id:'test_bac', domain:'bac' ],
+                        file(params.modules_testdata_base_path + 'genomics/prokaryotes/bacteroides_fragilis/genome/genome.fna.gz', checkIfExists: true)
+                    ],
+                    [
+                        [ id:'test_euk', domain:'euk' ],
+                        file(params.modules_testdata_base_path + 'genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true)
+                    ]
+                )
+                input[1] = 18
+                input[2] = 80
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            // TRNASCANSE and BARRNAP outputs are joined by meta - each genome must get exactly one decision
+            def decisions = workflow.out.rna_detected
+                .collectEntries { meta, tsv -> [ (meta.id): path(tsv).text ] }
+            assertAll(
+                { assert snapshot(workflow.out.rna_detected.sort { it[0].id }).match() },
+                { assert workflow.out.rna_detected.size() == 2 },
+                { assert decisions.keySet() == ['test_bac', 'test_euk'] as Set },
+                { assert decisions['test_bac'].contains("True") },
+                { assert decisions['test_euk'].contains("False") }
+            )
+        }
+
+    }
+
+    test("bacteroides_fragilis - bac - stub") {
+
+        options "-stub"
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of([
+                    [ id:'test_bac', domain:'bac' ],
+                    file(params.modules_testdata_base_path + 'genomics/prokaryotes/bacteroides_fragilis/genome/genome.fna.gz', checkIfExists: true)
+                ])
+                input[1] = 18
+                input[2] = 80
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assertAll(
+                { assert snapshot(workflow.out.rna_detected).match() },
+                { assert workflow.out.rna_detected.size() == 1 }
+            )
+        }
+
+    }
+
+}

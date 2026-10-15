@@ -60,7 +60,10 @@ workflow NFCORE_SEQSUBMIT {
             params.test_upload,
             params.webincli_mode,
             params.is_private,
-            params.release_date ? channel.value(params.release_date): channel.value(false)
+            params.release_date ? channel.value(params.release_date): channel.value(false),
+            params.busco_db_lineage,
+            params.busco_db,
+            params.busco_clean
         )
         ch_multiqc_report = GENOMESUBMIT.out.multiqc_report
     } else if (params.mode == "metagenomic_assemblies") {

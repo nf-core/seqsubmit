@@ -52,6 +52,9 @@ workflow GENOMESUBMIT {
     webincli_mode            // val: either 'validate' or 'submit' to specify WebinCLI mode of operation
     is_private               // val: fetch metadata from private/public account
     release_date             // val: keep submitted data private until given date
+    busco_db_lineage         // val: name of the busco supported lineage
+    busco_db                 // val: download URL or local tar.gz archive/directory
+    busco_clean              // boolean: clean intermediate busco files
 
     main:
 
@@ -110,65 +113,8 @@ workflow GENOMESUBMIT {
         }
         .mix(branched_coverage_results.genome_coverage_present)
 
-    // --------- For genomes without RNA_presence info, calculate rRNA and tRNA
-    branched_rna_results = fasta_updated_with_coverage
-        .branch { meta, _fasta ->
-            rna_prediction_input: meta.RNA_presence == null  // it might be True/False
-            rna_present: true  // Everything else goes here
-        }
-
-    RNA_DETECTION (
-        branched_rna_results.rna_prediction_input,
-        trna_limit,
-        rrna_limit
-    )
-
-    // Update metadata for records missing RNA
-    fasta_updated_with_rna = RNA_DETECTION.out.rna_detected.join(branched_rna_results.rna_prediction_input)
-        .map{ meta, rna_decision, fasta ->
-              def lines = rna_decision.readLines()
-              // support for empty decision files required for -stub mode
-              def decision = lines ? lines[0].split('\t')[1].toLowerCase() == 'true' : null
-              def updated_meta = meta.clone()
-              updated_meta.RNA_presence = decision
-              return [updated_meta, fasta]
-        }
-        .mix(branched_rna_results.rna_present)
-
-    // --------- Completeness and contamination calculation
-    branched_stats_results = fasta_updated_with_rna
-        .branch { meta, _fasta ->
-            genome_evaluation_input: !(meta.completeness) || !(meta.contamination) || !(meta.stats_generation_software)
-            evaluation_present: true  // Everything else goes here
-        }
-
-    GENOME_EVALUATION (
-        branched_stats_results.genome_evaluation_input,
-        checkm2_db,
-        checkm2_db_download_id
-    )
-
-    // Create a value channel with the version string
-    def stats_version_ch = GENOME_EVALUATION.out.stats_versions
-        .map { _process_name, tool_name, version_output -> return "${tool_name}_v${version_output}"
-        }.first()
-
-    fasta_updated_with_stats = GENOME_EVALUATION.out.genome_evaluation
-        .join(branched_stats_results.genome_evaluation_input)
-        .combine(stats_version_ch)
-        .map { meta, stats_tsv, fasta, stats_version ->
-            def lines = stats_tsv.readLines()
-            // support for empty checkm files required for -stub mode
-            def updated_meta = meta.clone()
-            updated_meta.completeness = lines ? lines[1].split('\t')[1] : null
-            updated_meta.contamination = lines ? lines[1].split('\t')[2] : null
-            updated_meta.stats_generation_software = stats_version
-            return [updated_meta, fasta]
-        }
-        .mix(branched_stats_results.evaluation_present)
-
     // --------- Taxonomy
-    branched_taxonomy_results = fasta_updated_with_stats
+    branched_taxonomy_results = fasta_updated_with_coverage
         .branch { meta, _fasta ->
             genome_taxonomy_input: !(meta.NCBI_lineage)
             taxonomy_present: true  // Everything else goes here
@@ -209,9 +155,81 @@ workflow GENOMESUBMIT {
         }
         .mix(branched_taxonomy_results.taxonomy_present)
 
+    // --------- Add meta.domain value for eukaryotes (euk) and prokaryotes (bac and arc)
+    domain_identification = fasta_updated_with_taxonomy
+        .map { meta, fasta ->
+            def lineage = meta.NCBI_lineage
+            def parts   = lineage.tokenize(';').collect { p -> p.trim() }
+            def is_euk  = lineage.contains('ukaryot') || parts.contains('2759')
+            def is_arc  = lineage.contains('rchaea') || parts.contains('2157')
+
+            [ meta + [domain: is_euk ? 'euk' : (is_arc ? 'arc' : 'bac')], fasta ]
+        }
+
+    // --------- For genomes without RNA_presence info, calculate rRNA and tRNA
+    branched_rna_results = domain_identification
+        .branch { meta, _fasta ->
+            rna_prediction_input: meta.RNA_presence == null  // it might be True/False
+            rna_present: true  // Everything else goes here
+        }
+
+    RNA_DETECTION (
+        branched_rna_results.rna_prediction_input,
+        trna_limit,
+        rrna_limit
+    )
+
+    // Update metadata for records missing RNA
+    fasta_updated_with_rna = RNA_DETECTION.out.rna_detected.join(branched_rna_results.rna_prediction_input)
+        .map{ meta, rna_decision, fasta ->
+              def lines = rna_decision.readLines()
+              // support for empty decision files required for -stub mode
+              def decision = lines ? lines[0].split('\t')[1].toLowerCase() == 'true' : null
+              def updated_meta = meta.clone()
+              updated_meta.RNA_presence = decision
+              return [updated_meta, fasta]
+        }
+        .mix(branched_rna_results.rna_present)
+
+    // --------- Completeness and contamination calculation
+    branched_stats_results = fasta_updated_with_rna
+        .branch { meta, _fasta ->
+            genome_evaluation_input: !(meta.completeness) || !(meta.contamination) || !(meta.stats_generation_software)
+            evaluation_present: true  // Everything else goes here
+        }
+
+    GENOME_EVALUATION (
+        branched_stats_results.genome_evaluation_input,
+        checkm2_db,
+        checkm2_db_download_id,
+        busco_db_lineage,
+        busco_db ? file(busco_db, checkIfExists: true) : [],  //channel with busco database
+        busco_clean
+    )
+
+    // Create a value channel with the version string
+    def stats_version_ch = GENOME_EVALUATION.out.stats_versions
+        .map { _process_name, tool_name, version_output -> return "${tool_name}_v${version_output}"
+        }.first()
+
+    fasta_updated_with_stats = GENOME_EVALUATION.out.genome_evaluation
+        .join(branched_stats_results.genome_evaluation_input)
+        .combine(stats_version_ch)
+        .map { meta, stats_tsv, fasta, stats_version ->
+            def lines = stats_tsv.readLines()
+            // support for empty checkm files required for -stub mode
+            def updated_meta = meta.clone()
+            updated_meta.completeness = lines ? lines[1].split('\t')[1] : null
+            updated_meta.contamination = lines ? lines[1].split('\t')[2] : null
+            updated_meta.stats_generation_software = stats_version
+            return [updated_meta, fasta]
+        }
+        .mix(branched_stats_results.evaluation_present)
+
+
     // --------- Combine metadata into TSV using module
     CREATE_GENOME_METADATA_TSV (
-        fasta_updated_with_taxonomy
+        fasta_updated_with_stats
     )
 
     // Collect all TSV rows into a single file
