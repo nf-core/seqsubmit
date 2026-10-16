@@ -74,7 +74,10 @@ Example:
 id,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version
 assembly_1,data/contigs_1.fasta.gz,data/reads_1.fastq.gz,data/reads_2.fastq.gz,,ERR011322,SPAdes,3.15.5
 assembly_2,data/contigs_2.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
+coassembly_1,data/contigs_3.fasta.gz,data/run1_R1.fastq.gz;data/run2_R1.fastq.gz,data/run1_R2.fastq.gz;data/run2_R2.fastq.gz,,ERR011324;ERR011325,MEGAHIT,1.2.9
 ```
+
+Co-assemblies are supported: list all source runs in `run_accession` and their read files in `fastq_1`/`fastq_2`, separated by semicolons.
 
 See the [`metagenomic_assemblies` mode section](docs/usage.md#samplesheet-input-1) of the usage documentation for more details.
 

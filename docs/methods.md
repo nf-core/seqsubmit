@@ -12,7 +12,8 @@ The `ASSEMBLYSUBMIT` workflow:
 2. Validates assembly FASTA files.
 3. Reuses provided or calculates missing `coverage` values.
 4. Builds the metadata table used for manifest generation.
-5. Generates assembly manifests and submits the assemblies to ENA.
+5. Registers a virtual ENA sample for co-assemblies whose runs come from different samples.
+6. Generates assembly manifests and submits the assemblies to ENA.
 
 ### Assembly FASTA validation
 
@@ -24,7 +25,9 @@ Only assemblies with successful validation are forwarded to coverage estimation,
 
 If the `coverage` column is already populated in the samplesheet, that value is used directly.
 
-If `coverage` is missing, the workflow maps the reads of all runs listed for the assembly with `coverm contig`, which reports the mean depth of each contig for each run.
+If `coverage` is missing, the workflow maps the reads of all runs listed for the assembly with `coverm contig`, which reports the mean depth and the length of each contig for each run.
+
+The same calculation is applied to every assembly. For an assembly from a single run ($N = 1$), it reduces to the length-weighted mean of the per-contig depths.
 
 Because a co-assembly is built from the pooled reads of all runs, the depth of contig $c$ is the sum of its depths across the $N$ runs:
 
