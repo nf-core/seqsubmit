@@ -18,14 +18,15 @@ process CREATE_ASSEMBLY_METADATA_CSV {
     task.ext.when == null || task.ext.when
 
     script:
-    def header = 'Runs,Coverage,Assembler,Version,Filepath,Sample'
+    def header = 'Runs,Coverage,Assembler,Version,Filepath,Sample,Library'
     def row = [
         meta.run_accession,
         meta.coverage,
         meta.assembler,
         meta.assembler_version,
         fasta.name,
-        ''    // Sample column left empty because co-assemblies are not supported
+        '',    // Sample column left empty because co-assemblies are not supported
+        meta.library_strategy ?: 'metagenome'  // it would be applied by schema, but still needed as safe case for tests
     ].join(',')
     """
     cat <<-END_CSV > ${meta.id}_assembly_metadata.csv

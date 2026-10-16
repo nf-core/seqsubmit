@@ -9,9 +9,10 @@
                             "run_accession": "ERR123456",
                             "coverage": 50.5,
                             "assembler": "metaspades",
-                            "assembler_version": "3.15.5"
+                            "assembler_version": "3.15.5",
+                            "library_strategy": "metagenome"
                         },
-                        "test_sample_assembly_metadata.csv:md5,0ad41b6b4e778fb03fc224bae9ba4529"
+                        "test_sample_assembly_metadata.csv:md5,5627f0b0bc83720dd269e2ea8ac16eff"
                     ]
                 ],
                 "1": [
@@ -28,14 +29,15 @@
                             "run_accession": "ERR123456",
                             "coverage": 50.5,
                             "assembler": "metaspades",
-                            "assembler_version": "3.15.5"
+                            "assembler_version": "3.15.5",
+                            "library_strategy": "metagenome"
                         },
-                        "test_sample_assembly_metadata.csv:md5,0ad41b6b4e778fb03fc224bae9ba4529"
+                        "test_sample_assembly_metadata.csv:md5,5627f0b0bc83720dd269e2ea8ac16eff"
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-07-07T13:48:39.201846",
+        "timestamp": "2026-10-15T11:45:01.123968",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.0"
@@ -51,7 +53,8 @@
                             "run_accession": "ERR999999",
                             "coverage": 75.0,
                             "assembler": "megahit",
-                            "assembler_version": "1.2.9"
+                            "assembler_version": "1.2.9",
+                            "library_strategy": "metatranscriptome"
                         },
                         "stub_sample_assembly_metadata.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
                     ]
@@ -70,14 +73,15 @@
                             "run_accession": "ERR999999",
                             "coverage": 75.0,
                             "assembler": "megahit",
-                            "assembler_version": "1.2.9"
+                            "assembler_version": "1.2.9",
+                            "library_strategy": "metatranscriptome"
                         },
                         "stub_sample_assembly_metadata.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-07-07T13:48:46.340926",
+        "timestamp": "2026-10-15T11:45:06.881317",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.0"

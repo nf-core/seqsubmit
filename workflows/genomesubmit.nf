@@ -138,7 +138,7 @@ workflow GENOMESUBMIT {
     // --------- Completeness and contamination calculation
     branched_stats_results = fasta_updated_with_rna
         .branch { meta, _fasta ->
-            genome_evaluation_input: !(meta.completeness) || !(meta.contamination) || !(meta.stats_generation_software)
+            genome_evaluation_input: meta.completeness == null || meta.contamination == null || meta.stats_generation_software == null
             evaluation_present: true  // Everything else goes here
         }
 

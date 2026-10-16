@@ -43,6 +43,7 @@ nextflow_process {
                 assert manifestContent.contains("SAMPLE	SAMEA7687881")
                 assert manifestContent.contains("STUDY	PRJ12345")
                 assert manifestContent.contains("RUN_REF	ERR4918394")
+                assert manifestContent.contains("ASSEMBLY_TYPE\tprimary metagenome")
             }
         )
     }

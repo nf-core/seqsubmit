@@ -92,6 +92,14 @@
                 "errorMessage": "Assembler version must be provided and cannot contain spaces",
                 "description": "Version of the assembler software used to generate the assembly, e.g. 1.0.0",
                 "meta": ["assembler_version"]
+            },
+            "library_strategy": {
+                "type": "string",
+                "enum": ["metagenome", "metatranscriptome"],
+                "errorMessage": "Assembly library strategy should be metagenome or metatranscriptome",
+                "description": "Assembly library strategy: metagenome or metatranscriptome. Default: metagenome",
+                "default": "metagenome",
+                "meta": ["library_strategy"]
             }
         },
         "required": ["id", "fasta", "run_accession", "assembler", "assembler_version"],

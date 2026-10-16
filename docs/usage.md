@@ -214,9 +214,9 @@ You will need to create a samplesheet with information about the metagenomic ass
 Example:
 
 ```csv title="samplesheet_assembly.csv"
-id,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version
-assembly_001,data/assembly_001.fasta.gz,data/assembly_001_R1.fastq.gz,data/assembly_001_R2.fastq.gz,,ERR011322,SPAdes,3.15.5
-assembly_002,data/assembly_002.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
+id,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version,library_strategy
+assembly_001,data/assembly_001.fasta.gz,data/assembly_001_R1.fastq.gz,data/assembly_001_R2.fastq.gz,,ERR011322,SPAdes,3.15.5,metagenome
+assembly_002,data/assembly_002.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9,metatranscriptome
 ```
 
 | Column              | Required    | Description                                                                                                                                           |
@@ -229,6 +229,7 @@ assembly_002,data/assembly_002.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
 | `run_accession`     | Yes         | ENA run accession for the reads used to generate the metagenomic assembly. Reads must already be submitted to ENA.                                    |
 | `assembler`         | Yes         | Name of the assembler software used to generate the assembly, e.g. MEGAHIT, SPAdes, metaSPAdes, Flye, etc.                                            |
 | `assembler_version` | Yes         | Version of the assembler software used to generate the assembly, e.g. 1.0.0.                                                                          |
+| `library_strategy`  | No          | Sequencing library strategy: `metagenome` or `metatranscriptome`. Default: `metagenome`                                                               |
 
 Provide either read files (`fastq_1`, optionally `fastq_2`) or a `coverage` value for each row. If `coverage` is missing and reads are provided, the workflow calculates average coverage with CoverM. See the [Methods documentation](docs/methods.md) for more information on how coverage is calculated.
 

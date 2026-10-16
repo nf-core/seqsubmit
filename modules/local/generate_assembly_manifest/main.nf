@@ -4,8 +4,8 @@ process GENERATE_ASSEMBLY_MANIFEST {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/assembly_uploader:1.3.5--pyhdfd78af_1':
-        'quay.io/biocontainers/assembly_uploader:1.3.5--pyhdfd78af_1' }"
+        'https://depot.galaxyproject.org/singularity/assembly_uploader:1.3.6--pyhdfd78af_0':
+        'quay.io/biocontainers/assembly_uploader:1.3.6--pyhdfd78af_0' }"
 
     input:
     tuple val(meta), path(assembly_fasta), path(data_csv)
