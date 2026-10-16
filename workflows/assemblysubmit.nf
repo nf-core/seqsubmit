@@ -181,7 +181,8 @@ workflow ASSEMBLYSUBMIT {
 
     REGISTER_COASSEMBLY_SAMPLE(
         assembly_metadata_by_type.coassembly,
-        test_upload
+        test_upload,
+        is_private
     )
 
     assembly_metadata_with_sample = assembly_metadata_by_type.standard

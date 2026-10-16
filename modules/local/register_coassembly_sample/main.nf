@@ -10,6 +10,7 @@ process REGISTER_COASSEMBLY_SAMPLE {
     input:
     tuple val(meta), path(csv)
     val(test)
+    val(is_private)
 
     output:
     tuple val(meta), path("*_updated.csv"), emit: csv
@@ -22,11 +23,13 @@ process REGISTER_COASSEMBLY_SAMPLE {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def test_arg = test ? "--test" : ""
+    def private_arg = is_private ? "--private" : ""
     """
     register_coassembly_sample.py \\
         --input ${csv} \\
         --output ${prefix}_updated.csv \\
         ${test_arg} \\
+        ${private_arg} \\
         ${args}
 
     cat <<-END_VERSIONS > versions.yml

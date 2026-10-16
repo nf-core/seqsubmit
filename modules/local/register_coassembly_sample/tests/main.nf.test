@@ -16,6 +16,7 @@ nextflow_process {
                     file("${moduleDir}/tests/coassembly_metadata.csv", checkIfExists: true)
                 ]
                 input[1] = true
+                input[2] = false
                 """
             }
         }

@@ -17,9 +17,7 @@ from retry import retry
 logger = logging.getLogger("register_coassembly_sample")
 
 
-RUN_XML_API = "https://www.ebi.ac.uk/ena/browser/api/xml/{accession}"
-SAMPLE_XML_API = "https://www.ebi.ac.uk/ena/browser/api/xml/{accession}"
-SAMPLE_PORTAL_API = "https://www.ebi.ac.uk/ena/portal/api/search"
+PORTAL_SEARCH_API = "https://www.ebi.ac.uk/ena/portal/api/search"
 CHECKLIST_XML_API = "https://www.ebi.ac.uk/ena/browser/api/xml/ERC000011"
 
 TEST_SUBMIT_URL = "https://wwwdev.ebi.ac.uk/ena/submit/drop-box/submit/"
@@ -48,6 +46,11 @@ def parse_args() -> argparse.Namespace:
         "--test",
         action="store_true",
         help="Register sample using the test submission endpoint",
+    )
+    parser.add_argument(
+        "--private",
+        action="store_true",
+        help="Source runs/samples are private: query the ENA Portal API with Webin auth (ENA_WEBIN/ENA_WEBIN_PASSWORD)",
     )
     parser.add_argument(
         "--debug",
@@ -90,12 +93,39 @@ def get_xml(url: str) -> ET.Element:
     return ET.fromstring(response.content)
 
 @retry(tries=3, delay=2, backoff=2)
-def get_json(url: str, params: dict[str, str]) -> list[dict[str, str]]:
+def get_json(url: str, params: dict[str, str], auth: HTTPBasicAuth | None = None) -> list[dict[str, str]]:
     prepared = requests.Request("GET", url, params=params).prepare()
-    logger.debug(f"Requesting JSON URL: {prepared.url}")
-    response = requests.get(url, params=params, timeout=60)
+    logger.debug(f"Requesting JSON URL ({'with' if auth else 'without'} Webin auth): {prepared.url}")
+    response = requests.get(url, params=params, auth=auth, timeout=60)
     response.raise_for_status()
-    return response.json()
+    if not response.text.strip():
+        return []
+    result = response.json()
+    if isinstance(result, dict) and "message" in result:
+        raise CoassemblyRegistrationError(f"ENA Portal API error: {result['message']}")
+    return result
+
+
+def search_portal(result: str, query: str, fields: str, private: bool = False) -> list[dict[str, str]]:
+    """
+    Query the ENA Portal API.
+
+    When `private` is set, the request is authenticated with the Webin account
+    (ENA_WEBIN/ENA_WEBIN_PASSWORD), which also returns private records owned by it.
+    """
+    params = {"result": result, "query": query, "fields": fields, "format": "json"}
+    if not private:
+        return get_json(PORTAL_SEARCH_API, params=params)
+
+    username, password = get_credentials()
+    try:
+        return get_json(PORTAL_SEARCH_API, params=params, auth=HTTPBasicAuth(username, password))
+    except requests.HTTPError as exc:
+        # ENA returns a 500 (not 401) for invalid Webin credentials, so a 500 is ambiguous
+        raise CoassemblyRegistrationError(
+            f"Authenticated ENA Portal API search failed ({exc}). This may be a temporary ENA API "
+            "issue, or invalid Webin credentials - check ENA_WEBIN/ENA_WEBIN_PASSWORD."
+        ) from exc
 
 def to_pretty_xml(root: ET.Element) -> str:
     """Serialize an XML element to a pretty-printed UTF-8 XML string."""
@@ -129,38 +159,48 @@ def merge_or_not_provided(values: list[str], default_value=None) -> str:
         logger.info(f"Merge decision: '{DEFAULT_NA_VALUE}' (multiple conflicting values or some missing)")
         return DEFAULT_NA_VALUE
 
-def get_run_sample_from_xml(run_accession: str) -> tuple[str, str | None]:
+def get_run_sample(run_accession: str, private: bool = False) -> str:
     """
-    Retrieve the sample accession from the RUN XML for a given run accession.
+    Retrieve the sample accession linked to a run from the ENA Portal API.
+    Use Webin auth to retrieve private records.
 
     Args:
         run_accession (str): The run accession to query.
+        private (bool): Query with Webin auth to access private data.
 
     Returns:
-        tuple[str, str | None]: The sample accession and an optional secondary sample accession.
+        str: The secondary sample accession (e.g. ERS/SRS), or the BioSample
+            accession if no secondary accession is available.
 
     Raises:
-        CoassemblyRegistrationError: If the RUN XML does not contain a sample accession.
+        CoassemblyRegistrationError: If the run is not found or has no linked sample.
     """
-    run_root = get_xml(RUN_XML_API.format(accession=run_accession))
-    sample_ref = run_root.find(".//RUN_LINKS/RUN_LINK/XREF_LINK[DB='ENA-SAMPLE']/ID")
-
-    if sample_ref is not None and sample_ref.text:
-        sample_accession = sample_ref.text.strip()
-    else:
+    rows = search_portal(
+        result="read_run",
+        query=f'"run_accession={run_accession}"',
+        fields="sample_accession,secondary_sample_accession",
+        private=private,
+    )
+    if not rows:
         raise CoassemblyRegistrationError(
-            f"Run {run_accession} has no sample accession in RUN XML (ENA-SAMPLE link)"
+            f"Run {run_accession} not found in ENA" + ("" if private else " (use --private for private data)")
         )
+
+    row = rows[0]
+    sample_accession = (row.get("secondary_sample_accession") or row.get("sample_accession") or "").strip()
+    if not sample_accession:
+        raise CoassemblyRegistrationError(f"Run {run_accession} has no linked sample accession in ENA")
 
     return sample_accession
 
 
-def get_sample_metadata(sample_accession: str) -> tuple[str, str, str, str]:
+def get_sample_metadata(sample_accession: str, private: bool = False) -> tuple[str, str, str, str]:
     """
     Retrieve metadata for a given sample accession from the ENA portal.
 
     Args:
         sample_accession (str): The sample accession to query.
+        private (bool): Query with Webin auth to access private data.
 
     Returns:
         tuple[str, str, str, str]: A tuple containing tax_id, scientific_name, country, and collection_date.
@@ -170,14 +210,11 @@ def get_sample_metadata(sample_accession: str) -> tuple[str, str, str, str]:
     else:
         query = f'"secondary_sample_accession={sample_accession}"'
 
-    rows = get_json(
-        SAMPLE_PORTAL_API,
-        params={
-            "result": "sample",
-            "query": query,
-            "fields": "country,collection_date,tax_id,scientific_name",
-            "format": "json",
-        },
+    rows = search_portal(
+        result="sample",
+        query=query,
+        fields="country,collection_date,tax_id,scientific_name",
+        private=private,
     )
 
     if not rows:
@@ -333,13 +370,14 @@ def extract_accession_from_receipt(receipt: ET.Element) -> str:
     raise CoassemblyRegistrationError("ENA sample submission succeeded but no SAMPLE accession found in receipt XML")
 
 
-def register_virtual_sample(run_accessions: list[str], test: bool, default_country=None, default_date=None, default_taxid=None, default_tax_name=None) -> str:
+def register_virtual_sample(run_accessions: list[str], test: bool, private: bool = False, default_country=None, default_date=None, default_taxid=None, default_tax_name=None) -> str:
     """
     Register a virtual sample for co-assemblies based on run accessions.
 
     Args:
         run_accessions (list[str]): A list of run accessions for the co-assembly.
         test (bool): Whether to use the test submission endpoint.
+        private (bool): Whether source runs/samples are private (query ENA with Webin auth).
 
     Returns:
         str: The sample accession of the registered virtual sample.
@@ -359,11 +397,11 @@ def register_virtual_sample(run_accessions: list[str], test: bool, default_count
     collection_dates = []
 
     for run in run_accessions:
-        sample_acc = get_run_sample_from_xml(run)
+        sample_acc = get_run_sample(run, private=private)
         logger.info(f"Run {run} is linked to sample {sample_acc}")
         sample_accessions.append(sample_acc)
 
-        taxon_id, scientific_name, country, collection_date = get_sample_metadata(sample_acc)
+        taxon_id, scientific_name, country, collection_date = get_sample_metadata(sample_acc, private=private)
         logger.info(f"Metadata for sample {sample_acc}: tax_id={taxon_id}, scientific_name={scientific_name}, country={country}, collection_date={collection_date}")
         if not taxon_id:
             raise CoassemblyRegistrationError(f"Sample {sample_acc} has no tax_id in ENA portal response")
@@ -467,6 +505,7 @@ def main() -> int:
         virtual_sample = register_virtual_sample(
             run_accessions=run_accessions,
             test=args.test,
+            private=args.private,
             default_country=args.default_country,
             default_date=args.default_date,
             default_taxid=args.default_taxid,
