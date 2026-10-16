@@ -4,10 +4,10 @@ nextflow_pipeline {
     script "../main.nf"
     tag "pipeline"
     tag "mode_assembly"
-    tag "test_assembly_complete_metadata"
-    profile "test_assembly_complete_metadata"
+    tag "test_assembly_complete_metadata_fixed_study"
+    profile "test_assembly_complete_metadata_fixed_study"
 
-    test("-profile test_assembly_complete_metadata") {
+    test("-profile test_assembly_complete_metadata_fixed_study") {
 
         when {
             params {
