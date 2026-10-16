@@ -192,6 +192,34 @@ def validateInputSamplesheet(input) {
     return [ metas[0], fastqs ]
 }
 //
+// Calculate co-assembly coverage from a `coverm contig --methods mean length` table.
+// Rows are contigs; each read set contributes one `<name> Mean` and one `<name> Length` column.
+// Per-contig depth is the sum of the `Mean` columns (reads from all runs were pooled for the
+// co-assembly). Assembly depth is the length-weighted mean of the per-contig depths:
+//     sum_c(L_c * sum_i(D_c,i)) / sum_c(L_c)
+//
+def calculateCoassemblyCoverage(coverage_file) {
+    double weighted_depth = 0d
+    double total_length   = 0d
+
+    coverage_file.splitCsv(sep: '\t', header: true).each { row ->
+        def mean_columns  = row.findAll { key, _value -> key.endsWith(' Mean') }
+        def length_column = row.find { key, _value -> key.endsWith(' Length') }
+        if (!mean_columns || !length_column) {
+            error("CoverM output ${coverage_file.name} must contain '<sample> Mean' and '<sample> Length' columns. Run 'coverm contig' with '--methods mean length'.")
+        }
+
+        def depth  = mean_columns.values().sum { value -> value as Double }
+        def length = length_column.value as Double
+
+        weighted_depth += depth * length
+        total_length   += length
+    }
+
+    return total_length > 0 ? weighted_depth / total_length : 0d
+}
+
+//
 // Generate methods description for MultiQC
 //
 def toolCitationText() {

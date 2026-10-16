@@ -12,7 +12,8 @@ The `ASSEMBLYSUBMIT` workflow:
 2. Validates assembly FASTA files.
 3. Reuses provided or calculates missing `coverage` values.
 4. Builds the metadata table used for manifest generation.
-5. Generates assembly manifests and submits the assemblies to ENA.
+5. Registers a virtual ENA sample for co-assemblies whose runs come from different samples.
+6. Generates assembly manifests and submits the assemblies to ENA.
 
 ### Assembly FASTA validation
 
@@ -24,14 +25,20 @@ Only assemblies with successful validation are forwarded to coverage estimation,
 
 If the `coverage` column is already populated in the samplesheet, that value is used directly.
 
-If `coverage` is missing, the workflow calculates coverage with `coverm contig`.
+If `coverage` is missing, the workflow maps the reads of all runs listed for the assembly with `coverm contig`, which reports the mean depth and the length of each contig for each run.
 
-`coverm contig` outputs per-contig depth. The workflow then reads this file and calculates the arithmetic mean across all contigs.
+The same calculation is applied to every assembly. For an assembly from a single run ($N = 1$), it reduces to the length-weighted mean of the per-contig depths.
 
-If the per-contig coverage values are $c_1, c_2, \ldots, c_n$, the workflow currently computes assembly coverage as an unweighted mean across contigs:
+Because a co-assembly is built from the pooled reads of all runs, the depth of contig $c$ is the sum of its depths across the $N$ runs:
 
 $$
-\bar{c} = \frac{1}{n} \sum_{i=1}^{n} c_i
+D_c = \sum_{i=1}^{N} D_{c,i}
+$$
+
+The assembly coverage is the mean of these per-contig depths, weighted by contig length $L_c$:
+
+$$
+D_{\text{assembly}} = \frac{\sum_{c} L_c \cdot D_c}{\sum_{c} L_c}
 $$
 
 ## `GENOMESUBMIT`

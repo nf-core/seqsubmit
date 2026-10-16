@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: "register_coassembly_sample"
+description: Register a virtual ENA sample for co-assemblies and write sample accession into assembly metadata CSV
+keywords:
+  - ena
+  - sample
+  - metadata
+  - co-assembly
+tools:
+  - python:
+      description: Python
+      homepage: https://www.python.org/
+  - retry:
+      description: Retry decorator for resilient network calls
+      homepage: https://pypi.org/project/retry/
+input:
+  - - meta:
+        type: map
+        description: Groovy map containing sample metadata
+    - csv:
+        type: file
+        description: Assembly metadata CSV input for assembly_uploader tool
+        pattern: "*.csv"
+  - test:
+      type: string
+      description: Whether to submit to the ENA test server (`true`) instead of production.
+output:
+  - csv:
+      - meta:
+          type: map
+          description: Same metadata map as input
+      - "*.csv":
+          type: file
+          description: Updated assembly metadata CSV with "Sample" column filled for co-assemblies
+          pattern: "*.csv"
+  - versions:
+      - versions.yml:
+          type: file
+          description: File containing software versions
+          pattern: "versions.yml"
+authors:
+  - "@ochkalova"
+maintainers:
+  - "@ochkalova"

@@ -1,0 +1,84 @@
+nextflow_function {
+
+    name "Test calculateCoassemblyCoverage"
+    script "../main.nf"
+    function "calculateCoassemblyCoverage"
+    tag "functions"
+    tag "calculateCoassemblyCoverage"
+    tag "mode_assembly"
+
+    test("Single read set - length-weighted mean of contig depths") {
+
+        when {
+            function {
+                """
+                input[0] = file("${moduleDir}/tests/fixtures/coverm_single_run.depth.tsv")
+                """
+            }
+        }
+
+        then {
+            // (10 * 1000 + 2 * 100) / (1000 + 100)
+            assertAll(
+                { assert function.success },
+                { assert Math.abs(function.result - 10200d / 1100d) < 1e-9 }
+            )
+        }
+    }
+
+    test("Several read sets - depths summed per contig, zero-depth contigs kept") {
+
+        when {
+            function {
+                """
+                input[0] = file("${moduleDir}/tests/fixtures/coverm_three_runs.depth.tsv")
+                """
+            }
+        }
+
+        then {
+            // contig_1: 4 + 3 + 3 = 10, contig_2: 1 + 1 + 0 = 2, contig_3: 0
+            // (10 * 1000 + 2 * 3000 + 0 * 500) / (1000 + 3000 + 500)
+            assertAll(
+                { assert function.success },
+                { assert Math.abs(function.result - 16000d / 4500d) < 1e-9 }
+            )
+        }
+    }
+
+    test("No contigs in CoverM output - coverage is 0") {
+
+        when {
+            function {
+                """
+                input[0] = file("${moduleDir}/tests/fixtures/coverm_header_only.depth.tsv")
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert function.success },
+                { assert function.result == 0d }
+            )
+        }
+    }
+
+    test("CoverM run without '--methods mean length' - fails with a clear error") {
+
+        when {
+            function {
+                """
+                input[0] = file("${moduleDir}/tests/fixtures/coverm_no_length.depth.tsv")
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert function.failed },
+                { assert function.stdout.any { it.contains("--methods mean length") } }
+            )
+        }
+    }
+}

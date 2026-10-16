@@ -217,20 +217,32 @@ Example:
 id,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version
 assembly_001,data/assembly_001.fasta.gz,data/assembly_001_R1.fastq.gz,data/assembly_001_R2.fastq.gz,,ERR011322,SPAdes,3.15.5
 assembly_002,data/assembly_002.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
+coassembly_001,data/coassembly_001.fasta.gz,data/run1_R1.fastq.gz;data/run2_R1.fastq.gz,data/run1_R2.fastq.gz;data/run2_R2.fastq.gz,,ERR011324;ERR011325,MEGAHIT,1.2.9
 ```
 
-| Column              | Required    | Description                                                                                                                                           |
-| ------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                | Yes         | A unique identifier for this data entry. Must be globally unique within the input dataset.                                                            |
-| `fasta`             | Yes         | Path to assembly contigs in FASTA format compressed with `gzip`.                                                                                      |
-| `fastq_1`           | Conditional | Path to single-end/paired-end forward reads in FASTQ format (optionally gzipped). Required if `coverage` is not provided.                             |
-| `fastq_2`           | No          | Path to the second read file in FASTQ format for paired-end data used to generate the source metagenomic assembly. Leave empty for single-end reads.  |
-| `coverage`          | Conditional | Estimated sequencing depth of the assembly. If this value is missing, it is computed automatically during pipeline execution when reads are provided. |
-| `run_accession`     | Yes         | ENA run accession for the reads used to generate the metagenomic assembly. Reads must already be submitted to ENA.                                    |
-| `assembler`         | Yes         | Name of the assembler software used to generate the assembly, e.g. MEGAHIT, SPAdes, metaSPAdes, Flye, etc.                                            |
-| `assembler_version` | Yes         | Version of the assembler software used to generate the assembly, e.g. 1.0.0.                                                                          |
+| Column              | Required    | Description                                                                                                                                                                                                                                                           |
+| ------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                | Yes         | A unique identifier for this data entry. Must be globally unique within the input dataset.                                                                                                                                                                            |
+| `fasta`             | Yes         | Path to assembly contigs in FASTA format compressed with `gzip`.                                                                                                                                                                                                      |
+| `fastq_1`           | Conditional | Path to single-end/paired-end forward reads in FASTQ format (optionally gzipped). Required if `coverage` is not provided. For co-assemblies, semicolon-separated paths, one per run, in the same order as `run_accession` (e.g. `run1_R1.fastq.gz;run2_R1.fastq.gz`). |
+| `fastq_2`           | No          | Path to the second read file in FASTQ format for paired-end data used to generate the source metagenomic assembly. Leave empty for single-end reads. For co-assemblies, semicolon-separated paths, one per run, in the same order as `run_accession`.                 |
+| `coverage`          | Conditional | Estimated sequencing depth of the assembly. If this value is missing, it is computed automatically during pipeline execution when reads are provided.                                                                                                                 |
+| `run_accession`     | Yes         | ENA run accession(s) for the reads used to generate the metagenomic assembly. Reads must already be submitted to ENA. For co-assemblies, semicolon-separated accessions (e.g. `ERR011324;ERR011325`).                                                                 |
+| `assembler`         | Yes         | Name of the assembler software used to generate the assembly, e.g. MEGAHIT, SPAdes, metaSPAdes, Flye, etc.                                                                                                                                                            |
+| `assembler_version` | Yes         | Version of the assembler software used to generate the assembly, e.g. 1.0.0.                                                                                                                                                                                          |
 
 Provide either read files (`fastq_1`, optionally `fastq_2`) or a `coverage` value for each row. If `coverage` is missing and reads are provided, the workflow calculates average coverage with CoverM. See the [Methods documentation](docs/methods.md) for more information on how coverage is calculated.
+
+### Co-assemblies
+
+An assembly built from the pooled reads of several runs (a co-assembly) is described by a single samplesheet row listing all source runs in `run_accession`, separated by semicolons. If coverage has to be calculated, provide the read files of every run in `fastq_1` (and `fastq_2` for paired-end data) in the same order as the accessions; the pipeline fails if the number of read files does not match the number of run accessions.
+
+ENA requires each assembly to reference a single sample. The pipeline handles this as follows:
+
+- If all source runs belong to the same ENA sample, the assembly is submitted against that sample.
+- If the runs belong to different samples, the pipeline registers a virtual ENA sample (checklist `ERC000011`) with a `composed of` attribute listing the source samples, and submits the assembly against it. Its metadata is merged from the source samples:
+  - `collection date` and `geographic location (country and/or sea)` are kept if all source samples share the same value, otherwise they are set to `not provided`. A country that is not in the `ERC000011` list of allowed values is also set to `not provided`.
+  - The taxon and scientific name must be the same for all source samples; otherwise the pipeline stops with an error.
 
 ### `metagenomic_assemblies` parameters and example
 
@@ -269,8 +281,6 @@ nextflow run nf-core/seqsubmit \
 ### Limitations
 
 `metagenomic_assemblies` mode does not yet support the following:
-
-- **Co-assemblies**: Metagenomic co-assemblies are not supported. The pipeline currently expects each assembly to be derived from a single run. Tracked in [issue #61](https://github.com/nf-core/seqsubmit/issues/61), addressed in [PR #66](https://github.com/nf-core/seqsubmit/pull/66).
 
 - **Submission of an assembly without submitting the raw reads**: Assemblies that have no associated reads accession (`run_accession` column in the samplesheet) are not supported, since the pipeline relies on that lineage to build the required metadata. Tracked in [issue #29](https://github.com/nf-core/seqsubmit/issues/29).
 
