@@ -1,7 +1,7 @@
 {
     "-profile test_mag_no_coverage_paired_reads": {
         "content": [
-            8,
+            9,
             {
                 "CONCAT_ACCESSIONS": {
                     "coreutils": 9.4,
@@ -24,6 +24,9 @@
                 },
                 "FALINT": {
                     "falint": "1.2.0"
+                },
+                "REGISTERSTUDY": {
+                    "mgnify-pipelines-toolkit": "1.5.1"
                 },
                 "SUBMIT": {
                     "ena-webin-cli": "9.0.3",
@@ -64,19 +67,6 @@
                 "multiqc/multiqc_data/multiqc_sample_registration.txt",
                 "multiqc/multiqc_data/multiqc_software_versions.txt",
                 "multiqc/multiqc_data/multiqc_sources.txt",
-                "multiqc/multiqc_plots",
-                "multiqc/multiqc_plots/pdf",
-                "multiqc/multiqc_plots/pdf/Genomes assigned accessions.pdf",
-                "multiqc/multiqc_plots/pdf/genome_metadata.pdf",
-                "multiqc/multiqc_plots/pdf/sample_registration.pdf",
-                "multiqc/multiqc_plots/png",
-                "multiqc/multiqc_plots/png/Genomes assigned accessions.png",
-                "multiqc/multiqc_plots/png/genome_metadata.png",
-                "multiqc/multiqc_plots/png/sample_registration.png",
-                "multiqc/multiqc_plots/svg",
-                "multiqc/multiqc_plots/svg/Genomes assigned accessions.svg",
-                "multiqc/multiqc_plots/svg/genome_metadata.svg",
-                "multiqc/multiqc_plots/svg/sample_registration.svg",
                 "multiqc/multiqc_report.html",
                 "pipeline_info",
                 "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
@@ -88,10 +78,10 @@
                 "multiqc_genome_metadata.txt:md5,73ca3eaa259e29711518c466246aeed5"
             ]
         ],
+        "timestamp": "2026-10-16T11:28:13.637453",
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "26.04.0"
-        },
-        "timestamp": "2026-06-24T16:04:05.724269"
+            "nf-test": "0.9.5",
+            "nextflow": "26.10.0"
+        }
     }
 }
