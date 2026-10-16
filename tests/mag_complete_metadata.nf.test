@@ -4,10 +4,10 @@ nextflow_pipeline {
     script "../main.nf"
     tag "pipeline"
     tag "mode_mag"
-    tag "test_mag_no_study_complete_metadata"
-    profile "test_mag_no_study_complete_metadata"
+    tag "test_mag_complete_metadata"
+    profile "test_mag_complete_metadata"
 
-    test("-profile test_mag_no_study_complete_metadata") {
+    test("-profile test_mag_complete_metadata") {
 
         when {
             params {
