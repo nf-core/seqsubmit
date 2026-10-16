@@ -1,7 +1,7 @@
 {
-    "-profile test_mag_complete_metadata": {
+    "-profile test_mag_complete_metadata_fixed_study": {
         "content": [
-            8,
+            7,
             {
                 "CONCAT_ACCESSIONS": {
                     "coreutils": 9.4,
@@ -21,9 +21,6 @@
                 },
                 "FALINT": {
                     "falint": "1.2.0"
-                },
-                "REGISTERSTUDY": {
-                    "mgnify-pipelines-toolkit": "1.5.1"
                 },
                 "SUBMIT": {
                     "ena-webin-cli": "9.0.3",
@@ -72,7 +69,7 @@
                 "multiqc_genome_metadata.txt:md5,4364c96b13eb232b290c9f29b0edcf5a"
             ]
         ],
-        "timestamp": "2026-10-16T11:24:05.697224",
+        "timestamp": "2026-10-16T15:32:26.944716",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.10.0"
