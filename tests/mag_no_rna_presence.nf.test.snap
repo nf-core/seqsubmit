@@ -1,7 +1,7 @@
 {
     "-profile test_mag_no_rna_presence": {
         "content": [
-            10,
+            11,
             {
                 "BARRNAP": {
                     "barrnap": 0.9
@@ -27,6 +27,9 @@
                 },
                 "FALINT": {
                     "falint": "1.2.0"
+                },
+                "REGISTERSTUDY": {
+                    "mgnify-pipelines-toolkit": "1.5.1"
                 },
                 "SUBMIT": {
                     "ena-webin-cli": "9.0.3",
@@ -100,10 +103,10 @@
                 "multiqc_genome_metadata.txt:md5,efa903988140642f4f3d12b8e034e7a1"
             ]
         ],
+        "timestamp": "2026-10-19T15:57:54.825156",
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "26.04.0"
-        },
-        "timestamp": "2026-06-24T16:13:51.780521"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.1"
+        }
     }
 }
