@@ -7,9 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
+- [#116](https://github.com/nf-core/seqsubmit/pull/116)
+  - Most tests now register a new submission study, so they can be run with any Webin account. Only the `*_fixed_study` tests submit to the existing study `PRJEB98843`
+  - `test_upload = true` is set explicitly in all test configs
+  - Study submission alias now has a random suffix, so parallel registrations started in the same second no longer collide
+  - `REGISTERSTUDY` now runs only when at least one input passed validation ([#113](https://github.com/nf-core/seqsubmit/issues/113))
 - [#106](https://github.com/nf-core/seqsubmit/pull/106)
   - Added support for metatranscriptome submission for ASSEMBLYSUBMIT
-  - Set retry to assembly_uploader
+  - Set retry to GENERATE_ASSEMBLY_MANIFEST module
 - [#108](https://github.com/nf-core/seqsubmit/pull/108)
   - Added test usecase in test-datasets https://github.com/nf-core/test-datasets/pull/2324 with contamination=0
 - [#107](https://github.com/nf-core/seqsubmit/pull/107)
