@@ -33,28 +33,30 @@ include { methodsDescriptionText                } from '../subworkflows/local/ut
 workflow GENOMESUBMIT {
 
     take:
-    ch_samplesheet           // channel: samplesheet read in from --input
+    ch_samplesheet               // channel: samplesheet read in from --input
     multiqc_config
     multiqc_logo
     multiqc_methods_description
     outdir
-    mags_or_bins_flag        // val: submission mode (mags or bins)
-    submission_study         // val: accession of the study to submit to (optional)
-    study_metadata           // val: path to study metadata file for study creation (used if no submission_study provided)
-    trna_limit               // val: tRNA count threshold
-    rrna_limit               // val: rRNA length percentage threshold
-    checkm2_db               // val: path to CheckM2 database
-    checkm2_db_download_id   // val: CheckM2 database download ID
-    cat_db                   // val: path to CAT database
-    centre_name              // val: submission centre name
-    upload_tpa               // val: upload as TPA (Third Party Annotation)
-    test_upload              // val: true for test upload mode
-    webincli_mode            // val: either 'validate' or 'submit' to specify WebinCLI mode of operation
-    is_private               // val: fetch metadata from private/public account
-    release_date             // val: keep submitted data private until given date
-    busco_db_lineage         // val: name of the busco supported lineage
-    busco_db                 // val: download URL or local tar.gz archive/directory
-    busco_clean              // boolean: clean intermediate busco files
+    mags_or_bins_flag            // val: submission mode (mags or bins)
+    submission_study             // val: accession of the study to submit to (optional)
+    study_metadata               // val: path to study metadata file for study creation (used if no submission_study provided)
+    trna_limit                   // val: tRNA count threshold
+    rrna_limit                   // val: rRNA length percentage threshold
+    checkm2_db                   // val: path to CheckM2 database
+    checkm2_db_download_id       // val: CheckM2 database download ID
+    cat_db                       // val: path to CAT database
+    centre_name                  // val: submission centre name
+    upload_tpa                   // val: upload as TPA (Third Party Annotation)
+    test_upload                  // val: true for test upload mode
+    webincli_mode                // val: either 'validate' or 'submit' to specify WebinCLI mode of operation
+    is_private                   // val: fetch metadata from private/public account
+    release_date                 // val: keep submitted data private until given date
+    busco_db_lineage             // val: name of the busco supported lineage
+    busco_db                     // val: download URL or local tar.gz archive/directory
+    busco_clean                  // boolean: clean intermediate busco files
+    eukaryotic_completeness_tool // val: busco or eukcc
+    eukcc_db                     // val: EukCC database - local directory or .tar.gz/.tgz archive (path or URL)
 
     main:
 
@@ -203,25 +205,21 @@ workflow GENOMESUBMIT {
         checkm2_db,
         checkm2_db_download_id,
         busco_db_lineage,
-        busco_db ? file(busco_db, checkIfExists: true) : [],  //channel with busco database
-        busco_clean
+        busco_db,
+        busco_clean,
+        eukaryotic_completeness_tool,
+        eukcc_db
     )
 
-    // Create a value channel with the version string
-    def stats_version_ch = GENOME_EVALUATION.out.stats_versions
-        .map { _process_name, tool_name, version_output -> return "${tool_name}_v${version_output}"
-        }.first()
-
-    fasta_updated_with_stats = GENOME_EVALUATION.out.genome_evaluation
+    // Update metadata with completeness and contamination from CheckM2 (prokaryotes) or EukCC (eukaryotes)
+    fasta_updated_with_stats = GENOME_EVALUATION.out.stats
         .join(branched_stats_results.genome_evaluation_input)
-        .combine(stats_version_ch)
-        .map { meta, stats_tsv, fasta, stats_version ->
-            def lines = stats_tsv.readLines()
-            // support for empty checkm files required for -stub mode
-            def updated_meta = meta.clone()
-            updated_meta.completeness = lines ? lines[1].split('\t')[1] : null
-            updated_meta.contamination = lines ? lines[1].split('\t')[2] : null
-            updated_meta.stats_generation_software = stats_version
+        .map { meta, completeness, contamination, stats_software, fasta ->
+            def updated_meta = meta + [
+                completeness: completeness,
+                contamination: contamination,
+                stats_generation_software: stats_software
+            ]
             return [updated_meta, fasta]
         }
         .mix(branched_stats_results.evaluation_present)

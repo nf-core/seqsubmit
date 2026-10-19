@@ -124,8 +124,8 @@
                 },
                 "eukcc_db": {
                     "type": "string",
-                    "description": "Path to EukCC database folder",
-                    "help_text": "Folder with atabase downloaded from http://ftp.ebi.ac.uk/pub/databases/metagenomics/eukcc/eukcc2_db_ver_1.1.tar.gz and uncompressed.",
+                    "description": "Path to EukCC database folder or .tar.gz/.tgz archive (local path or URL).",
+                    "help_text": "EukCC database, e.g. http://ftp.ebi.ac.uk/pub/databases/metagenomics/eukcc/eukcc2_db_ver_1.1.tar.gz. Can be given as an uncompressed folder, or as a .tar.gz/.tgz archive (local path or URL) that will be extracted by the pipeline. Required if there are eukaryotic genomes. To avoid downloading it in every run, download and extract it once and provide the folder.",
                     "format": "path",
                     "exists": true
                 },
