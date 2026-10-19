@@ -1,6 +1,6 @@
 nextflow_pipeline {
 
-    name "Test assembly submission workflow - complete_metadata"
+    name "Test assembly submission workflow - complete_metadata (submission to existing study)"
     script "../main.nf"
     tag "pipeline"
     tag "mode_assembly"

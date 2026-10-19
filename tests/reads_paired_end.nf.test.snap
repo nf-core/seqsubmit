@@ -1,7 +1,7 @@
 {
     "-profile test_reads_paired": {
         "content": [
-            4,
+            5,
             {
                 "CONCAT_ACCESSIONS": {
                     "coreutils": 9.4,
@@ -10,7 +10,10 @@
                 },
                 "CREATE_READS_MANIFEST": {
                     "mgnify-pipelines-toolkit": "1.5.1"
-               },
+                },
+                "REGISTERSTUDY": {
+                    "mgnify-pipelines-toolkit": "1.5.1"
+                },
                 "SUBMIT": {
                     "ena-webin-cli": "9.0.3",
                     "mgnify-pipelines-toolkit": "1.5.1",
@@ -45,7 +48,7 @@
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
             ]
         ],
-        "timestamp": "2026-06-04T12:21:08.055365",
+        "timestamp": "2026-10-19T15:18:28.953324",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.1"
