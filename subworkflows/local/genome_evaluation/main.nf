@@ -13,6 +13,7 @@ include { BUSCO_BUSCO              } from '../../../modules/nf-core/busco/busco/
 include { CHECKM2_DATABASEDOWNLOAD } from '../../../modules/nf-core/checkm2/databasedownload/main'
 include { CHECKM2_PREDICT          } from '../../../modules/nf-core/checkm2/predict/main'
 include { UNTAR as BUSCO_UNTAR     } from '../../../modules/nf-core/untar/main'
+include { GUNZIP as GUNZIP_FASTA   } from '../../../modules/nf-core/gunzip/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -95,8 +96,11 @@ workflow GENOME_EVALUATION {
     )
 
     eukcc_database = channel.value([[id: 'eukcc_db'], file(params.eukcc_db, checkIfExists: true)])
+
+    GUNZIP_FASTA ( domain_split_fasta.euks )
+
     EUKCC_SINGLE (
-       domain_split_fasta.euks,
+       GUNZIP_FASTA.out.gunzip,
        eukcc_database
     )
 
