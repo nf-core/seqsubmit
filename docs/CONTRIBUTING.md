@@ -230,7 +230,7 @@ All submissions are performed via [Webin-CLI](https://github.com/enasequence/web
 
 ### Testing Requirements
 
-All new functionality must be covered by tests. Running nf-tests that perform ENA submission locally requires ENA webin credentials. Contributors may ask for testing credentials on the nf-core Slack [#seqsubmit](https://nfcore.slack.com/channels/seqsubmit) channel.
+All new functionality must be covered by tests. Running nf-tests that perform ENA submission locally requires ENA Webin credentials. Most tests register a new study, so any free [Webin account](https://www.ebi.ac.uk/ena/submit/webin/login) is enough. Only the `*_fixed_study` tests submit to the existing study `PRJEB98843` and need maintainer credentials; contributors may ask for them on the nf-core Slack [#seqsubmit](https://nfcore.slack.com/channels/seqsubmit) channel.
 
 At minimum, include:
 
