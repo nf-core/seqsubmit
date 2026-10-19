@@ -24,7 +24,7 @@ TEST_SUBMIT_URL = "https://wwwdev.ebi.ac.uk/ena/submit/drop-box/submit/"
 PROD_SUBMIT_URL = "https://www.ebi.ac.uk/ena/submit/drop-box/submit/"
 
 INSDC_BIOSAMPLE_ACCESSION_REGEX = re.compile(
-    r"SAM[AG]?[0-9]+"
+    r"^SAM(N|D|E|EA)[0-9]{7,8}$"
 )
 EXISTING_ACCESSION_IN_ERROR_REGEX = re.compile(
     r'accession:\s*"([A-Z]+[0-9]+)"',
