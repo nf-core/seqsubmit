@@ -28,6 +28,11 @@
                 "REGISTERSTUDY": {
                     "mgnify-pipelines-toolkit": "1.5.1"
                 },
+                "REGISTER_COASSEMBLY_SAMPLE": {
+                    "python": "3.14.4",
+                    "requests": "2.34.1",
+                    "retry": "0.9.2"
+                },
                 "SUBMIT": {
                     "ena-webin-cli": "9.0.3",
                     "mgnify-pipelines-toolkit": "1.5.1",
@@ -74,7 +79,7 @@
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
             ]
         ],
-        "timestamp": "2026-10-16T15:01:52.422755",
+        "timestamp": "2026-10-19T16:26:50.911456",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.1"

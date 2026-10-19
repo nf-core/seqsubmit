@@ -14,7 +14,9 @@ process REGISTER_COASSEMBLY_SAMPLE {
 
     output:
     tuple val(meta), path("*_updated.csv"), emit: csv
-    path "versions.yml",                    emit: versions
+    tuple val("${task.process}"), val('python'), eval('python --version 2>&1 | sed "s/Python //g"'), topic: versions
+    tuple val("${task.process}"), val('requests'), eval('python -c "import requests; print(requests.__version__)"'), topic: versions
+    tuple val("${task.process}"), val('retry'), eval('python -c "import importlib.metadata; print(importlib.metadata.version(\'retry\'))"'), topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -31,25 +33,11 @@ process REGISTER_COASSEMBLY_SAMPLE {
         ${test_arg} \\
         ${private_arg} \\
         ${args}
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python --version | sed 's/Python //')
-        requests: \$(python -c "import requests; print(requests.__version__)")
-        retry: \$(python -c "import importlib.metadata as m; print(m.version('retry'))")
-    END_VERSIONS
     """
 
     stub:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     cp ${csv} ${prefix}_updated.csv
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python --version | sed 's/Python //')
-        requests: \$(python -c "import requests; print(requests.__version__)")
-        retry: \$(python -c "import importlib.metadata as m; print(m.version('retry'))")
-    END_VERSIONS
     """
 }
