@@ -1,5 +1,5 @@
 {
-    "-profile test_assembly_no_study_complete_metadata": {
+    "-profile test_assembly_complete_metadata": {
         "content": [
             8,
             {
