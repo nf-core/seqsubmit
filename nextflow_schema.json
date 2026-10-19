@@ -121,6 +121,20 @@
                     "description": "Enable clean-up of temporary files created during BUSCO runs.",
                     "help_text": "By default, BUSCO creates a large number of intermediate files every run. This may cause problems on some clusters which have file number limits in plate, particularly with large numbers of bins. Enabling this option cleans these files, reducing the total file count of the work directory.",
                     "default": false
+                },
+                "eukcc_db": {
+                    "type": "string",
+                    "description": "Path to EukCC database folder",
+                    "help_text": "Folder with atabase downloaded from http://ftp.ebi.ac.uk/pub/databases/metagenomics/eukcc/eukcc2_db_ver_1.1.tar.gz and uncompressed.",
+                    "format": "path",
+                    "exists": true
+                },
+                "eukaryotic_completeness_tool": {
+                    "type": "string",
+                    "description": "Name of the tool to compute completeness for eukaryotic MAGs/bins. Choice: eukcc or busco. Default: eukcc",
+                    "help_text": "Completeness of eukaryotic MAGs/bins can be calculated using eukcc or busco.",
+                    "enum": ["eukcc", "busco"],
+                    "default": "eukcc"
                 }
             }
         },

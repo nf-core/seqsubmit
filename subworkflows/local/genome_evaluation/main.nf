@@ -7,6 +7,7 @@
     IMPORT FUNCTIONS / MODULES / SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+include { EUKCC_SINGLE             } from '../../../modules/local/eukcc/single/main'
 
 include { BUSCO_BUSCO              } from '../../../modules/nf-core/busco/busco/main'
 include { CHECKM2_DATABASEDOWNLOAD } from '../../../modules/nf-core/checkm2/databasedownload/main'
@@ -92,6 +93,13 @@ workflow GENOME_EVALUATION {
        [],
        busco_clean
     )
+
+    eukcc_database = channel.value([[id: 'eukcc_db'], file(params.eukcc_db, checkIfExists: true)])
+    EUKCC_SINGLE (
+       domain_split_fasta.euks,
+       eukcc_database
+    )
+
 
     emit:
     genome_evaluation = CHECKM2_PREDICT.out.checkm2_tsv  // channel: [ val(meta), path(tsv) ]
