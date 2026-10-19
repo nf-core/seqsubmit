@@ -27,8 +27,16 @@ nextflow_process {
 
         then {
         assert process.success
+        // Manifest md5 is not stable: ASSEMBLYNAME contains a timestamp-based hash in test mode
+        // and FASTA may contain a work directory path. Snapshot the content without them.
+        def manifestLines = path(process.out.manifest[0][1]).readLines()
+            .findAll { line -> !line.startsWith("ASSEMBLYNAME\t") }
+            .collect { line -> line.startsWith("FASTA\t") ? "FASTA\t" + line.split("\t")[1].tokenize('/')[-1] : line }
         assertAll(
-            // Only snapshot versions, not the manifest because it contains a timestamp
+            { assert snapshot(
+                process.out[1],
+                manifestLines
+            ).match() },
             { assert process.out.manifest.size() == 1 },
             { assert process.out.manifest[0][1].toString().endsWith(".manifest") },
             {
@@ -43,10 +51,10 @@ nextflow_process {
                 assert manifestContent.contains("SAMPLE	SAMEA7687881")
                 assert manifestContent.contains("STUDY	PRJ12345")
                 assert manifestContent.contains("RUN_REF	ERR4918394")
+                assert manifestContent.contains("ASSEMBLY_TYPE\tprimary metagenome")
             }
-        )
+        )}
     }
-}
 
     test("GENERATE_ASSEMBLY_MANIFEST completes with expected outputs - stub") {
 

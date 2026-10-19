@@ -14,7 +14,7 @@
                     [
                         "GENERATE_ASSEMBLY_MANIFEST",
                         "assembly_uploader",
-                        "1.3.5"
+                        "1.3.6"
                     ]
                 ],
                 "manifest": [
@@ -27,7 +27,7 @@
                 ]
             }
         ],
-        "timestamp": "2026-07-22T21:23:02.99938",
+        "timestamp": "2026-10-19T11:54:27.111784",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.0"
@@ -35,13 +35,26 @@
     },
     "GENERATE_ASSEMBLY_MANIFEST completes with expected outputs": {
         "content": [
-            {
-                "GENERATE_ASSEMBLY_MANIFEST": {
-                    "assembly_uploader": "1.3.5"
-                }
-            }
+            [
+                [
+                    "GENERATE_ASSEMBLY_MANIFEST",
+                    "assembly_uploader",
+                    "1.3.6"
+                ]
+            ],
+            [
+                "STUDY\tPRJ12345",
+                "SAMPLE\tSAMEA7687881",
+                "RUN_REF\tERR4918394",
+                "ASSEMBLY_TYPE\tprimary metagenome",
+                "COVERAGE\t20.0",
+                "PROGRAM\tmetaSPADES v3.12.1",
+                "PLATFORM\tDNBSEQ-G400",
+                "FASTA\tcontigs.fasta.gz",
+                "TPA\tfalse"
+            ]
         ],
-        "timestamp": "2026-06-25T22:01:06.448406",
+        "timestamp": "2026-10-19T12:01:56.845176",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.0"

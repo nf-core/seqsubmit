@@ -25,7 +25,7 @@ input:
         description: |
           CSV file containing metadata -
           runs (comma-separated and in quotes, example: "SRR1234,SRR5678"),
-          coverage, assembler, version, filepath and optionally sample.
+          coverage, assembler, version, filepath, [optionally] sample, [optionally] assembly_type
     - assembly_study:
         type: value
         description: |

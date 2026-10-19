@@ -71,9 +71,9 @@ See the [`reads` mode section](docs/usage.md#samplesheet-input) of the usage doc
 Example:
 
 ```csv
-id,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version
-assembly_1,data/contigs_1.fasta.gz,data/reads_1.fastq.gz,data/reads_2.fastq.gz,,ERR011322,SPAdes,3.15.5
-assembly_2,data/contigs_2.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9
+id,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version,assembly_type
+assembly_1,data/contigs_1.fasta.gz,data/reads_1.fastq.gz,data/reads_2.fastq.gz,,ERR011322,SPAdes,3.15.5,metagenome
+assembly_2,data/contigs_2.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9,metatranscriptome
 ```
 
 See the [`metagenomic_assemblies` mode section](docs/usage.md#samplesheet-input-1) of the usage documentation for more details.

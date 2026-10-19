@@ -19,7 +19,8 @@ nextflow_process {
                         run_accession: 'ERR123456',
                         coverage: 50.5,
                         assembler: 'metaspades',
-                        assembler_version: '3.15.5'
+                        assembler_version: '3.15.5',
+                        assembly_type: 'metagenome'
                     ],
                     file('https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/genome/NC_045512.2/GCF_009858895.2_ASM985889v3_genomic.200409.fna.gz')
                 ]
@@ -49,7 +50,8 @@ nextflow_process {
                         run_accession: 'ERR999999',
                         coverage: 75.0,
                         assembler: 'megahit',
-                        assembler_version: '1.2.9'
+                        assembler_version: '1.2.9',
+                        assembly_type: 'metatranscriptome'
                     ],
                     file('https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/genome/NC_045512.2/GCF_009858895.2_ASM985889v3_genomic.200409.fna.gz')
                 ]

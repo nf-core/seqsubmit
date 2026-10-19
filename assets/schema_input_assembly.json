@@ -92,6 +92,14 @@
                 "errorMessage": "Assembler version must be provided and cannot contain spaces",
                 "description": "Version of the assembler software used to generate the assembly, e.g. 1.0.0",
                 "meta": ["assembler_version"]
+            },
+            "assembly_type": {
+                "type": "string",
+                "enum": ["metagenome", "metatranscriptome"],
+                "errorMessage": "Assembly type should be metagenome or metatranscriptome",
+                "description": "Assembly type: metagenome or metatranscriptome. Written to the ENA manifest as ASSEMBLY_TYPE 'primary metagenome' or 'metatranscriptome'. Default: metagenome",
+                "default": "metagenome",
+                "meta": ["assembly_type"]
             }
         },
         "required": ["id", "fasta", "run_accession", "assembler", "assembler_version"],
