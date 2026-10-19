@@ -226,7 +226,8 @@ workflow GENOMESUBMIT {
         study_accession_ch = channel.of(submission_study)
     } else {
         REGISTERSTUDY(
-            channel.of([[id: "study"], file(study_metadata)]),
+            // Only register a study when at least one genome passed validation
+            FASTA_VALIDATION.out.valid_fastas.first().map { _it -> [[id: "study"], file(study_metadata)] },
             test_upload,
             release_date
         )

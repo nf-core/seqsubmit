@@ -136,7 +136,8 @@ workflow ASSEMBLYSUBMIT {
     } else {
         // Register a new study using the study metadata file
         REGISTERSTUDY(
-            channel.of([[id: "study"], file(study_metadata)]),
+            // Only register a study when at least one assembly passed validation
+            FASTA_VALIDATION.out.valid_fastas.first().map { _it -> [[id: "study"], file(study_metadata)] },
             test_upload,
             release_date
         )

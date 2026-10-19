@@ -1,11 +1,8 @@
 {
     "-profile test_mag_one_contig": {
         "content": [
-            2,
+            1,
             {
-                "REGISTERSTUDY": {
-                    "mgnify-pipelines-toolkit": "1.5.1"
-                },
                 "Workflow": {
                     "nf-core/seqsubmit": "v1.0.0"
                 }
@@ -31,10 +28,10 @@
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
             ]
         ],
-        "timestamp": "2026-10-15T16:19:46.817973",
+        "timestamp": "2026-10-19T15:29:21.389607",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "26.10.0"
+            "nextflow": "26.04.1"
         }
     }
 }
