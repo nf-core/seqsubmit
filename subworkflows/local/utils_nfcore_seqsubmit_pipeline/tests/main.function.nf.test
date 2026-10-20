@@ -46,7 +46,7 @@ nextflow_function {
         }
     }
 
-    test("No contigs in CoverM output - coverage is 0") {
+    test("No contigs in CoverM output - fails with a clear error") {
 
         when {
             function {
@@ -58,8 +58,26 @@ nextflow_function {
 
         then {
             assertAll(
-                { assert function.success },
-                { assert function.result == 0d }
+                { assert function.failed },
+                { assert function.stdout.any { it.contains("has no contigs") } }
+            )
+        }
+    }
+
+    test("No reads mapped - coverage 0 fails with a clear error") {
+
+        when {
+            function {
+                """
+                input[0] = file("${moduleDir}/tests/fixtures/coverm_zero_depth.depth.tsv")
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert function.failed },
+                { assert function.stdout.any { it.contains("no reads mapped") } }
             )
         }
     }

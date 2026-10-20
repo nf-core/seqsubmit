@@ -216,7 +216,14 @@ def calculateCoassemblyCoverage(coverage_file) {
         total_length   += length
     }
 
-    return total_length > 0 ? weighted_depth / total_length : 0d
+    if (total_length == 0) {
+        error("CoverM output ${coverage_file.name} has no contigs, so assembly coverage cannot be calculated.")
+    }
+    def coverage = weighted_depth / total_length
+    if (coverage == 0) {
+        error("Calculated coverage for ${coverage_file.name} is 0: no reads mapped to the assembly. Check that the reads in 'fastq_1'/'fastq_2' belong to this assembly.")
+    }
+    return coverage
 }
 
 //
