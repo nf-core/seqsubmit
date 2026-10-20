@@ -58,6 +58,8 @@ custom_data:
         title: "Filepath"
       Sample:
         title: "Sample"
+      Library:
+        title: "Library"
 
   genome_metadata:
     id: "genome_metadata"

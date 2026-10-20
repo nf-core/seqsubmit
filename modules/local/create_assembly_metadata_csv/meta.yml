@@ -21,6 +21,7 @@ input:
           - coverage: Assembly coverage value
           - assembler: Name of the assembler used
           - assembler_version: Version of the assembler
+          - assembly_type: 'metagenome' or 'metatranscriptome' (optional, default: 'metagenome')
     - fasta:
         type: file
         description: Assembly FASTA file
@@ -34,7 +35,10 @@ output:
             Groovy Map containing sample information (same as input)
       - "*.csv":
           type: file
-          description: CSV file containing assembly metadata to be used as input for the assembly_uploader
+          description: |
+            CSV file containing assembly metadata to be used as input for the assembly_uploader,
+            with columns Runs, Coverage, Assembler, Version, Filepath, Sample (empty) and
+            Library (assembly_type value, defines ASSEMBLY_TYPE in the ENA manifest)
           pattern: "*_assembly_metadata.csv"
 
 authors:

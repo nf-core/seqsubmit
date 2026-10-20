@@ -1,7 +1,7 @@
 {
     "-profile test_mag_no_taxonomy": {
         "content": [
-            11,
+            12,
             {
                 "CATPACK_ADDNAMES_BINS": {
                     "catpack": 6.0
@@ -30,6 +30,9 @@
                 },
                 "FALINT": {
                     "falint": "1.2.0"
+                },
+                "REGISTERSTUDY": {
+                    "mgnify-pipelines-toolkit": "1.5.1"
                 },
                 "RENAME_FASTA_FOR_CATPACK": {
                     "bash": "5.2.37(1)-release"
@@ -99,10 +102,10 @@
                 "multiqc_genome_metadata.txt:md5,c2bdf8ba36b55b5f48fa07a26e5222f5"
             ]
         ],
+        "timestamp": "2026-10-15T16:23:14.854681",
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "26.04.0"
-        },
-        "timestamp": "2026-06-24T16:20:51.581304"
+            "nf-test": "0.9.5",
+            "nextflow": "26.10.0"
+        }
     }
 }

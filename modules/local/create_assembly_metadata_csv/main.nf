@@ -18,7 +18,7 @@ process CREATE_ASSEMBLY_METADATA_CSV {
     task.ext.when == null || task.ext.when
 
     script:
-    def header = 'Runs,Coverage,Assembler,Version,Filepath,Sample'
+    def header = 'Runs,Coverage,Assembler,Version,Filepath,Sample,Library'
     // Format run accessions: wrap in quotes if it's a list (co-assembly) or single value
     def runs_joined = meta.run_accession instanceof List ? meta.run_accession.join(',') : meta.run_accession
     def runs = "\"${runs_joined}\""
@@ -28,7 +28,8 @@ process CREATE_ASSEMBLY_METADATA_CSV {
         meta.assembler,
         meta.assembler_version,
         fasta.name,
-        ''    // Sample column is filled later for co-assemblies that require virtual sample registration
+        '',    // Sample column is filled later for co-assemblies that require virtual sample registration
+        meta.assembly_type ?: 'metagenome'  // it would be applied by schema, but still needed as safe case for tests
     ].join(',')
     """
     cat <<-END_CSV > ${meta.id}_assembly_metadata.csv

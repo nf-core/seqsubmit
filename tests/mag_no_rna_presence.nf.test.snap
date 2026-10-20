@@ -1,7 +1,7 @@
 {
     "-profile test_mag_no_rna_presence": {
         "content": [
-            10,
+            11,
             {
                 "BARRNAP": {
                     "barrnap": 0.9
@@ -27,6 +27,9 @@
                 },
                 "FALINT": {
                     "falint": "1.2.0"
+                },
+                "REGISTERSTUDY": {
+                    "mgnify-pipelines-toolkit": "1.5.1"
                 },
                 "SUBMIT": {
                     "ena-webin-cli": "9.0.3",
@@ -95,15 +98,15 @@
             [
                 "no_rna_presence_bac.gff:md5,df19e1b84ba6f691d20c72b397c88abf",
                 "no_rna_presence.tsv:md5,abd958e8addba39c9e4d7f6b97a1a7c6",
-                "genomes_metadata.tsv:md5,0f567491f038d4a0c1dbf4c05cdc26c0",
+                "genomes_metadata.tsv:md5,28fdaa0fe237cba4d0370c07d5f9ebaa",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
-                "multiqc_genome_metadata.txt:md5,73e2aecbb5233cee71a12237ed4c3f08"
+                "multiqc_genome_metadata.txt:md5,efa903988140642f4f3d12b8e034e7a1"
             ]
         ],
+        "timestamp": "2026-10-19T15:57:54.825156",
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "26.04.0"
-        },
-        "timestamp": "2026-06-24T16:13:51.780521"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.1"
+        }
     }
 }

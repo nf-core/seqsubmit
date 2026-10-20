@@ -1,7 +1,7 @@
 {
     "-profile test_assembly_no_coverage_paired_reads": {
         "content": [
-            8,
+            9,
             {
                 "CONCAT_ACCESSIONS": {
                     "coreutils": 9.4,
@@ -23,7 +23,10 @@
                     "falint": "1.2.0"
                 },
                 "GENERATE_ASSEMBLY_MANIFEST": {
-                    "assembly_uploader": "1.3.5"
+                    "assembly_uploader": "1.3.6"
+                },
+                "REGISTERSTUDY": {
+                    "mgnify-pipelines-toolkit": "1.5.1"
                 },
                 "SUBMIT": {
                     "ena-webin-cli": "9.0.3",
@@ -72,15 +75,15 @@
             ],
             [
                 "no_coverage_paired_reads.depth.tsv:md5,bb5f99e74d21df3c73e0ae0f388bcbcb",
-                "assemblies_metadata.csv:md5,60706c21c030ba38af7a402f5e753fd5",
-                "multiqc_assembly_metadata.txt:md5,9ae2665c6c7b648797758ee66d42ce62",
+                "assemblies_metadata.csv:md5,199890227285973c56ea126e7f556017",
+                "multiqc_assembly_metadata.txt:md5,07b7d9fc2d6b6eaa9e779af80eb8fdde",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
             ]
         ],
+        "timestamp": "2026-10-15T15:39:15.438257",
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "26.04.1"
-        },
-        "timestamp": "2026-05-13T13:18:47.77148"
+            "nf-test": "0.9.5",
+            "nextflow": "26.10.0"
+        }
     }
 }

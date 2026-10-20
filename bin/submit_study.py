@@ -13,6 +13,7 @@ import json
 import logging
 import os
 import sys
+import uuid
 import xml.etree.ElementTree as ET
 from io import BytesIO
 from pathlib import Path
@@ -327,7 +328,8 @@ def build_submission_xml(
     # SUBMISSION_SET
     submission_set = ET.SubElement(webin, "SUBMISSION_SET")
     submission = ET.SubElement(submission_set, "SUBMISSION")
-    sub_alias = f"study-submission-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
+    # Random suffix keeps aliases unique when several submissions start in the same second
+    sub_alias = f"study-submission-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:4]}"
     submission.set("alias", sub_alias)
     actions = ET.SubElement(submission, "ACTIONS")
     main_action = ET.SubElement(actions, "ACTION")

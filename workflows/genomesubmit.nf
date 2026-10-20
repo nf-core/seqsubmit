@@ -138,7 +138,7 @@ workflow GENOMESUBMIT {
     // --------- Completeness and contamination calculation
     branched_stats_results = fasta_updated_with_rna
         .branch { meta, _fasta ->
-            genome_evaluation_input: !(meta.completeness) || !(meta.contamination) || !(meta.stats_generation_software)
+            genome_evaluation_input: meta.completeness == null || meta.contamination == null || meta.stats_generation_software == null
             evaluation_present: true  // Everything else goes here
         }
 
@@ -226,7 +226,8 @@ workflow GENOMESUBMIT {
         study_accession_ch = channel.of(submission_study)
     } else {
         REGISTERSTUDY(
-            channel.of([[id: "study"], file(study_metadata)]),
+            // Only register a study when at least one genome passed validation
+            FASTA_VALIDATION.out.valid_fastas.first().map { _it -> [[id: "study"], file(study_metadata)] },
             test_upload,
             release_date
         )
