@@ -209,7 +209,10 @@ def toolCitationText() {
     ].join(' ').trim()
 
     def stats_tools = [
-        params.mode == "bins" || params.mode == "mags" ? "Completeness and contamination metrics was performed by CheckM2 (Chklovski et al. 2023)." : "",
+        params.mode == "bins" || params.mode == "mags" ? "Completeness and contamination metrics for prokaryotic genomes were calculated by CheckM2 (Chklovski et al. 2023)." : "",
+        params.mode == "bins" || params.mode == "mags" ? "Contamination metrics for eukaryotic genomes were calculated by EukCC (Saary et al. 2020), which uses MetaEuk (Levy Karin et al. 2020) and pplacer (Matsen et al. 2010)." : "",
+        (params.mode == "bins" || params.mode == "mags") && params.eukaryotic_completeness_tool == "busco" ? "Completeness metrics for eukaryotic genomes were calculated by BUSCO (Manni et al. 2021; Tegenfeldt et al. 2025)." : "",
+        (params.mode == "bins" || params.mode == "mags") && params.eukaryotic_completeness_tool != "busco" ? "Completeness metrics for eukaryotic genomes were calculated by EukCC (Saary et al. 2020)." : "",
         params.mode == "metagenomic_assemblies" ? "Coverage calculation for metagenomic assemblies was done by CoverM contig (Aroney et el. 2025)." : "",
         params.mode == "bins" || params.mode == "mags" ? "Coverage calculation for bins/MAGs was done by CoverM genome (Aroney et el. 2025)." : ""
     ].join(' ').trim()
@@ -219,7 +222,7 @@ def toolCitationText() {
     ].join(' ').trim()
 
     def rna_tools = [
-        params.mode == "bins" || params.mode == "mags" ? "Bacterial ribosomal RNA prediction was performed by barrnap (Seemann T. 2013)." : "",
+        params.mode == "bins" || params.mode == "mags" ? "Ribosomal RNA prediction was performed by barrnap (Seemann T. 2013)." : "",
         params.mode == "bins" || params.mode == "mags" ? "Transfer RNA genes were detected by tRNAscan-SE (Chan et al. 2021)." : ""
     ].join(' ').trim()
 
@@ -246,6 +249,11 @@ def toolBibliographyText() {
             '<li>Edwards, R. (2023). linsalrob/py_fasta_validator: Compressy. doi: <a href="https://doi.org/10.5281/zenodo.5002710">10.5281/zenodo.5002710</a></li>',
             '<li>Chklovski, A., Parks, D. H., Woodcroft, B. J., & Tyson, G. W. (2023). CheckM2: a rapid, scalable and accurate tool for assessing microbial genome quality using machine learning. Nature Methods, 20(8), 1203-1212. doi: <a href="https://doi.org/10.1038/s41592-023-01940-w">10.1038/s41592-023-01940-w</a></li>',
             '<li>Aroney, S. T., Newell, R. J., Nissen, J. N., Camargo, A. P., Tyson, G. W., & Woodcroft, B. J. (2025). CoverM: read alignment statistics for metagenomics. Bioinformatics, 41(4), btaf147. doi: <a href="https://doi.org/10.1093/bioinformatics/btaf147">10.1093/bioinformatics/btaf147</a></li>',
+            '<li>Saary, P., Mitchell, A. L., & Finn, R. D. (2020). Estimating the quality of eukaryotic genomes recovered from metagenomic analysis with EukCC. Genome Biology, 21(1), 244. doi: <a href="https://doi.org/10.1186/s13059-020-02155-4">10.1186/s13059-020-02155-4</a></li>',
+            '<li>Levy Karin, E., Mirdita, M., & Söding, J. (2020). MetaEuk—sensitive, high-throughput gene discovery, and annotation for large-scale eukaryotic metagenomics. Microbiome, 8(1), 48. doi: <a href="https://doi.org/10.1186/s40168-020-00808-x">10.1186/s40168-020-00808-x</a></li>',
+            '<li>Matsen, F. A., Kodner, R. B., & Armbrust, E. V. (2010). pplacer: linear time maximum-likelihood and Bayesian phylogenetic placement of sequences onto a fixed reference tree. BMC Bioinformatics, 11, 538. doi: <a href="https://doi.org/10.1186/1471-2105-11-538">10.1186/1471-2105-11-538</a></li>',
+            params.eukaryotic_completeness_tool == "busco" ? '<li>Manni, M., Berkeley, M. R., Seppey, M., Simão, F. A., & Zdobnov, E. M. (2021). BUSCO Update: Novel and Streamlined Workflows along with Broader and Deeper Phylogenetic Coverage for Scoring of Eukaryotic, Prokaryotic, and Viral Genomes. Molecular Biology and Evolution, 38(10), 4647-4654. doi: <a href="https://doi.org/10.1093/molbev/msab199">10.1093/molbev/msab199</a></li>' : "",
+            params.eukaryotic_completeness_tool == "busco" ? '<li>Tegenfeldt, F., Kuznetsov, D., Manni, M., Berkeley, M., Zdobnov, E. M., & Kriventseva, E. V. (2025). OrthoDB and BUSCO update: annotation of orthologs with wider sampling of genomes. Nucleic Acids Research, 53(D1), D516-D522. doi: <a href="https://doi.org/10.1093/nar/gkae987">10.1093/nar/gkae987</a></li>' : "",
             '<li>Von Meijenfeldt, F. B., Arkhipova, K., Cambuy, D. D., Coutinho, F. H., & Dutilh, B. E. (2019). Robust taxonomic classification of uncharted microbial sequences and bins with CAT and BAT. Genome biology, 20(1), 217. doi: <a href="https://doi.org/10.1038/s41467-024-47155-1">10.1038/s41467-024-47155-1</a></li>',
             '<li>Seemann, T. (2014). barrnap: Bacterial ribosomal RNA predictor. barrnap: Bacterial ribosomal RNA predictor. <a href="http://vicbioinformatics.com/">vicbioinformatics.com</a></li>',
             '<li>Chan, P. P., Lin, B. Y., Mak, A. J., & Lowe, T. M. (2021). tRNAscan-SE 2.0: improved detection and functional classification of transfer RNA genes. Nucleic acids research, 49(16), 9077-9096. doi: <a href="https://doi.org/10.1093/nar/gkab688">10.1093/nar/gkab688</a></li>',

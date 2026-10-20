@@ -1,0 +1,124 @@
+{
+    "eukaryote - busco - stub": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test_euk",
+                        "domain": "euk"
+                    },
+                    null,
+                    "1.0",
+                    "busco_v6.1.0;eukcc_v2.2.0"
+                ]
+            ]
+        ],
+        "timestamp": "2026-10-20T10:38:25.344278",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    },
+    "prokaryotes only - stub": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test_arc",
+                        "domain": "arc"
+                    },
+                    null,
+                    null,
+                    "checkm2_v1.1.0"
+                ],
+                [
+                    {
+                        "id": "test_bac",
+                        "domain": "bac"
+                    },
+                    null,
+                    null,
+                    "checkm2_v1.1.0"
+                ]
+            ]
+        ],
+        "timestamp": "2026-10-20T10:01:14.903614",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    },
+    "eukaryote with contamination - eukcc - stub": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test_euk",
+                        "domain": "euk",
+                        "contamination": 2.5,
+                        "stats_generation_software": "CustomTool_v1.0"
+                    },
+                    "90.0",
+                    2.5,
+                    "CustomTool_v1.0;eukcc_v2.2.0"
+                ]
+            ]
+        ],
+        "timestamp": "2026-10-20T10:38:53.012231",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    },
+    "mixed domains - eukcc - stub": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test_bac",
+                        "domain": "bac"
+                    },
+                    null,
+                    null,
+                    "checkm2_v1.1.0"
+                ],
+                [
+                    {
+                        "id": "test_euk",
+                        "domain": "euk"
+                    },
+                    "90.0",
+                    "1.0",
+                    "eukcc_v2.2.0"
+                ]
+            ]
+        ],
+        "timestamp": "2026-10-20T09:53:08.084333",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    },
+    "eukaryote with contamination - busco - stub": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test_euk",
+                        "domain": "euk",
+                        "contamination": 2.5,
+                        "stats_generation_software": "CustomTool_v1.0"
+                    },
+                    null,
+                    2.5,
+                    "CustomTool_v1.0;busco_v6.1.0"
+                ]
+            ]
+        ],
+        "timestamp": "2026-10-20T10:38:42.005927",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    }
+}

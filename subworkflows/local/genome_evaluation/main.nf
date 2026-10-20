@@ -68,20 +68,31 @@ workflow GENOME_EVALUATION {
 
     // ------ Eukaryotes
 
+    // Contamination can only be calculated by EukCC. If contamination is already given in the samplesheet
+    // and BUSCO calculates completeness, EukCC is skipped for that genome.
+    // Without BUSCO, EukCC runs as usual for completeness and contamination from the samplesheet is kept.
+    euks_split = domain_split_fasta.euks
+        .branch { meta, _fasta ->
+            busco_only: eukaryotic_completeness_tool == 'busco' && meta.contamination != null
+            eukcc:      true
+        }
+
     // Databases for eukaryotes can be given as a directory or as a .tar.gz/.tgz archive (local path or URL).
-    // Archives are extracted with a single DB_UNTAR step, only if there is at least one eukaryotic genome.
+    // Archives are extracted with a single DB_UNTAR step, only if there is at least one genome that needs the tool.
     // BUSCO database directory is expected to have the structure `<busco_db>/lineages/<taxa>_odb(10|12)`
     def busco_db_file = (eukaryotic_completeness_tool == 'busco' && busco_db) ? file(busco_db, checkIfExists: true) : null
     def eukcc_db_file = eukcc_db ? file(eukcc_db, checkIfExists: true) : null
 
     ch_db_archives = domain_split_fasta.euks
         .first()
-        .flatMap { _meta, _fasta ->
-            [
-                [[id: 'busco_db'], busco_db_file],
-                [[id: 'eukcc_db'], eukcc_db_file]
-            ].findAll { _db_meta, db -> isArchive(db) }
-        }
+        .filter { _meta, _fasta -> isArchive(busco_db_file) }
+        .map { _meta, _fasta -> [[id: 'busco_db'], busco_db_file] }
+        .mix(
+            euks_split.eukcc
+                .first()
+                .filter { _meta, _fasta -> isArchive(eukcc_db_file) }
+                .map { _meta, _fasta -> [[id: 'eukcc_db'], eukcc_db_file] }
+        )
 
     DB_UNTAR ( ch_db_archives )
 
@@ -104,21 +115,23 @@ workflow GENOME_EVALUATION {
     }
 
     // Run EukCC for completeness and contamination of eukaryotes
-    // Database is required only when there is at least one eukaryotic genome
+    // Database is required only when there is at least one eukaryotic genome to run EukCC on
     def eukcc_database = eukcc_db_file
         ? prepareDatabase(eukcc_db_file, 'eukcc_db', DB_UNTAR.out.untar)
-        : domain_split_fasta.euks.first().map { _meta, _fasta ->
+        : euks_split.eukcc.first().map { _meta, _fasta ->
             error("Eukaryotic genomes were found, but --eukcc_db is not provided. Please provide the EukCC database.")
         }
 
-    GUNZIP_FASTA ( domain_split_fasta.euks )
+    GUNZIP_FASTA ( euks_split.eukcc )
 
     EUKCC_SINGLE (
        GUNZIP_FASTA.out.gunzip,
        eukcc_database
     )
 
-    // ------ Combine completeness and contamination from both tools into one channel
+    // ------ Combine completeness and contamination from all tools into one channel
+    // Tools are listed in stats_generation_software separated by ';'.
+    // If stats_generation_software is given in the samplesheet, launched tools are appended to it.
 
     // Software name with version, e.g. checkm2_v1.0.2, assigned per tool
     def checkm2_software = CHECKM2_PREDICT.out.versions_checkm2_predict
@@ -131,10 +144,44 @@ workflow GENOME_EVALUATION {
     ch_prok_stats = CHECKM2_PREDICT.out.checkm2_tsv
         .combine(checkm2_software)
         .map { meta, table, software -> parseStatsTable(meta, table, software) }
+        .map { meta, completeness, contamination, software ->
+            [ meta, completeness, contamination, mergeSoftware(meta.stats_generation_software, [software]) ]
+        }
 
-    ch_euk_stats = EUKCC_SINGLE.out.eukcc_tsv
+    // [ meta, completeness, contamination, software ], contamination from the samplesheet is kept if present
+    ch_eukcc_stats = EUKCC_SINGLE.out.eukcc_tsv
         .combine(eukcc_software)
         .map { meta, table, software -> parseStatsTable(meta, table, software) }
+        .map { meta, completeness, contamination, software ->
+            [ meta, completeness, meta.contamination != null ? meta.contamination : contamination, software ]
+        }
+
+    if (eukaryotic_completeness_tool == 'busco') {
+        // With BUSCO activated, completeness is taken from BUSCO and contamination from EukCC or samplesheet
+        def busco_software = BUSCO_BUSCO.out.versions_busco
+            .map { _process_name, tool_name, version -> "${tool_name}_v${version}" }
+            .first()
+        def ch_busco_completeness = BUSCO_BUSCO.out.short_summaries_json
+            .map { meta, summaries -> [ meta, parseBuscoCompleteness(summaries) ] }
+
+        // BUSCO short summary is optional (no genes found) and EukCC is skipped for busco_only genomes -
+        // remainder keeps every eukaryotic genome, missing results are null
+        ch_euk_stats = domain_split_fasta.euks
+            .map { meta, _fasta -> [ meta, true ] }
+            .join(ch_busco_completeness, remainder: true)
+            .join(ch_eukcc_stats.map { meta, completeness, contamination, software -> [ meta, [completeness, contamination, software] ] }, remainder: true)
+            .combine(busco_software)
+            .map { meta, _is_euk, busco_completeness, eukcc_stats, busco_sw ->
+                def contamination = eukcc_stats ? eukcc_stats[1] : meta.contamination
+                def tools         = [ busco_sw, eukcc_stats ? eukcc_stats[2] : null ]
+                [ meta, busco_completeness, contamination, mergeSoftware(meta.stats_generation_software, tools) ]
+            }
+    } else {
+        ch_euk_stats = ch_eukcc_stats
+            .map { meta, completeness, contamination, software ->
+                [ meta, completeness, contamination, mergeSoftware(meta.stats_generation_software, [software]) ]
+            }
+    }
 
     emit:
     stats = ch_prok_stats.mix(ch_euk_stats)  // channel: [ val(meta), val(completeness), val(contamination), val(stats_generation_software) ]
@@ -186,4 +233,25 @@ def parseStatsTable(meta, table, software) {
         values ? values[2] : null,
         software
     ]
+}
+
+//
+// Read completeness ([results][Complete percentage]) from BUSCO short_summary json.
+// With auto-lineage BUSCO writes a generic and a specific summary - the specific lineage is preferred.
+//
+def parseBuscoCompleteness(summaries) {
+    def summary_files = summaries instanceof List ? summaries : [summaries]
+    def summary = summary_files.find { json -> json.name.startsWith('short_summary.specific.') } ?: summary_files[0]
+    def completeness = new groovy.json.JsonSlurper().parseText(summary.text)?.results?.get('Complete percentage')
+    return completeness != null ? completeness.toString() : null
+}
+
+//
+// Join software names with ';', appending launched tools to the software given in the samplesheet.
+// Duplicates and empty values are removed, e.g. "CheckM2_v1.0.0;eukcc_v2.2.0"
+//
+def mergeSoftware(existing, tools) {
+    def existing_tools = existing ? existing.toString().tokenize(';').collect { tool -> tool.trim() } : []
+    def merged = (existing_tools + tools.findAll { tool -> tool }.collect { tool -> tool.toString() }).unique()
+    return merged ? merged.join(';') : null
 }

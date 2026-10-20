@@ -1,7 +1,8 @@
 process EUKCC_SINGLE {
-
-    container 'community.wave.seqera.io/library/python_metaeuk_pplacer_epa-ng_pruned:0b7ea587ebcad440'
     tag "${meta.id}"
+
+    conda "${moduleDir}/environment.yml"
+    container 'community.wave.seqera.io/library/python_metaeuk_pplacer_epa-ng_pruned:0b7ea587ebcad440'
 
     input:
     tuple val(meta), path(fasta)
