@@ -87,8 +87,8 @@ workflow ASSEMBLYSUBMIT {
             }
 
             // Convert paths to file objects
-            def fastq1_paths = fastq1_list.collect { path -> file(path.trim()) }
-            def fastq2_paths = fastq2_list ? fastq2_list.collect { path -> file(path.trim()) } : []
+            def fastq1_paths = fastq1_list.collect { path -> file(path.trim(), checkIfExists: true) }
+            def fastq2_paths = fastq2_list ? fastq2_list.collect { path -> file(path.trim(), checkIfExists: true) } : []
 
             if (fastq2_paths) {
                 [new_meta, fastq1_paths, fastq2_paths]
