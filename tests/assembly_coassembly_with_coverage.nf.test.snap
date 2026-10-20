@@ -20,7 +20,7 @@
                     "falint": "1.2.0"
                 },
                 "GENERATE_ASSEMBLY_MANIFEST": {
-                    "assembly_uploader": "1.3.5"
+                    "assembly_uploader": "1.3.6"
                 },
                 "REGISTERSTUDY": {
                     "mgnify-pipelines-toolkit": "1.5.1"
