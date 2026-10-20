@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Fixed`
 
 - [#116](https://github.com/nf-core/seqsubmit/pull/116)
-  - Most tests now register a new submission study, so they can be run with any Webin account. Only the `*_fixed_study` tests submit to the existing study `PRJEB98843`
+  - All tests except the `*_existing_study` ones now register a new submission study, so they can be run with any Webin account ([#95](https://github.com/nf-core/seqsubmit/issues/95)). The `test_mag_complete_metadata_existing_study` and `test_assembly_complete_metadata_existing_study` tests submit to the existing study `PRJEB98843` and require maintainer Webin credentials
   - `test_upload = true` is set explicitly in all test configs
   - Study submission alias now has a random suffix, so parallel registrations started in the same second no longer collide
   - `REGISTERSTUDY` now runs only when at least one input passed validation ([#113](https://github.com/nf-core/seqsubmit/issues/113))
