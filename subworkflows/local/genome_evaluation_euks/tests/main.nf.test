@@ -183,6 +183,50 @@ nextflow_workflow {
 
     }
 
+    test("eukaryote without estimate - eukcc - not assigned") {
+
+        // Not a stub: values are not checked in -stub mode.
+        // SARS-CoV-2 genome has no fungal marker genes, so EukCC gives no estimate (exit code 201/204)
+        // and the genome is reported in not_assigned_quality_genomes.tsv instead of stats.
+
+        when {
+            params {
+                mode = 'mags'
+            }
+            workflow {
+                """
+                input[0] = channel.of([
+                    [ id:'test_not_assigned', domain:'euk' ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta.gz', checkIfExists: true)
+                ])
+                input[1] = 'auto_euk'
+                input[2] = null
+                input[3] = true
+                input[4] = 'eukcc'
+                input[5] = 'https://ftp.ebi.ac.uk/pub/databases/metagenomics/eukcc/eukcc2_db_tiny_fungi_test.tar.gz'
+                """
+            }
+        }
+
+        then {
+            def report = path("${params.outdir}/mags/not_assigned_quality_genomes.tsv")
+            assert workflow.success
+            assertAll(
+                { assert workflow.out.stats.size() == 0 },
+                { assert workflow.out.not_assigned.size() == 1 },
+                { assert workflow.out.not_assigned[0][0].id == 'test_not_assigned' },
+                { assert workflow.out.not_assigned[0][1] == null },
+                { assert workflow.out.not_assigned[0][2] == null },
+                { assert report.exists() },
+                { assert report.readLines()[0] == 'sample\tcompleteness\tcontamination\tstats_generation_software' },
+                { assert report.readLines().size() == 2 },
+                { assert report.readLines()[1].startsWith('test_not_assigned\tnull\tnull\teukcc_v') },
+                { assert workflow.stdout.any { it.contains("Genome 'test_not_assigned' is excluded from submission") } }
+            )
+        }
+
+    }
+
     test("no genomes - stub") {
 
         options "-stub"

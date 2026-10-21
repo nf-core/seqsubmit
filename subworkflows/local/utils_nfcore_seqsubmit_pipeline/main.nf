@@ -316,6 +316,13 @@ def parseStatsTable(meta, table, software) {
 }
 
 //
+// Check if completeness or contamination value was not assigned by a tool: missing, empty or NA/NaN
+//
+def isNotAssigned(value) {
+    return value == null || value.toString().trim().toUpperCase() in ['', 'NA', 'NAN']
+}
+
+//
 // Join software names with ';', appending launched tools to the software given in the samplesheet.
 // Duplicates and empty values are removed, e.g. "CheckM2_v1.0.0;eukcc_v2.2.0"
 //

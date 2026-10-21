@@ -224,6 +224,7 @@ workflow GENOMESUBMIT {
     )
 
     // Update metadata with completeness and contamination from CheckM2 (prokaryotes) or EukCC/BUSCO (eukaryotes)
+    // Eukaryotic genomes without completeness or contamination are filtered out in GENOME_EVALUATION_EUKS
     fasta_updated_with_stats = GENOME_EVALUATION_PROKS.out.stats
         .mix(GENOME_EVALUATION_EUKS.out.stats)
         .join(branched_stats_results.genome_evaluation_input)

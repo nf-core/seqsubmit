@@ -68,4 +68,3 @@ workflow GENOME_EVALUATION_PROKS {
     stats = ch_prok_stats  // channel: [ val(meta), val(completeness), val(contamination), val(stats_generation_software) ]
 
 }
-

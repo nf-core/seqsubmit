@@ -59,6 +59,12 @@ output:
         Channel containing completeness, contamination and software used per genome.
         stats_generation_software lists the tools separated by ';', appended to the value given in the samplesheet.
         Structure: [ val(meta), val(completeness), val(contamination), val(stats_generation_software) ]
+  - not_assigned:
+      type: list
+      description: |
+        Channel containing genomes excluded from submission because completeness or contamination
+        could not be estimated (missing, empty or NA). They are also reported in not_assigned_quality_genomes.tsv.
+        Structure: [ val(meta), val(completeness), val(contamination), val(stats_generation_software) ]
 authors:
   - "@KateSakharova"
   - "@ochkalova"

@@ -13,7 +13,7 @@ include { BUSCO_BUSCO              } from '../../../modules/nf-core/busco/busco/
 include { UNTAR as DB_UNTAR        } from '../../../modules/nf-core/untar/main'
 include { GUNZIP as GUNZIP_FASTA   } from '../../../modules/nf-core/gunzip/main'
 
-include { parseStatsTable; mergeSoftware } from '../utils_nfcore_seqsubmit_pipeline'
+include { parseStatsTable; mergeSoftware; isNotAssigned } from '../utils_nfcore_seqsubmit_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -138,8 +138,29 @@ workflow GENOME_EVALUATION_EUKS {
             }
     }
 
+    // ------ Filter out genomes without completeness or contamination
+    // EukCC reports NA when it cannot place a genome, BUSCO summary is missing when no genes are found.
+    // Values are not checked in -stub mode, where empty tool outputs give null values.
+    ch_euk_stats_branched = ch_euk_stats
+        .branch { _meta, completeness, contamination, _software ->
+            not_assigned: !workflow.stubRun && [completeness, contamination].any { value -> isNotAssigned(value) }
+            assigned: true
+        }
+
+    ch_euk_stats_branched.not_assigned
+        .map { meta, completeness, contamination, software ->
+            log.warn("Genome '${meta.id}' is excluded from submission: ${software} returned completeness='${completeness}', contamination='${contamination}'")
+            "${meta.id}\t${completeness}\t${contamination}\t${software}"
+        }
+        .collectFile(
+            name: "${params.outdir}/${params.mode}/not_assigned_quality_genomes.tsv",
+            newLine: true,
+            seed: "sample\tcompleteness\tcontamination\tstats_generation_software\n"
+        )
+
     emit:
-    stats = ch_euk_stats  // channel: [ val(meta), val(completeness), val(contamination), val(stats_generation_software) ]
+    stats        = ch_euk_stats_branched.assigned      // channel: [ val(meta), val(completeness), val(contamination), val(stats_generation_software) ]
+    not_assigned = ch_euk_stats_branched.not_assigned  // channel: [ val(meta), val(completeness), val(contamination), val(stats_generation_software) ]
 
 }
 
