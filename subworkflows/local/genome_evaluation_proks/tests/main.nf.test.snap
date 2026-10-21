@@ -1,0 +1,52 @@
+{
+    "prokaryote with stats_generation_software - stub": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test_bac",
+                        "domain": "bac",
+                        "stats_generation_software": "CustomTool_v1.0"
+                    },
+                    null,
+                    null,
+                    "CustomTool_v1.0;checkm2_v1.1.0"
+                ]
+            ]
+        ],
+        "timestamp": "2026-10-21T18:09:23.381378",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    },
+    "prokaryotes - stub": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test_arc",
+                        "domain": "arc"
+                    },
+                    null,
+                    null,
+                    "checkm2_v1.1.0"
+                ],
+                [
+                    {
+                        "id": "test_bac",
+                        "domain": "bac"
+                    },
+                    null,
+                    null,
+                    "checkm2_v1.1.0"
+                ]
+            ]
+        ],
+        "timestamp": "2026-10-21T18:08:46.296846",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    }
+}

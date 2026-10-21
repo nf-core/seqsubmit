@@ -1,5 +1,5 @@
 //
-// Subworkflow that calculates completeness and contamination for genome
+// Subworkflow that calculates completeness and contamination for eukaryotic genomes
 //
 
 /*
@@ -10,10 +10,10 @@
 include { EUKCC_SINGLE             } from '../../../modules/local/eukcc/single/main'
 
 include { BUSCO_BUSCO              } from '../../../modules/nf-core/busco/busco/main'
-include { CHECKM2_DATABASEDOWNLOAD } from '../../../modules/nf-core/checkm2/databasedownload/main'
-include { CHECKM2_PREDICT          } from '../../../modules/nf-core/checkm2/predict/main'
 include { UNTAR as DB_UNTAR        } from '../../../modules/nf-core/untar/main'
 include { GUNZIP as GUNZIP_FASTA   } from '../../../modules/nf-core/gunzip/main'
+
+include { parseStatsTable; mergeSoftware } from '../utils_nfcore_seqsubmit_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -21,12 +21,10 @@ include { GUNZIP as GUNZIP_FASTA   } from '../../../modules/nf-core/gunzip/main'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-workflow GENOME_EVALUATION {
+workflow GENOME_EVALUATION_EUKS {
 
     take:
-    ch_fasta                     // channel: [ val(meta), path(fasta) ]
-    ch_checkm2_db                // val: path to local CheckM2 database or null to trigger automatic download
-    ch_checkm2_db_download_id    // val: CheckM2 database Zenodo download ID
+    ch_fasta                     // channel: [ val(meta), path(fasta) ] - eukaryotic genomes only
     busco_db_lineage             // val: lineage for checking against, default: auto_euk
     busco_db                     // val: BUSCO database - local directory or .tar.gz/.tgz archive (path or URL), or null to download
     busco_clean                  // boolean: clean intermediate busco files
@@ -35,43 +33,10 @@ workflow GENOME_EVALUATION {
 
     main:
 
-    // ------ split input to Prokaryotes and Eukaryotes
-
-    domain_split_fasta = ch_fasta
-        .branch { meta, fasta ->
-            proks: meta.domain in ['arc', 'bac']
-            euks:  meta.domain == 'euk'
-        }
-
-    // ------ Prokaryotes
-
-    // Database preparation for checkm2
-    // that step would be launched only if proks branch is not empty
-    ch_do_download = domain_split_fasta.proks
-        .first()
-        .map { _meta_fasta -> ch_checkm2_db_download_id }
-
-    // Download and prepare db from scratch if no pre-built db provided
-    if (ch_checkm2_db) {
-        ch_checkm2_db_ready = channel.value([[id: 'checkm2_db'], file(ch_checkm2_db, checkIfExists: true)])
-    } else {
-        CHECKM2_DATABASEDOWNLOAD(ch_do_download)
-        ch_checkm2_db_ready = CHECKM2_DATABASEDOWNLOAD.out.database
-    }
-
-    // Genome evaluation with CheckM2
-
-    CHECKM2_PREDICT(
-        domain_split_fasta.proks,
-        ch_checkm2_db_ready,
-    )
-
-    // ------ Eukaryotes
-
     // Contamination can only be calculated by EukCC. If contamination is already given in the samplesheet
     // and BUSCO calculates completeness, EukCC is skipped for that genome.
     // Without BUSCO, EukCC runs as usual for completeness and contamination from the samplesheet is kept.
-    euks_split = domain_split_fasta.euks
+    euks_split = ch_fasta
         .branch { meta, _fasta ->
             busco_only: eukaryotic_completeness_tool == 'busco' && meta.contamination != null
             eukcc:      true
@@ -83,7 +48,7 @@ workflow GENOME_EVALUATION {
     def busco_db_file = (eukaryotic_completeness_tool == 'busco' && busco_db) ? file(busco_db, checkIfExists: true) : null
     def eukcc_db_file = eukcc_db ? file(eukcc_db, checkIfExists: true) : null
 
-    ch_db_archives = domain_split_fasta.euks
+    ch_db_archives = ch_fasta
         .first()
         .filter { _meta, _fasta -> isArchive(busco_db_file) }
         .map { _meta, _fasta -> [[id: 'busco_db'], busco_db_file] }
@@ -105,7 +70,7 @@ workflow GENOME_EVALUATION {
         // Genome evaluation with BUSCO
 
         BUSCO_BUSCO (
-           domain_split_fasta.euks,
+           ch_fasta,
            'genome',          // busco mode (choice of: genome, proteins, or transcriptome)
            busco_db_lineage,  // busco lineages file - downloads if not set
            ch_busco_db,
@@ -133,20 +98,10 @@ workflow GENOME_EVALUATION {
     // Tools are listed in stats_generation_software separated by ';'.
     // If stats_generation_software is given in the samplesheet, launched tools are appended to it.
 
-    // Software name with version, e.g. checkm2_v1.0.2, assigned per tool
-    def checkm2_software = CHECKM2_PREDICT.out.versions_checkm2_predict
-        .map { _process_name, tool_name, version -> "${tool_name}_v${version}" }
-        .first()
+    // Software name with version, e.g. eukcc_v2.2.0, assigned per tool
     def eukcc_software = EUKCC_SINGLE.out.versions_eukcc
         .map { _process_name, tool_name, version -> "${tool_name}_v${version}" }
         .first()
-
-    ch_prok_stats = CHECKM2_PREDICT.out.checkm2_tsv
-        .combine(checkm2_software)
-        .map { meta, table, software -> parseStatsTable(meta, table, software) }
-        .map { meta, completeness, contamination, software ->
-            [ meta, completeness, contamination, mergeSoftware(meta.stats_generation_software, [software]) ]
-        }
 
     // [ meta, completeness, contamination, software ], contamination from the samplesheet is kept if present
     ch_eukcc_stats = EUKCC_SINGLE.out.eukcc_tsv
@@ -166,7 +121,7 @@ workflow GENOME_EVALUATION {
 
         // BUSCO short summary is optional (no genes found) and EukCC is skipped for busco_only genomes -
         // remainder keeps every eukaryotic genome, missing results are null
-        ch_euk_stats = domain_split_fasta.euks
+        ch_euk_stats = ch_fasta
             .map { meta, _fasta -> [ meta, true ] }
             .join(ch_busco_completeness, remainder: true)
             .join(ch_eukcc_stats.map { meta, completeness, contamination, software -> [ meta, [completeness, contamination, software] ] }, remainder: true)
@@ -184,7 +139,7 @@ workflow GENOME_EVALUATION {
     }
 
     emit:
-    stats = ch_prok_stats.mix(ch_euk_stats)  // channel: [ val(meta), val(completeness), val(contamination), val(stats_generation_software) ]
+    stats = ch_euk_stats  // channel: [ val(meta), val(completeness), val(contamination), val(stats_generation_software) ]
 
 }
 
@@ -220,22 +175,6 @@ def prepareDatabase(db, db_id, ch_untarred) {
 }
 
 //
-// Read completeness and contamination from a CheckM2 quality_report.tsv or EukCC eukcc.tsv.
-// Both are tab-separated with a header and genome name, completeness, contamination as first three columns.
-// Empty or header-only tables (-stub mode, EukCC exit codes 201/204) give null values.
-//
-def parseStatsTable(meta, table, software) {
-    def lines  = table.readLines()
-    def values = lines.size() > 1 ? lines[1].split('\t') : null
-    return [
-        meta,
-        values ? values[1] : null,
-        values ? values[2] : null,
-        software
-    ]
-}
-
-//
 // Read completeness ([results][Complete percentage]) from BUSCO short_summary json.
 // With auto-lineage BUSCO writes a generic and a specific summary - the specific lineage is preferred.
 //
@@ -244,14 +183,4 @@ def parseBuscoCompleteness(summaries) {
     def summary = summary_files.find { json -> json.name.startsWith('short_summary.specific.') } ?: summary_files[0]
     def completeness = new groovy.json.JsonSlurper().parseText(summary.text)?.results?.get('Complete percentage')
     return completeness != null ? completeness.toString() : null
-}
-
-//
-// Join software names with ';', appending launched tools to the software given in the samplesheet.
-// Duplicates and empty values are removed, e.g. "CheckM2_v1.0.0;eukcc_v2.2.0"
-//
-def mergeSoftware(existing, tools) {
-    def existing_tools = existing ? existing.toString().tokenize(';').collect { tool -> tool.trim() } : []
-    def merged = (existing_tools + tools.findAll { tool -> tool }.collect { tool -> tool.toString() }).unique()
-    return merged ? merged.join(';') : null
 }

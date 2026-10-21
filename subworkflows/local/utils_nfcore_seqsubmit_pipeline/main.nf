@@ -298,3 +298,29 @@ def methodsDescriptionText(mqc_methods_yaml) {
 
     return description_html.toString()
 }
+
+//
+// Read completeness and contamination from a CheckM2 quality_report.tsv or EukCC eukcc.tsv.
+// Both are tab-separated with a header and genome name, completeness, contamination as first three columns.
+// Empty or header-only tables (-stub mode, EukCC exit codes 201/204) give null values.
+//
+def parseStatsTable(meta, table, software) {
+    def lines  = table.readLines()
+    def values = lines.size() > 1 ? lines[1].split('\t') : null
+    return [
+        meta,
+        values ? values[1] : null,
+        values ? values[2] : null,
+        software
+    ]
+}
+
+//
+// Join software names with ';', appending launched tools to the software given in the samplesheet.
+// Duplicates and empty values are removed, e.g. "CheckM2_v1.0.0;eukcc_v2.2.0"
+//
+def mergeSoftware(existing, tools) {
+    def existing_tools = existing ? existing.toString().tokenize(';').collect { tool -> tool.trim() } : []
+    def merged = (existing_tools + tools.findAll { tool -> tool }.collect { tool -> tool.toString() }).unique()
+    return merged ? merged.join(';') : null
+}

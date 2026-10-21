@@ -1,8 +1,10 @@
 process EUKCC_SINGLE {
+
     tag "${meta.id}"
+    label 'process_high'
 
     conda "${moduleDir}/environment.yml"
-    container 'community.wave.seqera.io/library/python_metaeuk_pplacer_epa-ng_pruned:0b7ea587ebcad440'
+    container 'quay.io/biocontainers/eukcc:2.2.0--pyhdfd78af_0'
 
     input:
     tuple val(meta), path(fasta)
@@ -12,7 +14,7 @@ process EUKCC_SINGLE {
     tuple val(meta), path("${prefix}_eukcc_results/eukcc.tsv"), emit: eukcc_tsv
     tuple val("${task.process}"), val('eukcc'), eval('eukcc -v 2>&1 | grep -oE "[0-9]+\\.[0-9]+\\.[0-9]+" | head -n1'), emit: versions_eukcc, topic: versions
     tuple val("${task.process}"), val('metaeuk'), eval('metaeuk -h 2>&1 | grep "Version" | sed "s/.*Version: //"'), emit: versions_metaeuk, topic: versions
-    tuple val("${task.process}"), val('pplacer'), eval ('pplacer --version'), emit: versions_pplacer, topic: versions
+    tuple val("${task.process}"), val('pplacer'), eval('pplacer --version'), emit: versions_pplacer, topic: versions
 
     script:
     def args = task.ext.args ?: ''

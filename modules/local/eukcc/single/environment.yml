@@ -4,7 +4,7 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  # versions match the container community.wave.seqera.io/library/python_metaeuk_pplacer_epa-ng_pruned:0b7ea587ebcad440
+  # versions match the container quay.io/biocontainers/eukcc:2.2.0--pyhdfd78af_0
   - bioconda::epa-ng=0.3.8
   - bioconda::eukcc=2.2.0
   - bioconda::hmmer=3.3

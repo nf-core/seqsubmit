@@ -16,7 +16,8 @@ include { MULTIQC                               } from '../modules/nf-core/multi
 include { paramsSummaryMap                      } from 'plugin/nf-schema'
 
 include { FASTA_VALIDATION                      } from '../subworkflows/local/fasta_validation/main'
-include { GENOME_EVALUATION                     } from '../subworkflows/local/genome_evaluation/main'
+include { GENOME_EVALUATION_EUKS                } from '../subworkflows/local/genome_evaluation_euks/main'
+include { GENOME_EVALUATION_PROKS               } from '../subworkflows/local/genome_evaluation_proks/main'
 include { RNA_DETECTION                         } from '../subworkflows/local/rna_detection/main'
 include { FASTA_CLASSIFY_CATPACK                } from '../subworkflows/nf-core/fasta_classify_catpack/main'
 
@@ -200,10 +201,21 @@ workflow GENOMESUBMIT {
             evaluation_present: true  // Everything else goes here
         }
 
-    GENOME_EVALUATION (
-        branched_stats_results.genome_evaluation_input,
+    // Split genomes to evaluate into prokaryotes and eukaryotes
+    domain_split_stats = branched_stats_results.genome_evaluation_input
+        .branch { meta, _fasta ->
+            proks: meta.domain in ['arc', 'bac']
+            euks:  meta.domain == 'euk'
+        }
+
+    GENOME_EVALUATION_PROKS (
+        domain_split_stats.proks,
         checkm2_db,
-        checkm2_db_download_id,
+        checkm2_db_download_id
+    )
+
+    GENOME_EVALUATION_EUKS (
+        domain_split_stats.euks,
         busco_db_lineage,
         busco_db,
         busco_clean,
@@ -211,8 +223,9 @@ workflow GENOMESUBMIT {
         eukcc_db
     )
 
-    // Update metadata with completeness and contamination from CheckM2 (prokaryotes) or EukCC (eukaryotes)
-    fasta_updated_with_stats = GENOME_EVALUATION.out.stats
+    // Update metadata with completeness and contamination from CheckM2 (prokaryotes) or EukCC/BUSCO (eukaryotes)
+    fasta_updated_with_stats = GENOME_EVALUATION_PROKS.out.stats
+        .mix(GENOME_EVALUATION_EUKS.out.stats)
         .join(branched_stats_results.genome_evaluation_input)
         .map { meta, completeness, contamination, stats_software, fasta ->
             def updated_meta = meta + [
@@ -256,7 +269,7 @@ workflow GENOMESUBMIT {
 
     // --------- Generate manifests
     CREATE_MANIFESTS(
-        fasta_updated_with_taxonomy.map{_meta, fasta -> fasta}.collect(),
+        fasta_updated_with_stats.map{_meta, fasta -> fasta}.collect(),
         CONCAT_METADATA.out.file_out.map { _meta, file -> file }.first(),
         mags_or_bins_flag,     // mags or bins
         study_accession_ch.first(),
@@ -277,7 +290,7 @@ workflow GENOMESUBMIT {
             [ meta, manifest ]
     }
     // Combine fasta and manifests
-    ch_combined = fasta_updated_with_taxonomy
+    ch_combined = fasta_updated_with_stats
         .map { meta, fasta -> [meta.id, meta, fasta] }
         .join(
             manifests_ch.map { meta, manifest -> [meta.id, manifest] }  // Has only [id: prefix]
