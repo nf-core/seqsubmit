@@ -79,7 +79,7 @@
             "stats_generation_software": {
                 "type": "string",
                 "default": null,
-                "description": "Tool, including version, that was used to calculate completeness and contamination, e.g. CheckM2_v1.0.0",
+                "description": "Tool, including version, that was used to calculate completeness and contamination, e.g. CheckM2_v1.0.0. Several tools are separated by `;`, e.g. busco_v6.1.0;eukcc_v2.2.0. If the pipeline runs additional tools for this genome, they are appended to the provided value.",
                 "meta": ["stats_generation_software"]
             },
             "completeness": {
@@ -165,7 +165,7 @@
                     }
                 ],
                 "default": null,
-                "description": "Presence or absence of the 23S, 16S, and 5S rRNA genes and at least 18 tRNAs. This is used for MISAG/MIMAG assembly quality classification. Options: 'true' or 'false'",
+                "description": "Presence or absence of the 23S, 16S, and 5S rRNA genes (prokaryotes) or the 28S, 18S, 5.8S and 5S rRNA genes (eukaryotes) and at least 18 tRNAs. This is used for MISAG/MIMAG assembly quality classification. Options: true or false.",
                 "meta": ["RNA_presence"]
             },
             "NCBI_lineage": {
