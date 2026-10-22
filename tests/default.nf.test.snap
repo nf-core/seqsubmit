@@ -1,7 +1,7 @@
 {
     "-profile test": {
         "content": [
-            21,
+            22,
             {
                 "BARRNAP": {
                     "barrnap": 0.9
@@ -39,6 +39,9 @@
                 },
                 "FALINT": {
                     "falint": "1.2.0"
+                },
+                "REGISTERSTUDY": {
+                    "mgnify-pipelines-toolkit": "1.5.1"
                 },
                 "RENAME_FASTA_FOR_CATPACK": {
                     "bash": "5.2.37(1)-release"
@@ -131,10 +134,10 @@
                 "multiqc_genome_metadata.txt:md5,2f42824e9296d918b7f944037c27c717"
             ]
         ],
+        "timestamp": "2026-10-19T15:27:49.508151",
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "26.04.0"
-        },
-        "timestamp": "2026-06-24T15:59:38.733125"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.1"
+        }
     }
 }

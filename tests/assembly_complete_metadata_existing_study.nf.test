@@ -1,13 +1,13 @@
 nextflow_pipeline {
 
-    name "Test genome submission workflow - complete_metadata"
+    name "Test assembly submission workflow - complete_metadata (submission to existing study)"
     script "../main.nf"
     tag "pipeline"
-    tag "mode_mag"
-    tag "test_mag_no_study_complete_metadata"
-    profile "test_mag_no_study_complete_metadata"
+    tag "mode_assembly"
+    tag "test_assembly_complete_metadata_existing_study"
+    profile "test_assembly_complete_metadata_existing_study"
 
-    test("-profile test_mag_no_study_complete_metadata") {
+    test("-profile test_assembly_complete_metadata_existing_study") {
 
         when {
             params {
@@ -17,7 +17,7 @@ nextflow_pipeline {
 
         then {
             // stable_name: All files + folders in ${params.outdir}/ with a stable name
-            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}', '**/manifests_test/*'])
+            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
             // stable_path: All files in ${params.outdir}/ with stable content
             def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
             // Early failure no need to test the rest of snapshots
