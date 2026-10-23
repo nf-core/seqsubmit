@@ -1,6 +1,6 @@
 nextflow_pipeline {
 
-    name "Test reads submission workflow - long-read BAM"
+    name "Test reads submission workflow - long-read BAM (validate)"
     script "../main.nf"
     tag "pipeline"
     tag "mode_reads"
@@ -32,7 +32,33 @@ nextflow_pipeline {
                     stable_name,
                     // All files with stable contents
                     stable_path
-                ).match() }
+                ).match() },
+                {
+                    // CREATE_READS_MANIFEST output is not published, so look it up in the work dir
+                    // (skip symlinks staged into downstream tasks)
+                    def manifests = []
+                    new File("$workDir").eachFileRecurse(groovy.io.FileType.FILES) { f ->
+                        if (f.name.endsWith(".manifest") && !java.nio.file.Files.isSymbolicLink(f.toPath())) {
+                            manifests << f
+                        }
+                    }
+                    assert manifests.size() == 1
+                    def lines = manifests[0].readLines()
+                    // 8 required fields + DESCRIPTION + 1 BAM entry = 10 lines
+                    assert lines.size() == 10
+                    assert lines.contains("STUDY\tPRJEB98843")
+                    assert lines.contains("SAMPLE\tSAMEA104188781")
+                    // NAME has a timestamp suffix — check the base ID is present
+                    assert lines.any { it.startsWith("NAME\tbacteroides_fragilis_ont_bam_") }
+                    assert lines.contains("PLATFORM\tOXFORD_NANOPORE")
+                    assert lines.contains("INSTRUMENT\tMinION")
+                    assert lines.contains("LIBRARY_SOURCE\tMETAGENOMIC")
+                    assert lines.contains("LIBRARY_SELECTION\tRANDOM")
+                    assert lines.contains("LIBRARY_STRATEGY\tWGS")
+                    assert lines.contains("DESCRIPTION\tTiny unaligned ONT BAM test")
+                    assert lines.contains("BAM\ttiny_ont.bam")
+                    assert lines.count { it.startsWith("FASTQ\t") } == 0
+                }
             )
         }
     }
