@@ -9,15 +9,15 @@
                     "pigz": 2.8
                 },
                 "CREATE_READS_MANIFEST": {
-                    "mgnify-pipelines-toolkit": "1.5.1"
+                    "mgnify-pipelines-toolkit": "1.5.5"
                 },
                 "REGISTERSTUDY": {
-                    "mgnify-pipelines-toolkit": "1.5.1"
+                    "mgnify-pipelines-toolkit": "1.5.5"
                 },
                 "SUBMIT": {
                     "ena-webin-cli": "9.0.3",
-                    "mgnify-pipelines-toolkit": "1.5.1",
-                    "python": "3.12.13"
+                    "mgnify-pipelines-toolkit": "1.5.5",
+                    "python": "3.12.16"
                 },
                 "Workflow": {
                     "nf-core/seqsubmit": "v1.0.0"

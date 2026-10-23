@@ -4,8 +4,8 @@ process CREATE_READS_MANIFEST {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mgnify-pipelines-toolkit:1.5.1--pyhdfd78af_1':
-        'quay.io/microbiome-informatics/mgnify-pipelines-toolkit:feat-raw-reads' }"
+        'https://depot.galaxyproject.org/singularity/mgnify-pipelines-toolkit:1.5.5--pyhdfd78af_0  ':
+        'biocontainers/mgnify-pipelines-toolkit:1.5.5--pyhdfd78af_0' }"
 
     input:
     tuple val(meta), path(read_files)

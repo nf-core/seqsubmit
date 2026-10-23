@@ -1,0 +1,57 @@
+{
+    "-profile test_reads_long_bam": {
+        "content": [
+            5,
+            {
+                "CONCAT_ACCESSIONS": {
+                    "coreutils": 9.4,
+                    "find": "4.6.0",
+                    "pigz": 2.8
+                },
+                "CREATE_READS_MANIFEST": {
+                    "mgnify-pipelines-toolkit": "1.5.5"
+                },
+                "REGISTERSTUDY": {
+                    "mgnify-pipelines-toolkit": "1.5.5"
+                },
+                "SUBMIT": {
+                    "ena-webin-cli": "9.0.3",
+                    "mgnify-pipelines-toolkit": "1.5.5",
+                    "python": "3.12.16"
+                },
+                "Workflow": {
+                    "nf-core/seqsubmit": "v1.0.0"
+                }
+            },
+            [
+                "multiqc",
+                "multiqc/multiqc_data",
+                "multiqc/multiqc_data/llms-full.txt",
+                "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc.parquet",
+                "multiqc/multiqc_data/multiqc_citations.txt",
+                "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_software_versions.txt",
+                "multiqc/multiqc_data/multiqc_sources.txt",
+                "multiqc/multiqc_report.html",
+                "pipeline_info",
+                "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml",
+                "reads",
+                "reads/bacteroides_fragilis_ont_bam",
+                "reads/bacteroides_fragilis_ont_bam/upload",
+                "reads/bacteroides_fragilis_ont_bam/upload/webin_cli",
+                "reads/bacteroides_fragilis_ont_bam/upload/webin_cli/bacteroides_fragilis_ont_bam_accessions.tsv",
+                "reads/upload",
+                "reads/upload/reads_accessions.tsv"
+            ],
+            [
+                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
+            ]
+        ],
+        "timestamp": "2026-10-26T19:25:01.401474",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    }
+}

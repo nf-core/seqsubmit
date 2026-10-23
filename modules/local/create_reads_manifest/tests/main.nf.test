@@ -112,6 +112,7 @@ nextflow_process {
                         insert_size: null,
                         library_name: null,
                         description: null,
+                        file_type: 'bam'
                     ],
                     file(params.pipelines_testdata_base_path + 'test_data/reads/tiny_ont.bam', checkIfExists: true)
                 ]
