@@ -1,5 +1,5 @@
 {
-    "-profile test_mag_no_taxonomy": {
+    "-profile test_mag_no_taxonomy_without_ena_interaction": {
         "content": [
             8,
             {

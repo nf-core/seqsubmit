@@ -1,5 +1,5 @@
 {
-    "-profile test_mag_no_quality_euk": {
+    "-profile test_mag_no_quality_euk_without_ena_interaction": {
         "content": [
             7,
             {
