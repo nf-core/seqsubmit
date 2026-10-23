@@ -4,8 +4,8 @@ process REGISTERSTUDY {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mgnify-pipelines-toolkit:1.5.1--pyhdfd78af_1':
-        'biocontainers/mgnify-pipelines-toolkit:1.5.1--pyhdfd78af_1' }"
+        'https://depot.galaxyproject.org/singularity/mgnify-pipelines-toolkit:1.5.5--pyhdfd78af_0  ':
+        'biocontainers/mgnify-pipelines-toolkit:1.5.5--pyhdfd78af_0' }"
 
     // ENA_WEBIN and ENA_WEBIN_PASSWORD must be set in the process environment.
     // In the pipeline, map Nextflow secrets via conf/modules.config or nextflow.config:

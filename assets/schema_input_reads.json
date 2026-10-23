@@ -22,12 +22,21 @@
                 "meta": ["sample_accession"]
             },
             "fastq_1": {
-                "type": "string",
-                "format": "file-path",
-                "exists": true,
-                "pattern": "^\\S+\\.(fq|fastq)(\\.gz)?$",
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "format": "file-path",
+                        "exists": true,
+                        "pattern": "^\\S+\\.(fq|fastq)(\\.gz)?$"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
+                "default": null,
                 "errorMessage": "FASTQ file must have extension '.fq' or '.fastq' (optionally gzipped)",
-                "description": "Path to single-end/paired-end forward reads in FASTQ format (optionally gzipped)"
+                "description": "Path to single-end/paired-end forward reads in FASTQ format (optionally gzipped). Leave empty if reads are provided as BAM"
             },
             "fastq_2": {
                 "anyOf": [
@@ -45,6 +54,23 @@
                 "default": null,
                 "errorMessage": "FASTQ file for reverse reads must have extension '.fq' or '.fastq' (optionally gzipped)",
                 "description": "Path to reverse reads in FASTQ format for paired-end data (optionally gzipped). Leave empty for single-end reads"
+            },
+            "bam": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "format": "file-path",
+                        "exists": true,
+                        "pattern": "^\\S+\\.bam$"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
+                "default": null,
+                "errorMessage": "BAM file must have extension '.bam'",
+                "description": "Path to reads in unaligned or aligned BAM format. Use instead of fastq_1/fastq_2"
             },
             "platform": {
                 "type": "string",
@@ -223,12 +249,53 @@
         "required": [
             "id",
             "sample_accession",
-            "fastq_1",
             "platform",
             "instrument",
             "library_source",
             "library_selection",
             "library_strategy"
-        ]
+        ],
+        "oneOf": [
+            {
+                "properties": {
+                    "fastq_1": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "required": ["fastq_1"]
+            },
+            {
+                "properties": {
+                    "bam": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "required": ["bam"]
+            }
+        ],
+        "if": {
+            "properties": {
+                "bam": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            },
+            "required": ["bam"]
+        },
+        "then": {
+            "properties": {
+                "fastq_1": {
+                    "maxLength": 0,
+                    "errorMessage": "fastq_1 must be empty when reads are provided as BAM"
+                },
+                "fastq_2": {
+                    "maxLength": 0,
+                    "errorMessage": "fastq_2 must be empty when reads are provided as BAM"
+                }
+            }
+        },
+        "errorMessage": "Reads must be provided either as FASTQ (fastq_1, optionally fastq_2) or as a single BAM (bam, with fastq_1 and fastq_2 empty)"
     }
 }

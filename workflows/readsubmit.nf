@@ -45,14 +45,16 @@ workflow READSUBMIT {
 
     // --------- Create reads channel with proper metadata structure
     reads_ch = ch_samplesheet
-        .map { meta, reads_1, reads_2 ->
-            def new_meta = meta + [single_end: !reads_2]
-            if ( !new_meta.single_end ) {
+        .map { meta, reads_1, reads_2, bam ->
+            if ( bam ) {
+                // Reads provided as BAM
+                [meta + [single_end: true, file_type: 'bam'], bam]
+            } else if ( reads_2 ) {
                 // If paired end reads
-                [new_meta, [reads_1, reads_2]]
+                [meta + [single_end: false, file_type: 'fastq'], [reads_1, reads_2]]
             } else {
                 // If single end
-                [new_meta, reads_1]
+                [meta + [single_end: true, file_type: 'fastq'], reads_1]
             }
         }
 
@@ -82,10 +84,10 @@ workflow READSUBMIT {
         study_accession_ch.first()
     )
 
-    // Prepare input for submission with manifest and fastq files
+    // Prepare input for submission with manifest and read files
     submission_input = reads_ch.join(CREATE_READS_MANIFEST.out.manifest)
-        .map { meta, fastq, manifest ->
-            [meta, fastq, manifest]
+        .map { meta, reads, manifest ->
+            [meta, reads, manifest]
         }
 
     // --------- Upload data to ENA

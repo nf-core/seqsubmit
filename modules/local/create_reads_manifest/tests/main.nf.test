@@ -96,4 +96,46 @@ nextflow_process {
         }
     }
 
+    test("CREATE_READS_MANIFEST - long-read BAM") {
+        when {
+            process {
+                """
+                input[0] = [
+                    [
+                        id: 'test_bam',
+                        sample_accession: 'SAMEA12345',
+                        platform: 'OXFORD_NANOPORE',
+                        instrument: 'MinION',
+                        library_source: 'METAGENOMIC',
+                        library_selection: 'RANDOM',
+                        library_strategy: 'WGS',
+                        insert_size: null,
+                        library_name: null,
+                        description: null,
+                    ],
+                    file(params.pipelines_testdata_base_path + 'test_data/reads/tiny_ont.bam', checkIfExists: true)
+                ]
+                input[1] = "PRJEB12345"
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assertAll(
+                { assert process.out.manifest.size() == 1 },
+                {
+                    def manifestContent = path(process.out.manifest[0][1]).text
+                    def lines = manifestContent.readLines()
+                    // 8 required fields + 1 BAM entry = 9 lines
+                    assert lines.size() == 9
+                    assert manifestContent.contains("PLATFORM\tOXFORD_NANOPORE")
+                    assert lines.count { it.startsWith("BAM\t") } == 1
+                    assert lines.contains("BAM\ttiny_ont.bam")
+                    assert lines.count { it.startsWith("FASTQ\t") } == 0
+                }
+            )
+        }
+    }
+
 }

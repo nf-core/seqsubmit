@@ -1,0 +1,42 @@
+{
+    "-profile test_reads_long_bam": {
+        "content": [
+            3,
+            {
+                "CREATE_READS_MANIFEST": {
+                    "mgnify-pipelines-toolkit": "1.5.5"
+                },
+                "SUBMIT": {
+                    "ena-webin-cli": "10.0.0",
+                    "mgnify-pipelines-toolkit": "1.5.5",
+                    "python": "3.12.15"
+                },
+                "Workflow": {
+                    "nf-core/seqsubmit": "v1.0.0"
+                }
+            },
+            [
+                "multiqc",
+                "multiqc/multiqc_data",
+                "multiqc/multiqc_data/llms-full.txt",
+                "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc.parquet",
+                "multiqc/multiqc_data/multiqc_citations.txt",
+                "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_software_versions.txt",
+                "multiqc/multiqc_data/multiqc_sources.txt",
+                "multiqc/multiqc_report.html",
+                "pipeline_info",
+                "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
+            ],
+            [
+                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
+            ]
+        ],
+        "timestamp": "2026-10-23T14:39:52.869303",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    }
+}
