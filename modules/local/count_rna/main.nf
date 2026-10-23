@@ -25,11 +25,13 @@ process COUNT_RNA {
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
+    def domain = meta.domain ?: 'bac'
     """
     count_rna.py \\
         --trna ${trnas_stats} \\
         --rrna ${rrna_gff} \\
         --name ${prefix} \\
+        --domain ${domain} \\
         --trna-limit ${min_trna_count} \\
         --rrna-limit ${min_rrna_percentage} \\
         --output ${prefix}_rna_decision.tsv

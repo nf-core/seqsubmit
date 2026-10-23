@@ -1,0 +1,13 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/environment-schema.json
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  # versions match the container quay.io/biocontainers/eukcc:2.2.0--pyhdfd78af_0
+  - bioconda::epa-ng=0.3.8
+  - bioconda::eukcc=2.2.0
+  - bioconda::hmmer=3.3
+  - bioconda::metaeuk=4.a0f584d
+  - bioconda::pplacer=1.1.alpha19
+  - conda-forge::python=3.8.12

@@ -1,0 +1,70 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "genome_evaluation_euks"
+description: |
+  Estimates completeness and contamination of eukaryotic genomes.
+  Contamination is calculated by EukCC (or kept from the samplesheet).
+  Completeness is calculated by EukCC (default) or BUSCO, selected by eukaryotic_completeness_tool.
+  Databases can be given as a directory or as a .tar.gz/.tgz archive that is extracted by the subworkflow.
+keywords:
+  - genome
+  - completeness
+  - contamination
+  - eukcc
+  - busco
+  - eukaryotes
+  - metagenomics
+  - MAGs
+  - bins
+components:
+  - busco/busco
+  - untar
+  - gunzip
+  - eukcc/single
+input:
+  - ch_fasta:
+      type: file
+      description: |
+        Channel containing eukaryotic genome FASTA files to evaluate.
+        Structure: [ val(meta), path(fasta) ]
+      pattern: "*.{fa,fasta,fna,fa.gz,fasta.gz,fna.gz}"
+      ontologies:
+        - edam: "http://edamontology.org/format_1929" # FASTA
+  - busco_db_lineage:
+      type: string
+      description: |
+        BUSCO lineage to check against, e.g. 'auto_euk' or '<taxa>_odb(10|12)'.
+        Only used when eukaryotic_completeness_tool is 'busco'.
+  - busco_db:
+      type: directory
+      description: |
+        BUSCO database as a local directory or .tar.gz/.tgz archive (local path or URL),
+        expected structure `<busco_db>/lineages/<taxa>_odb(10|12)`.
+        Provide null to let BUSCO download the lineage itself.
+  - busco_clean:
+      type: boolean
+      description: Clean intermediate BUSCO files.
+  - eukaryotic_completeness_tool:
+      type: string
+      description: Tool used to calculate completeness of eukaryotic genomes.
+      enum: ["eukcc", "busco"]
+  - eukcc_db:
+      type: directory
+      description: |
+        EukCC database as a local directory or .tar.gz/.tgz archive (local path or URL).
+        Required if at least one genome has to be evaluated with EukCC.
+output:
+  - stats:
+      type: list
+      description: |
+        Channel containing completeness, contamination and software used per genome.
+        stats_generation_software lists the tools separated by ';', appended to the value given in the samplesheet.
+        Structure: [ val(meta), val(completeness), val(contamination), val(stats_generation_software) ]
+  - not_assigned:
+      type: list
+      description: |
+        Channel containing genomes excluded from submission because completeness or contamination
+        could not be estimated (missing, empty or NA). They are also reported in not_assigned_quality_genomes.tsv.
+        Structure: [ val(meta), val(completeness), val(contamination), val(stats_generation_software) ]
+authors:
+  - "@KateSakharova"
+  - "@ochkalova"

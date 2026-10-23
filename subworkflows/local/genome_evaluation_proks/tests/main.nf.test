@@ -1,0 +1,106 @@
+nextflow_workflow {
+
+    name "Test Subworkflow GENOME_EVALUATION_PROKS"
+    script "../main.nf"
+    workflow "GENOME_EVALUATION_PROKS"
+
+    tag "subworkflows"
+    tag "subworkflows_local"
+    tag "subworkflows/genome_evaluation_proks"
+    tag "checkm2"
+    tag "checkm2/predict"
+    tag "checkm2/databasedownload"
+
+    test("prokaryotes - stub") {
+
+        options "-stub"
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of(
+                    [
+                        [ id:'test_bac', domain:'bac' ],
+                        file(params.modules_testdata_base_path + 'genomics/prokaryotes/bacteroides_fragilis/genome/genome.fna.gz', checkIfExists: true)
+                    ],
+                    [
+                        [ id:'test_arc', domain:'arc' ],
+                        file(params.modules_testdata_base_path + 'genomics/prokaryotes/bacteroides_fragilis/genome/genome.fna.gz', checkIfExists: true)
+                    ]
+                )
+                input[1] = null       // checkm2_db - triggers CHECKM2_DATABASEDOWNLOAD
+                input[2] = 14897628   // checkm2_db_download_id
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assertAll(
+                { assert snapshot(workflow.out.stats.sort { it[0].id }).match() },
+                { assert workflow.out.stats.size() == 2 },
+                // CheckM2 stub writes an empty report - no values
+                { assert workflow.out.stats.every { it[1] == null && it[2] == null } },
+                { assert workflow.out.stats.every { it[3].startsWith('checkm2_v') } },
+                // CheckM2 database is downloaded once for all prokaryotes
+                { assert workflow.trace.tasks().count { it.name.contains('CHECKM2_DATABASEDOWNLOAD') } == 1 }
+            )
+        }
+
+    }
+
+    test("prokaryote with stats_generation_software - stub") {
+
+        options "-stub"
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of([
+                    [ id:'test_bac', domain:'bac', stats_generation_software:'CustomTool_v1.0' ],
+                    file(params.modules_testdata_base_path + 'genomics/prokaryotes/bacteroides_fragilis/genome/genome.fna.gz', checkIfExists: true)
+                ])
+                input[1] = null
+                input[2] = 14897628
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assertAll(
+                { assert snapshot(workflow.out.stats).match() },
+                { assert workflow.out.stats.size() == 1 },
+                // CheckM2 is appended to the software given in samplesheet
+                { assert workflow.out.stats[0][3] ==~ /CustomTool_v1\.0;checkm2_v[^;]+/ }
+            )
+        }
+
+    }
+
+    test("no genomes - stub") {
+
+        options "-stub"
+
+        when {
+            workflow {
+                """
+                input[0] = channel.empty()
+                input[1] = null
+                input[2] = 14897628
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assertAll(
+                { assert workflow.out.stats.size() == 0 },
+                // CheckM2 database must not be downloaded without prokaryotes
+                { assert !workflow.trace.tasks().any { it.name.contains('CHECKM2') } }
+            )
+        }
+
+    }
+
+}

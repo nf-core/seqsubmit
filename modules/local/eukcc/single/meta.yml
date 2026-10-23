@@ -1,0 +1,129 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: "eukcc_single"
+description: Estimate completeness and contamination of a single eukaryotic genome or MAG with EukCC
+keywords:
+  - eukaryotes
+  - mag
+  - metagenome
+  - quality
+  - completeness
+  - contamination
+tools:
+  - "eukcc":
+      description: "EukCC - completeness and contamination estimation for eukaryotic genomes using marker genes"
+      homepage: "https://github.com/EBI-Metagenomics/EukCC"
+      documentation: "https://eukcc.readthedocs.io"
+      doi: "10.1186/s13059-020-02155-4"
+      licence: ["GPL v3"]
+      identifier: ""
+  - "metaeuk":
+      description: "MetaEuk - gene discovery and annotation of eukaryotic contigs, used by EukCC to predict proteins"
+      homepage: "https://github.com/soedinglab/metaeuk"
+      doi: "10.1186/s40168-020-00808-x"
+      licence: ["GPL v3"]
+      identifier: biotools:MetaEuk
+  - "pplacer":
+      description: "pplacer - phylogenetic placement of sequences on a reference tree, used by EukCC to select the lineage marker set"
+      homepage: "https://matsen.fhcrc.org/pplacer/"
+      doi: "10.1186/1471-2105-11-538"
+      licence: ["GPL v3"]
+      identifier: biotools:pplacer
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'test', domain:'euk' ]`
+    - fasta:
+        type: file
+        description: Uncompressed nucleotide FASTA file of the genome
+        pattern: "*.{fasta,fna,fa}"
+        ontologies:
+          - edam: http://edamontology.org/format_1929 # FASTA
+  - - meta_db:
+        type: map
+        description: |
+          Groovy Map containing database information
+          e.g. `[ id:'eukcc_db' ]`
+    - eukcc_db:
+        type: directory
+        description: Uncompressed EukCC database directory (e.g. eukcc2_db_ver_1.1)
+output:
+  eukcc_tsv:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'test', domain:'euk' ]`
+      - ${prefix}_eukcc_results/eukcc.tsv:
+          type: file
+          description: |
+            Tab-separated table with columns fasta, completeness, contamination, ncbi_lng.
+            Contains only the header if EukCC exited with code 201 (no marker genes found)
+            or 204 (MetaEuk predicted zero proteins).
+          pattern: "*_eukcc_results/eukcc.tsv"
+          ontologies:
+            - edam: http://edamontology.org/format_3475 # TSV
+  versions_eukcc:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - eukcc:
+          type: string
+          description: The name of the tool
+      - 'eukcc -v 2>&1 | grep -oE "[0-9]+\\.[0-9]+\\.[0-9]+" | head -n1':
+          type: eval
+          description: The expression to obtain the version of the tool
+  versions_metaeuk:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - metaeuk:
+          type: string
+          description: The name of the tool
+      - 'metaeuk -h 2>&1 | grep "Version" | sed "s/.*Version: //"':
+          type: eval
+          description: The expression to obtain the version of the tool
+  versions_pplacer:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - pplacer:
+          type: string
+          description: The name of the tool
+      - "pplacer --version":
+          type: eval
+          description: The expression to obtain the version of the tool
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - eukcc:
+          type: string
+          description: The name of the tool
+      - 'eukcc -v 2>&1 | grep -oE "[0-9]+\\.[0-9]+\\.[0-9]+" | head -n1':
+          type: eval
+          description: The expression to obtain the version of the tool
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - metaeuk:
+          type: string
+          description: The name of the tool
+      - 'metaeuk -h 2>&1 | grep "Version" | sed "s/.*Version: //"':
+          type: eval
+          description: The expression to obtain the version of the tool
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - pplacer:
+          type: string
+          description: The name of the tool
+      - "pplacer --version":
+          type: eval
+          description: The expression to obtain the version of the tool
+authors:
+  - "@KateSakharova"
+maintainers:
+  - "@KateSakharova"

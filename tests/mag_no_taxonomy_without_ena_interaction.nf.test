@@ -1,13 +1,13 @@
 nextflow_pipeline {
 
-    name "Test genome submission workflow - no_rna_presence"
+    name "Test genome submission workflow - no_taxonomy without ENA interaction"
     script "../main.nf"
     tag "pipeline"
     tag "mode_mag"
-    tag "test_mag_no_rna_presence"
-    profile "test_mag_no_rna_presence"
+    tag "test_mag_no_taxonomy_without_ena_interaction"
+    profile "test_mag_no_taxonomy_without_ena_interaction"
 
-    test("-profile test_mag_no_rna_presence") {
+    test("-profile test_mag_no_taxonomy_without_ena_interaction") {
 
         when {
             params {

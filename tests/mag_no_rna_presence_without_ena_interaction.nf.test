@@ -1,13 +1,13 @@
 nextflow_pipeline {
 
-    name "Test genome submission workflow - no_taxonomy"
+    name "Test genome submission workflow - no_rna_presence without ENA interaction"
     script "../main.nf"
     tag "pipeline"
     tag "mode_mag"
-    tag "test_mag_no_taxonomy"
-    profile "test_mag_no_taxonomy"
+    tag "test_mag_no_rna_presence_without_ena_interaction"
+    profile "test_mag_no_rna_presence_without_ena_interaction"
 
-    test("-profile test_mag_no_taxonomy") {
+    test("-profile test_mag_no_rna_presence_without_ena_interaction") {
 
         when {
             params {
@@ -22,7 +22,21 @@ nextflow_pipeline {
             def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
             // Early failure no need to test the rest of snapshots
             assert workflow.success
+            // Final RNA_presence decision per genome, read from the submission metadata table
+            def metadata_lines = path("$outputDir/mags/upload/genomes_metadata.tsv").readLines()
+            def metadata_header = metadata_lines[0].split('\t') as List
+            def rna_presence = metadata_lines.drop(1)
+                .findAll { line -> line.trim() }
+                .collectEntries { line ->
+                    def values = line.split('\t', -1)
+                    [ (values[metadata_header.indexOf('genome_name')]): values[metadata_header.indexOf('rRNA_presence')] ]
+                }
             assertAll(
+                { assert rna_presence.keySet() == ['no_rna_presence_prok', 'no_rna_presence_euk'] as Set },
+                // complete bacterial isolate genome - all rRNA genes and enough tRNAs are expected
+                { assert rna_presence['no_rna_presence_prok'] == 'True' },
+                // small eukaryotic genome fragment - eukaryotic rRNA set is not expected to be complete
+                { assert rna_presence['no_rna_presence_euk'] == 'False' },
                 { assert snapshot(
                     // Number of successful tasks
                     workflow.trace.succeeded().size(),
