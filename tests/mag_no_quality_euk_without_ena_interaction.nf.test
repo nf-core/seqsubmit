@@ -1,13 +1,13 @@
 nextflow_pipeline {
 
-    name "Test genome submission workflow - no_quality_euk"
+    name "Test genome submission workflow - no_quality_euk without ENA interaction"
     script "../main.nf"
     tag "pipeline"
     tag "mode_mag"
-    tag "test_mag_no_quality_euk"
-    profile "test_mag_no_quality_euk"
+    tag "test_mag_no_quality_euk_without_ena_interaction"
+    profile "test_mag_no_quality_euk_without_ena_interaction"
 
-    test("-profile test_mag_no_quality_euk") {
+    test("-profile test_mag_no_quality_euk_without_ena_interaction") {
 
         when {
             params {
