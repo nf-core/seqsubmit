@@ -141,7 +141,18 @@ workflow READSUBMIT {
         : file("${projectDir}/assets/methods_description_template.yml", checkIfExists: true)
     def ch_methods_description = channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: true))
-    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_ACCESSIONS.out.file_out.map{_meta, file -> file})
+    // Split "ERX...,ERR..." accession column into experiment and run columns for the report
+    def ch_reads_accessions_split = CONCAT_ACCESSIONS.out.file_out
+        .flatMap { _meta, tsv -> tsv.readLines().drop(1).findAll { line -> line.trim() } }
+        .map { line ->
+            def (alias, accessions) = line.tokenize('\t') + ['']
+            def accession_list = accessions.tokenize(',')*.trim()
+            def experiment = accession_list.find { acc -> acc ==~ /^[EDS]RX\d+$/ } ?: ''
+            def run        = accession_list.find { acc -> acc ==~ /^[EDS]RR\d+$/ } ?: ''
+            "${alias}\t${experiment}\t${run}"
+        }
+        .collectFile(name: 'reads_accessions_split.tsv', seed: "alias\texperiment\trun", newLine: true, sort: true)
+    ch_multiqc_files = ch_multiqc_files.mix(ch_reads_accessions_split)
     MULTIQC(
         ch_multiqc_files.flatten().collect().map { files ->
             [

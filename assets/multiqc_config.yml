@@ -21,6 +21,7 @@ custom_content:
     - sample_registration
     - submission_results_assemblies
     - submission_results_genomes
+    - submission_results_reads
 
 sp:
   assembly_metadata:
@@ -33,6 +34,8 @@ sp:
     fn_re: 'genomes_accessions\.tsv$'
   submission_results_assemblies:
     fn_re: 'assemblies_accessions\.tsv$'
+  submission_results_reads:
+    fn_re: 'reads_accessions_split\.tsv$'
 
 # Custom data configuration
 custom_data:
@@ -160,3 +163,26 @@ custom_data:
       accession:
         title: "ENA accession"
         description: "Assigned accession after submission"
+
+  submission_results_reads:
+    id: "submission_results_reads"
+    section_name: "Submission results"
+    description: >
+      Accessions assigned during upload process (experiment and run accessions).
+      Users should read the ENA documentation on referencing submitted data:
+      https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html
+    file_format: "tsv"
+    plot_type: "table"
+    pconfig:
+      id: "Reads assigned accessions"
+      title: "Submission results"
+    headers:
+      alias:
+        title: "alias"
+        description: "Read submission name"
+      experiment:
+        title: "ENA experiment"
+        description: "Experiment accession (ERX) assigned after submission"
+      run:
+        title: "ENA run"
+        description: "Run accession (ERR) assigned after submission"
