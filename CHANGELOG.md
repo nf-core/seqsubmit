@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
+- [#117](https://github.com/nf-core/seqsubmit/pull/117) and [#119](https://github.com/nf-core/seqsubmit/pull/119)
+  - Added BAM files support as raw reads
+  - Added tests for BAM submission with `-submit` and `-validate` modes
+  - Added assigned `run accession` and `experiment accession` to MultiQC report ([Issue 70](https://github.com/nf-core/seqsubmit/issues/70) resolved)
 - [#116](https://github.com/nf-core/seqsubmit/pull/116)
   - All tests except the `*_existing_study` ones now register a new submission study, so they can be run with any Webin account ([#95](https://github.com/nf-core/seqsubmit/issues/95)). The `test_mag_complete_metadata_existing_study` and `test_assembly_complete_metadata_existing_study` tests submit to the existing study `PRJEB98843` and require maintainer Webin credentials
   - `test_upload = true` is set explicitly in all test configs
