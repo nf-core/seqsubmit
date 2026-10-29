@@ -23,7 +23,10 @@ nextflow_pipeline {
             def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore', ignore: ['**/upload/assemblies_metadata.csv'])
             // Early failure no need to test the rest of snapshots
             assert workflow.success
+            def all_tasks = workflow.trace.tasks()*.name
             assertAll(
+                // Coverage is provided in the samplesheet, so CoverM must not run
+                { assert !all_tasks.any { it.contains(':COVERM_CONTIG') } },
                 { assert snapshot(
                     // Number of successful tasks
                     workflow.trace.succeeded().size(),

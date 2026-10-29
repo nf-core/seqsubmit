@@ -23,7 +23,12 @@ nextflow_pipeline {
             def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore', ignore: ['**/upload/assemblies_metadata.csv'])
             // Early failure no need to test the rest of snapshots
             assert workflow.success
+            def succeeded_tasks = workflow.trace.succeeded()*.name
             assertAll(
+                // Coverage is computed with CoverM and the runs are registered as a virtual co-assembly sample
+                { assert succeeded_tasks.any { it.contains(':COVERM_CONTIG') } },
+                { assert succeeded_tasks.any { it.contains(':REGISTER_COASSEMBLY_SAMPLE') } },
+                { assert path("$outputDir/metagenomic_assemblies/upload/assemblies_metadata.csv").readLines()[1].contains(',1.263635324935214,') },
                 { assert snapshot(
                     // Number of successful tasks
                     workflow.trace.succeeded().size(),
