@@ -18,13 +18,22 @@ logger = logging.getLogger("register_coassembly_sample")
 
 
 PORTAL_SEARCH_API = "https://www.ebi.ac.uk/ena/portal/api/search"
-CHECKLIST_XML_API = "https://www.ebi.ac.uk/ena/browser/api/xml/ERC000011"
+
+CHECKLIST = "ERC000011"
+CHECKLIST_XML_API = f"https://www.ebi.ac.uk/ena/browser/api/xml/{CHECKLIST}"
+
+# ENA Portal API fields retrieved for runs and samples
+RUN_SAMPLE_FIELDS = ["sample_accession", "secondary_sample_accession"]
+SAMPLE_METADATA_FIELDS = ["country", "collection_date", "tax_id", "scientific_name"]
 
 TEST_SUBMIT_URL = "https://wwwdev.ebi.ac.uk/ena/submit/drop-box/submit/"
 PROD_SUBMIT_URL = "https://www.ebi.ac.uk/ena/submit/drop-box/submit/"
 
 INSDC_BIOSAMPLE_ACCESSION_REGEX = re.compile(
     r"^SAM(N|D|E|EA)[0-9]{7,8}$"
+)
+INSDC_SECONDARY_SAMPLE_ACCESSION_REGEX = re.compile(
+    r"^(E|D|S)RS[0-9]{6,}$"
 )
 EXISTING_ACCESSION_IN_ERROR_REGEX = re.compile(
     r'accession:\s*"([A-Z]+[0-9]+)"',
@@ -106,14 +115,14 @@ def get_json(url: str, params: dict[str, str], auth: HTTPBasicAuth | None = None
     return result
 
 
-def search_portal(result: str, query: str, fields: str, private: bool = False) -> list[dict[str, str]]:
+def search_portal(result: str, query: str, fields: list[str], private: bool = False) -> list[dict[str, str]]:
     """
     Query the ENA Portal API.
 
     When `private` is set, the request is authenticated with the Webin account
     (ENA_WEBIN/ENA_WEBIN_PASSWORD), which also returns private records owned by it.
     """
-    params = {"result": result, "query": query, "fields": fields, "format": "json"}
+    params = {"result": result, "query": query, "fields": ",".join(fields), "format": "json"}
     if not private:
         return get_json(PORTAL_SEARCH_API, params=params)
 
@@ -178,7 +187,7 @@ def get_run_sample(run_accession: str, private: bool = False) -> str:
     rows = search_portal(
         result="read_run",
         query=f'"run_accession={run_accession}"',
-        fields="sample_accession,secondary_sample_accession",
+        fields=RUN_SAMPLE_FIELDS,
         private=private,
     )
     if not rows:
@@ -207,13 +216,15 @@ def get_sample_metadata(sample_accession: str, private: bool = False) -> tuple[s
     """
     if INSDC_BIOSAMPLE_ACCESSION_REGEX.match(sample_accession):
         query = f'"sample_accession={sample_accession}"'
-    else:
+    elif INSDC_SECONDARY_SAMPLE_ACCESSION_REGEX.match(sample_accession):
         query = f'"secondary_sample_accession={sample_accession}"'
+    else:
+        raise CoassemblyRegistrationError(f"Unrecognised sample accession format: {sample_accession}")
 
     rows = search_portal(
         result="sample",
         query=query,
-        fields="country,collection_date,tax_id,scientific_name",
+        fields=SAMPLE_METADATA_FIELDS,
         private=private,
     )
 
@@ -299,7 +310,7 @@ def build_sample_xml(
         value_node = ET.SubElement(item, "VALUE")
         value_node.text = value
 
-    add_attr("ENA-CHECKLIST", "ERC000011")
+    add_attr("ENA-CHECKLIST", CHECKLIST)
     add_attr("organism", scientific_name)
     add_attr("collection date", collection_date)
     add_attr("composed of", composed_of)
@@ -422,28 +433,29 @@ def register_virtual_sample(run_accessions: list[str], test: bool, private: bool
     merged_taxid = merge_or_not_provided(taxon_ids, default_taxid)
     merged_tax_name = merge_or_not_provided(scientific_names, default_tax_name)
 
-    if merged_taxid == DEFAULT_NA_VALUE:
-        raise CoassemblyRegistrationError(
-            f"Co-assembly source samples have mixed taxa: {', '.join(taxon_ids)}"
+    if merged_taxid == DEFAULT_NA_VALUE or merged_tax_name == DEFAULT_NA_VALUE:
+        sample_taxa = dict(zip(sample_accessions, zip(taxon_ids, scientific_names)))
+        details = "\n".join(
+            f"  {sample}: tax_id={taxid}, scientific_name={name}"
+            for sample, (taxid, name) in sample_taxa.items()
         )
-
-    if merged_tax_name == DEFAULT_NA_VALUE:
         raise CoassemblyRegistrationError(
-            f"Co-assembly source samples have mixed scientific names: {', '.join(scientific_names)}"
+            "Co-assembly source samples must share the same tax_id and scientific_name:\n"
+            f"{details}"
         )
 
     allowed_countries = get_allowed_countries()
     if merged_country != DEFAULT_NA_VALUE and merged_country not in allowed_countries:
         logger.warning(
-            f"Country '{merged_country}' is not in ERC000011 allowed country/sea values; setting to '{DEFAULT_NA_VALUE}'"
+            f"Country '{merged_country}' is not in {CHECKLIST} allowed country/sea values; setting to '{DEFAULT_NA_VALUE}'"
         )
         merged_country = DEFAULT_NA_VALUE
 
     sample_list = ",".join(unique_samples)
     title = f"Combined sample from {sample_list}"
     description = (
-        "This sample is a virtual sample of co-assembled raw reads from multiple samples "
-        f"of {merged_tax_name}. Co-assembly was performed from runs of the samples {sample_list}"
+        f"This is a virtual sample representing a co-assembly of raw reads from multiple "
+        f"{merged_tax_name} samples. Co-assembly was performed from runs of {len(unique_samples)} samples {sample_list}."
     )
     alias = build_virtual_sample_alias(unique_samples, test=test)
     logger.info(f"Registering virtual sample with alias '{alias}' for co-assembly of samples: {sample_list}")
