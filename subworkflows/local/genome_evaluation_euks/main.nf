@@ -21,7 +21,7 @@ include { parseStatsTable; mergeSoftware; isNotAssigned } from '../utils_nfcore_
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-workflow GENOME_EVALUATION_EUKS {
+workflow EUKARYOTIC_GENOME_EVALUATION {
 
     take:
     ch_fasta                     // channel: [ val(meta), path(fasta) ] - eukaryotic genomes only

@@ -4,10 +4,10 @@ nextflow_pipeline {
     script "../main.nf"
     tag "pipeline"
     tag "mode_mag"
-    tag "test_mag_no_quality_euk_without_ena_interaction"
-    profile "test_mag_no_quality_euk_without_ena_interaction"
+    tag "test_mag_no_quality_euk_skip_ena_queries"
+    profile "test_mag_no_quality_euk_skip_ena_queries"
 
-    test("-profile test_mag_no_quality_euk_without_ena_interaction") {
+    test("-profile test_mag_no_quality_euk_skip_ena_queries") {
 
         when {
             params {

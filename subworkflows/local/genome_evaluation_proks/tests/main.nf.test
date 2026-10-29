@@ -1,8 +1,8 @@
 nextflow_workflow {
 
-    name "Test Subworkflow GENOME_EVALUATION_PROKS"
+    name "Test Subworkflow PROKARYOTIC_GENOME_EVALUATION"
     script "../main.nf"
-    workflow "GENOME_EVALUATION_PROKS"
+    workflow "PROKARYOTIC_GENOME_EVALUATION"
 
     tag "subworkflows"
     tag "subworkflows_local"

@@ -149,7 +149,7 @@ The final `True`/`False` decision is then merged back into the submission metada
 
 ### Completeness and contamination assessment
 
-Completeness and contamination are evaluated in a genome quality step split by domain: prokaryotic genomes go to the `GENOME_EVALUATION_PROKS` subworkflow and eukaryotic genomes to the `GENOME_EVALUATION_EUKS` subworkflow.
+Completeness and contamination are evaluated in a genome quality step split by domain: prokaryotic genomes go to the `PROKARYOTIC_GENOME_EVALUATION` subworkflow and eukaryotic genomes to the `EUKARYOTIC_GENOME_EVALUATION` subworkflow.
 
 The workflow checks three samplesheet fields: `completeness`, `contamination`, and `stats_generation_software`. If all three are already present, those values are reused. If any of them is missing, the genome is analysed with a tool selected by its domain.
 

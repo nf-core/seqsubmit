@@ -1,8 +1,8 @@
 nextflow_workflow {
 
-    name "Test Subworkflow GENOME_EVALUATION_EUKS"
+    name "Test Subworkflow EUKARYOTIC_GENOME_EVALUATION"
     script "../main.nf"
-    workflow "GENOME_EVALUATION_EUKS"
+    workflow "EUKARYOTIC_GENOME_EVALUATION"
 
     tag "subworkflows"
     tag "subworkflows_local"
@@ -28,7 +28,7 @@ nextflow_workflow {
                 input[2] = null       // busco_db
                 input[3] = true       // busco_clean
                 input[4] = 'eukcc'    // eukaryotic_completeness_tool
-                input[5] = 'https://ftp.ebi.ac.uk/pub/databases/metagenomics/eukcc/eukcc2_db_tiny_fungi_test.tar.gz' // eukcc_db
+                input[5] = '.'        // fake folder replacing eukcc_db because test DB https://ftp.ebi.ac.uk/pub/databases/metagenomics/eukcc/eukcc2_db_tiny_fungi_test.tar.gz is big
                 """
             }
         }
@@ -62,7 +62,7 @@ nextflow_workflow {
                 input[2] = null       // busco_db - BUSCO downloads lineages itself
                 input[3] = true
                 input[4] = 'busco'
-                input[5] = 'https://ftp.ebi.ac.uk/pub/databases/metagenomics/eukcc/eukcc2_db_tiny_fungi_test.tar.gz'
+                input[5] = '.'        // fake folder replacing eukcc_db
                 """
             }
         }
@@ -135,7 +135,7 @@ nextflow_workflow {
                 input[2] = null
                 input[3] = true
                 input[4] = 'eukcc'
-                input[5] = 'https://ftp.ebi.ac.uk/pub/databases/metagenomics/eukcc/eukcc2_db_tiny_fungi_test.tar.gz'
+                input[5] = '.'   // fake folder replacing eukcc_db
                 """
             }
         }

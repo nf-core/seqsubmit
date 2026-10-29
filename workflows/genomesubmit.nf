@@ -16,8 +16,8 @@ include { MULTIQC                               } from '../modules/nf-core/multi
 include { paramsSummaryMap                      } from 'plugin/nf-schema'
 
 include { FASTA_VALIDATION                      } from '../subworkflows/local/fasta_validation/main'
-include { GENOME_EVALUATION_EUKS                } from '../subworkflows/local/genome_evaluation_euks/main'
-include { GENOME_EVALUATION_PROKS               } from '../subworkflows/local/genome_evaluation_proks/main'
+include { EUKARYOTIC_GENOME_EVALUATION          } from '../subworkflows/local/genome_evaluation_euks/main'
+include { PROKARYOTIC_GENOME_EVALUATION         } from '../subworkflows/local/genome_evaluation_proks/main'
 include { RNA_DETECTION                         } from '../subworkflows/local/rna_detection/main'
 include { FASTA_CLASSIFY_CATPACK                } from '../subworkflows/nf-core/fasta_classify_catpack/main'
 
@@ -119,13 +119,13 @@ workflow GENOMESUBMIT {
     // --------- Taxonomy
     branched_taxonomy_results = fasta_updated_with_coverage
         .branch { meta, _fasta ->
-            genome_taxonomy_input: !(meta.NCBI_lineage)
+            taxonomy_absent: !(meta.NCBI_lineage)
             taxonomy_present: true  // Everything else goes here
         }
 
     // Change extension for all files required taxonomy to .fasta because CATPACK requires suffix as input
     RENAME_FASTA_FOR_CATPACK (
-        branched_taxonomy_results.genome_taxonomy_input
+        branched_taxonomy_results.taxonomy_absent
     )
 
     // build input structures for CAT_DB depending on what provided as input
@@ -148,11 +148,12 @@ workflow GENOMESUBMIT {
     )
 
     fasta_updated_with_taxonomy = FASTA_CLASSIFY_CATPACK.out.bat_classification
-        .join(branched_taxonomy_results.genome_taxonomy_input)
+        .join(branched_taxonomy_results.taxonomy_absent)
         .map { meta, taxa_tsv, fasta ->
             def lines = taxa_tsv.readLines()
             def updated_meta = meta.clone()
             // support for empty taxonomy files required for -stub mode
+            // skip header and take 4th column from table corresponding to lineage
             updated_meta.NCBI_lineage = lines ? lines[1].split('\t')[3] : null
             return [updated_meta, fasta]
         }
@@ -161,10 +162,18 @@ workflow GENOMESUBMIT {
     // --------- Add meta.domain value for eukaryotes (euk) and prokaryotes (bac and arc)
     domain_identification = fasta_updated_with_taxonomy
         .map { meta, fasta ->
-            def lineage = meta.NCBI_lineage
+            def lineage = meta.NCBI_lineage.toLowerCase()
             def parts   = lineage.tokenize(';').collect { p -> p.trim() }
-            def is_euk  = lineage.contains('ukaryot') || parts.contains('2759')
-            def is_arc  = lineage.contains('rchaea') || parts.contains('2157')
+            def is_euk  = parts.any { it == 'eukaryot' } || parts.contains('2759')
+            def is_arc  = parts.any { it == 'archaea' } || parts.contains('2157')
+            def is_bac  = parts.any { it == 'bacteria' } || parts.contains('2')
+
+            if (!is_euk && !is_arc && !is_bac) {
+            throw new IllegalStateException(
+                "Unassigned or unrecognized taxonomic lineage for ${meta.id}: '${meta.NCBI_lineage}. \
+                Provide NCBI format taxonomy or remove it from MAG/bin submission'"
+                )
+            }
 
             [ meta + [domain: is_euk ? 'euk' : (is_arc ? 'arc' : 'bac')], fasta ]
         }
@@ -204,18 +213,18 @@ workflow GENOMESUBMIT {
     // Split genomes to evaluate into prokaryotes and eukaryotes
     domain_split_stats = branched_stats_results.genome_evaluation_input
         .branch { meta, _fasta ->
-            proks: meta.domain in ['arc', 'bac']
-            euks:  meta.domain == 'euk'
+            prokaryotes: meta.domain in ['arc', 'bac']
+            eukaryotes:  meta.domain == 'euk'
         }
 
-    GENOME_EVALUATION_PROKS (
-        domain_split_stats.proks,
+    PROKARYOTIC_GENOME_EVALUATION (
+        domain_split_stats.prokaryotes,
         checkm2_db,
         checkm2_db_download_id
     )
 
-    GENOME_EVALUATION_EUKS (
-        domain_split_stats.euks,
+    EUKARYOTIC_GENOME_EVALUATION (
+        domain_split_stats.eukaryotes,
         busco_db_lineage,
         busco_db,
         busco_clean,
@@ -224,9 +233,9 @@ workflow GENOMESUBMIT {
     )
 
     // Update metadata with completeness and contamination from CheckM2 (prokaryotes) or EukCC/BUSCO (eukaryotes)
-    // Eukaryotic genomes without completeness or contamination are filtered out in GENOME_EVALUATION_EUKS
-    fasta_updated_with_stats = GENOME_EVALUATION_PROKS.out.stats
-        .mix(GENOME_EVALUATION_EUKS.out.stats)
+    // Eukaryotic genomes without completeness or contamination are filtered out in EUKARYOTIC_GENOME_EVALUATION
+    fasta_updated_with_stats = PROKARYOTIC_GENOME_EVALUATION.out.stats
+        .mix(EUKARYOTIC_GENOME_EVALUATION.out.stats)
         .join(branched_stats_results.genome_evaluation_input)
         .map { meta, completeness, contamination, stats_software, fasta ->
             def updated_meta = meta + [

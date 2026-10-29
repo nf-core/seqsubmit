@@ -1,5 +1,5 @@
 {
-    "-profile test_mag_one_contig": {
+    "-profile test_mag_one_contig_skip_ena_queries": {
         "content": [
             1,
             {

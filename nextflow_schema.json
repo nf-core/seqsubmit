@@ -125,7 +125,7 @@
                 "busco_clean": {
                     "type": "boolean",
                     "description": "Remove BUSCO intermediate files after each run. BUSCO creates a large number of intermediate files, which may cause problems on clusters with file number limits, particularly with many MAGs/bins. Used only with `--eukaryotic_completeness_tool busco`.",
-                    "default": false
+                    "default": true
                 },
                 "eukcc_db": {
                     "type": "string",
@@ -320,7 +320,7 @@
                     "type": "boolean",
                     "description": "Upload to ENA TEST server instead of LIVE server",
                     "default": true,
-                    "help_text": "Use that flag for development purposes or for validation of your submissions. Submission would be done to TEST ENA server instead of LIVE server. TEST server holds data 24h and removes afterwords. LIVE server does not have option to modify your submission, you can only suppress data and re-upload"
+                    "help_text": "Use that flag for development purposes or for validation of your submissions. Submission would be done to TEST ENA server instead of LIVE server. TEST server holds data 24h and removes afterwords. LIVE server does not have option to modify your submission, you can only suppress data and re-upload. It is restricted to use --test-upload=false with --webincli_mode validate because study and/or samples would be registered on LIVE server but data would not be submitted."
                 },
                 "is_private": {
                     "type": "boolean",
@@ -395,6 +395,29 @@
         },
         {
             "$ref": "#/$defs/pipeline_options"
+        },
+        {
+            "if": {
+                "properties": {
+                    "test_upload": {
+                        "const": false
+                    }
+                },
+                "required": ["test_upload"]
+            },
+            "then": {
+                "properties": {
+                    "webincli_mode": {
+                        "const": "submit"
+                    }
+                },
+                "required": ["webincli_mode"],
+                "errorMessage": {
+                    "properties": {
+                        "webincli_mode": "LIVE ENA submissions require webincli_mode to be 'submit'. Validation-only mode cannot be used with the LIVE server."
+                    }
+                }
+            }
         }
     ]
 }

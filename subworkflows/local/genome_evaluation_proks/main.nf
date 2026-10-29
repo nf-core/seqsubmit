@@ -18,7 +18,7 @@ include { parseStatsTable; mergeSoftware } from '../utils_nfcore_seqsubmit_pipel
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-workflow GENOME_EVALUATION_PROKS {
+workflow PROKARYOTIC_GENOME_EVALUATION {
 
     take:
     ch_fasta                     // channel: [ val(meta), path(fasta) ] - prokaryotic genomes only

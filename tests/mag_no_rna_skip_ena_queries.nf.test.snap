@@ -1,5 +1,5 @@
 {
-    "-profile test_mag_no_rna_presence_without_ena_interaction": {
+    "-profile test_mag_no_rna_skip_ena_queries": {
         "content": [
             12,
             {
