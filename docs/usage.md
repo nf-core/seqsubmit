@@ -240,10 +240,10 @@ An assembly built from the pooled reads of several runs (a co-assembly) is descr
 
 ENA requires each assembly to reference a single sample. The pipeline handles this as follows:
 
-- If all source runs belong to the same ENA sample, the assembly is submitted against that sample.
-- If the runs belong to different samples, the pipeline registers a virtual ENA sample (checklist `ERC000011`) with a `composed of` attribute listing the source samples, and submits the assembly against it. Its metadata is merged from the source samples:
+- If all source runs belong to the same ENA sample, the assembly is submitted under that sample.
+- If the runs belong to different samples, the pipeline registers a virtual ENA sample with a `composed of` attribute listing the source samples, and submits the assembly under it. The virtual sample uses the [ENA default sample checklist (`ERC000011`)](https://www.ebi.ac.uk/ena/browser/view/ERC000011), the minimal checklist, because its mandatory fields (`collection date` and `geographic location (country and/or sea)`) can be derived from any source samples, whichever checklists they were originally registered with. Its metadata is merged from the source samples:
   - `collection date` and `geographic location (country and/or sea)` are kept if all source samples share the same value, otherwise they are set to `not provided`. A country that is not in the `ERC000011` list of allowed values is also set to `not provided`.
-  - The taxon and scientific name must be the same for all source samples; otherwise the pipeline stops with an error.
+  - `tax_id` and `scientific_name` must be the same for all source samples; otherwise the pipeline stops with an error.
 
 ### `metagenomic_assemblies` parameters and example
 
