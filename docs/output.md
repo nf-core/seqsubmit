@@ -67,7 +67,7 @@ When `--mode reads` is used, results are written under `reads/`.
 <summary>Output files</summary>
 
 - `reads/`
-  - `upload/reads_accessions.tsv`: run accessions assigned to submitted reads.
+  - `upload/reads_accessions.tsv`: experiment and run accessions assigned to submitted reads (also shown in the MultiQC report).
 
 </details>
 

@@ -45,14 +45,16 @@ workflow READSUBMIT {
 
     // --------- Create reads channel with proper metadata structure
     reads_ch = ch_samplesheet
-        .map { meta, reads_1, reads_2 ->
-            def new_meta = meta + [single_end: !reads_2]
-            if ( !new_meta.single_end ) {
+        .map { meta, reads_1, reads_2, bam ->
+            if ( bam ) {
+                // Reads provided as BAM
+                [meta + [single_end: true, file_type: 'bam'], bam]
+            } else if ( reads_2 ) {
                 // If paired end reads
-                [new_meta, [reads_1, reads_2]]
+                [meta + [single_end: false, file_type: 'fastq'], [reads_1, reads_2]]
             } else {
                 // If single end
-                [new_meta, reads_1]
+                [meta + [single_end: true, file_type: 'fastq'], reads_1]
             }
         }
 
@@ -82,10 +84,10 @@ workflow READSUBMIT {
         study_accession_ch.first()
     )
 
-    // Prepare input for submission with manifest and fastq files
+    // Prepare input for submission with manifest and read files
     submission_input = reads_ch.join(CREATE_READS_MANIFEST.out.manifest)
-        .map { meta, fastq, manifest ->
-            [meta, fastq, manifest]
+        .map { meta, reads, manifest ->
+            [meta, reads, manifest]
         }
 
     // --------- Upload data to ENA
@@ -139,7 +141,18 @@ workflow READSUBMIT {
         : file("${projectDir}/assets/methods_description_template.yml", checkIfExists: true)
     def ch_methods_description = channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: true))
-    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_ACCESSIONS.out.file_out.map{_meta, file -> file})
+    // Split "ERX...,ERR..." accession column into experiment and run columns for the report
+    def ch_reads_accessions_split = CONCAT_ACCESSIONS.out.file_out
+        .flatMap { _meta, tsv -> tsv.readLines().drop(1).findAll { line -> line.trim() } }
+        .map { line ->
+            def (alias, accessions) = line.tokenize('\t') + ['']
+            def accession_list = accessions.tokenize(',')*.trim()
+            def experiment = accession_list.find { acc -> acc ==~ /^[EDS]RX\d+$/ } ?: ''
+            def run        = accession_list.find { acc -> acc ==~ /^[EDS]RR\d+$/ } ?: ''
+            "${alias}\t${experiment}\t${run}"
+        }
+        .collectFile(name: 'reads_accessions_split.tsv', seed: "alias\texperiment\trun", newLine: true, sort: true)
+    ch_multiqc_files = ch_multiqc_files.mix(ch_reads_accessions_split)
     MULTIQC(
         ch_multiqc_files.flatten().collect().map { files ->
             [
