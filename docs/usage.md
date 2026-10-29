@@ -125,12 +125,12 @@ If you want to test the submission process without making a permanent submission
 
 Alternatively, you can use _validation_ mode to check whether your submission files are valid without uploading any data to either the TEST or LIVE server. This is particularly useful during development and for checking files before a real submission. Those procedures are controlled with `--test_upload` and `--webincli_mode` arguments described in [Running the pipeline](#running-the-pipeline).
 
-| `--test-upload` | `--webincli_mode` | Action                                                                      |
-| --------------- | ----------------- | --------------------------------------------------------------------------- |
-| `false`         | `submit`          | Submission to LIVE server.                                                  |
-| `true`          | `submit`          | Submission to TEST server. Pipeline default settings.                       |
-| `false`         | `validate`        | Registration of records on LIVE server without upload. **Restricted mode**. |
-| `true`          | `validate`        | Registration of records on TEST server without upload.                      |
+| `--test_upload` | `--webincli_mode` | Action                                                                             |
+|-----------------| ----------------- |------------------------------------------------------------------------------------|
+| `false`         | `submit`          | Submission to LIVE server.                                                         |
+| `true`          | `submit`          | Submission to TEST server. Pipeline default settings.                              |
+| `false`         | `validate`        | Registration of records on LIVE server without upload. **Restricted combination**. |
+| `true`          | `validate`        | Registration of records on TEST server without upload.                             |
 
 ## Data privacy
 
