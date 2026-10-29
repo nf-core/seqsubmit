@@ -6,6 +6,7 @@
 
 include { COVERM_CONTIG                         } from '../modules/nf-core/coverm/contig/main'
 include { CREATE_ASSEMBLY_METADATA_CSV          } from '../modules/local/create_assembly_metadata_csv/main'
+include { REGISTER_COASSEMBLY_SAMPLE            } from '../modules/local/register_coassembly_sample/main'
 include { GENERATE_ASSEMBLY_MANIFEST            } from '../modules/local/generate_assembly_manifest/main'
 include { REGISTERSTUDY                         } from '../modules/local/registerstudy/main'
 include { ENA_WEBIN_CLI_WRAPPER as SUBMIT       } from '../modules/local/ena_webin_cli_wrapper'
@@ -20,6 +21,7 @@ include { softwareVersionsToYAML                } from '../subworkflows/nf-core/
 
 include { FASTA_VALIDATION                      } from '../subworkflows/local/fasta_validation/main'
 include { methodsDescriptionText                } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
+include { calculateCoassemblyCoverage           } from '../subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -50,20 +52,49 @@ workflow ASSEMBLYSUBMIT {
 
     // --------- Create assembly channel with proper metadata structure
     assembly_fasta = ch_samplesheet
-        .map { meta, fasta, reads_1, reads_2 ->
-            def new_meta = meta + [single_end: !reads_2]
+        .map { meta, fasta, _reads_1, reads_2 ->
+            // support semicolon-separated values for co-assemblies (e.g. ERR000001;ERR000002)
+            def run_accessions = meta.run_accession.split(';')?.toList()?.unique() ?: []
+            def new_meta = meta + [
+                single_end: !reads_2,
+                run_accession: run_accessions.size() == 1 ? run_accessions[0] : run_accessions
+            ]
             [new_meta, fasta]
         }
 
     // --------- Create reads channel with proper metadata structure
     reads_fastq = ch_samplesheet
         .filter { row -> row[2] && row[2] != "" } // Check if fastq_1 exists and is not empty
-        .map { meta, fasta, reads_1, reads_2 ->
-            def new_meta = meta + [single_end: !reads_2]
-            def reads = new_meta.single_end
-                ? [reads_1]
-                : [reads_1, reads_2]
-            [new_meta, reads]
+        .map { meta, _fasta, reads_1, reads_2 ->
+            // support semicolon-separated values for co-assemblies (e.g. ERR000001;ERR000002)
+            def run_accessions = meta.run_accession.split(';')?.toList()?.unique() ?: []
+            def new_meta = meta + [
+                single_end: !reads_2,
+                run_accession: run_accessions.size() == 1 ? run_accessions[0] : run_accessions
+            ]
+
+            def fastq1_list = reads_1.toString().split(';').toList()
+            def fastq2_list = reads_2 ? reads_2.toString().split(';').toList() : []
+
+            // Validation: Check that number of read files matches number of accessions
+            if (run_accessions.size() > 1) {
+                if (fastq1_list.size() != run_accessions.size()) {
+                    error "Sample ${new_meta.id}: Number of forward read files (${fastq1_list.size()}) does not match number of run accessions (${run_accessions.size()})"
+                }
+                if (fastq2_list && fastq2_list.size() != run_accessions.size()) {
+                    error "Sample ${new_meta.id}: Number of reverse read files (${fastq2_list.size()}) does not match number of run accessions (${run_accessions.size()})"
+                }
+            }
+
+            // Convert paths to file objects
+            def fastq1_paths = fastq1_list.collect { path -> file(path.trim(), checkIfExists: true) }
+            def fastq2_paths = fastq2_list ? fastq2_list.collect { path -> file(path.trim(), checkIfExists: true) } : []
+
+            if (fastq2_paths) {
+                [new_meta, fastq1_paths, fastq2_paths]
+            } else {
+                [new_meta, fastq1_paths]
+            }
         }
 
     // --------- Check fasta files are properly formatted and filter out files with less than 2 contigs
@@ -76,9 +107,33 @@ workflow ASSEMBLYSUBMIT {
     coverm_input = FASTA_VALIDATION.out.valid_fastas
         .filter { meta, _fasta -> !(meta.coverage) }
         .join(reads_fastq)
-        .multiMap { meta, fasta, fastq ->
+        .map { tuple ->
+            def meta = tuple[0]
+            def fasta = tuple[1]
+            def reads_data = tuple[2..-1]
+
+            // Transform reads into flat list for CoverM
+            def all_reads = []
+            if (meta.single_end) {
+                // Single-end: just flatten the R1 list
+                def fastq1_list = reads_data[0]
+                all_reads = fastq1_list
+            } else {
+                // Paired-end: interleave R1 and R2 files
+                // Input format: [meta, [R1_1, R1_2, ...], [R2_1, R2_2, ...]]
+                def fastq1_list = reads_data[0]
+                def fastq2_list = reads_data[1]
+
+                // Create list as: R1_1, R2_1, R1_2, R2_2, ...
+                // Use collectMany to flatten the pairs
+                all_reads = [fastq1_list, fastq2_list].transpose().collectMany { pair -> pair }
+            }
+
+            [meta, fasta, all_reads]
+        }
+        .multiMap { meta, fasta, reads ->
             assembly: [ meta, fasta ]
-            reads: [ meta, fastq ]
+            reads: [ meta, reads ]
         }
 
     COVERM_CONTIG (
@@ -89,16 +144,10 @@ workflow ASSEMBLYSUBMIT {
         false  // enable_bam_output
     )
 
-    // Calculate average coverage using splitCsv operator
+    // Length-weighted co-assembly coverage (see docs/methods.md)
     average_coverage_ch = COVERM_CONTIG.out.coverage
-        .splitCsv(sep: '\t', skip: 1)
-        .map { meta, row ->
-            [meta, row[1] as Double]
-        }
-        .groupTuple()
-        .map { meta, coverages ->
-            def average = coverages.sum() / coverages.size()
-            [meta, average]
+        .map { meta, coverage_tsv ->
+            [ meta, calculateCoassemblyCoverage(coverage_tsv) ]
         }
 
     // Update metadata with calculated coverage
@@ -122,9 +171,26 @@ workflow ASSEMBLYSUBMIT {
         assemblies_with_coverage
     )
 
+    // For co-assemblies (multiple run accessions), register a virtual ENA sample and fill Sample column.
+    // Rows with a single run accession bypass this step unchanged.
+    assembly_metadata_by_type = CREATE_ASSEMBLY_METADATA_CSV.out.csv
+        .branch { meta, _csv ->
+            coassembly: meta.run_accession instanceof List && meta.run_accession.size() > 1
+            individual_assembly: true
+        }
+
+    REGISTER_COASSEMBLY_SAMPLE(
+        assembly_metadata_by_type.coassembly,
+        test_upload,
+        is_private
+    )
+
+    assembly_metadata_with_sample = assembly_metadata_by_type.individual_assembly
+        .mix(REGISTER_COASSEMBLY_SAMPLE.out.csv)
+
     // --------- Concatenate assembly metadata CSVs into single file to publish
     CONCAT_METADATA (
-        CREATE_ASSEMBLY_METADATA_CSV.out.csv.map { _meta, file -> file }.collect().map { files -> [ [id: "assemblies_metadata"], files ] },
+        assembly_metadata_with_sample.map { _meta, file -> file }.collect().map { files -> [ [id: "assemblies_metadata"], files ] },
         'true' // skip_header - we want to keep the header from the first file and skip it for the rest
     )
 
@@ -151,7 +217,7 @@ workflow ASSEMBLYSUBMIT {
 
     // --------- Generate assembly manifest files and submit them to ENA
     GENERATE_ASSEMBLY_MANIFEST(
-        assemblies_with_coverage.join(CREATE_ASSEMBLY_METADATA_CSV.out.csv),
+        assemblies_with_coverage.join(assembly_metadata_with_sample),
         study_accession_ch.first(),
         upload_tpa,
         test_upload,

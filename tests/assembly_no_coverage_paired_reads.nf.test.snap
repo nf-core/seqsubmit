@@ -74,9 +74,9 @@
                 "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
             ],
             [
-                "no_coverage_paired_reads.depth.tsv:md5,bb5f99e74d21df3c73e0ae0f388bcbcb",
-                "assemblies_metadata.csv:md5,199890227285973c56ea126e7f556017",
-                "multiqc_assembly_metadata.txt:md5,07b7d9fc2d6b6eaa9e779af80eb8fdde",
+                "no_coverage_paired_reads.depth.tsv:md5,ed807966913ebeec8b3face8e30317ed",
+                "assemblies_metadata.csv:md5,5a2a691d2e2ecf059a74cfa56bef5f19",
+                "multiqc_assembly_metadata.txt:md5,d830fad9de3ef5531c2170db07341e3a",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
             ]
         ],

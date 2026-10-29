@@ -66,7 +66,7 @@
                 "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
             ],
             [
-                "assemblies_metadata.csv:md5,4a171d2d13d999e391fd6b460f5927ec",
+                "assemblies_metadata.csv:md5,98b1419c74815101cfacd3daf92a435a",
                 "multiqc_assembly_metadata.txt:md5,3187b2ddb3922a060b58f330c7609d0d",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
             ]
