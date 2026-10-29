@@ -21,6 +21,7 @@ PORTAL_SEARCH_API = "https://www.ebi.ac.uk/ena/portal/api/search"
 
 CHECKLIST = "ERC000011"
 CHECKLIST_XML_API = f"https://www.ebi.ac.uk/ena/browser/api/xml/{CHECKLIST}"
+TAXONOMY_API = "https://www.ebi.ac.uk/ena/taxonomy/rest/tax-id"
 
 # ENA Portal API fields retrieved for runs and samples
 RUN_SAMPLE_FIELDS = ["sample_accession", "secondary_sample_accession"]
@@ -68,8 +69,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--default-country", type=str, help="Default country to use if values differ or are missing.")
     parser.add_argument("--default-date", type=str, help="Default collection date to use if values differ or are missing.")
-    parser.add_argument("--default-taxid", type=str, help="Default taxon ID to use if values differ or are missing.")
-    parser.add_argument("--default-tax-name", type=str, help="Default taxon name to use if values differ or are missing.")
+    parser.add_argument("--default-taxid", type=str, help="Default taxon ID to use if values differ or are missing. The scientific name is fetched from ENA taxonomy.")
     return parser.parse_args()
 
 
@@ -162,7 +162,7 @@ def merge_or_not_provided(values: list[str], default_value=None) -> str:
         logger.info(f"Merge decision: using unique value '{unique_values[0]}'")
         return unique_values[0]
     elif default_value:
-        logger.info(f"Merge decision: using default value '{default_value}' due to multiple/conflicting values or missing data")
+        logger.info(f"Merge decision: using default value '{default_value}' to overwrite samples metadata")
         return default_value
     else:
         logger.info(f"Merge decision: '{DEFAULT_NA_VALUE}' (multiple conflicting values or some missing)")
@@ -239,6 +239,31 @@ def get_sample_metadata(sample_accession: str, private: bool = False) -> tuple[s
         row.get("country"),
         row.get("collection_date"),
     )
+
+@retry(requests.RequestException, tries=3, delay=2, backoff=2)
+def get_scientific_name(tax_id: str) -> str:
+    """
+    Retrieve the scientific name for a taxon ID from the ENA taxonomy API.
+
+    Args:
+        tax_id (str): The NCBI taxon ID.
+
+    Returns:
+        str: The scientific name of the taxon.
+
+    Raises:
+        CoassemblyRegistrationError: If the taxon is not found or cannot be used for submission.
+    """
+    url = f"{TAXONOMY_API}/{tax_id}"
+    logger.debug(f"Requesting taxonomy URL: {url}")
+    response = requests.get(url, timeout=60)
+    if response.status_code == 404:
+        raise CoassemblyRegistrationError(f"Taxon ID {tax_id} not found in ENA taxonomy")
+    response.raise_for_status()
+    taxon = response.json()
+    if taxon.get("submittable") != "true":
+        raise CoassemblyRegistrationError(f"Taxon ID {tax_id} ({taxon.get('scientificName')}) is not submittable to ENA")
+    return taxon["scientificName"]
 
 def get_allowed_countries() -> set[str]:
     """
@@ -381,7 +406,7 @@ def extract_accession_from_receipt(receipt: ET.Element) -> str:
     raise CoassemblyRegistrationError("ENA sample submission succeeded but no SAMPLE accession found in receipt XML")
 
 
-def register_virtual_sample(run_accessions: list[str], test: bool, private: bool = False, default_country=None, default_date=None, default_taxid=None, default_tax_name=None) -> str:
+def register_virtual_sample(run_accessions: list[str], test: bool, private: bool = False, default_country=None, default_date=None, default_taxid=None) -> str:
     """
     Register a virtual sample for co-assemblies based on run accessions.
 
@@ -431,18 +456,22 @@ def register_virtual_sample(run_accessions: list[str], test: bool, private: bool
     merged_collection_date = merge_or_not_provided(collection_dates, default_date)
     merged_country = merge_or_not_provided(countries, default_country)
     merged_taxid = merge_or_not_provided(taxon_ids, default_taxid)
-    merged_tax_name = merge_or_not_provided(scientific_names, default_tax_name)
 
-    if merged_taxid == DEFAULT_NA_VALUE or merged_tax_name == DEFAULT_NA_VALUE:
+    if merged_taxid == DEFAULT_NA_VALUE:
         sample_taxa = dict(zip(sample_accessions, zip(taxon_ids, scientific_names)))
         details = "\n".join(
-            f"  {sample}: tax_id={taxid}, scientific_name={name}"
+            f"  {sample}: tax_id={taxid} ({name})"
             for sample, (taxid, name) in sample_taxa.items()
         )
         raise CoassemblyRegistrationError(
-            "Co-assembly source samples must share the same tax_id and scientific_name:\n"
-            f"{details}"
+            "Co-assembly source samples must share the same tax_id:\n"
+            f"{details}\n"
+            "Set the tax_id to register the co-assembly sample under with --default-taxid "
+            "(the 'tax_id' column of the samplesheet when running the pipeline)."
         )
+
+    merged_tax_name = get_scientific_name(merged_taxid)
+    logger.info(f"Scientific name for tax_id {merged_taxid}: {merged_tax_name}")
 
     allowed_countries = get_allowed_countries()
     if merged_country != DEFAULT_NA_VALUE and merged_country not in allowed_countries:
@@ -521,7 +550,6 @@ def main() -> int:
             default_country=args.default_country,
             default_date=args.default_date,
             default_taxid=args.default_taxid,
-            default_tax_name=args.default_tax_name
         )
         if virtual_sample or virtual_sample == "":
             row["Sample"] = virtual_sample
