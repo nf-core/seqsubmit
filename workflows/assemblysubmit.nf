@@ -52,7 +52,7 @@ workflow ASSEMBLYSUBMIT {
 
     // --------- Create assembly channel with proper metadata structure
     assembly_fasta = ch_samplesheet
-        .map { meta, fasta, reads_1, reads_2 ->
+        .map { meta, fasta, _reads_1, reads_2 ->
             // support semicolon-separated values for co-assemblies (e.g. ERR000001;ERR000002)
             def run_accessions = meta.run_accession.split(';')?.toList()?.unique() ?: []
             def new_meta = meta + [
@@ -65,7 +65,7 @@ workflow ASSEMBLYSUBMIT {
     // --------- Create reads channel with proper metadata structure
     reads_fastq = ch_samplesheet
         .filter { row -> row[2] && row[2] != "" } // Check if fastq_1 exists and is not empty
-        .map { meta, fasta, reads_1, reads_2 ->
+        .map { meta, _fasta, reads_1, reads_2 ->
             // support semicolon-separated values for co-assemblies (e.g. ERR000001;ERR000002)
             def run_accessions = meta.run_accession.split(';')?.toList()?.unique() ?: []
             def new_meta = meta + [
@@ -176,7 +176,7 @@ workflow ASSEMBLYSUBMIT {
     assembly_metadata_by_type = CREATE_ASSEMBLY_METADATA_CSV.out.csv
         .branch { meta, _csv ->
             coassembly: meta.run_accession instanceof List && meta.run_accession.size() > 1
-            standard: true
+            individual_assembly: true
         }
 
     REGISTER_COASSEMBLY_SAMPLE(
@@ -185,7 +185,7 @@ workflow ASSEMBLYSUBMIT {
         is_private
     )
 
-    assembly_metadata_with_sample = assembly_metadata_by_type.standard
+    assembly_metadata_with_sample = assembly_metadata_by_type.individual_assembly
         .mix(REGISTER_COASSEMBLY_SAMPLE.out.csv)
 
     // --------- Concatenate assembly metadata CSVs into single file to publish

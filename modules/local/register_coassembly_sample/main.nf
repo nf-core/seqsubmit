@@ -26,12 +26,14 @@ process REGISTER_COASSEMBLY_SAMPLE {
     def prefix = task.ext.prefix ?: "${meta.id}"
     def test_arg = test ? "--test" : ""
     def private_arg = is_private ? "--private" : ""
+    def taxid_arg = meta.tax_id ? "--default-taxid ${meta.tax_id}" : ""
     """
     register_coassembly_sample.py \\
         --input ${csv} \\
         --output ${prefix}_updated.csv \\
         ${test_arg} \\
         ${private_arg} \\
+        ${taxid_arg} \\
         ${args}
     """
 

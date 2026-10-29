@@ -217,10 +217,11 @@ You will need to create a samplesheet with information about the metagenomic ass
 Example:
 
 ```csv title="samplesheet_assembly.csv"
-id,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version,assembly_type
-assembly_001,data/assembly_001.fasta.gz,data/assembly_001_R1.fastq.gz,data/assembly_001_R2.fastq.gz,,ERR011322,SPAdes,3.15.5,metagenome
-assembly_002,data/assembly_002.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9,metatranscriptome
-coassembly_001,data/coassembly_001.fasta.gz,data/run1_R1.fastq.gz;data/run2_R1.fastq.gz,data/run1_R2.fastq.gz;data/run2_R2.fastq.gz,,ERR011324;ERR011325,MEGAHIT,1.2.9,
+id,fasta,fastq_1,fastq_2,coverage,run_accession,assembler,assembler_version,assembly_type,tax_id
+assembly_001,data/assembly_001.fasta.gz,data/assembly_001_R1.fastq.gz,data/assembly_001_R2.fastq.gz,,ERR011322,SPAdes,3.15.5,metagenome,
+assembly_002,data/assembly_002.fasta.gz,,,42.7,ERR011323,MEGAHIT,1.2.9,metatranscriptome,
+coassembly_001,data/coassembly_001.fasta.gz,data/run1_R1.fastq.gz;data/run2_R1.fastq.gz,data/run1_R2.fastq.gz;data/run2_R2.fastq.gz,,ERR011324;ERR011325,MEGAHIT,1.2.9,,
+coassembly_002,data/coassembly_002.fasta.gz,,,35.2,ERR011326;ERR011327,MEGAHIT,1.2.9,metagenome,408172
 ```
 
 | Column              | Required    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
@@ -234,6 +235,7 @@ coassembly_001,data/coassembly_001.fasta.gz,data/run1_R1.fastq.gz;data/run2_R1.f
 | `assembler`         | Yes         | Name of the assembler software used to generate the assembly, e.g. MEGAHIT, SPAdes, metaSPAdes, Flye, etc.                                                                                                                                                                                                                                                                                                                                                                        |
 | `assembler_version` | Yes         | Version of the assembler software used to generate the assembly, e.g. 1.0.0.                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `assembly_type`     | No          | Sequencing library source: `metagenome` for metagenome assembly (would be used as _'primary metagenome'_ in manifest file following [ENA docs](https://ena-docs.readthedocs.io/en/latest/submit/assembly/metagenome/primary.html)) or `metatranscriptome` for metatranscriptome assembly (woule be used _'metatranscriptome'_ in assembly manifest following [ENA docs](https://ena-docs.readthedocs.io/en/latest/submit/assembly/metatranscriptome.html)). Default: `metagenome` |
+| `tax_id`            | No          | NCBI taxon ID for the virtual sample registered for a co-assembly, e.g. `408172` (marine metagenome). Used only when the source samples have different taxon IDs; see [Co-assemblies](#co-assemblies).                                                                                                                                                                                                                                                                            |
 
 Provide either read files (`fastq_1`, optionally `fastq_2`) or a `coverage` value for each row. If `coverage` is missing and reads are provided, the workflow calculates average coverage with CoverM. See the [Methods documentation](docs/methods.md) for more information on how coverage is calculated.
 
@@ -246,7 +248,7 @@ ENA requires each assembly to reference a single sample. The pipeline handles th
 - If all source runs belong to the same ENA sample, the assembly is submitted under that sample.
 - If the runs belong to different samples, the pipeline registers a virtual ENA sample with a `composed of` attribute listing the source samples, and submits the assembly under it. The virtual sample uses the [ENA default sample checklist (`ERC000011`)](https://www.ebi.ac.uk/ena/browser/view/ERC000011), the minimal checklist, because its mandatory fields (`collection date` and `geographic location (country and/or sea)`) can be derived from any source samples, whichever checklists they were originally registered with. Its metadata is merged from the source samples:
   - `collection date` and `geographic location (country and/or sea)` are kept if all source samples share the same value, otherwise they are set to `not provided`. A country that is not in the `ERC000011` list of allowed values is also set to `not provided`.
-  - `tax_id` and `scientific_name` must be the same for all source samples; otherwise the pipeline stops with an error.
+  - `tax_id` must be the same for all source samples. If it differs, set the `tax_id` column for that samplesheet row to the taxon the co-assembly should be registered under (e.g. `408172` for marine metagenome when combining marine and marine sediment samples); otherwise the submission fails. The scientific name is fetched from the [ENA taxonomy](https://ena-docs.readthedocs.io/en/latest/faq/taxonomy.html) for the final `tax_id`.
 
 ### `metagenomic_assemblies` parameters and example
 

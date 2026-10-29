@@ -96,6 +96,22 @@
                 "description": "Assembly type: metagenome or metatranscriptome. Written to the ENA manifest as ASSEMBLY_TYPE 'primary metagenome' or 'metatranscriptome'. Default: metagenome",
                 "default": "metagenome",
                 "meta": ["assembly_type"]
+            },
+            "tax_id": {
+                "anyOf": [
+                    {
+                        "type": "integer",
+                        "exclusiveMinimum": 0
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
+                "default": null,
+                "errorMessage": "Taxon ID must be a positive integer or empty",
+                "description": "NCBI taxon ID for the virtual sample registered for a co-assembly (optional). Provide when the source samples have different taxon IDs. Ignored for assemblies that are not co-assemblies of several samples",
+                "meta": ["tax_id"]
             }
         },
         "required": ["id", "fasta", "run_accession", "assembler", "assembler_version"],
