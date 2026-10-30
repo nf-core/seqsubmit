@@ -29,13 +29,15 @@ input:
         description: |
           Groovy Map containing sample information, including platform,
           instrument, library_source, library_selection, library_strategy,
-          sample_accession, and optionally insert_size, library_name,
-          description.
-          e.g. `[ id:'sample1', platform:'ILLUMINA', instrument:'Illumina HiSeq 2500' ]`
-    - fastq_files:
+          sample_accession, file_type ('fastq' or 'bam'), and optionally
+          insert_size, library_name, description.
+          e.g. `[ id:'sample1', platform:'ILLUMINA', instrument:'Illumina HiSeq 2500', file_type:'fastq' ]`
+    - read_files:
         type: file
-        description: One or two FASTQ files (single-end or paired-end reads).
-        pattern: "*.{fastq,fastq.gz,fq,fq.gz}"
+        description: |
+          One or two FASTQ files (single-end or paired-end reads), or a single
+          BAM file. Written to the manifest as FASTQ or BAM according to meta.file_type.
+        pattern: "*.{fastq,fastq.gz,fq,fq.gz,bam}"
   - - study_accession:
         type: value
         description: ENA study accession to submit reads to.

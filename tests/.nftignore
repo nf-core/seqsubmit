@@ -7,6 +7,7 @@ multiqc/multiqc_data/multiqc_software_versions.txt
 multiqc/multiqc_data/llms-full.txt
 multiqc/multiqc_data/multiqc_Assemblies assigned accessions.txt
 multiqc/multiqc_data/multiqc_Genomes assigned accessions.txt
+multiqc/multiqc_data/multiqc_Reads assigned accessions.txt
 multiqc/multiqc_data/multiqc_sample_registration.txt
 multiqc/multiqc_plots/{svg,pdf,png}/*.{svg,pdf,png}
 multiqc/multiqc_report.html
