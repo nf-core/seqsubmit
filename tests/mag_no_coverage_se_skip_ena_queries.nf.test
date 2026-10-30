@@ -1,13 +1,13 @@
 nextflow_pipeline {
 
-    name "Test genome submission workflow - no_coverage_paired_reads"
+    name "Test genome submission workflow - no_coverage_single_reads skip_ena_queries"
     script "../main.nf"
     tag "pipeline"
     tag "mode_mag"
-    tag "test_mag_no_coverage_paired_reads"
-    profile "test_mag_no_coverage_paired_reads"
+    tag "test_mag_no_coverage_se_skip_ena_queries"
+    profile "test_mag_no_coverage_se_skip_ena_queries"
 
-    test("-profile test_mag_no_coverage_paired_reads") {
+    test("-profile test_mag_no_coverage_se_skip_ena_queries") {
 
         when {
             params {

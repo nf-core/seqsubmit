@@ -354,7 +354,32 @@
                     "enum": ["submit", "validate"],
                     "help_text": "Controls ENA Webin-CLI mode. `validate` mode checks correctness of manifest files, data access and validity. `submit` mode does validation and push data to ENA server. Default: submit."
                 }
-            }
+            },
+            "allOf": [
+                {
+                    "if": {
+                        "properties": {
+                            "test_upload": {
+                                "const": false
+                            }
+                        },
+                        "required": ["test_upload"]
+                    },
+                    "then": {
+                        "properties": {
+                            "webincli_mode": {
+                                "const": "submit"
+                            }
+                        },
+                        "required": ["webincli_mode"],
+                        "errorMessage": {
+                            "properties": {
+                                "webincli_mode": "LIVE ENA submissions require webincli_mode to be 'submit'. Validation-only mode cannot be used with the LIVE server."
+                            }
+                        }
+                    }
+                }
+            ]
         }
     },
     "oneOf": [
@@ -395,29 +420,6 @@
         },
         {
             "$ref": "#/$defs/pipeline_options"
-        },
-        {
-            "if": {
-                "properties": {
-                    "test_upload": {
-                        "const": false
-                    }
-                },
-                "required": ["test_upload"]
-            },
-            "then": {
-                "properties": {
-                    "webincli_mode": {
-                        "const": "submit"
-                    }
-                },
-                "required": ["webincli_mode"],
-                "errorMessage": {
-                    "properties": {
-                        "webincli_mode": "LIVE ENA submissions require webincli_mode to be 'submit'. Validation-only mode cannot be used with the LIVE server."
-                    }
-                }
-            }
         }
     ]
 }

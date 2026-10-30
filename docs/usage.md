@@ -346,7 +346,7 @@ If `genome_coverage`, `stats_generation_software`, `completeness`, `contaminatio
 
 ### Preparing the CheckM2, EukCC, BUSCO and CAT_pack databases
 
-`mags` and `bins` submission modes use CheckM2 (prokaryotes), EukCC and optionally BUSCO (eukaryotes) and CAT_pack tools that require specialized databases for completeness/contamination assessment and taxonomy assignment.
+`mags` and `bins` submission modes use [CheckM2](https://github.com/chklovski/CheckM2) (prokaryotes), [EukCC](https://github.com/EBI-Metagenomics/EukCC) and optionally [BUSCO](https://busco.ezlab.org/busco_userguide.html) (eukaryotes) and [CAT_pack](https://github.com/MGXlab/CAT_pack) tools that require specialized databases for completeness/contamination assessment and taxonomy assignment.
 
 You can either provide pre-existing databases or let the pipeline prepare them during execution.
 
@@ -364,8 +364,6 @@ In particular, the CAT_pack database is extremely large and may take a long time
 
 - CAT_pack:
   - provide the path to a local database (containing `tax/` and `db/` folders or a `tar.gz` archive) with `--cat_db`, otherwise the pipeline builds CAT_pack DB from NCBI non-redundant protein database (`nr`).
-
-See the [CAT_pack documentation](https://github.com/MGXlab/CAT_pack), [CheckM2 documentation](https://github.com/chklovski/CheckM2), [EukCC documentation](https://eukcc.readthedocs.io) and [BUSCO documentation](https://busco.ezlab.org/busco_userguide.html) for more details on usage and creation of databases.
 
 Databases created/downloaded by the pipeline are published under:
 `<output_dir>/databases/`. In subsequent pipeline runs you can reuse them using `--cat_db <output_dir>/databases/cat_pack/` and `--checkm2_db <output_dir>/databases/checkm2/`.
@@ -408,9 +406,10 @@ nextflow run nf-core/seqsubmit \
 
 - **Viral bins/MAGs**: Submitting viral genomes that require additional metadata generation is not supported. For such genomes tRNA and rRNA prediction, quality assessment (completeness/contamination estimation) and taxonomy assignment are not implemented. If all the required metadata (`completeness`, `contamination`, `stats_generation_software`, `RNA_presence` and `NCBI_lineage`) is already provided in the samplesheet, viral bins/MAGs can still be submitted normally. Tracked in [issue #63](https://github.com/nf-core/seqsubmit/issues/63).
 
-- **Domain assignment**: the domain of each genome (bacteria, archaea or eukaryote) is decided from `NCBI_lineage` (provided in the samplesheet or assigned by CAT_pack). Genomes whose lineage does not contain Eukaryota/`2759` or Archaea/`2157` are processed as bacteria, so a missing or incorrect lineage leads to prokaryotic tools being used for that genome.
+- **Domain assignment**: the domain of each genome (bacteria, archaea or eukaryote) is decided from `NCBI_lineage` (provided in the samplesheet or assigned by CAT_pack). Genomes whose lineage does not contain `Eukaryota`/`2759` or `Archaea`/`2157` or `Bacteria`/`2` are raising pipeline error.
 
 - **Eukaryotic bins/MAGs**:
+  - Taxonomic lineage assignment is implemented using CAT_pack that is using Prodigal (prokaryotic gene caller) which can raise errors on long sequences.
   - EukCC database (`--eukcc_db`) is downloaded and extracted in every run unless a local folder is provided.
   - BUSCO is used only for completeness, contamination is always taken from EukCC (or from the samplesheet).
   - If EukCC finds no marker genes or MetaEuk predicts no proteins for a genome, completeness and contamination stay empty for that genome. The same happens for completeness when BUSCO finds no genes.
