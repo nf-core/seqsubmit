@@ -55,7 +55,7 @@ workflow NFCORE_SEQSUBMIT {
             params.checkm2_db,
             params.checkm2_db_download_id,
             params.cat_db,
-            params.centre_name,
+            params.center_name,
             params.upload_tpa,
             params.test_upload,
             params.webincli_mode,
@@ -76,7 +76,8 @@ workflow NFCORE_SEQSUBMIT {
             params.test_upload,
             params.webincli_mode,
             params.is_private,
-            params.release_date ? channel.value(params.release_date): channel.value(false)
+            params.release_date ? channel.value(params.release_date): channel.value(false),
+            params.center_name
         )
         ch_multiqc_report = ASSEMBLYSUBMIT.out.multiqc_report
     } else if (params.mode == "reads") {
@@ -90,7 +91,8 @@ workflow NFCORE_SEQSUBMIT {
             params.study_metadata,
             params.test_upload,
             params.webincli_mode,
-            params.release_date ? channel.value(params.release_date): channel.value(false)
+            params.release_date ? channel.value(params.release_date): channel.value(false),
+            params.center_name
         )
         ch_multiqc_report = READSUBMIT.out.multiqc_report
     }

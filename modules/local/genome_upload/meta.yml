@@ -27,9 +27,9 @@ input:
   - submission_study:
       type: value
       description: ENA study accession used for submission.
-  - centre_name:
+  - center_name:
       type: value
-      description: Submitting centre name required by ENA.
+      description: Submitting center name required by ENA.
   - is_tpa:
       type: value
       description: Whether genomes are submitted as TPA (Third Party Annotation).

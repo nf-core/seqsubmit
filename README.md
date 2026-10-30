@@ -103,7 +103,7 @@ nextflow run nf-core/seqsubmit \
     -profile <docker/singularity/...> \
     --mode <mags|bins|metagenomic_assemblies|reads> \
     --input <samplesheet.csv> \
-    --centre_name <your_centre> \
+    --center_name <your_organisation> \
     --submission_study <your_study> \
     --outdir <outdir>
 ```

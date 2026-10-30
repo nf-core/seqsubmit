@@ -12,7 +12,7 @@ process GENOME_UPLOAD {
     path(table_for_upload)
     val(mags_or_bins_flag)
     val(submission_study)
-    val(centre_name)
+    val(center_name)
     val(is_tpa)
     val(test_upload)
     val(is_private)
@@ -37,7 +37,7 @@ process GENOME_UPLOAD {
     genome_upload \\
         -u ${submission_study} \\
         --genome_info ${table_for_upload} \\
-        --centre_name "${centre_name}" \\
+        --centre_name "${center_name}" \\
         --${mags_or_bins_flag} \\
         ${tpa} \\
         ${mode} \\

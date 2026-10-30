@@ -42,6 +42,7 @@ workflow ASSEMBLYSUBMIT {
     webincli_mode        // val: either 'validate' or 'submit' to specify WebinCLI mode of operation
     is_private           // val: fetch metadata from private/public account
     release_date         // val: keep submitted data private until given date
+    center_name          // val: name of submitting institution
 
     main:
 
@@ -139,7 +140,8 @@ workflow ASSEMBLYSUBMIT {
             // Only register a study when at least one assembly passed validation
             FASTA_VALIDATION.out.valid_fastas.first().map { _it -> [[id: "study"], file(study_metadata)] },
             test_upload,
-            release_date
+            release_date,
+            center_name
         )
 
         study_accession_ch = REGISTERSTUDY.out.accessions

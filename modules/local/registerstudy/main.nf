@@ -15,6 +15,7 @@ process REGISTERSTUDY {
     tuple val(meta), path(study_metadata)
     val(test_upload)
     val(release_date)
+    val(center_name)
 
     output:
     tuple val(meta), path("*_accessions.json"), emit: accessions
@@ -28,6 +29,7 @@ process REGISTERSTUDY {
     def prefix    = task.ext.prefix ?: "${meta.id}"
     def test_flag = test_upload     ? "--test" : ""
     def hold_data_private_until = release_date ? "--hold-until ${release_date}" : ""
+    def center_name_arg = center_name ? "--center-name ${center_name}": ""
 
     """
     submit_study.py \\
@@ -35,6 +37,7 @@ process REGISTERSTUDY {
         --output ${prefix}_accessions.json \\
         ${test_flag} \\
         ${hold_data_private_until} \\
+        ${center_name_arg} \\
         ${args}
     """
 
