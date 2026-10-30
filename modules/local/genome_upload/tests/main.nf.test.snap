@@ -1,0 +1,44 @@
+{
+    "genome_upload - stub": {
+        "content": [
+            {
+                "0": [
+                    "test_1.manifest:md5,d41d8cd98f00b204e9800998ecf8427e"
+                ],
+                "1": [
+                    "ENA_backup.json:md5,d41d8cd98f00b204e9800998ecf8427e"
+                ],
+                "2": [
+                    "genome_samples.xml:md5,d41d8cd98f00b204e9800998ecf8427e"
+                ],
+                "3": [
+                    "registered_MAGs_test.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                ],
+                "4": [
+                    [
+                        "GENOME_UPLOAD",
+                        "genome_uploader",
+                        "3.0.4"
+                    ]
+                ],
+                "ena_upload_backup_json": [
+                    "ENA_backup.json:md5,d41d8cd98f00b204e9800998ecf8427e"
+                ],
+                "manifests": [
+                    "test_1.manifest:md5,d41d8cd98f00b204e9800998ecf8427e"
+                ],
+                "upload_genome_samples": [
+                    "genome_samples.xml:md5,d41d8cd98f00b204e9800998ecf8427e"
+                ],
+                "upload_registered_mags": [
+                    "registered_MAGs_test.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                ]
+            }
+        ],
+        "timestamp": "2026-10-30T22:35:09.968164",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.10.4"
+        }
+    }
+}
