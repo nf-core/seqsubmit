@@ -310,7 +310,27 @@
                     "enum": ["submit", "validate"],
                     "help_text": "Controls ENA Webin-CLI mode. `validate` mode checks correctness of manifest files, data access and validity. `submit` mode does validation and push data to ENA server. Default: submit."
                 }
-            }
+            },
+            "allOf": [
+                {
+                    "if": {
+                        "properties": {
+                            "mode": {
+                                "const": "reads"
+                            }
+                        },
+                        "required": ["mode"]
+                    },
+                    "then": {
+                        "properties": {
+                            "upload_tpa": {
+                                "const": false,
+                                "errorMessage": "--upload_tpa is not applicable to --mode reads (TPA applies only to mags, bins and metagenomic_assemblies)"
+                            }
+                        }
+                    }
+                }
+            ]
         }
     },
     "oneOf": [
@@ -348,24 +368,6 @@
         },
         {
             "$ref": "#/$defs/pipeline_options"
-        },
-        {
-            "if": {
-                "properties": {
-                    "mode": {
-                        "const": "reads"
-                    }
-                },
-                "required": ["mode"]
-            },
-            "then": {
-                "properties": {
-                    "upload_tpa": {
-                        "const": false,
-                        "errorMessage": "--upload_tpa is not applicable to --mode reads (TPA applies only to mags, bins and metagenomic_assemblies)"
-                    }
-                }
-            }
         }
     ]
 }
