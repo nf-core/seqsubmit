@@ -353,7 +353,7 @@ Databases created/downloaded by the pipeline are published under:
 In addition to the [common parameters](#running-the-pipeline):
 
 | Parameter      | Required | Description                                                                                                                                             |
-| -------------- | -------- |---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `--upload_tpa` | No       | Mark submission as [third party assemblies (TPA)](#third-party-assemblies-tpa) when required. Default: `false`.                                         |
 | `--checkm2_db` | No       | Path to a pre-downloaded CheckM2 database. If omitted, downloads the version set by `--checkm2_db_download_id`. Default: `14897628` (Zenodo accession). |
 | `--cat_db`     | No       | Path to a local CAT_pack database. If omitted, builds CAT_pack DB from NCBI non-redundant protein database (`nr`).                                      |
