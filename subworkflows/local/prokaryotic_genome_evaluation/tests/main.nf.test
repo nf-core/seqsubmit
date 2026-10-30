@@ -6,7 +6,7 @@ nextflow_workflow {
 
     tag "subworkflows"
     tag "subworkflows_local"
-    tag "subworkflows/genome_evaluation_proks"
+    tag "subworkflows/prokaryotic_genome_evaluation"
     tag "checkm2"
     tag "checkm2/predict"
     tag "checkm2/databasedownload"

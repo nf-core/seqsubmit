@@ -6,7 +6,7 @@ nextflow_workflow {
 
     tag "subworkflows"
     tag "subworkflows_local"
-    tag "subworkflows/genome_evaluation_euks"
+    tag "subworkflows/eukaryotic_genome_evaluation"
     tag "eukcc"
 
     test("eukaryote without estimate - eukcc - not assigned") {

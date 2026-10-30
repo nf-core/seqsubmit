@@ -1,13 +1,13 @@
 nextflow_workflow {
 
-    name "Test Subworkflow EUKARYOTIC_GENOME_EVALUATION"
+    name "Test Subworkflow EUKARYOTIC_GENOME_EVALUATION -stub"
     script "../main.nf"
     workflow "EUKARYOTIC_GENOME_EVALUATION"
 
     tag "subworkflows"
     tag "subworkflows_local"
-    tag "subworkflows/genome_evaluation_euks"
-    tag "subworkflows/genome_evaluation_euks_stub"
+    tag "subworkflows/eukaryotic_genome_evaluation"
+    tag "subworkflows/eukaryotic_genome_evaluation_stub"
     tag "busco"
     tag "busco/busco"
     tag "eukcc"

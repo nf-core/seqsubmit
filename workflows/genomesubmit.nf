@@ -16,8 +16,8 @@ include { MULTIQC                               } from '../modules/nf-core/multi
 include { paramsSummaryMap                      } from 'plugin/nf-schema'
 
 include { FASTA_VALIDATION                      } from '../subworkflows/local/fasta_validation/main'
-include { EUKARYOTIC_GENOME_EVALUATION          } from '../subworkflows/local/genome_evaluation_euks/main'
-include { PROKARYOTIC_GENOME_EVALUATION         } from '../subworkflows/local/genome_evaluation_proks/main'
+include { EUKARYOTIC_GENOME_EVALUATION          } from '../subworkflows/local/eukaryotic_genome_evaluation/main'
+include { PROKARYOTIC_GENOME_EVALUATION         } from '../subworkflows/local/prokaryotic_genome_evaluation/main'
 include { RNA_DETECTION                         } from '../subworkflows/local/rna_detection/main'
 include { FASTA_CLASSIFY_CATPACK                } from '../subworkflows/nf-core/fasta_classify_catpack/main'
 
