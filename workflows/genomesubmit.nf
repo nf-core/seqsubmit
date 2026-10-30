@@ -164,9 +164,9 @@ workflow GENOMESUBMIT {
         .map { meta, fasta ->
             def lineage = meta.NCBI_lineage.toLowerCase()
             def parts   = lineage.tokenize(';').collect { p -> p.trim() }
-            def is_euk  = parts.any { it == 'eukaryot' } || parts.contains('2759')
-            def is_arc  = parts.any { it == 'archaea' } || parts.contains('2157')
-            def is_bac  = parts.any { it == 'bacteria' } || parts.contains('2')
+            def is_euk  = lineage.contains('eukaryot') || parts.contains('2759')
+            def is_arc  = lineage.contains('archaea') || parts.contains('2157')
+            def is_bac  = lineage.contains('bacteria') || parts.contains('2')
 
             if (!is_euk && !is_arc && !is_bac) {
             throw new IllegalStateException(
