@@ -252,17 +252,17 @@
             "title": "Pipeline flow control parameters",
             "type": "object",
             "description": "Use these parameters to control the flow of the pipeline execution.",
-            "required": ["centre_name", "mode"],
+            "required": ["center_name", "mode"],
             "properties": {
-                "centre_name": {
+                "center_name": {
                     "type": "string",
                     "description": "Name of the submitter's organisation (mandatory for broker accounts).",
                     "help_text": "ena-webin-cli argument -centerName: the center name of the submitter (mandatory for broker accounts)."
                 },
                 "upload_tpa": {
                     "type": "boolean",
-                    "description": "Mark the assemblies as a Third PArty (TPA)",
-                    "help_text": "Set to true if the assembly was built from public sequence data (TPA) rather than original primary data. See NCBI TPA guidance: https://www.ncbi.nlm.nih.gov/genbank/tpa/",
+                    "description": "Mark the submission as a Third PArty (TPA). Not applicable to `--mode reads`.",
+                    "help_text": "Set to true if the assembly/MAG/bin was built from public sequence data (TPA) rather than original primary data. Only used with `--mode mags`, `bins` or `metagenomic_assemblies`; setting it with `--mode reads` is rejected. See NCBI TPA guidance: https://www.ncbi.nlm.nih.gov/genbank/tpa/",
                     "default": false
                 },
                 "mode": {
@@ -310,7 +310,27 @@
                     "enum": ["submit", "validate"],
                     "help_text": "Controls ENA Webin-CLI mode. `validate` mode checks correctness of manifest files, data access and validity. `submit` mode does validation and push data to ENA server. Default: submit."
                 }
-            }
+            },
+            "allOf": [
+                {
+                    "if": {
+                        "properties": {
+                            "mode": {
+                                "const": "reads"
+                            }
+                        },
+                        "required": ["mode"]
+                    },
+                    "then": {
+                        "properties": {
+                            "upload_tpa": {
+                                "const": false,
+                                "errorMessage": "--upload_tpa is not applicable to --mode reads (TPA applies only to mags, bins and metagenomic_assemblies)"
+                            }
+                        }
+                    }
+                }
+            ]
         }
     },
     "oneOf": [

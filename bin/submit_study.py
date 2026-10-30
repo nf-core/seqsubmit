@@ -308,6 +308,9 @@ def build_submission_xml(
     hold_until: str | None = None,
     action: str = "ADD",
     test: bool = False,
+    center_name: str | None = None,
+    submission_tool: str | None = None,
+    submission_tool_version: str | None = None,
 ) -> ET.Element:
     """Build a ``<WEBIN>`` XML document for submitting studies.
 
@@ -319,6 +322,12 @@ def build_submission_xml(
             or ``"MODIFY"`` to update existing ones.
         test: If ``True``, append a timestamp-based hash to aliases
             for uniqueness in test submissions.
+        center_name: Optional submitting center name, set as the
+            ``center_name`` attribute of each ``<PROJECT>``.
+        submission_tool: Optional name of the tool used for submission,
+            added as ``SUBMISSION_TOOL`` project attribute.
+        submission_tool_version: Optional version of the submission tool,
+            added as ``SUBMISSION_TOOL_VERSION`` project attribute.
 
     Returns:
         Root ``<WEBIN>`` element.
@@ -342,7 +351,13 @@ def build_submission_xml(
     # PROJECT_SET
     project_set = ET.SubElement(webin, "PROJECT_SET")
     for study in studies:
-        _add_project_element(project_set, study, test=test)
+        _add_project_element(
+            project_set, study,
+            test=test,
+            center_name=center_name,
+            submission_tool=submission_tool,
+            submission_tool_version=submission_tool_version,
+        )
     return webin
 
 
@@ -350,6 +365,9 @@ def _add_project_element(
     project_set: ET.Element,
     study: dict[str, Any],
     test: bool = False,
+    center_name: str | None = None,
+    submission_tool: str | None = None,
+    submission_tool_version: str | None = None,
 ) -> None:
     """Append a ``<PROJECT>`` element to *project_set*."""
     alias = study.get("alias", "")
@@ -362,6 +380,8 @@ def _add_project_element(
 
     project = ET.SubElement(project_set, "PROJECT")
     project.set("alias", alias)
+    if center_name:
+        project.set("center_name", center_name)
 
     name_text = study.get("project_name", study.get("study_title", ""))
     if name_text:
@@ -381,19 +401,25 @@ def _add_project_element(
 
     sp = ET.SubElement(project, "SUBMISSION_PROJECT")
     ET.SubElement(sp, "SEQUENCING_PROJECT")
+
+    project_attributes: list[tuple[str, str]] = []
     study_type = study.get("existing_study_type")
     if study_type:
+        project_attributes.append(("existing_study_type", study_type))
+        new_type = study.get("new_study_type")
+        if new_type and study_type == "Other":
+            project_attributes.append(("new_study_type", new_type))
+    if submission_tool:
+        project_attributes.append(("SUBMISSION_TOOL", submission_tool))
+    if submission_tool_version:
+        project_attributes.append(("SUBMISSION_TOOL_VERSION", submission_tool_version))
+
+    if project_attributes:
         attrs = ET.SubElement(
             project, "PROJECT_ATTRIBUTES",
         )
-        _add_project_attribute(
-            attrs, "existing_study_type", study_type,
-        )
-        new_type = study.get("new_study_type")
-        if new_type and study_type == "Other":
-            _add_project_attribute(
-                attrs, "new_study_type", new_type,
-            )
+        for tag_text, value_text in project_attributes:
+            _add_project_attribute(attrs, tag_text, value_text)
 
 
 def _add_project_attribute(
@@ -560,6 +586,21 @@ def _do_submission(
     help="Path to write JSON accession results (default: stdout)",
 )
 @click.option(
+    "--center-name",
+    default=None,
+    help="Submitting center name, added as center_name to each study",
+)
+@click.option(
+    "--submission-tool",
+    default=None,
+    help="Name of the tool used for submission, added as SUBMISSION_TOOL study attribute",
+)
+@click.option(
+    "--submission-tool-version",
+    default=None,
+    help="Version of the submission tool, added as SUBMISSION_TOOL_VERSION study attribute",
+)
+@click.option(
     "--validate",
     is_flag=True, default=False,
     help="Validate and build XML but do not submit to ENA",
@@ -569,6 +610,9 @@ def main(
     use_test: bool,
     hold_until: str | None,
     output: Path | None,
+    center_name: str | None,
+    submission_tool: str | None,
+    submission_tool_version: str | None,
     validate: bool,
 ) -> None:
     """Submit studies to ENA via the Webin REST API v2."""
@@ -606,6 +650,9 @@ def main(
         hold_until=hold_until,
         action="ADD",
         test=use_test,
+        center_name=center_name,
+        submission_tool=submission_tool,
+        submission_tool_version=submission_tool_version,
     )
     xml_bytes = xml_to_bytes(xml_root)
     logger.info("XML document size: %d bytes", len(xml_bytes))

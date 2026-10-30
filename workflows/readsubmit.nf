@@ -38,6 +38,7 @@ workflow READSUBMIT {
     test_upload          // val: true for test upload mode
     webincli_mode        // val: either 'validate' or 'submit' to specify WebinCLI mode of operation
     release_date         // val: keep submitted data private until given date
+    center_name          // val: name of submitting institution
 
     main:
     def ch_versions = channel.empty()
@@ -68,7 +69,8 @@ workflow READSUBMIT {
         REGISTERSTUDY(
             channel.of([[id: "study"], file(study_metadata)]),
             test_upload,
-            release_date
+            release_date,
+            center_name
         )
 
         study_accession_ch = REGISTERSTUDY.out.accessions

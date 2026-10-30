@@ -12,7 +12,7 @@ process GENOME_UPLOAD {
     path(table_for_upload)
     val(mags_or_bins_flag)
     val(submission_study)
-    val(centre_name)
+    val(center_name)
     val(is_tpa)
     val(test_upload)
     val(is_private)
@@ -32,12 +32,13 @@ process GENOME_UPLOAD {
     def tpa      = is_tpa         ? "--tpa"  : ""
     def mode     = (!test_upload) ? "--live" : ""
     def is_private_flag  = is_private   ? "--private" : ""
+    def center_name_arg = center_name ? "--centre_name ${center_name}" : ""
 
     """
     genome_upload \\
         -u ${submission_study} \\
         --genome_info ${table_for_upload} \\
-        --centre_name "${centre_name}" \\
+        ${center_name_arg} \\
         --${mags_or_bins_flag} \\
         ${tpa} \\
         ${mode} \\

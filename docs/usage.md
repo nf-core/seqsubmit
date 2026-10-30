@@ -354,7 +354,7 @@ In addition to the [common parameters](#running-the-pipeline):
 
 | Parameter      | Required | Description                                                                                                                                             |
 | -------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--upload_tpa` | No       | Mark assemblies as [third party assemblies (TPA)](#third-party-assemblies-tpa) when required. Default: `false`.                                         |
+| `--upload_tpa` | No       | Mark submission as [third party assemblies (TPA)](#third-party-assemblies-tpa) when required. Default: `false`.                                         |
 | `--checkm2_db` | No       | Path to a pre-downloaded CheckM2 database. If omitted, downloads the version set by `--checkm2_db_download_id`. Default: `14897628` (Zenodo accession). |
 | `--cat_db`     | No       | Path to a local CAT_pack database. If omitted, builds CAT_pack DB from NCBI non-redundant protein database (`nr`).                                      |
 
@@ -366,7 +366,7 @@ nextflow run nf-core/seqsubmit \
     --mode mags \
     --input samplesheet_genomes.csv \
     --submission_study <your_study> \
-    --centre_name <your_centre> \
+    --center_name <your_organisation> \
     --webincli_mode submit \
     --test_upload \
     --outdir mags_submission/
@@ -403,7 +403,7 @@ nextflow run nf-core/seqsubmit \
     -profile <docker/singularity/...> \
     --mode <mags|bins|metagenomic_assemblies|reads> \
     --input <samplesheet.csv> \
-    --centre_name <your_centre> \
+    --center_name <your_organisation> \
     --submission_study <your_study> \
     --outdir <outdir>
 ```
@@ -416,7 +416,7 @@ Parameters common to all modes:
 | `--input`                                  | Yes          | Path to samplesheet describing the data to be submitted (supported formats: csv, tsv, yaml, yml, json). Columns/fields depend on the pipeline mode. See [usage docs](https://nf-co.re/seqsubmit/usage#samplesheet-input).                                                                                                                                                             |
 | `--outdir`                                 | Yes          | Path to the output directory for pipeline results. You have to use absolute paths to storage on Cloud infrastructure.                                                                                                                                                                                                                                                                 |
 | `--submission_study` OR `--study_metadata` | Yes (one of) | ENA study accession (PRJ/ERP) to submit the data to OR metadata file in JSON/TSV/CSV format to register a new study.                                                                                                                                                                                                                                                                  |
-| `--centre_name`                            | Yes          | Name of the submitter's organisation (mandatory for broker accounts).                                                                                                                                                                                                                                                                                                                 |
+| `--center_name`                            | Yes          | Name of the submitter's organisation (mandatory for broker accounts).                                                                                                                                                                                                                                                                                                                 |
 | `--test_upload`                            | No           | Submit to the ENA TEST server instead of the LIVE server. Use that flag for development purposes or for validation of your submissions. Submission would be done to TEST ENA server instead of LIVE server. TEST server holds data 24h and removes afterwords. LIVE server does not have option to modify your submission, you can only suppress data and re-upload. Default: `true`. |
 | `--webincli_mode`                          | No           | Webin-CLI mode for ENA interaction: `submit` uploads data, `validate` performs validation only. `validate` mode checks correctness of manifest files, data access and validity. `submit` mode does validation and push data to ENA server. Default: `submit`.                                                                                                                         |
 | `--is_private`                             | No           | Use if you are referencing private data accessions in your submission. Set to true when the referenced project/reads/assembly are still private in ENA, so metadata is fetched via authenticated access. Does NOT affect the privacy of your own submission, use --release_date for that. Default: `false`.                                                                           |
