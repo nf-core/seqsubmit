@@ -3,6 +3,7 @@ name: "rna_detection"
 description: |
   Detects tRNA and rRNA genes in genome FASTA files using tRNAscan-SE and Barrnap,
   then evaluates whether the genome meets MIMAG RNA completeness standards.
+  Prediction mode and required rRNA genes depend on the genome's domain (meta.domain).
 keywords:
   - rna
   - trna
@@ -14,33 +15,39 @@ keywords:
 components:
   - barrnap
   - trnascanse
-  - countrna
+  - count_rna
 input:
   - fasta:
       type: file
       description: |
         Channel containing genome FASTA files.
+        meta.domain must be one of 'bac', 'arc' or 'euk'. It sets the Barrnap kingdom,
+        the tRNAscan-SE search mode (-B/-A/-E, via conf/modules.config) and the rRNA genes
+        required by COUNT_RNA.
         Structure: [ val(meta), path(fasta) ]
+        e.g. [ [ id:'test', domain:'bac' ], genome.fasta ]
       pattern: "*.{fa,fasta,fna,fa.gz,fasta.gz,fna.gz}"
       ontologies:
         - edam: "http://edamontology.org/format_1929" # FASTA
   - min_trna_count:
       type: integer
       description: |
-        Minimum number of distinct tRNA types required to pass the MIMAG standard (e.g. 18).
+        Minimum total number of tRNA genes for the 20 standard amino acids required
+        to pass the MIMAG standard (e.g. 18).
   - min_rrna_percentage:
       type: float
       description: |
-        Minimum percentage of the three rRNA genes (5S, 16S, 23S) required to pass
-        the MIMAG standard (e.g. 75.0).
+        Minimum percentage of expected gene length that must be recovered for each
+        required rRNA gene to count it as present (e.g. 80).
+        Required genes: 16S, 23S and 5S for 'bac'/'arc'; 18S, 28S, 5.8S and 5S for 'euk'.
 output:
   - rna_detected:
       type: file
       description: |
-        Channel containing per-genome TSV files with tRNA/rRNA counts and a
-        MIMAG pass/fail decision.
+        Channel containing per-genome TSV files with one line: genome ID and
+        RNA presence decision (True/False).
         Structure: [ val(meta), path(tsv) ]
-      pattern: "*.tsv"
+      pattern: "*_rna_decision.tsv"
       ontologies:
         - edam: "http://edamontology.org/format_3475" # TSV
 authors:

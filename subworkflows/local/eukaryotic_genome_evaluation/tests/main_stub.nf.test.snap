@@ -1,0 +1,86 @@
+{
+    "eukaryote - busco - stub": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test_euk",
+                        "domain": "euk"
+                    },
+                    null,
+                    "1.0",
+                    "busco_v6.1.0;eukcc_v2.2.0"
+                ]
+            ]
+        ],
+        "timestamp": "2026-10-21T18:04:58.162808",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    },
+    "eukaryote with contamination - eukcc - stub": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test_euk",
+                        "domain": "euk",
+                        "contamination": 2.5,
+                        "stats_generation_software": "CustomTool_v1.0"
+                    },
+                    "90.0",
+                    2.5,
+                    "CustomTool_v1.0;eukcc_v2.2.0"
+                ]
+            ]
+        ],
+        "timestamp": "2026-10-21T18:05:55.032161",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    },
+    "eukaryote - eukcc - stub": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test_euk",
+                        "domain": "euk"
+                    },
+                    "90.0",
+                    "1.0",
+                    "eukcc_v2.2.0"
+                ]
+            ]
+        ],
+        "timestamp": "2026-10-21T18:04:14.72553",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    },
+    "eukaryote with contamination - busco - stub": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test_euk",
+                        "domain": "euk",
+                        "contamination": 2.5,
+                        "stats_generation_software": "CustomTool_v1.0"
+                    },
+                    null,
+                    2.5,
+                    "CustomTool_v1.0;busco_v6.1.0"
+                ]
+            ]
+        ],
+        "timestamp": "2026-10-21T18:05:21.38848",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    }
+}

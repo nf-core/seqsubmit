@@ -27,7 +27,7 @@ workflow RNA_DETECTION {
     main:
 
     BARRNAP(
-        fasta.map {id, fasta_file -> [id, fasta_file, "bac"]}
+        fasta.map {meta, fasta_file -> [meta, fasta_file, meta.domain]}
     )
 
     TRNASCANSE(

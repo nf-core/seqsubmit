@@ -6,6 +6,7 @@
 
 import argparse
 import logging
+import re
 
 
 # Expected rRNA gene lengths
@@ -16,6 +17,13 @@ EXPECTED_LENGTHS = {
     "18S_rRNA": 1800,
     "28S_rRNA": 4500,
     "5_8S_rRNA": 155,
+}
+
+# rRNA genes required per domain (gene names as reported by barrnap for each --kingdom)
+REQUIRED_RRNA = {
+    "bac": ["16S_rRNA", "23S_rRNA", "5S_rRNA"],
+    "arc": ["16S_rRNA", "23S_rRNA", "5S_rRNA"],
+    "euk": ["18S_rRNA", "28S_rRNA", "5_8S_rRNA", "5S_rRNA"],
 }
 
 AA = [
@@ -41,14 +49,17 @@ AA = [
     "Trp",
 ]
 
+TRNASCAN_REGEXP = r"^\s*(\S+)\s*:\s*(\d+)"
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Script parses tRNAscan-SE output and barrnap GFF output, and writes a decision "
         "of whether RNA genes are present in the genome. Decision is 'True' if number of tRNA genes "
-        "is at least --trna-limit and 16S, 23S, and 5S rRNA genes have more than --rrna-limit percentage "
-        "of gene length recovered, and 'False' otherwise."
+        "is at least --trna-limit and all rRNA genes required for --domain (16S, 23S and 5S for bac/arc; "
+        "18S, 28S, 5.8S and 5S for euk) have at least --rrna-limit percentage of gene length recovered, "
+        "and 'False' otherwise."
     )
     parser.add_argument("-t", "--trna", dest="trna", help="trnas_stats.out from tRNAscan-SE",
                         required=True)
@@ -60,8 +71,10 @@ def parse_args():
                         default="rna_decision.tsv", required=False)
     parser.add_argument("--trna-limit", dest="trna_limit", help="Minimal required number of tRNA",
                         required=True, type=int)
-    parser.add_argument("--rrna-limit", dest="rrna_limit", help="Minimum percentage of 16S, 23S, and 5S rRNA gene length recovered to count the gene as present.",
-                        required=True, type=int)
+    parser.add_argument("--rrna-limit", dest="rrna_limit", help="Minimum percentage of rRNA gene length recovered to count the gene as present.",
+                        required=True, type=float)
+    parser.add_argument("-d", "--domain", dest="domain", help="Taxonomic domain of the genome, defines which rRNA genes are required (default: bac)",
+                        choices=sorted(REQUIRED_RRNA), default="bac", required=False)
     return parser.parse_args()
 
 
@@ -87,18 +100,18 @@ def parse_trna(trna_input):
             if "Isotype / Anticodon" in line:
                 start_parsing = True
             elif start_parsing:
-                cols = line.split()
-                if len(cols) > 1:
-                    aa_pred = line.split()[0]
-                    counts = int(line.split()[2])
-                    if aa_pred in AA:
+                match = re.match(TRNASCAN_REGEXP, line)
+                if match:
+                    aa_pred = match.group(1)
+                    counts = int(match.group(2))
+                    if any(i in aa_pred for i in AA):
                         trnas += counts
                         logging.info(f"Found {counts} tRNA genes for amino acid {aa_pred}")
     return trnas
 
 
-def parse_rrna(rrna_input, rrna_limit):
-    """Parses barrnap GFF output and counts 16S, 23S, and 5S rRNA genes that have more than --rrna-limit percentage of gene length recovered.
+def parse_rrna(rrna_input, rrna_limit, required_genes):
+    """Parses barrnap GFF output and counts required rRNA genes that have at least --rrna-limit percentage of gene length recovered.
 
     File example:
     ##gff-version 3
@@ -128,8 +141,7 @@ def parse_rrna(rrna_input, rrna_limit):
                         break
 
                 # Check if gene length meets the threshold
-                # For now we only consider bacterial/archaeal rRNA genes
-                if gene_name in ["16S_rRNA", "23S_rRNA", "5S_rRNA"]:
+                if gene_name in required_genes:
                     expected_length = EXPECTED_LENGTHS[gene_name]
                     percentage_recovered = (gene_length / expected_length) * 100
                     logging.info(f"Found {gene_name} with length {gene_length} bp, which is {percentage_recovered:.2f}% of expected length.")
@@ -147,11 +159,13 @@ def main():
     logging.info(f"Found {trna_count} tRNA in total")
     # parsing rRNA
     logging.info(f"Parsing rRNA genes from {args.rrna}")
-    rrna_count = parse_rrna(rrna_input=args.rrna, rrna_limit=args.rrna_limit)
-    logging.info(f"Found {rrna_count} rRNA subunit types in total")
+    required_genes = REQUIRED_RRNA[args.domain]
+    logging.info(f"Required rRNA genes for domain '{args.domain}': {', '.join(required_genes)}")
+    rrna_count = parse_rrna(rrna_input=args.rrna, rrna_limit=args.rrna_limit, required_genes=required_genes)
+    logging.info(f"Found {rrna_count} of {len(required_genes)} required rRNA subunit types")
 
-    # rrna_count should be 3 to make sure all 3 rRNA genes are present
-    decision = "True" if trna_count >= args.trna_limit and rrna_count == 3 else "False"
+    # all required rRNA genes must be present
+    decision = "True" if trna_count >= args.trna_limit and rrna_count == len(required_genes) else "False"
     logging.info(f"RNA presented: {decision}")
 
     with open(args.output, 'w') as file_out:

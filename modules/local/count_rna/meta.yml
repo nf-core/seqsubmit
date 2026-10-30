@@ -11,42 +11,48 @@ tools:
   - count_rna:
       description: |
         Script that parses tRNAscan-SE output and barrnap GFF output to determine
-        whether RNA genes are present in the genome. Returns 'Yes' if the number of
-        tRNA genes meets the threshold and all three rRNA subunits (16S, 23S, 5S)
-        have sufficient length coverage, otherwise 'No'.
+        whether RNA genes are present in the genome. Returns 'True' if the number of
+        tRNA genes meets the threshold and all rRNA genes required for the genome's
+        domain have sufficient length coverage, otherwise 'False'.
+        Required rRNA genes: 16S, 23S and 5S for bacteria and archaea;
+        18S, 28S, 5.8S and 5S for eukaryotes.
       licence: ["GPL v3"]
 
 input:
   - meta:
       type: map
       description: |
-        Groovy Map containing sample information
-        e.g. [ id:'test' ]
+        Groovy Map containing sample information.
+        `domain` defines which rRNA genes are required: 'bac', 'arc' or 'euk' (default: 'bac').
+        e.g. [ id:'test', domain:'bac' ]
   - trnas_stats:
       type: file
       description: tRNA statistics file from tRNAscan-SE (.stats format)
       pattern: "*.stats"
   - rrna_gff:
       type: file
-      description: rRNA annotation file from barrnap (GFF3 format)
+      description: rRNA annotation file from barrnap (GFF3 format), predicted with the kingdom matching meta.domain
       pattern: "*.gff"
   - min_trna_count:
-      type: value
-      description: Minimum required number of tRNA genes.
+      type: integer
+      description: |
+        Minimum required total number of tRNA genes for the 20 standard amino acids (e.g. 18).
   - min_rrna_percentage:
-      type: value
-      description: Minimum required percentage coverage for each rRNA subunit.
+      type: float
+      description: |
+        Minimum percentage of expected gene length that must be recovered for each
+        required rRNA gene to count it as present (e.g. 80).
 
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [ id:'test' ]
+        e.g. [ id:'test', domain:'bac' ]
   - rna_decision:
       type: file
       description: |
-        Tab-separated file containing genome ID and decision (Yes/No) on whether
+        Tab-separated file with one line: genome ID and decision (True/False) on whether
         sufficient RNA genes are present
       pattern: "*_rna_decision.tsv"
 

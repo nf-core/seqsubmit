@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "prokaryotic_genome_evaluation"
+description: |
+  Estimates completeness and contamination of prokaryotic (bacterial and archaeal) genomes using CheckM2.
+  Downloads the CheckM2 database automatically when no pre-built database is provided.
+keywords:
+  - genome
+  - completeness
+  - contamination
+  - checkm2
+  - prokaryotes
+  - metagenomics
+  - MAGs
+  - bins
+components:
+  - checkm2/databasedownload
+  - checkm2/predict
+input:
+  - ch_fasta:
+      type: file
+      description: |
+        Channel containing prokaryotic genome FASTA files to evaluate.
+        Structure: [ val(meta), path(fasta) ]
+      pattern: "*.{fa,fasta,fna,fa.gz,fasta.gz,fna.gz}"
+      ontologies:
+        - edam: "http://edamontology.org/format_1929" # FASTA
+  - ch_checkm2_db:
+      type: directory
+      description: |
+        Path to a pre-built CheckM2 database.
+        Provide null to trigger automatic download via ch_checkm2_db_download_id.
+  - ch_checkm2_db_download_id:
+      type: integer
+      description: |
+        Zenodo record ID used to download the CheckM2 database via CHECKM2_DATABASEDOWNLOAD (e.g. 14897628).
+        Only used when ch_checkm2_db is null.
+output:
+  - stats:
+      type: list
+      description: |
+        Channel containing completeness, contamination and software used per genome.
+        stats_generation_software lists the tools separated by ';', appended to the value given in the samplesheet.
+        Structure: [ val(meta), val(completeness), val(contamination), val(stats_generation_software) ]
+authors:
+  - "@KateSakharova"
+  - "@ochkalova"
