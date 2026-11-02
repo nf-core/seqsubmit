@@ -26,7 +26,7 @@
                 "anyOf": [
                     {
                         "type": "string",
-                        "pattern": "^\\S+\\.(fq|fastq)(\\.gz)?(;\\S+\\.(fq|fastq)(\\.gz)?)*$"
+                        "pattern": "^[^\\s;]+\\.(fq|fastq)(\\.gz)?(;[^\\s;]+\\.(fq|fastq)(\\.gz)?)*$"
                     },
                     {
                         "type": "string",
@@ -41,7 +41,7 @@
                 "anyOf": [
                     {
                         "type": "string",
-                        "pattern": "^\\S+\\.(fq|fastq)(\\.gz)?(;\\S+\\.(fq|fastq)(\\.gz)?)*$"
+                        "pattern": "^[^\\s;]+\\.(fq|fastq)(\\.gz)?(;[^\\s;]+\\.(fq|fastq)(\\.gz)?)*$"
                     },
                     {
                         "type": "string",

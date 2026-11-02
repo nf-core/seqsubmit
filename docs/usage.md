@@ -241,7 +241,7 @@ Provide either read files (`fastq_1`, optionally `fastq_2`) or a `coverage` valu
 
 ### Co-assemblies
 
-An assembly built from the pooled reads of several runs (a co-assembly) is described by a single samplesheet row listing all source runs in `run_accession`, separated by semicolons. If coverage has to be calculated, provide the read files of every run in `fastq_1` (and `fastq_2` for paired-end data) in the same order as the accessions; the pipeline fails if the number of read files does not match the number of run accessions.
+An assembly built from the pooled reads of several runs (a co-assembly) is described by a single samplesheet row listing all source runs in `run_accession`, separated by semicolons. If coverage has to be calculated, provide the read files of every run in `fastq_1` (and `fastq_2` for paired-end data) in the same order as the accessions; the pipeline fails if the number of read files does not match the number of run accessions. All runs must be either single-end or paired-end; for a co-assembly mixing both, provide `coverage` instead (see [Limitations](#limitations-1)).
 
 ENA requires each assembly to reference a single sample. The pipeline handles this as follows:
 
@@ -291,6 +291,8 @@ nextflow run nf-core/seqsubmit \
 - **Submission of an assembly without submitting the raw reads**: Assemblies that have no associated reads accession (`run_accession` column in the samplesheet) are not supported, since the pipeline relies on that lineage to build the required metadata. Tracked in [issue #29](https://github.com/nf-core/seqsubmit/issues/29).
 
 - **Single-contig assemblies**: Assemblies that consist of only one contig cannot be uploaded through this pipeline. ENA classifies these as "chromosomal assemblies", which follow a different submission procedure with different metadata requirements. If you have a single-contig assembly to submit, please contact [ENA support](https://www.ebi.ac.uk/ena/browser/support) for guidance.
+
+- **Coverage calculation for co-assemblies mixing single-end and paired-end runs**: Coverage cannot be calculated for a co-assembly where some runs are single-end and others paired-end: all runs in `fastq_1`/`fastq_2` must be of the same type. Such co-assemblies can still be submitted if `coverage` is provided in the samplesheet.
 
 - **Coverage calculation from long reads**: `coverage` calculation via CoverM has only been tested and validated with short reads (e.g. Illumina). It has not been tested with long reads (PacBio, Nanopore). Exercise caution when processing data generated from long reads, as issues may occur.
 

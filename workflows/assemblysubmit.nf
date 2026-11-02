@@ -82,7 +82,7 @@ workflow ASSEMBLYSUBMIT {
                     error "Sample ${new_meta.id}: Number of forward read files (${fastq1_list.size()}) does not match number of run accessions (${run_accessions.size()})"
                 }
                 if (fastq2_list && fastq2_list.size() != run_accessions.size()) {
-                    error "Sample ${new_meta.id}: Number of reverse read files (${fastq2_list.size()}) does not match number of run accessions (${run_accessions.size()})"
+                    error "Sample ${new_meta.id}: Number of reverse read files (${fastq2_list.size()}) does not match number of run accessions (${run_accessions.size()}). Coverage cannot be calculated for co-assemblies mixing single-end and paired-end runs: provide 'coverage' in the samplesheet instead"
                 }
             }
 
