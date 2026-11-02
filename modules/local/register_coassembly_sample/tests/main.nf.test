@@ -30,6 +30,23 @@ nextflow_process {
                     def csvContent = path(process.out.csv[0][1]).text
                     assert csvContent.contains("Sample")
                     assert csvContent.contains("SRR3183853")
+                },
+                {
+                    // Sample is the last column, right after Filepath
+                    def samples = path(process.out.csv[0][1]).readLines().drop(1).collectEntries { line ->
+                        def m = line =~ /,(contigs\d+\.fasta\.gz),(.*)$/
+                        assert m.find()
+                        [ (m.group(1)): m.group(2) ]
+                    }
+                    assert samples.size() == 10
+                    // Runs from several samples: a virtual co-assembly sample is registered
+                    ['contigs1', 'contigs2', 'contigs3', 'contigs4'].each { name ->
+                        assert samples["${name}.fasta.gz"]
+                    }
+                    // All runs from one sample: no virtual sample is registered and Sample stays empty
+                    ['contigs5', 'contigs6', 'contigs9', 'contigs12', 'contigs13', 'contigs14'].each { name ->
+                        assert samples["${name}.fasta.gz"] == ''
+                    }
                 }
             )
         }
