@@ -24,6 +24,9 @@ input:
   - test:
       type: string
       description: Whether to submit to the ENA test server (`true`) instead of production.
+  - is_private:
+      type: boolean
+      description: Whether the source runs and samples are private (`true`), so ENA is queried with Webin credentials.
 output:
   - csv:
       - meta:
