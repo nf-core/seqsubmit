@@ -328,6 +328,7 @@ def build_submission_xml(
             added as ``SUBMISSION_TOOL`` project attribute.
         submission_tool_version: Optional version of the submission tool,
             added as ``SUBMISSION_TOOL_VERSION`` project attribute.
+            Both attributes are added only when tool and version are given.
 
     Returns:
         Root ``<WEBIN>`` element.
@@ -409,9 +410,8 @@ def _add_project_element(
         new_type = study.get("new_study_type")
         if new_type and study_type == "Other":
             project_attributes.append(("new_study_type", new_type))
-    if submission_tool:
+    if submission_tool and submission_tool_version:
         project_attributes.append(("SUBMISSION_TOOL", submission_tool))
-    if submission_tool_version:
         project_attributes.append(("SUBMISSION_TOOL_VERSION", submission_tool_version))
 
     if project_attributes:
@@ -593,12 +593,12 @@ def _do_submission(
 @click.option(
     "--submission-tool",
     default=None,
-    help="Name of the tool used for submission, added as SUBMISSION_TOOL study attribute",
+    help="Name of the tool used for submission, added as SUBMISSION_TOOL study attribute (requires --submission-tool-version)",
 )
 @click.option(
     "--submission-tool-version",
     default=None,
-    help="Version of the submission tool, added as SUBMISSION_TOOL_VERSION study attribute",
+    help="Version of the submission tool, added as SUBMISSION_TOOL_VERSION study attribute (requires --submission-tool)",
 )
 @click.option(
     "--validate",
@@ -627,6 +627,11 @@ def main(
 
     if hold_until:
         validate_hold_until(hold_until)
+
+    if bool(submission_tool) != bool(submission_tool_version):
+        raise click.UsageError(
+            "--submission-tool and --submission-tool-version must be specified together"
+        )
 
     # -- Step 1: Load input file -------------------------
     logger.info("Loading input: %s", input_file)

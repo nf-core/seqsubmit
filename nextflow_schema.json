@@ -257,7 +257,7 @@
                 "center_name": {
                     "type": "string",
                     "description": "Name of the submitter's organisation (mandatory for broker accounts).",
-                    "help_text": "ena-webin-cli argument -centerName: the center name of the submitter (mandatory for broker accounts)."
+                    "help_text": "Name of the center generating and uploading genomes. It must be provided for broker accounts. If omitted, ENA uses the account's registered center name. Check ENA documentation: https://ena-docs.readthedocs.io/en/latest/submit/general-guide/data-brokering.html for more details."
                 },
                 "upload_tpa": {
                     "type": "boolean",
