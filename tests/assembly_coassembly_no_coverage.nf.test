@@ -28,6 +28,9 @@ nextflow_pipeline {
                 // Coverage is computed with CoverM and the runs are registered as a virtual co-assembly sample
                 { assert succeeded_tasks.any { it.contains(':COVERM_CONTIG') } },
                 { assert succeeded_tasks.any { it.contains(':REGISTER_COASSEMBLY_SAMPLE') } },
+                // The manifest is generated, but the upload is skipped in this profile
+                { assert succeeded_tasks.any { it.contains(':GENERATE_ASSEMBLY_MANIFEST') } },
+                { assert !succeeded_tasks.any { it.contains(':SUBMIT') } },
                 { assert path("$outputDir/metagenomic_assemblies/upload/assemblies_metadata.csv").readLines()[1].contains(',1.263635324935214,') },
                 { assert snapshot(
                     // Number of successful tasks
