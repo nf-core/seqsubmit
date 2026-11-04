@@ -12,7 +12,7 @@
                             "assembler_version": "3.15.5",
                             "assembly_type": "metagenome"
                         },
-                        "test_sample_assembly_metadata.csv:md5,5627f0b0bc83720dd269e2ea8ac16eff"
+                        "test_sample_assembly_metadata.csv:md5,000897a94b9f0873867fa463790583f2"
                     ]
                 ],
                 "1": [
@@ -32,15 +32,15 @@
                             "assembler_version": "3.15.5",
                             "assembly_type": "metagenome"
                         },
-                        "test_sample_assembly_metadata.csv:md5,5627f0b0bc83720dd269e2ea8ac16eff"
+                        "test_sample_assembly_metadata.csv:md5,000897a94b9f0873867fa463790583f2"
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-10-15T11:45:01.123968",
+        "timestamp": "2026-10-29T15:18:32.564715",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "26.04.0"
+            "nextflow": "26.04.1"
         }
     },
     "test_create_assembly_metadata_csv - stub": {
