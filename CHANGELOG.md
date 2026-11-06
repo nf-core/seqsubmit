@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
+- [#122](https://github.com/nf-core/seqsubmit/pull/122)
+  - Renamed `centre_name` to `center_name`
+  - Updated `genome_uploader` to v3.1.1
+  - Restricted combination `--mode reads` && `--upload_tpa`
+  - Added `submission_tool` (`seqsubmit_vVersion`) record and `center_name` to newly created STUDY in ENA
+  - Resolved [Issue 57](https://github.com/nf-core/seqsubmit/issues/57)
 - [#117](https://github.com/nf-core/seqsubmit/pull/117) and [#119](https://github.com/nf-core/seqsubmit/pull/119)
   - Added BAM files support as raw reads
   - Added tests for BAM submission with `-submit` and `-validate` modes

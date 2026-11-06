@@ -15,7 +15,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { SEQSUBMIT  } from './workflows/seqsubmit'
+include { SEQSUBMIT               } from './workflows/seqsubmit'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 /*
@@ -51,7 +51,7 @@ workflow NFCORE_SEQSUBMIT {
         params.checkm2_db,
         params.checkm2_db_download_id,
         params.cat_db,
-        params.centre_name,
+        params.center_name,
         params.upload_tpa,
         params.test_upload,
         params.webincli_mode,

@@ -4,15 +4,15 @@ process GENOME_UPLOAD {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/genome-uploader:3.0.4--pyhdfd78af_0':
-        'quay.io/biocontainers/genome-uploader:3.0.4--pyhdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/genome-uploader:3.1.1--pyhdfd78af_0':
+        'quay.io/biocontainers/genome-uploader:3.1.1--pyhdfd78af_0' }"
 
     input:
     path(mags)   // required for validation
     path(table_for_upload)
     val(mags_or_bins_flag)
     val(submission_study)
-    val(centre_name)
+    val(center_name)
     val(is_tpa)
     val(test_upload)
     val(is_private)
@@ -32,12 +32,13 @@ process GENOME_UPLOAD {
     def tpa      = is_tpa         ? "--tpa"  : ""
     def mode     = (!test_upload) ? "--live" : ""
     def is_private_flag  = is_private   ? "--private" : ""
+    def center_name_arg = center_name ? "--centre_name ${center_name}" : ""
 
     """
     genome_upload \\
         -u ${submission_study} \\
         --genome_info ${table_for_upload} \\
-        --centre_name "${centre_name}" \\
+        ${center_name_arg} \\
         --${mags_or_bins_flag} \\
         ${tpa} \\
         ${mode} \\
