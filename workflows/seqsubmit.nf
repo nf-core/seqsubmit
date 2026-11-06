@@ -35,7 +35,7 @@ workflow SEQSUBMIT {
     checkm2_db               // val: path to CheckM2 database
     checkm2_db_download_id   // val: CheckM2 database download ID
     cat_db                   // val: path to CAT database
-    centre_name              // val: submission centre name
+    center_name              // val: submission center name
     upload_tpa               // val: upload as TPA (Third Party Annotation)
     test_upload              // val: true for test upload mode
     webincli_mode            // val: either 'validate' or 'submit' to specify WebinCLI mode of operation
