@@ -46,7 +46,7 @@ workflow GENOMESUBMIT {
     checkm2_db               // val: path to CheckM2 database
     checkm2_db_download_id   // val: CheckM2 database download ID
     cat_db                   // val: path to CAT database
-    centre_name              // val: submission centre name
+    center_name              // val: submission center name
     upload_tpa               // val: upload as TPA (Third Party Annotation)
     test_upload              // val: true for test upload mode
     webincli_mode            // val: either 'validate' or 'submit' to specify WebinCLI mode of operation
@@ -229,7 +229,8 @@ workflow GENOMESUBMIT {
             // Only register a study when at least one genome passed validation
             FASTA_VALIDATION.out.valid_fastas.first().map { _it -> [[id: "study"], file(study_metadata)] },
             test_upload,
-            release_date
+            release_date,
+            center_name
         )
 
         study_accession_ch = REGISTERSTUDY.out.accessions
@@ -245,7 +246,7 @@ workflow GENOMESUBMIT {
         CONCAT_METADATA.out.file_out.map { _meta, file -> file }.first(),
         mags_or_bins_flag,     // mags or bins
         study_accession_ch.first(),
-        centre_name,
+        center_name,
         upload_tpa,
         test_upload,
         is_private

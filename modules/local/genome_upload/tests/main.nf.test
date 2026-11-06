@@ -1,0 +1,136 @@
+def writeGenomeMetadataTsv = { String genomeName, String fastaName ->
+    def metadataDir = new File(System.getenv("NFT_WORKDIR") ?: ".nf-test", "tmp/genome_upload")
+    metadataDir.mkdirs()
+    def metadata = File.createTempFile("genomes_metadata_${genomeName}_", ".tsv", metadataDir)
+    def header = [
+        "genome_name", "genome_path", "accessions", "assembly_software", "binning_software",
+        "binning_parameters", "stats_generation_software", "completeness", "contamination",
+        "genome_coverage", "metagenome", "co-assembly", "broad_environment", "local_environment",
+        "environmental_medium", "rRNA_presence", "NCBI_lineage"
+    ]
+    def row = [
+        genomeName, fastaName, "SRR14332510", "spades_v3.15.5", "mags_v1",
+        "default", "CheckM2_v1.0.1", "92.81", "1.09",
+        "66.04", "sediment metagenome", "False", "marine", "cable bacteria",
+        "marine sediment", "False", "d__Bacteria;p__Bacillota_A;c__Clostridia;o__Lachnospirales;f__Lachnospiraceae;g__Lachnospira;s__Lachnospira eligens"
+    ]
+    metadata.text = [header, row].collect { it.join("\t") }.join("\n") + "\n"
+    return metadata.absolutePath
+}
+
+nextflow_process {
+    name "Test Process GENOME_UPLOAD"
+    script "../main.nf"
+    config "./nextflow.config"
+    process "GENOME_UPLOAD"
+
+    tag "modules"
+    tag "genome_upload"
+
+    test("genome_upload - mags - ENA test server") {
+        def genomeMetadata = writeGenomeMetadataTsv("test_mag", "bin_lachnospira_eligens.fa.gz")
+
+        when {
+            process {
+                """
+                input[0] = file(params.pipelines_testdata_base_path + 'test_data/bins/bin_lachnospira_eligens.fa.gz', checkIfExists: true)
+                input[1] = file("${genomeMetadata}", checkIfExists: true)
+                input[2] = 'mags'
+                input[3] = 'PRJEB98843'
+                input[4] = 'TEST_CENTER'
+                input[5] = false // is_tpa
+                input[6] = true  // test_upload
+                input[7] = false // is_private
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assertAll(
+                { assert process.out.manifests.size() == 1 },
+                { assert path(process.out.manifests[0]).fileName.toString() ==~ /test_mag_\d+\.manifest/ },
+                {
+                    def lines = path(process.out.manifests[0]).readLines()
+                    assert lines.contains("STUDY\tPRJEB98843")
+                    assert lines.any { it ==~ /SAMPLE\tERS\d+/ }
+                    assert lines.any { it ==~ /ASSEMBLYNAME\ttest_mag_\d+/ }
+                    assert lines.contains("ASSEMBLY_TYPE\tMetagenome-Assembled Genome (MAG)")
+                    assert lines.contains("COVERAGE\t66.04")
+                    assert lines.contains("PROGRAM\tspades_v3.15.5")
+                    assert lines.contains("RUN_REF\tSRR14332510")
+                    assert lines.any { it.startsWith("FASTA\t") && it.endsWith("bin_lachnospira_eligens.fa.gz") }
+                },
+                { assert path(process.out.upload_registered_mags[0]).fileName.toString() == "registered_MAGs_test.tsv" },
+                {
+                    def rows = path(process.out.upload_registered_mags[0]).readLines()
+                    assert rows[0] == "alias\tsample"
+                    assert rows.size() == 2
+                    assert rows[1] ==~ /test_mag_\d+\tERS\d+/
+                },
+                { assert path(process.out.upload_genome_samples[0]).exists() },
+                { assert path(process.out.ena_upload_backup_json[0]).exists() }
+            )
+        }
+    }
+
+    test("genome_upload - bins - ENA test server") {
+        def genomeMetadata = writeGenomeMetadataTsv("test_bin", "bin_lachnospira_eligens.fa.gz")
+
+        when {
+            process {
+                """
+                input[0] = file(params.pipelines_testdata_base_path + 'test_data/bins/bin_lachnospira_eligens.fa.gz', checkIfExists: true)
+                input[1] = file("${genomeMetadata}", checkIfExists: true)
+                input[2] = 'bins'
+                input[3] = 'PRJEB98843'
+                input[4] = "TEST_CENTER" // center name
+                input[5] = false // is_tpa
+                input[6] = true  // test_upload
+                input[7] = false // is_private
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assertAll(
+                { assert process.out.manifests.size() == 1 },
+                {
+                    def lines = path(process.out.manifests[0]).readLines()
+                    assert lines.contains("STUDY\tPRJEB98843")
+                    assert lines.any { it ==~ /SAMPLE\tERS\d+/ }
+                    assert lines.contains("ASSEMBLY_TYPE\tbinned metagenome")
+                },
+                { assert path(process.out.upload_registered_mags[0]).fileName.toString() == "registered_bins_test.tsv" }
+            )
+        }
+    }
+
+    test("genome_upload - stub") {
+        options "-stub"
+        def genomeMetadata = writeGenomeMetadataTsv("test_mag_stub", "bin_lachnospira_eligens.fa.gz")
+
+        when {
+            process {
+                """
+                input[0] = file(params.pipelines_testdata_base_path + 'test_data/bins/bin_lachnospira_eligens.fa.gz', checkIfExists: true)
+                input[1] = file("${genomeMetadata}", checkIfExists: true)
+                input[2] = 'mags'
+                input[3] = 'PRJEB98843'
+                input[4] = 'TEST_CENTER'
+                input[5] = false // is_tpa
+                input[6] = true  // test_upload
+                input[7] = false // is_private
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+}
