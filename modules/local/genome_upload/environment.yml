@@ -4,4 +4,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - "bioconda::genome-uploader=3.0.1"
+  - "bioconda::genome-uploader=3.1.1"
