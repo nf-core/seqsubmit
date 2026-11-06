@@ -61,7 +61,7 @@ workflow SEQSUBMIT {
             checkm2_db,
             checkm2_db_download_id,
             cat_db,
-            centre_name,
+            center_name,
             upload_tpa,
             test_upload,
             webincli_mode,
@@ -78,7 +78,8 @@ workflow SEQSUBMIT {
             test_upload,
             webincli_mode,
             is_private,
-            release_date
+            release_date,
+            center_name
         )
         ch_multiqc_files = ch_multiqc_files.mix(ASSEMBLYSUBMIT.out.multiqc_files)
     } else if (mode == "reads") {
@@ -88,7 +89,8 @@ workflow SEQSUBMIT {
             study_metadata,
             test_upload,
             webincli_mode,
-            release_date
+            release_date,
+            center_name
         )
         ch_multiqc_files = ch_multiqc_files.mix(READSUBMIT.out.multiqc_files)
     }
@@ -148,8 +150,8 @@ workflow SEQSUBMIT {
             ]
         }
     )
-    emit:multiqc_report = MULTIQC.out.report.map { _meta, report -> [report] }.toList() // channel: /path/to/multiqc_report.html
-    versions       = ch_versions                 // channel: [ path(versions.yml) ]
+    emit:
+    multiqc_report = MULTIQC.out.report.map { _meta, report -> [report] }.toList() // channel: /path/to/multiqc_report.html
 }
 
 /*
