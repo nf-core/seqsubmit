@@ -355,8 +355,7 @@
                     "help_text": "Controls ENA Webin-CLI mode. `validate` mode checks correctness of manifest files, data access and validity. `submit` mode does validation and push data to ENA server. Default: submit."
                 }
             },
-            "allOf":
-            [
+            "allOf": [
                 {
                     "if": {
                         "properties": {

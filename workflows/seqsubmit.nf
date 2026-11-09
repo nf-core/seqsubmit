@@ -72,10 +72,10 @@ workflow SEQSUBMIT {
             webincli_mode,
             is_private,
             release_date,
-            busco_db_lineage
-            busco_db
-            busco_clean
-            eukaryotic_completeness_tool
+            busco_db_lineage,
+            busco_db,
+            busco_clean,
+            eukaryotic_completeness_tool,
             eukcc_db
         )
         ch_multiqc_files = ch_multiqc_files.mix(GENOMESUBMIT.out.multiqc_files)
