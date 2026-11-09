@@ -5,8 +5,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v1.0.1dev - [date]
 
+### `Added`
+
+- [#66](https://github.com/nf-core/seqsubmit/pull/66)
+  - Added co-assembly submission to `ASSEMBLYSUBMIT`: a samplesheet row can list several semicolon-separated run accessions (and matching read files for coverage calculation)
+  - When the source runs belong to different ENA samples, a virtual sample with a `composed of` attribute is registered and the co-assembly is submitted under it
+  - Optional `tax_id` samplesheet column to set the taxon of the virtual co-assembly sample when the source samples have different taxa
+
+- [#124](https://github.com/nf-core/seqsubmit/pull/124)
+  - Added the template's `SEQSUBMIT` workflow (`workflows/seqsubmit.nf`). It runs `GENOMESUBMIT`, `ASSEMBLYSUBMIT` or `READSUBMIT` depending on `--mode`, then collates software versions and runs MultiQC once for all modes. The mode workflows now emit their MultiQC files instead of each running MultiQC.
+
 ### `Fixed`
 
+- [#122](https://github.com/nf-core/seqsubmit/pull/122)
+  - Renamed `centre_name` to `center_name`
+  - Updated `genome_uploader` to v3.1.1
+  - Restricted combination `--mode reads` && `--upload_tpa`
+  - Added `submission_tool` (`seqsubmit_vVersion`) record and `center_name` to newly created STUDY in ENA
+  - Resolved [Issue 57](https://github.com/nf-core/seqsubmit/issues/57)
 - [#117](https://github.com/nf-core/seqsubmit/pull/117) and [#119](https://github.com/nf-core/seqsubmit/pull/119)
   - Added BAM files support as raw reads
   - Added tests for BAM submission with `-submit` and `-validate` modes
