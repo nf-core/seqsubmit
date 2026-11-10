@@ -10,8 +10,6 @@ include { RENAME_FASTA_FOR_CATPACK              } from '../modules/local/rename_
 include { CREATE_GENOME_METADATA_TSV            } from '../modules/local/create_genome_metadata_tsv/main'
 
 include { COVERM_GENOME                         } from '../modules/nf-core/coverm/genome'
-include { FIND_CONCATENATE as CONCAT_METADATA   } from '../modules/nf-core/find/concatenate/main'
-include { FIND_CONCATENATE as CONCAT_ACCESSIONS } from '../modules/nf-core/find/concatenate/main'
 
 include { FASTA_VALIDATION                      } from '../subworkflows/local/fasta_validation/main'
 include { EUKARYOTIC_GENOME_EVALUATION          } from '../subworkflows/local/eukaryotic_genome_evaluation/main'
@@ -243,10 +241,13 @@ workflow GENOMESUBMIT {
     )
 
     // Collect all TSV rows into a single file
-    CONCAT_METADATA (
-        CREATE_GENOME_METADATA_TSV.out.tsv.map { _meta, file -> file }.collect().map { files -> [ [id: "genomes_metadata"], files ] },
-        'true' // skip_header - we want to keep the header from the first file and skip it for the rest
-    )
+    genomes_metadata_file = CREATE_GENOME_METADATA_TSV.out.tsv
+        .map { meta, file -> file }
+        .collectFile(
+            name: 'genomes_metadata.tsv',
+            storeDir: "${params.outdir}/${params.mode}/upload",
+            keepHeader: true
+        )
 
     // --------- Register study if accession not provided via --submission_study
     def study_accession_ch
@@ -271,7 +272,7 @@ workflow GENOMESUBMIT {
     // --------- Generate manifests
     CREATE_MANIFESTS(
         fasta_updated_with_stats.map{_meta, fasta -> fasta}.collect(),
-        CONCAT_METADATA.out.file_out.map { _meta, file -> file }.first(),
+        genomes_metadata_file,
         mags_or_bins_flag,     // mags or bins
         study_accession_ch.first(),
         center_name,
@@ -309,15 +310,18 @@ workflow GENOMESUBMIT {
     )
 
     // Concatenate accessions into single file to publish
-    CONCAT_ACCESSIONS (
-        SUBMIT.out.accessions.map { _meta, file -> file }.collect().map { files -> [ [id: "genomes_accessions"], files ] },
-        'true' // skip_header - we want to keep the header from the first file and skip it for the rest
-    )
+    accessions_file = SUBMIT.out.accessions
+        .map { meta, file -> file }
+        .collectFile(
+            name: 'genomes_accessions.tsv',
+            storeDir: "${params.outdir}/${params.mode}/upload",
+            keepHeader: true
+        )
 
     // --------- Collect files for the MultiQC report
-    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_METADATA.out.file_out.map{_meta, file -> file})
+    ch_multiqc_files = ch_multiqc_files.mix(genomes_metadata_file)
     ch_multiqc_files = ch_multiqc_files.mix(CREATE_MANIFESTS.out.upload_registered_mags)
-    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_ACCESSIONS.out.file_out.map{_meta, file -> file})
+    ch_multiqc_files = ch_multiqc_files.mix(accessions_file)
 
     emit:
     multiqc_files = ch_multiqc_files // channel: files to include in the MultiQC report
