@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
+- [#104](https://github.com/nf-core/seqsubmit/pull/104)
+  - Added support of eukaryotic MAGs
+  - Added domain assignment decision based on taxonomy assigned by CAT_pack tool or provided in input samplesheet
+  - Integrated quality assignment with EukCC and/or BUSCO for eukaryotic MAGs
+  - Introduced "Production vs Test submission" section to `docs/usage.md`
+
 - [#66](https://github.com/nf-core/seqsubmit/pull/66)
   - Added co-assembly submission to `ASSEMBLYSUBMIT`: a samplesheet row can list several semicolon-separated run accessions (and matching read files for coverage calculation)
   - When the source runs belong to different ENA samples, a virtual sample with a `composed of` attribute is registered and the co-assembly is submitted under it
@@ -15,28 +21,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#124](https://github.com/nf-core/seqsubmit/pull/124)
   - Added the template's `SEQSUBMIT` workflow (`workflows/seqsubmit.nf`). It runs `GENOMESUBMIT`, `ASSEMBLYSUBMIT` or `READSUBMIT` depending on `--mode`, then collates software versions and runs MultiQC once for all modes. The mode workflows now emit their MultiQC files instead of each running MultiQC.
 
+- [#122](https://github.com/nf-core/seqsubmit/pull/122)
+  - Added `submission_tool` (`seqsubmit_vVersion`) record and `center_name` to newly created STUDY in ENA
+
+- [#117](https://github.com/nf-core/seqsubmit/pull/117) and [#119](https://github.com/nf-core/seqsubmit/pull/119)
+  - Added BAM files support as raw reads
+  - Added tests for BAM submission with `-submit` and `-validate` modes
+  - Added assigned `run accession` and `experiment accession` to MultiQC report ([Issue 70](https://github.com/nf-core/seqsubmit/issues/70) resolved)
+
+- [#106](https://github.com/nf-core/seqsubmit/pull/106)
+  - Added support for metatranscriptome submission for ASSEMBLYSUBMIT
+
+- [#108](https://github.com/nf-core/seqsubmit/pull/108)
+  - Added test usecase in test-datasets https://github.com/nf-core/test-datasets/pull/2324 with contamination=0
+
 ### `Fixed`
+
+- [#104](https://github.com/nf-core/seqsubmit/pull/104)
+  - Made RNA detection domain based
+  - Simplified mags tests
+  - Restricted combination `--test_upload=false` && `--webincli_mode=validate`
 
 - [#122](https://github.com/nf-core/seqsubmit/pull/122)
   - Renamed `centre_name` to `center_name`
   - Updated `genome_uploader` to v3.1.1
   - Restricted combination `--mode reads` && `--upload_tpa`
-  - Added `submission_tool` (`seqsubmit_vVersion`) record and `center_name` to newly created STUDY in ENA
   - Resolved [Issue 57](https://github.com/nf-core/seqsubmit/issues/57)
-- [#117](https://github.com/nf-core/seqsubmit/pull/117) and [#119](https://github.com/nf-core/seqsubmit/pull/119)
-  - Added BAM files support as raw reads
-  - Added tests for BAM submission with `-submit` and `-validate` modes
-  - Added assigned `run accession` and `experiment accession` to MultiQC report ([Issue 70](https://github.com/nf-core/seqsubmit/issues/70) resolved)
+
 - [#116](https://github.com/nf-core/seqsubmit/pull/116)
   - All tests except the `*_existing_study` ones now register a new submission study, so they can be run with any Webin account ([#95](https://github.com/nf-core/seqsubmit/issues/95)). The `test_mag_complete_metadata_existing_study` and `test_assembly_complete_metadata_existing_study` tests submit to the existing study `PRJEB98843` and require maintainer Webin credentials
   - `test_upload = true` is set explicitly in all test configs
   - Study submission alias now has a random suffix, so parallel registrations started in the same second no longer collide
   - `REGISTERSTUDY` now runs only when at least one input passed validation ([#113](https://github.com/nf-core/seqsubmit/issues/113))
+
 - [#106](https://github.com/nf-core/seqsubmit/pull/106)
-  - Added support for metatranscriptome submission for ASSEMBLYSUBMIT
   - Set retry to GENERATE_ASSEMBLY_MANIFEST module
-- [#108](https://github.com/nf-core/seqsubmit/pull/108)
-  - Added test usecase in test-datasets https://github.com/nf-core/test-datasets/pull/2324 with contamination=0
+
 - [#107](https://github.com/nf-core/seqsubmit/pull/107)
   - Fix `GENOMESUBMIT` treating a zero-valued completeness/contamination as a missing one. The branch that decides whether to (re)compute the statistics with CheckM2 tested the samplesheet values for Groovy truthiness, and the number `0` is falsey
 
