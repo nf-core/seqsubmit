@@ -1,0 +1,132 @@
+{
+    "-profile test_mag_multiple_genomes_skip_ena_queries": {
+        "content": [
+            25,
+            {
+                "BARRNAP": {
+                    "barrnap": 0.9
+                },
+                "CATPACK_ADDNAMES_BINS": {
+                    "catpack": 6.0
+                },
+                "CATPACK_BINS": {
+                    "catpack": 6.0
+                },
+                "CAT_DB_UNTAR": {
+                    "untar": 1.34
+                },
+                "CONCAT_METADATA": {
+                    "coreutils": 9.4,
+                    "find": "4.6.0",
+                    "pigz": 2.8
+                },
+                "COUNT_RNA": {
+                    "python": "3.12.12"
+                },
+                "COVERM_GENOME": {
+                    "coverm": "0.7.0"
+                },
+                "CREATE_GENOME_METADATA_TSV": {
+                    "bash": "5.2.37(1)-release"
+                },
+                "DB_UNTAR": {
+                    "untar": 1.34
+                },
+                "EUKCC_SINGLE": {
+                    "eukcc": "2.2.0",
+                    "metaeuk": "4.a0f584d",
+                    "pplacer": "v1.1.alpha19-0-g807f6f3"
+                },
+                "FALINT": {
+                    "falint": "1.2.0"
+                },
+                "GUNZIP_FASTA": {
+                    "gunzip": 1.13
+                },
+                "RENAME_FASTA_FOR_CATPACK": {
+                    "bash": "5.2.37(1)-release"
+                },
+                "TRNASCANSE": {
+                    "tRNAscan-SE": "2.0.12"
+                },
+                "Workflow": {
+                    "nf-core/seqsubmit": "v1.0.0"
+                }
+            },
+            [
+                "mags",
+                "mags/invalid_fastas.tsv",
+                "mags/no_coverage_and_rna_paired_reads_prok",
+                "mags/no_coverage_and_rna_paired_reads_prok/coverage",
+                "mags/no_coverage_and_rna_paired_reads_prok/coverage/no_coverage_and_rna_paired_reads_prok.depth.tsv",
+                "mags/no_coverage_and_rna_paired_reads_prok/rna",
+                "mags/no_coverage_and_rna_paired_reads_prok/rna/barrnap",
+                "mags/no_coverage_and_rna_paired_reads_prok/rna/barrnap/no_coverage_and_rna_paired_reads_prok_bac.gff",
+                "mags/no_coverage_and_rna_paired_reads_prok/rna/trnascanse",
+                "mags/no_coverage_and_rna_paired_reads_prok/rna/trnascanse/no_coverage_and_rna_paired_reads_prok.log",
+                "mags/no_coverage_and_rna_paired_reads_prok/rna/trnascanse/no_coverage_and_rna_paired_reads_prok.stats",
+                "mags/no_coverage_and_rna_paired_reads_prok/rna/trnascanse/no_coverage_and_rna_paired_reads_prok.tsv",
+                "mags/no_coverage_single_reads_prok",
+                "mags/no_coverage_single_reads_prok/coverage",
+                "mags/no_coverage_single_reads_prok/coverage/no_coverage_single_reads_prok.depth.tsv",
+                "mags/no_rna_and_quality_euk",
+                "mags/no_rna_and_quality_euk/eukcc",
+                "mags/no_rna_and_quality_euk/eukcc/no_rna_and_quality_euk_eukcc_results",
+                "mags/no_rna_and_quality_euk/eukcc/no_rna_and_quality_euk_eukcc_results/eukcc.tsv",
+                "mags/no_rna_and_quality_euk/rna",
+                "mags/no_rna_and_quality_euk/rna/barrnap",
+                "mags/no_rna_and_quality_euk/rna/barrnap/no_rna_and_quality_euk_euk.gff",
+                "mags/no_rna_and_quality_euk/rna/trnascanse",
+                "mags/no_rna_and_quality_euk/rna/trnascanse/no_rna_and_quality_euk.log",
+                "mags/no_rna_and_quality_euk/rna/trnascanse/no_rna_and_quality_euk.stats",
+                "mags/no_rna_and_quality_euk/rna/trnascanse/no_rna_and_quality_euk.tsv",
+                "mags/no_taxonomy_prok",
+                "mags/no_taxonomy_prok/taxonomy",
+                "mags/no_taxonomy_prok/taxonomy/no_taxonomy_prok.bin2classification.txt",
+                "mags/no_taxonomy_prok/taxonomy/no_taxonomy_prok.txt",
+                "mags/upload",
+                "mags/upload/genomes_metadata.tsv",
+                "multiqc",
+                "multiqc/multiqc_data",
+                "multiqc/multiqc_data/llms-full.txt",
+                "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc.parquet",
+                "multiqc/multiqc_data/multiqc_citations.txt",
+                "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_genome_metadata.txt",
+                "multiqc/multiqc_data/multiqc_software_versions.txt",
+                "multiqc/multiqc_data/multiqc_sources.txt",
+                "multiqc/multiqc_plots",
+                "multiqc/multiqc_plots/pdf",
+                "multiqc/multiqc_plots/pdf/genome_metadata.pdf",
+                "multiqc/multiqc_plots/png",
+                "multiqc/multiqc_plots/png/genome_metadata.png",
+                "multiqc/multiqc_plots/svg",
+                "multiqc/multiqc_plots/svg/genome_metadata.svg",
+                "multiqc/multiqc_report.html",
+                "pipeline_info",
+                "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
+            ],
+            [
+                "invalid_fastas.tsv:md5,8e3efcafacb0f0b78d537052ae1d18e9",
+                "no_coverage_and_rna_paired_reads_prok.depth.tsv:md5,fb8374996c3bad9ddd296684d8c28628",
+                "no_coverage_and_rna_paired_reads_prok_bac.gff:md5,468c2be7060d743f95295f1ecf751e19",
+                "no_coverage_and_rna_paired_reads_prok.tsv:md5,55ef27998a528dd2f97f761becd7e4ea",
+                "no_coverage_single_reads_prok.depth.tsv:md5,3791d9be880cbfacbc527e47623e3c9a",
+                "eukcc.tsv:md5,d3209c92be134c009c01eb6b74483202",
+                "no_rna_and_quality_euk_euk.gff:md5,df19e1b84ba6f691d20c72b397c88abf",
+                "no_rna_and_quality_euk.tsv:md5,c25fc4300128fd12085daaad6421bc8b",
+                "no_taxonomy_prok.bin2classification.txt:md5,e24c109efe807c7044a866999fd736f1",
+                "no_taxonomy_prok.txt:md5,0f2082d3e397fd630d605dd60993b131",
+                "genomes_metadata.tsv:md5,9780fb59575e0dd04912174e869c8f5b",
+                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
+                "multiqc_genome_metadata.txt:md5,537d5c664791ec5e2491ee45c572760d"
+            ]
+        ],
+        "timestamp": "2026-11-10T10:37:33.214783175",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.10.4"
+        }
+    }
+}

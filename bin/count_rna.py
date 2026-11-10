@@ -164,8 +164,12 @@ def main():
     rrna_count = parse_rrna(rrna_input=args.rrna, rrna_limit=args.rrna_limit, required_genes=required_genes)
     logging.info(f"Found {rrna_count} of {len(required_genes)} required rRNA subunit types")
 
-    # all required rRNA genes must be present
-    decision = "True" if trna_count >= args.trna_limit and rrna_count == len(required_genes) else "False"
+    if args.domain == "euk":
+        # tRNA and one of rRNA should be present
+        decision = "True" if trna_count >= args.trna_limit and rrna_count > 0 else "False"
+    else:
+        # all required rRNA genes must be present
+        decision = "True" if trna_count >= args.trna_limit and rrna_count == len(required_genes) else "False"
     logging.info(f"RNA presented: {decision}")
 
     with open(args.output, 'w') as file_out:

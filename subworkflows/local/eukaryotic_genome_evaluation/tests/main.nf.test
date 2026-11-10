@@ -29,7 +29,7 @@ nextflow_workflow {
                 input[2] = null
                 input[3] = true
                 input[4] = 'eukcc'
-                input[5] = 'https://ftp.ebi.ac.uk/pub/databases/metagenomics/eukcc/eukcc2_db_tiny_fungi_test.tar.gz'
+                input[5] = 'https://ftp.ebi.ac.uk/pub/databases/metagenomics/eukcc/eukcc2_db_tiny_fungi.tar.gz'
                 """
             }
         }
