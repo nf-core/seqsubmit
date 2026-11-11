@@ -246,7 +246,8 @@ workflow GENOMESUBMIT {
         .collectFile(
             name: 'genomes_metadata.tsv',
             storeDir: "${params.outdir}/${params.mode}/upload",
-            keepHeader: true
+            keepHeader: true,
+            sort: { a, b -> a[0] <=> b[0] }
         )
 
     // --------- Register study if accession not provided via --submission_study
@@ -315,7 +316,8 @@ workflow GENOMESUBMIT {
         .collectFile(
             name: 'genomes_accessions.tsv',
             storeDir: "${params.outdir}/${params.mode}/upload",
-            keepHeader: true
+            keepHeader: true,
+            sort: { a, b -> a[0] <=> b[0] }
         )
 
     // --------- Collect files for the MultiQC report
