@@ -1,15 +1,21 @@
 {
-    "-profile test_assembly_one_contig": {
+    "-profile test_reads_validate": {
         "content": [
-            1,
+            5,
             {
+                "CREATE_READS_MANIFEST": {
+                    "mgnify-pipelines-toolkit": "1.5.5"
+                },
+                "SUBMIT": {
+                    "ena-webin-cli": "9.0.3",
+                    "mgnify-pipelines-toolkit": "1.5.5",
+                    "python": "3.12.16"
+                },
                 "Workflow": {
                     "nf-core/seqsubmit": "v1.0.0"
                 }
             },
             [
-                "metagenomic_assemblies",
-                "metagenomic_assemblies/invalid_fastas.tsv",
                 "multiqc",
                 "multiqc/multiqc_data",
                 "multiqc/multiqc_data/llms-full.txt",
@@ -24,14 +30,13 @@
                 "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
             ],
             [
-                "invalid_fastas.tsv:md5,8e3efcafacb0f0b78d537052ae1d18e9",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
             ]
         ],
-        "timestamp": "2026-10-19T15:29:09.134422",
+        "timestamp": "2026-11-11T16:51:10.827902",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "26.04.1"
+            "nextflow": "26.10.4"
         }
     }
 }

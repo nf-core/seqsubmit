@@ -1,13 +1,13 @@
 nextflow_pipeline {
 
-    name "Test reads submission workflow stub - paired_end"
+    name "Test assembly submission workflow - multiple cases"
     script "../main.nf"
     tag "pipeline"
-    tag "mode_reads"
-    tag "test_reads_paired_end"
-    profile "test_reads_paired"
+    tag "mode_assembly"
+    tag "test_assembly_multiple_cases"
+    profile "test_assembly_multiple_cases"
 
-    test("-profile test_reads_paired") {
+    test("-profile test_assembly_multiple_cases") {
 
         when {
             params {

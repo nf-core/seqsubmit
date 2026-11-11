@@ -1,0 +1,77 @@
+nextflow_pipeline {
+
+    name "Test reads submission workflow - multiple cases (paired-end FASTQ, long-read BAM), validate only"
+    script "../main.nf"
+    tag "pipeline"
+    tag "mode_reads"
+    tag "test_reads_validate"
+    profile "test_reads_validate"
+
+    test("-profile test_reads_validate") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+            // stable_name: All files + folders in ${params.outdir}/ with a stable name
+            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
+            // stable_path: All files in ${params.outdir}/ with stable content
+            def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+            // Early failure no need to test the rest of snapshots
+            assert workflow.success
+            assertAll(
+                { assert snapshot(
+                    // Number of successful tasks
+                    workflow.trace.succeeded().size(),
+                    // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
+                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"),
+                    // All stable path name, with a relative path
+                    stable_name,
+                    // All files with stable contents
+                    stable_path
+                ).match() },
+                {
+                    // CREATE_READS_MANIFEST output is not published, so look it up in the work dir
+                    // (skip symlinks staged into downstream tasks)
+                    def manifests = [:]
+                    new File("$workDir").eachFileRecurse(groovy.io.FileType.FILES) { f ->
+                        if (f.name.endsWith(".manifest") && !java.nio.file.Files.isSymbolicLink(f.toPath())) {
+                            manifests[f.name] = f.readLines()
+                        }
+                    }
+                    // One manifest per samplesheet row
+                    assert manifests.keySet() == ["bacteroides_fragilis.manifest", "bacteroides_fragilis_ont_bam.manifest"] as Set
+
+                    manifests.each { name, lines ->
+                        assert lines.contains("STUDY\tPRJEB98843")
+                        assert lines.contains("SAMPLE\tSAMEA104188781")
+                        // NAME has a timestamp suffix — check the base ID is present
+                        assert lines.any { it ==~ /NAME\t${name - '.manifest'}_\d+/ }
+                        assert lines.contains("LIBRARY_SOURCE\tMETAGENOMIC")
+                        assert lines.contains("LIBRARY_SELECTION\tRANDOM")
+                        assert lines.contains("LIBRARY_STRATEGY\tWGS")
+                    }
+
+                    // Paired-end FASTQ
+                    def pe = manifests["bacteroides_fragilis.manifest"]
+                    assert pe.contains("PLATFORM\tILLUMINA")
+                    assert pe.contains("INSTRUMENT\tIllumina HiSeq 2000")
+                    assert pe.contains("INSERT_SIZE\t500")
+                    assert pe.findAll { it.startsWith("FASTQ\t") } == ["FASTQ\tfastq_1.fastq.gz", "FASTQ\tfastq_2.fastq.gz"]
+                    assert pe.count { it.startsWith("BAM\t") } == 0
+
+                    // Long-read BAM
+                    def bam = manifests["bacteroides_fragilis_ont_bam.manifest"]
+                    assert bam.contains("PLATFORM\tOXFORD_NANOPORE")
+                    assert bam.contains("INSTRUMENT\tMinION")
+                    assert bam.contains("BAM\ttiny_ont.bam")
+                    assert bam.count { it.startsWith("FASTQ\t") } == 0
+                    assert bam.count { it.startsWith("INSERT_SIZE\t") } == 0
+                }
+            )
+        }
+    }
+}
