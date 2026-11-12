@@ -23,7 +23,7 @@ nextflow_pipeline {
             // files gets a new ERS accession every time: check their content below instead of md5
             def unstable_metadata = ["assemblies_metadata.csv", "multiqc_assembly_metadata.txt"]
             def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
-                .findAll { f -> !(f.fileName.toString() in unstable_metadata) }
+                .findAll { f -> !(f.name in unstable_metadata) }
             // Early failure no need to test the rest of snapshots
             assert workflow.success
             assertAll(

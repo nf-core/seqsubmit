@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
+- [#126](https://github.com/nf-core/seqsubmit/pull/126)
+  - Simplified tests for READSUBMIT and ASSEMBLYSUBMIT by joining test samplesheets
+
 - [#104](https://github.com/nf-core/seqsubmit/pull/104)
   - Added support of eukaryotic MAGs
   - Added domain assignment decision based on taxonomy assigned by CAT_pack tool or provided in input samplesheet
@@ -36,6 +39,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added test usecase in test-datasets https://github.com/nf-core/test-datasets/pull/2324 with contamination=0
 
 ### `Fixed`
+
+- [#126](https://github.com/nf-core/seqsubmit/pull/126)
+  - Resolved https://github.com/nf-core/seqsubmit/issues/115 by changing format of file given to MultiQC as input
 
 - [#104](https://github.com/nf-core/seqsubmit/pull/104)
   - Made RNA detection domain based
@@ -73,6 +79,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Dependencies`
 
 ### `Deprecated`
+
+- [#104](https://github.com/nf-core/seqsubmit/pull/104) and [#126](https://github.com/nf-core/seqsubmit/pull/126)
+  - Removed tests and snapshots for samplesheets with one usecase:
+    - tests/mag_no_coverage_paired_reads.nf.test
+    - tests/mag_no_coverage_single_reads.nf.test
+    - tests/mag_no_rna_presence.nf.test
+    - tests/mag_one_contig.nf.test
+    - tests/assembly_coassembly_no_coverage.nf.test
+    - tests/assembly_coassembly_with_coverage.nf.test
+    - tests/assembly_no_coverage_paired_reads.nf.test
+    - tests/assembly_no_coverage_single_reads.nf.test
+    - tests/assembly_one_contig.nf.test
+    - tests/reads_long_bam.nf.test
+    - tests/reads_long_bam_validate.nf.test
 
 ## v1.0.0 - 01/08/2026
 
