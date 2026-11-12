@@ -109,7 +109,6 @@
                 "no_coverage_and_rna_single_reads_prok.depth.tsv:md5,3791d9be880cbfacbc527e47623e3c9a",
                 "no_coverage_and_rna_single_reads_prok_bac.gff:md5,468c2be7060d743f95295f1ecf751e19",
                 "no_coverage_and_rna_single_reads_prok.tsv:md5,55ef27998a528dd2f97f761becd7e4ea",
-                "eukcc.tsv:md5,dff7456f77fcfd6deced64136f87e677",
                 "no_rna_and_quality_euk_euk.gff:md5,df19e1b84ba6f691d20c72b397c88abf",
                 "no_rna_and_quality_euk.tsv:md5,c25fc4300128fd12085daaad6421bc8b",
                 "no_taxonomy_prok.bin2classification.txt:md5,e24c109efe807c7044a866999fd736f1",

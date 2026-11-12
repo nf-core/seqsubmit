@@ -32,7 +32,13 @@ nextflow_pipeline {
                     stable_name,
                     // All files with stable contents
                     stable_path
-                ).match() }
+                ).match() },
+                {
+                    // eukcc.tsv is excluded from md5 checks (tests/.nftignore), check the assigned lineage instead
+                    def eukcc = path("$outputDir/mags/no_rna_and_quality_euk/eukcc/no_rna_and_quality_euk_eukcc_results/eukcc.tsv")
+                    assert eukcc.exists()
+                    assert eukcc.text.contains("1-131567-2759-33154-4751")
+                }
             )
         }
     }

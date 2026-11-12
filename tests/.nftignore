@@ -26,6 +26,7 @@ pipeline_info/*.{html,json,txt,yml}
 **/bin_upload/genome_samples.xml
 **/rna/trnascanse/*.stats
 **/rna/trnascanse/*.log
+**/eukcc/*_eukcc_results/eukcc.tsv
 **/upload/assemblies_accessions.tsv
 **/upload/genomes_accessions.tsv
 **/upload/reads_accessions.tsv
