@@ -53,7 +53,7 @@ nextflow_pipeline {
                     assert study.submitted.size() == 1
                     assert study.submitted[0].accession ==~ /PRJEB\d+/
                     assert study.submitted[0].status == "PRIVATE"
-                    // ENA returns the date with a timezone suffix, e.g. 2027-05-11+01:00
+                    // ENA returns the date with a timezone suffix, e.g. YYYY-MM-DD+HH:00
                     assert study.submitted[0].holdUntilDate.startsWith(releaseDate)
                 },
                 {

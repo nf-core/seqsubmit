@@ -48,10 +48,18 @@
                 "multiqc/multiqc_data/llms-full.txt",
                 "multiqc/multiqc_data/multiqc.log",
                 "multiqc/multiqc_data/multiqc.parquet",
+                "multiqc/multiqc_data/multiqc_assembly_metadata.txt",
                 "multiqc/multiqc_data/multiqc_citations.txt",
                 "multiqc/multiqc_data/multiqc_data.json",
                 "multiqc/multiqc_data/multiqc_software_versions.txt",
                 "multiqc/multiqc_data/multiqc_sources.txt",
+                "multiqc/multiqc_plots",
+                "multiqc/multiqc_plots/pdf",
+                "multiqc/multiqc_plots/pdf/assembly_metadata.pdf",
+                "multiqc/multiqc_plots/png",
+                "multiqc/multiqc_plots/png/assembly_metadata.png",
+                "multiqc/multiqc_plots/svg",
+                "multiqc/multiqc_plots/svg/assembly_metadata.svg",
                 "multiqc/multiqc_report.html",
                 "pipeline_info",
                 "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
@@ -61,11 +69,12 @@
                 "no_coverage_paired_reads.depth.tsv:md5,ed807966913ebeec8b3face8e30317ed",
                 "no_coverage_paired_reads_coassembly.depth.tsv:md5,6e61f10c995d45b15f33d572d773e80e",
                 "no_coverage_single_reads.depth.tsv:md5,7d71e53c7424f930cee76eee9fa91b04",
-                "assemblies_metadata.csv:md5,d030574f790812ca7b45481c2cb5f880",
+                "assemblies_metadata.csv:md5,70e9c919d9258cbde0458b5adeee95b0",
+                "multiqc_assembly_metadata.txt:md5,ad71d309777f04df7b5d84f22bceb9f3",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
             ]
         ],
-        "timestamp": "2026-11-11T15:00:07.307985",
+        "timestamp": "2026-11-12T11:34:38.501085",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.10.4"
