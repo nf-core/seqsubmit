@@ -1,0 +1,76 @@
+nextflow_pipeline {
+
+    name "Test assembly submission workflow - multiple cases"
+    script "../main.nf"
+    tag "pipeline"
+    tag "mode_assembly"
+    tag "test_assembly_multiple_cases"
+    profile "test_assembly_multiple_cases"
+
+    test("-profile test_assembly_multiple_cases") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+            // stable_name: All files + folders in ${params.outdir}/ with a stable name
+            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
+            // stable_path: All files in ${params.outdir}/ with stable content
+            // Co-assembly samples are registered on each run, so the Sample column of the metadata
+            // files gets a new ERS accession every time: check their content below instead of md5
+            def unstable_metadata = ["assemblies_metadata.csv", "multiqc_assembly_metadata.txt"]
+            def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+                .findAll { f -> !(f.name in unstable_metadata) }
+            // Early failure no need to test the rest of snapshots
+            assert workflow.success
+            assertAll(
+                { assert snapshot(
+                    // Number of successful tasks
+                    workflow.trace.succeeded().size(),
+                    // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
+                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"),
+                    // All stable path name, with a relative path
+                    stable_name,
+                    // All files with stable contents
+                    stable_path
+                ).match() },
+                {
+                    // Published metadata CSV: one row per assembly (order depends on task completion)
+                    def lines = path("$outputDir/metagenomic_assemblies/upload/assemblies_metadata.csv").readLines()
+                    assert lines[0] == "Runs,Coverage,Assembler,Version,Filepath,Sample,Library"
+                    def rows = lines.drop(1).findAll { it.trim() }
+                    assert rows.size() == 4
+                    // Replace registered sample accessions with a placeholder before comparing
+                    assert rows.collect { it.replaceAll(/,ERS\d+,/, ',<ERS>,') }.sort() == [
+                        '"ERR000001",0.6311851104715869,SPAdes,3.15,genome.fna.gz,,metagenome',
+                        '"ERR000001",1.2628229464918617,SPAdes,3.15,genome.fna.gz,,metagenome',
+                        '"SRR3183850,SRR3183951",1.263635324935214,SPAdes,3.15,genome.fna.gz,<ERS>,metagenome',
+                        '"SRR3183850,SRR3183951",45.5,SPAdes,3.15,genome.fna.gz,<ERS>,metagenome'
+                    ]
+                },
+                {
+                    // MultiQC table: all 4 assemblies present (keyed by assembly ID), runs kept in one column
+                    def lines = path("$outputDir/multiqc/multiqc_data/multiqc_assembly_metadata.txt").readLines()
+                    def rows = lines.drop(1).findAll { it.trim() }.collectEntries { line ->
+                        def fields = line.split('\t', -1)
+                        [(fields[0]): fields]
+                    }
+                    assert rows.keySet() == ["coassembly_sample", "no_coverage_paired_reads", "no_coverage_paired_reads_coassembly", "no_coverage_single_reads"] as Set
+                    // Columns: ID, Runs, Coverage, Assembler, Version, Filepath, Sample, Library
+                    assert rows["coassembly_sample"][1] == "SRR3183850,SRR3183951"
+                    assert rows["no_coverage_paired_reads_coassembly"][1] == "SRR3183850,SRR3183951"
+                    assert rows["no_coverage_paired_reads"][1] == "ERR000001"
+                    assert rows["no_coverage_single_reads"][1] == "ERR000001"
+                    // Co-assemblies get a registered virtual sample, single assemblies keep it empty
+                    assert rows["coassembly_sample"][6] ==~ /ERS\d+/
+                    assert rows["no_coverage_paired_reads_coassembly"][6] ==~ /ERS\d+/
+                    assert rows["no_coverage_paired_reads"][6] == ""
+                    assert rows["no_coverage_single_reads"][6] == ""
+                }
+            )
+        }
+    }
+}
