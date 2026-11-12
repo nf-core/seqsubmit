@@ -1,7 +1,7 @@
 {
     "-profile test_reads_paired": {
         "content": [
-            5,
+            7,
             {
                 "CONCAT_ACCESSIONS": {
                     "coreutils": 9.4,
@@ -49,6 +49,10 @@
                 "reads/bacteroides_fragilis/upload",
                 "reads/bacteroides_fragilis/upload/webin_cli",
                 "reads/bacteroides_fragilis/upload/webin_cli/bacteroides_fragilis_accessions.tsv",
+                "reads/bacteroides_fragilis_ont_bam",
+                "reads/bacteroides_fragilis_ont_bam/upload",
+                "reads/bacteroides_fragilis_ont_bam/upload/webin_cli",
+                "reads/bacteroides_fragilis_ont_bam/upload/webin_cli/bacteroides_fragilis_ont_bam_accessions.tsv",
                 "reads/upload",
                 "reads/upload/reads_accessions.tsv"
             ],
@@ -56,7 +60,7 @@
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
             ]
         ],
-        "timestamp": "2026-10-27T20:27:33.457306",
+        "timestamp": "2026-11-12T09:32:01.031482",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.10.4"

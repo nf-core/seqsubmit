@@ -1,0 +1,215 @@
+nextflow_workflow {
+
+    name "Test Subworkflow EUKARYOTIC_GENOME_EVALUATION -stub"
+    script "../main.nf"
+    workflow "EUKARYOTIC_GENOME_EVALUATION"
+
+    tag "subworkflows"
+    tag "subworkflows_local"
+    tag "subworkflows/eukaryotic_genome_evaluation"
+    tag "subworkflows/eukaryotic_genome_evaluation_stub"
+    tag "busco"
+    tag "busco/busco"
+    tag "eukcc"
+    tag "untar"
+    tag "gunzip"
+
+    test("eukaryote - eukcc - stub") {
+
+        options "-stub"
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of([
+                    [ id:'test_euk', domain:'euk' ],
+                    file(params.modules_testdata_base_path + 'genomics/homo_sapiens/genome/genome.fasta.gz', checkIfExists: true)
+                ])
+                input[1] = 'auto_euk' // busco_db_lineage
+                input[2] = null       // busco_db
+                input[3] = true       // busco_clean
+                input[4] = 'eukcc'    // eukaryotic_completeness_tool
+                input[5] = '.'        // fake folder replacing eukcc_db because test DB https://ftp.ebi.ac.uk/pub/databases/metagenomics/eukcc/eukcc2_db_tiny_fungi_test.tar.gz is big
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assertAll(
+                { assert snapshot(workflow.out.stats).match() },
+                { assert workflow.out.stats.size() == 1 },
+                { assert workflow.out.stats[0][1] == '90.0' },  // fake values assigned by eukcc in -stub
+                { assert workflow.out.stats[0][2] == '1.0' },   // fake values assigned by eukcc in -stub
+                { assert workflow.out.stats[0][3].startsWith('eukcc_v') },
+                { assert !workflow.trace.tasks().any { it.name.contains('BUSCO') } }
+            )
+        }
+
+    }
+
+    test("eukaryote - busco - stub") {
+
+        options "-stub"
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of([
+                    [ id:'test_euk', domain:'euk' ],
+                    file(params.modules_testdata_base_path + 'genomics/homo_sapiens/genome/genome.fasta.gz', checkIfExists: true)
+                ])
+                input[1] = 'auto_euk'
+                input[2] = null       // busco_db - BUSCO downloads lineages itself
+                input[3] = true
+                input[4] = 'busco'
+                input[5] = '.'        // fake folder replacing eukcc_db
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assertAll(
+                { assert snapshot(workflow.out.stats).match() },
+                { assert workflow.out.stats.size() == 1 },
+                // completeness is taken from BUSCO - stub writes no short summary json, so it is empty
+                { assert workflow.out.stats[0][1] == null },
+                // contamination is always taken from EukCC
+                { assert workflow.out.stats[0][2] == '1.0' },
+                { assert workflow.out.stats[0][3] ==~ /busco_v[^;]+;eukcc_v[^;]+/ },
+                { assert workflow.trace.tasks().any { it.name.contains('BUSCO_BUSCO') } }
+            )
+        }
+
+    }
+
+    test("eukaryote with contamination - busco - stub") {
+
+        options "-stub"
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of([
+                    [ id:'test_euk', domain:'euk', contamination:2.5, stats_generation_software:'CustomTool_v1.0' ],
+                    file(params.modules_testdata_base_path + 'genomics/homo_sapiens/genome/genome.fasta.gz', checkIfExists: true)
+                ])
+                input[1] = 'auto_euk'
+                input[2] = null
+                input[3] = true
+                input[4] = 'busco'
+                input[5] = null       // eukcc_db is not required - EukCC is skipped
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assertAll(
+                { assert snapshot(workflow.out.stats).match() },
+                { assert workflow.out.stats.size() == 1 },
+                // completeness from BUSCO (stub - empty), contamination kept from samplesheet
+                { assert workflow.out.stats[0][1] == null },
+                { assert workflow.out.stats[0][2] == 2.5 },
+                // BUSCO is appended to the software given in samplesheet, EukCC is not listed
+                { assert workflow.out.stats[0][3] ==~ /CustomTool_v1\.0;busco_v[^;]+/ },
+                { assert !workflow.trace.tasks().any { it.name =~ /EUKCC|GUNZIP_FASTA|DB_UNTAR/ } },
+                { assert workflow.trace.tasks().any { it.name.contains('BUSCO_BUSCO') } }
+            )
+        }
+
+    }
+
+    test("eukaryote with contamination - eukcc - stub") {
+
+        options "-stub"
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of([
+                    [ id:'test_euk', domain:'euk', contamination:2.5, stats_generation_software:'CustomTool_v1.0' ],
+                    file(params.modules_testdata_base_path + 'genomics/homo_sapiens/genome/genome.fasta.gz', checkIfExists: true)
+                ])
+                input[1] = 'auto_euk'
+                input[2] = null
+                input[3] = true
+                input[4] = 'eukcc'
+                input[5] = '.'   // fake folder replacing eukcc_db
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assertAll(
+                { assert snapshot(workflow.out.stats).match() },
+                { assert workflow.out.stats.size() == 1 },
+                // completeness from EukCC, contamination kept from samplesheet
+                { assert workflow.out.stats[0][1] == '90.0' },
+                { assert workflow.out.stats[0][2] == 2.5 },
+                { assert workflow.out.stats[0][3] ==~ /CustomTool_v1\.0;eukcc_v[^;]+/ },
+                { assert workflow.trace.tasks().any { it.name.contains('EUKCC_SINGLE') } }
+            )
+        }
+
+    }
+
+    test("eukaryote - no eukcc_db - stub") {
+
+        options "-stub"
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of([
+                    [ id:'test_euk', domain:'euk' ],
+                    file(params.modules_testdata_base_path + 'genomics/homo_sapiens/genome/genome.fasta.gz', checkIfExists: true)
+                ])
+                input[1] = 'auto_euk'
+                input[2] = null
+                input[3] = true
+                input[4] = 'eukcc'
+                input[5] = null       // eukcc_db missing while eukaryotes are present
+                """
+            }
+        }
+
+        then {
+            assert workflow.failed
+            assert workflow.stdout.any { it.contains('--eukcc_db is not provided') } ||
+                workflow.stderr.any { it.contains('--eukcc_db is not provided') }
+        }
+
+    }
+
+    test("no genomes - stub") {
+
+        options "-stub"
+
+        when {
+            workflow {
+                """
+                input[0] = channel.empty()
+                input[1] = 'auto_euk'
+                input[2] = null
+                input[3] = true
+                input[4] = 'eukcc'
+                input[5] = null       // eukcc_db is not required without eukaryotes
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assertAll(
+                { assert workflow.out.stats.size() == 0 },
+                // no eukaryotes - eukaryotic steps must not run
+                { assert !workflow.trace.tasks().any { it.name =~ /EUKCC|BUSCO|DB_UNTAR|GUNZIP_FASTA/ } }
+            )
+        }
+
+    }
+
+}

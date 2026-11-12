@@ -56,8 +56,14 @@ workflow NFCORE_SEQSUBMIT {
         params.test_upload,
         params.webincli_mode,
         params.is_private,
-        params.release_date ? channel.value(params.release_date) : channel.value(false)
+        params.release_date ? channel.value(params.release_date) : channel.value(false),
+        params.busco_db_lineage,
+        params.busco_db,
+        params.busco_clean,
+        params.eukaryotic_completeness_tool,
+        params.eukcc_db
     )
+
     emit:
     multiqc_report = SEQSUBMIT.out.multiqc_report // channel: /path/to/multiqc_report.html
 }

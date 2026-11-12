@@ -27,20 +27,25 @@ workflow SEQSUBMIT {
     multiqc_logo
     multiqc_methods_description
     outdir
-    mode                     // val: submission mode (mags, bins, metagenomic_assemblies or reads)
-    submission_study         // val: accession of the study to submit to (optional)
-    study_metadata           // val: path to study metadata file for study creation (used if no submission_study provided)
-    trna_limit               // val: tRNA count threshold
-    rrna_limit               // val: rRNA length percentage threshold
-    checkm2_db               // val: path to CheckM2 database
-    checkm2_db_download_id   // val: CheckM2 database download ID
-    cat_db                   // val: path to CAT database
-    center_name              // val: submission center name
-    upload_tpa               // val: upload as TPA (Third Party Annotation)
-    test_upload              // val: true for test upload mode
-    webincli_mode            // val: either 'validate' or 'submit' to specify WebinCLI mode of operation
-    is_private               // val: fetch metadata from private/public account
-    release_date             // val: keep submitted data private until given date
+    mode                         // val: submission mode (mags, bins, metagenomic_assemblies or reads)
+    submission_study             // val: accession of the study to submit to (optional)
+    study_metadata               // val: path to study metadata file for study creation (used if no submission_study provided)
+    trna_limit                   // val: tRNA count threshold
+    rrna_limit                   // val: rRNA length percentage threshold
+    checkm2_db                   // val: path to CheckM2 database
+    checkm2_db_download_id       // val: CheckM2 database download ID
+    cat_db                       // val: path to CAT database
+    center_name                  // val: submission center name
+    upload_tpa                   // val: upload as TPA (Third Party Annotation)
+    test_upload                  // val: true for test upload mode
+    webincli_mode                // val: either 'validate' or 'submit' to specify WebinCLI mode of operation
+    is_private                   // val: fetch metadata from private/public account
+    release_date                 // val: keep submitted data private until given date
+    busco_db_lineage             // val: name of the busco supported lineage
+    busco_db                     // val: download URL or local tar.gz archive/directory
+    busco_clean                  // boolean: clean intermediate busco files
+    eukaryotic_completeness_tool // val: busco or eukcc
+    eukcc_db                     // val: EukCC database - local directory or .tar.gz/.tgz archive (path or URL)
 
     main:
 
@@ -66,7 +71,12 @@ workflow SEQSUBMIT {
             test_upload,
             webincli_mode,
             is_private,
-            release_date
+            release_date,
+            busco_db_lineage,
+            busco_db,
+            busco_clean,
+            eukaryotic_completeness_tool,
+            eukcc_db
         )
         ch_multiqc_files = ch_multiqc_files.mix(GENOMESUBMIT.out.multiqc_files)
     } else if (mode == "metagenomic_assemblies") {

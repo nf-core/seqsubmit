@@ -1,0 +1,27 @@
+Changes in component 'nf-core/busco/busco'
+'modules/nf-core/busco/busco/environment.yml' is unchanged
+'modules/nf-core/busco/busco/meta.yml' is unchanged
+Changes in 'busco/busco/main.nf':
+--- modules/nf-core/busco/busco/main.nf
++++ modules/nf-core/busco/busco/main.nf
+@@ -67,7 +67,13 @@
+     export BUSCO_BBTOOLS_MEMORY=${bbtools_memory}
+ 
+     # Fix Augustus for Apptainer
+-    ENV_AUGUSTUS=/opt/conda/etc/conda/activate.d/augustus.sh
++    # Pixi-based Wave images activate the environment only via the entrypoint, which Singularity/Apptainer skip
++    if [ -d /opt/wave/.pixi/envs/default/bin ]; then
++        export PATH="/opt/wave/.pixi/envs/default/bin:\${PATH}"
++        ENV_AUGUSTUS=/opt/wave/.pixi/envs/default/etc/conda/activate.d/augustus.sh
++    else
++        ENV_AUGUSTUS=/opt/conda/etc/conda/activate.d/augustus.sh
++    fi
+     set +u
+     if [ -z "\${AUGUSTUS_CONFIG_PATH}" ] && [ -f "\${ENV_AUGUSTUS}" ]; then
+         source "\${ENV_AUGUSTUS}"
+
+'modules/nf-core/busco/busco/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/busco/busco/tests/nextflow.config' is unchanged
+'modules/nf-core/busco/busco/tests/main.nf.test' is unchanged
+'modules/nf-core/busco/busco/.conda-lock/linux_amd64-bd-6d1f7006d91892b3_1.txt' is unchanged
+************************************************************

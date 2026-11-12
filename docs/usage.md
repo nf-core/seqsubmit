@@ -9,6 +9,7 @@
 - [Introduction](#introduction)
 - [Before you start](#before-you-start)
 - [Submission study](#submission-study)
+- [Production vs Test submission](#production-vs-test-submission)
 - [Data privacy](#data-privacy)
 - [Third party assemblies (TPA)](#third-party-assemblies-tpa)
 - [`reads` mode](#reads-mode)
@@ -115,6 +116,21 @@ study-soil-2026	Soil microbiome study	Survey of soil microbiota
 | `project_name`        | No       | Project name. Defaults to `study_title`.                                     |
 | `existing_study_type` | No       | ENA study type (e.g. `Metagenomics`, `Other`).                               |
 | `new_study_type`      | No       | Custom study type. Only used when `existing_study_type` is set to `Other`.   |
+
+## Production vs Test submission
+
+Real data submissions are always uploaded to the **ENA Production** server (alternatively called LIVE).
+
+If you want to test the submission process without making a permanent submission, you can use the ENA Test server (alternatively called TEST). This allows you to create all the necessary records (e.g. studies and samples) and upload your data for testing. Submissions to the TEST server are automatically deleted after 24 hours. Check [ENA documentation](https://ena-docs.readthedocs.io/en/latest/submit/general-guide/interactive.html) for more information.
+
+Alternatively, you can use _validation_ mode to check whether your submission files are valid without uploading any data to either the TEST or LIVE server. This is particularly useful during development and for checking files before a real submission. Those procedures are controlled with `--test_upload` and `--webincli_mode` arguments described in [Running the pipeline](#running-the-pipeline).
+
+| `--test_upload` | `--webincli_mode` | Action                                                                             |
+| --------------- | ----------------- | ---------------------------------------------------------------------------------- |
+| `false`         | `submit`          | Submission to LIVE server.                                                         |
+| `true`          | `submit`          | Submission to TEST server. Pipeline default settings.                              |
+| `false`         | `validate`        | Registration of records on LIVE server without upload. **Restricted combination**. |
+| `true`          | `validate`        | Registration of records on TEST server without upload.                             |
 
 ## Data privacy
 
@@ -325,7 +341,7 @@ mag_001,data/mag_001.fasta.gz,SRR24458089,,,SPAdes 3.15.5,MetaBAT2 2.15,default,
 | `assembly_software`         | Yes         | Tool name and version that were used to generate the source metagenomic assembly, e.g. MEGAHIT_v1.0, SPAdes_v4.0.0, metaSPAdes_v3.15.0.                                                                                                                                                                                                                                                                              |
 | `binning_software`          | Yes         | Tool name and version that was used to bin data, e.g. MetaBAT2_v1.0, VAMB_2.0, MaxBin2_v1, CONCOCT_v3.0, SemiBin2_v1, COMEBin_v2.3.4, etc.                                                                                                                                                                                                                                                                           |
 | `binning_parameters`        | Yes         | Arguments used to bin data different from default, e.g. -min_contig_length 1000, otherwise use 'default'.                                                                                                                                                                                                                                                                                                            |
-| `stats_generation_software` | No          | Tool, including version, that was used to calculate completeness and contamination, e.g. CheckM2_v1.0.0.                                                                                                                                                                                                                                                                                                             |
+| `stats_generation_software` | No          | Tool, including version, that was used to calculate completeness and contamination, e.g. CheckM2_v1.0.0. Several tools are separated by `;`, e.g. busco_v6.1.0;eukcc_v2.2.0. If the pipeline runs additional tools for this genome, they are appended to the provided value.                                                                                                                                         |
 | `completeness`              | No          | MAG/bin completeness score: the 0<= ratio <= 100 of observed single-copy marker genes to total single-copy marker genes in chosen marker gene set (%). ENA docs: https://ena-docs.readthedocs.io/en/latest/faq/metagenomes.html#how-is-the-quality-of-a-metagenomic-assembly-defined.                                                                                                                                |
 | `contamination`             | No          | MAG/bin contamination score: the 0<= ratio <= 100 of observed single-copy marker genes in ≥2 copies to total single-copy marker genes in chosen marker gene set (%). ENA docs: https://ena-docs.readthedocs.io/en/latest/faq/metagenomes.html#how-is-the-quality-of-a-metagenomic-assembly-defined.                                                                                                                  |
 | `genome_coverage`           | Conditional | Estimated average sequencing depth (>0) across the genome. If the value is missing, it is computed automatically during pipeline execution when reads are provided.                                                                                                                                                                                                                                                  |
@@ -334,7 +350,7 @@ mag_001,data/mag_001.fasta.gz,SRR24458089,,,SPAdes 3.15.5,MetaBAT2 2.15,default,
 | `broad_environment`         | Yes         | Broad ecological context of the sample, for example 'marine biome', 'desert biome'. It is recommended to use subclasses of EnvO 'biome' class (http://purl.obolibrary.org/obo/ENVO_00000428). Documentation: https://github.com/EnvironmentOntology/envo/wiki/Using-ENVO-with-MIxS.                                                                                                                                  |
 | `local_environment`         | Yes         | Local environmental context of the sample, for example 'tropical dry broadleaf forest biome', 'marine abyssal zone biome'. It is recommended to use EnvO terms which are of smaller spatial grain than your entry for "broad-scale environmental context". Documentation: https://github.com/EnvironmentOntology/envo/wiki/Using-ENVO-with-MIxS.                                                                     |
 | `environmental_medium`      | Yes         | Material surrounding and in contact with the sample, for example 'mucus', 'lake water'. It is recommended to use subclasses of EnvO 'environmental material' class (http://purl.obolibrary.org/obo/ENVO_00010483). Documentation: https://github.com/EnvironmentOntology/envo/wiki/Using-ENVO-with-MIxS.                                                                                                             |
-| `RNA_presence`              | No          | Presence or absence of the 23S, 16S, and 5S rRNA genes and at least 18 tRNAs. This is used for MISAG/MIMAG assembly quality classification. Options: true or false.                                                                                                                                                                                                                                                  |
+| `RNA_presence`              | No          | Presence or absence of the 23S, 16S, and 5S rRNA genes (prokaryotes) or the 28S, 18S, 5.8S and 5S rRNA genes (eukaryotes) and at least 18 tRNAs. This is used for MISAG/MIMAG assembly quality classification. Options: true or false.                                                                                                                                                                               |
 | `NCBI_lineage`              | No          | Full NCBI lineage - format: x;y;z. For example, the lineage for E. coli can be: 'Bacteria;Pseudomonadati;Pseudomonadota;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia' or '2;1224;1236;91347;543;561;562'. For more info check https://www.ncbi.nlm.nih.gov/datasets/docs/v2/data-processing/taxonomy-processing/taxonomy/.                                                                    |
 
 > [!NOTE]
@@ -342,9 +358,9 @@ mag_001,data/mag_001.fasta.gz,SRR24458089,,,SPAdes 3.15.5,MetaBAT2 2.15,default,
 
 If `genome_coverage`, `stats_generation_software`, `completeness`, `contamination`, `RNA_presence`, or `NCBI_lineage` are missing, the workflow can calculate or infer them when the required inputs are available. See the [Methods documentation](docs/methods.md) for more information on how metadata statistics are obtained.
 
-### Preparing the CheckM2 and CAT_pack databases
+### Preparing the CheckM2, EukCC, BUSCO and CAT_pack databases
 
-`mags` and `bins` submission modes use CheckM2 and CAT_pack tools that require specialized databases for completeness/contamination assessment and taxonomy assignment.
+`mags` and `bins` submission modes use [CheckM2](https://github.com/chklovski/CheckM2) (prokaryotes), [EukCC](https://github.com/EBI-Metagenomics/EukCC) and optionally [BUSCO](https://busco.ezlab.org/busco_userguide.html) (eukaryotes) and [CAT_pack](https://github.com/MGXlab/CAT_pack) tools that require specialized databases for completeness/contamination assessment and taxonomy assignment.
 
 You can either provide pre-existing databases or let the pipeline prepare them during execution.
 
@@ -354,10 +370,14 @@ In particular, the CAT_pack database is extremely large and may take a long time
 - CheckM2:
   - provide the path to a local database with `--checkm2_db`, otherwise the pipeline downloads the version specified with `--checkm2_db_download_id` (by default Zenodo accession `14897628`).
 
+- EukCC (used only if eukaryotic genomes are present and their completeness/contamination has to be calculated):
+  - provide the database with `--eukcc_db` as an uncompressed folder or as a `.tar.gz`/`.tgz` archive (local path or URL), otherwise the pipeline downloads `http://ftp.ebi.ac.uk/pub/databases/metagenomics/eukcc/eukcc2_db_ver_1.1.tar.gz`. URLs are downloaded and archives are extracted by the pipeline in every run, so we recommend downloading and extracting the database once and providing the folder.
+
+- BUSCO (used only with `--eukaryotic_completeness_tool busco`):
+  - provide a lineage dataset with `--busco_db` as a local folder or as a `.tar.gz`/`.tgz` archive (local path or URL), otherwise BUSCO downloads the lineage set by `--busco_db_lineage` during the run (requires an internet connection). A folder is expected to contain a `lineages` subfolder with the lineage dataset, e.g. `lineages/eukaryota_odb10`.
+
 - CAT_pack:
   - provide the path to a local database (containing `tax/` and `db/` folders or a `tar.gz` archive) with `--cat_db`, otherwise the pipeline builds CAT_pack DB from NCBI non-redundant protein database (`nr`).
-
-See the [CAT_pack documentation](https://github.com/MGXlab/CAT_pack) and [CheckM2 documentation](https://github.com/chklovski/CheckM2) for more details on usage and creation of databases.
 
 Databases created/downloaded by the pipeline are published under:
 `<output_dir>/databases/`. In subsequent pipeline runs you can reuse them using `--cat_db <output_dir>/databases/cat_pack/` and `--checkm2_db <output_dir>/databases/checkm2/`.
@@ -366,11 +386,17 @@ Databases created/downloaded by the pipeline are published under:
 
 In addition to the [common parameters](#running-the-pipeline):
 
-| Parameter      | Required | Description                                                                                                                                             |
-| -------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--upload_tpa` | No       | Mark submission as [third party assemblies (TPA)](#third-party-assemblies-tpa) when required. Default: `false`.                                         |
-| `--checkm2_db` | No       | Path to a pre-downloaded CheckM2 database. If omitted, downloads the version set by `--checkm2_db_download_id`. Default: `14897628` (Zenodo accession). |
-| `--cat_db`     | No       | Path to a local CAT_pack database. If omitted, builds CAT_pack DB from NCBI non-redundant protein database (`nr`).                                      |
+| Parameter                        | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| -------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--upload_tpa`                   | No       | Mark assemblies as [third party assemblies (TPA)](#third-party-assemblies-tpa) when required. Default: `false`.                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `--checkm2_db`                   | No       | Path to a pre-downloaded CheckM2 database. If omitted, downloads the version set by `--checkm2_db_download_id`. Default: `14897628` (Zenodo accession).                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `--cat_db`                       | No       | Path to a local CAT_pack database. If omitted, builds CAT_pack DB from NCBI non-redundant protein database (`nr`).                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `--eukaryotic_completeness_tool` | No       | Tool used to calculate completeness of eukaryotic MAGs/bins: `eukcc` or `busco`. Contamination is always calculated by EukCC, unless it is provided in the samplesheet. Default: `eukcc`.                                                                                                                                                                                                                                                                                                                                                                 |
+| `--eukcc_db`                     | No       | EukCC database as an uncompressed folder or a `.tar.gz`/`.tgz` archive (local path or URL). Used to calculate completeness and contamination of eukaryotic MAGs/bins if those values were not provided in the samplesheet. URLs are downloaded and archives are extracted by the pipeline in every run, so we recommend downloading and extracting the database once and providing the folder. Default: `http://ftp.ebi.ac.uk/pub/databases/metagenomics/eukcc/eukcc2_db_ver_1.1.tar.gz`.                                                                 |
+| `--busco_db`                     | No       | BUSCO `*_odb10` or `*_odb12` lineage dataset as an uncompressed folder or a `.tar.gz`/`.tgz` archive (local path or URL), e.g. `https://busco-data.ezlab.org/v5/data/lineages/eukaryota_odb10.2024-01-08.tar.gz`. A folder is expected to contain a `lineages` subfolder with the lineage dataset, e.g. `lineages/eukaryota_odb10`. If provided, BUSCO runs in offline mode. If omitted, BUSCO downloads the lineage set by `--busco_db_lineage` during the run (requires an internet connection). Used only with `--eukaryotic_completeness_tool busco`. |
+| `--busco_db_lineage`             | No       | Name of the BUSCO `*_odb10` or `*_odb12` lineage to check eukaryotic genomes against (e.g. `eukaryota_odb10`), or `auto`, `auto_prok`, `auto_euk` for automatic lineage selection. When used with `--busco_db`, it should correspond to the lineage supplied there. Without `--busco_db`, the lineage is downloaded during the run (requires an internet connection). Used only with `--eukaryotic_completeness_tool busco`. Default: `auto_euk`.                                                                                                         |
+| `--save_busco_db`                | No       | Save BUSCO lineage datasets downloaded during the run (when `--busco_db` is not provided) to the output directory. Useful for reproducibility, as BUSCO datasets are frequently updated and old versions do not always remain accessible. Used only with `--eukaryotic_completeness_tool busco`. Default: `false`.                                                                                                                                                                                                                                        |
+| `--busco_clean`                  | No       | Remove BUSCO intermediate files after each run. BUSCO creates a large number of intermediate files, which may cause problems on clusters with file number limits, particularly with many MAGs/bins. Used only with `--eukaryotic_completeness_tool busco`. Default: `false`.                                                                                                                                                                                                                                                                              |
 
 Example `mags` mode upload to TEST server, run command with docker:
 
@@ -392,7 +418,15 @@ nextflow run nf-core/seqsubmit \
 
 - **Co-assemblies**: MAGs/bins generated from co-assemblies are not supported. The pipeline currently expects each MAG/bin to be derived from an assembly generated from a single run. Tracked in [issue #61](https://github.com/nf-core/seqsubmit/issues/61).
 
-- **Eukaryotic and viral bins/MAGs**: Submitting eukaryotic or viral genomes that require additional metadata generation is not supported. For such genomes tRNA and rRNA prediction, quality assessment (completeness/contamination estimation) and taxonomy assignment are not implemented. If all the required metadata (`completeness`, `contamination`, `stats_generation_software`, `RNA_presence` and `NCBI_lineage`) is already provided in the samplesheet, eukaryotic and viral bins/MAGs can still be submitted normally. Tracked in [issue #40](https://github.com/nf-core/seqsubmit/issues/40) (eukaryotic) and [issue #63](https://github.com/nf-core/seqsubmit/issues/63) (viral).
+- **Viral bins/MAGs**: Submitting viral genomes that require additional metadata generation is not supported. For such genomes tRNA and rRNA prediction, quality assessment (completeness/contamination estimation) and taxonomy assignment are not implemented. If all the required metadata (`completeness`, `contamination`, `stats_generation_software`, `RNA_presence` and `NCBI_lineage`) is already provided in the samplesheet, viral bins/MAGs can still be submitted normally. Tracked in [issue #63](https://github.com/nf-core/seqsubmit/issues/63).
+
+- **Domain assignment**: the domain of each genome (bacteria, archaea or eukaryote) is decided from `NCBI_lineage` (provided in the samplesheet or assigned by CAT_pack). Genomes whose lineage does not contain `Eukaryota`/`2759` or `Archaea`/`2157` or `Bacteria`/`2` are raising pipeline error.
+
+- **Eukaryotic bins/MAGs**:
+  - Taxonomic lineage assignment is implemented using CAT_pack that is using Prodigal (prokaryotic gene caller) which can raise errors on long sequences.
+  - EukCC database (`--eukcc_db`) is downloaded and extracted in every run unless a local folder is provided.
+  - BUSCO is used only for completeness, contamination is always taken from EukCC (or from the samplesheet).
+  - If EukCC finds no marker genes or MetaEuk predicts no proteins for a genome, completeness and contamination stay empty for that genome. The same happens for completeness when BUSCO finds no genes.
 
 - **Submission of a MAG/bin without submitting the assembly or raw reads**: If a MAG/bin cannot be traced back to an assembly accession or a reads accession — i.e. only a sample accession is available — it cannot currently be submitted, since the pipeline relies on that lineage to build the required metadata. Tracked in [issue #87](https://github.com/nf-core/seqsubmit/issues/87).
 
@@ -402,7 +436,7 @@ nextflow run nf-core/seqsubmit \
 
 ## Scalability
 
-Some processes in this pipeline are resource intensive — in particular coverage calculation (CoverM), quality assessment (CheckM2), and taxonomic classification of MAGs/bins (BAT). For real-world data, these steps should be run on an HPC cluster or another compute environment with sufficient CPU, memory, and job scheduling capacity, rather than on a single local machine.
+Some processes in this pipeline are resource intensive — in particular coverage calculation (CoverM), quality assessment (CheckM2, EukCC, BUSCO), and taxonomic classification of MAGs/bins (BAT). For real-world data, these steps should be run on an HPC cluster or another compute environment with sufficient CPU, memory, and job scheduling capacity, rather than on a single local machine.
 
 Depending on the resources available on your machine or cluster, you will likely need to adapt the Nextflow configuration to limit the maximum number of concurrently running jobs and other resource settings using [resourceLimits](https://nf-co.re/docs/developing/institutional-profiles/configuration#resource-limits) in a custom config, so that the pipeline does not try to claim more resources than are actually available. See the [nf-core configuration documentation](https://nf-co.re/docs/usage/getting_started/configuration) for guidance on writing a custom config for your infrastructure.
 

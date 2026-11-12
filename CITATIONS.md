@@ -22,6 +22,24 @@
 
 > Chklovski A, Parks DH, Woodcroft BJ, Tyson GW. CheckM2: a rapid, scalable and accurate tool for assessing microbial genome quality using machine learning. Nat Methods. 2023;20(8):1203-1212. doi: 10.1038/s41592-023-01940-w. PubMed PMID: 37500759; PubMed Central PMCID: not available.
 
+- [EukCC](https://github.com/EBI-Metagenomics/EukCC)
+
+> Saary P, Mitchell AL, Finn RD. Estimating the quality of eukaryotic genomes recovered from metagenomic analysis with EukCC. Genome Biol. 2020;21(1):244. doi: 10.1186/s13059-020-02155-4. PubMed PMID: 32912302; PubMed Central PMCID: PMC7488429.
+
+- [MetaEuk](https://github.com/soedinglab/metaeuk)
+
+> Levy Karin E, Mirdita M, Söding J. MetaEuk-sensitive, high-throughput gene discovery, and annotation for large-scale eukaryotic metagenomics. Microbiome. 2020;8(1):48. doi: 10.1186/s40168-020-00808-x. PubMed PMID: 32245390; PubMed Central PMCID: PMC7126354.
+
+- [pplacer](https://matsen.fhcrc.org/pplacer/)
+
+> Matsen FA, Kodner RB, Armbrust EV. pplacer: linear time maximum-likelihood and Bayesian phylogenetic placement of sequences onto a fixed reference tree. BMC Bioinformatics. 2010;11:538. doi: 10.1186/1471-2105-11-538. PubMed PMID: 21034504; PubMed Central PMCID: PMC3098090.
+
+- [BUSCO](https://busco.ezlab.org)
+
+> Manni M, Berkeley MR, Seppey M, Simão FA, Zdobnov EM. BUSCO Update: Novel and Streamlined Workflows along with Broader and Deeper Phylogenetic Coverage for Scoring of Eukaryotic, Prokaryotic, and Viral Genomes. Mol Biol Evol. 2021;38(10):4647-4654. doi: 10.1093/molbev/msab199. PubMed PMID: 34320186; PubMed Central PMCID: PMC8476166.
+
+> Tegenfeldt F, Kuznetsov D, Manni M, Berkeley M, Zdobnov EM, Kriventseva EV. OrthoDB and BUSCO update: annotation of orthologs with wider sampling of genomes. Nucleic Acids Res. 2025;53(D1):D516-D522. doi: 10.1093/nar/gkae987. PubMed PMID: 39535043.
+
 - [CAT and BAT](https://doi.org/10.1186/s13059-019-1817-x)
 
 > von Meijenfeldt FAB, Arkhipova K, Cambuy DD, Coutinho FH, Dutilh BE. Robust taxonomic classification of uncharted microbial sequences and bins with CAT and BAT. Genome Biol. 2019;20(1):217. doi: 10.1186/s13059-019-1817-x. PubMed PMID: 31640809; PubMed Central PMCID: PMC6805573.
