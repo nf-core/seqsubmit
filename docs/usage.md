@@ -139,7 +139,7 @@ You can reference private ENA data if you have access to it via your Webin accou
 You can also control the privacy of your submitted data:
 
 - If you provide an existing study via `--submission_study`, your submission will inherit the same privacy status as that study.
-- If no study is provided, the pipeline will register a new one for you. To keep this new study private, you must specify a release date using `--release_date YYYY-MM-DD` (up to 2 years from the current date).
+- If no study is provided, the pipeline will register a new one for you. By default, ENA keeps newly registered study private for 2 years. To make this new study public, you must specify a release date using `--release_date YYYY-MM-DD` (up to 2 years from the current date). You can change privacy of your study in your Webin account on [submission portal](https://www.ebi.ac.uk/ena/submit/webin/).
 
 | Example                                                                                                                                                               | Source Data | Submission Visibility | Required Arguments                       | Result                                                |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | --------------------- | ---------------------------------------- | ----------------------------------------------------- |
