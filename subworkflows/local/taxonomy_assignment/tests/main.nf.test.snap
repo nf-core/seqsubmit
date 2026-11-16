@@ -1,0 +1,48 @@
+{
+    "two genomes - gtdbtk - stub": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test_bfragilis"
+                    },
+                    null
+                ],
+                [
+                    {
+                        "id": "test_ecoli"
+                    },
+                    null
+                ]
+            ]
+        ],
+        "timestamp": "2026-11-16T09:58:10.701765",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.10.4"
+        }
+    },
+    "two genomes - catpack - stub": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test_bfragilis"
+                    },
+                    null
+                ],
+                [
+                    {
+                        "id": "test_ecoli"
+                    },
+                    null
+                ]
+            ]
+        ],
+        "timestamp": "2026-11-16T09:58:38.377478",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.10.4"
+        }
+    }
+}

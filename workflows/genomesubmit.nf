@@ -6,7 +6,6 @@
 include { GENOME_UPLOAD as CREATE_MANIFESTS     } from '../modules/local/genome_upload'
 include { ENA_WEBIN_CLI_WRAPPER as SUBMIT       } from '../modules/local/ena_webin_cli_wrapper'
 include { REGISTERSTUDY                         } from '../modules/local/registerstudy/main'
-include { RENAME_FASTA_FOR_CATPACK              } from '../modules/local/rename_fasta_for_catpack'
 include { CREATE_GENOME_METADATA_TSV            } from '../modules/local/create_genome_metadata_tsv/main'
 
 include { COVERM_GENOME                         } from '../modules/nf-core/coverm/genome'
@@ -17,7 +16,7 @@ include { FASTA_VALIDATION                      } from '../subworkflows/local/fa
 include { EUKARYOTIC_GENOME_EVALUATION          } from '../subworkflows/local/eukaryotic_genome_evaluation/main'
 include { PROKARYOTIC_GENOME_EVALUATION         } from '../subworkflows/local/prokaryotic_genome_evaluation/main'
 include { RNA_DETECTION                         } from '../subworkflows/local/rna_detection/main'
-include { FASTA_CLASSIFY_CATPACK                } from '../subworkflows/nf-core/fasta_classify_catpack/main'
+include { TAXONOMY_ASSIGNMENT                   } from '../subworkflows/local/taxonomy_assignment/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -36,7 +35,11 @@ workflow GENOMESUBMIT {
     rrna_limit                   // val: rRNA length percentage threshold
     checkm2_db                   // val: path to CheckM2 database
     checkm2_db_download_id       // val: CheckM2 database download ID
+    taxonomy_tool                // val: catpack or gtdbtk
     cat_db                       // val: path to CAT database
+    gtdbtk_db                    // val: GTDB-Tk database - local directory or .tar.gz/.tgz archive (path or URL)
+    gtdbtk_ar53_metadata         // val: GTDB archaeal metadata table for the GTDB -> NCBI conversion
+    gtdbtk_bac120_metadata       // val: GTDB bacterial metadata table for the GTDB -> NCBI conversion
     center_name                  // val: submission centre name
     upload_tpa                   // val: upload as TPA (Third Party Annotation)
     test_upload                  // val: true for test upload mode
@@ -112,38 +115,20 @@ workflow GENOMESUBMIT {
             taxonomy_present: true  // Everything else goes here
         }
 
-    // Change extension for all files required taxonomy to .fasta because CATPACK requires suffix as input
-    RENAME_FASTA_FOR_CATPACK (
-        branched_taxonomy_results.taxonomy_absent
+    TAXONOMY_ASSIGNMENT (
+        branched_taxonomy_results.taxonomy_absent,
+        taxonomy_tool,
+        cat_db,
+        gtdbtk_db,
+        gtdbtk_ar53_metadata,
+        gtdbtk_bac120_metadata
     )
 
-    // build input structures for CAT_DB depending on what provided as input
-    def cat_db_input = cat_db
-        ? channel.of( [['id': 'CAT_DB'], file(cat_db)] )
-        : channel.empty()
-
-    cat_db_download_id = "nr"  // NCBI non-redundant protein database identifier
-    def cat_db_id_input = cat_db
-        ? channel.empty()
-        : channel.of( [['id': 'CAT_DB_id'], cat_db_download_id] )
-
-    FASTA_CLASSIFY_CATPACK (
-        RENAME_FASTA_FOR_CATPACK.out.renamed_fasta,  // ch_bins
-        channel.empty(),                             // ch_contigs - empty because we classify bins, not contigs
-        cat_db_input,
-        cat_db_id_input,
-        false,                                       // disable summary generation
-        '.fasta'                                     // bin_suffix - the suffix of the renamed fasta files
-    )
-
-    fasta_updated_with_taxonomy = FASTA_CLASSIFY_CATPACK.out.bat_classification
+    fasta_updated_with_taxonomy = TAXONOMY_ASSIGNMENT.out.lineage
         .join(branched_taxonomy_results.taxonomy_absent)
-        .map { meta, taxa_tsv, fasta ->
-            def lines = taxa_tsv.readLines()
+        .map { meta, lineage, fasta ->
             def updated_meta = meta.clone()
-            // support for empty taxonomy files required for -stub mode
-            // skip header and take 4th column from table corresponding to lineage
-            updated_meta.NCBI_lineage = lines ? lines[1].split('\t')[3] : null
+            updated_meta.NCBI_lineage = lineage
             return [updated_meta, fasta]
         }
         .mix(branched_taxonomy_results.taxonomy_present)

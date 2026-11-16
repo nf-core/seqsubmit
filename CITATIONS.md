@@ -44,6 +44,10 @@
 
 > von Meijenfeldt FAB, Arkhipova K, Cambuy DD, Coutinho FH, Dutilh BE. Robust taxonomic classification of uncharted microbial sequences and bins with CAT and BAT. Genome Biol. 2019;20(1):217. doi: 10.1186/s13059-019-1817-x. PubMed PMID: 31640809; PubMed Central PMCID: PMC6805573.
 
+- [GTDB-Tk](https://github.com/Ecogenomics/GTDBTk)
+
+> Chaumeil PA, Mussig AJ, Hugenholtz P, Parks DH. GTDB-Tk v2: memory friendly classification with the genome taxonomy database. Bioinformatics. 2022;38(23):5315-5316. doi: 10.1093/bioinformatics/btac672. PubMed PMID: 36218463; PubMed Central PMCID: PMC9710552.
+
 - [tRNAscan-SE 2.0](https://doi.org/10.1093/nar/gkab688)
 
 > Chan PP, Lin BY, Mak AJ, Lowe TM. tRNAscan-SE 2.0: Improved detection and functional classification of transfer RNA genes. Nucleic Acids Res. 2021;49(16):9077-9096. doi: 10.1093/nar/gkab688. PubMed PMID: 34417604; PubMed Central PMCID: PMC8450103.

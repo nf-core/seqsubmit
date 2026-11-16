@@ -64,12 +64,42 @@
             }
         },
         "taxonomy_assignment_options": {
-            "title": "Assigning NCBI taxonomy with CAT_pack",
+            "title": "Assigning NCBI taxonomy",
             "type": "object",
             "fa_icon": "fas fa-university",
-            "description": "CAT_pack required data",
+            "description": "Tool and databases used to assign NCBI taxonomy to MAGs/bins without NCBI_lineage in the samplesheet",
             "help_text": "Provide a path to pre-downloaded DB or DB id for automatic download",
             "properties": {
+                "taxonomy_tool": {
+                    "type": "string",
+                    "description": "Tool used to assign NCBI taxonomy to MAGs/bins without NCBI_lineage: `catpack` or `gtdbtk`. Use `gtdbtk` only if you do not expect eukaryotes in your MAGs/bins.",
+                    "help_text": "`catpack` (default) classifies each genome with CAT_pack (BAT) and works for all domains. `gtdbtk` classifies all genomes in a single GTDB-Tk `classify_wf` job and converts GTDB taxonomy to NCBI with `gtdb_to_ncbi_majority_vote.py`. GTDB-Tk classifies only bacteria and archaea, so use `gtdbtk` only if you do not expect eukaryotes in your MAGs/bins. The pipeline fails for genomes GTDB-Tk cannot classify: provide NCBI_lineage for them in the samplesheet or use `--taxonomy_tool catpack`.",
+                    "enum": ["catpack", "gtdbtk"],
+                    "default": "catpack",
+                    "fa_icon": "fas fa-tools"
+                },
+                "gtdbtk_db": {
+                    "type": "string",
+                    "format": "path",
+                    "exists": true,
+                    "description": "GTDB-Tk reference database as an uncompressed folder or a `.tar.gz`/`.tgz` archive (local path or URL). Required with `--taxonomy_tool gtdbtk`.",
+                    "help_text": "The database release must match the GTDB-Tk version used by the pipeline (GTDB-Tk 2.7.2, release 232). URLs are downloaded and archives are extracted by the pipeline in every run, so we recommend downloading and extracting the database once and providing the folder.",
+                    "fa_icon": "fas fa-database"
+                },
+                "gtdbtk_ar53_metadata": {
+                    "type": "string",
+                    "format": "path",
+                    "description": "GTDB archaeal metadata table (`ar53_metadata_r*.tsv.gz`, local path or URL) used to convert GTDB taxonomy to NCBI. Must match the GTDB-Tk database release.",
+                    "default": "https://data.gtdb.aau.ecogenomic.org/releases/release232/232.0/ar53_metadata_r232.tsv.gz",
+                    "fa_icon": "fas fa-file-alt"
+                },
+                "gtdbtk_bac120_metadata": {
+                    "type": "string",
+                    "format": "path",
+                    "description": "GTDB bacterial metadata table (`bac120_metadata_r*.tsv.gz`, local path or URL) used to convert GTDB taxonomy to NCBI. Must match the GTDB-Tk database release.",
+                    "default": "https://data.gtdb.aau.ecogenomic.org/releases/release232/232.0/bac120_metadata_r232.tsv.gz",
+                    "fa_icon": "fas fa-file-alt"
+                },
                 "cat_db": {
                     "format": "file-path",
                     "description": "Path to local CAT_pack DB",

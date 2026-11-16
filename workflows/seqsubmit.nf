@@ -34,7 +34,11 @@ workflow SEQSUBMIT {
     rrna_limit                   // val: rRNA length percentage threshold
     checkm2_db                   // val: path to CheckM2 database
     checkm2_db_download_id       // val: CheckM2 database download ID
+    taxonomy_tool                // val: catpack or gtdbtk
     cat_db                       // val: path to CAT database
+    gtdbtk_db                    // val: GTDB-Tk database - local directory or .tar.gz/.tgz archive (path or URL)
+    gtdbtk_ar53_metadata         // val: GTDB archaeal metadata table for the GTDB -> NCBI conversion
+    gtdbtk_bac120_metadata       // val: GTDB bacterial metadata table for the GTDB -> NCBI conversion
     center_name                  // val: submission center name
     upload_tpa                   // val: upload as TPA (Third Party Annotation)
     test_upload                  // val: true for test upload mode
@@ -65,7 +69,11 @@ workflow SEQSUBMIT {
             rrna_limit,
             checkm2_db,
             checkm2_db_download_id,
+            taxonomy_tool,
             cat_db,
+            gtdbtk_db,
+            gtdbtk_ar53_metadata,
+            gtdbtk_bac120_metadata,
             center_name,
             upload_tpa,
             test_upload,

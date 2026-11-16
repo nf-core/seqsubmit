@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "taxonomy_assignment"
+description: |
+  Assigns NCBI taxonomy to genomes without NCBI_lineage, using CAT_pack (default) or GTDB-Tk,
+  selected by taxonomy_tool.
+  CAT_pack (BAT) classifies each genome separately.
+  GTDB-Tk classifies all genomes in a single classify_wf job, and its GTDB taxonomy is converted
+  to NCBI taxonomy with gtdb_to_ncbi_majority_vote.py. GTDB-Tk classifies only bacteria and archaea.
+  Databases can be given as a directory or as a .tar.gz archive that is extracted by the subworkflow.
+keywords:
+  - genome
+  - taxonomy
+  - classification
+  - catpack
+  - gtdbtk
+  - metagenomics
+  - MAGs
+  - bins
+components:
+  - rename_fasta_for_catpack
+  - fasta_classify_catpack
+  - gtdbtk/classifywf
+  - gtdbtk/gtdbtoncbimajorityvote
+  - untar
+input:
+  - ch_fasta:
+      type: file
+      description: |
+        Channel containing genome FASTA files without NCBI_lineage.
+        With GTDB-Tk, FASTA file names (without extension) must be unique, because GTDB-Tk uses them as genome IDs.
+        Structure: [ val(meta), path(fasta) ]
+      pattern: "*.{fa,fasta,fna,fa.gz,fasta.gz,fna.gz}"
+      ontologies:
+        - edam: "http://edamontology.org/format_1929" # FASTA
+  - taxonomy_tool:
+      type: string
+      description: Tool used to assign taxonomy.
+      enum: ["catpack", "gtdbtk"]
+  - cat_db:
+      type: directory
+      description: |
+        CAT_pack database as a local directory (with db/ and tax/ subdirectories) or .tar.gz archive.
+        Provide null to download and prepare the NCBI nr database. Only used when taxonomy_tool is 'catpack'.
+  - gtdbtk_db:
+      type: directory
+      description: |
+        GTDB-Tk reference database as a local directory or .tar.gz/.tgz archive (local path or URL).
+        Required when taxonomy_tool is 'gtdbtk' and there is at least one genome to classify.
+  - gtdbtk_ar53_metadata:
+      type: file
+      description: |
+        GTDB archaeal metadata table (ar53_metadata_r*.tsv.gz) used by gtdb_to_ncbi_majority_vote.py.
+        Must match the GTDB-Tk database release. Only used when taxonomy_tool is 'gtdbtk'.
+      pattern: "*.{tsv,tsv.gz}"
+  - gtdbtk_bac120_metadata:
+      type: file
+      description: |
+        GTDB bacterial metadata table (bac120_metadata_r*.tsv.gz) used by gtdb_to_ncbi_majority_vote.py.
+        Must match the GTDB-Tk database release. Only used when taxonomy_tool is 'gtdbtk'.
+      pattern: "*.{tsv,tsv.gz}"
+output:
+  - lineage:
+      type: list
+      description: |
+        Channel containing the assigned NCBI lineage per genome.
+        CAT_pack gives a lineage of NCBI taxids separated by ';' (e.g. 1;131567;2;...),
+        GTDB-Tk gives NCBI names with rank prefixes (e.g. d__Bacteria;p__Pseudomonadota;...).
+        The lineage is null in -stub mode. With GTDB-Tk, the run fails if a genome could not be classified.
+        Structure: [ val(meta), val(NCBI_lineage) ]
+authors:
+  - "@KateSakharova"
