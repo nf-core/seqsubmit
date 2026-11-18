@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
+- [#128](https://github.com/nf-core/seqsubmit/pull/128)
+  - Replaced custom eukcc/single module with nf-core
+
 - [#126](https://github.com/nf-core/seqsubmit/pull/126)
   - Simplified tests for READSUBMIT and ASSEMBLYSUBMIT by joining test samplesheets
 
