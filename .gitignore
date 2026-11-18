@@ -8,7 +8,5 @@ testing*
 *.pyc
 null/
 .lineage/
-.nf-test*
-.idea/
-test_data
-.venv
+.nf-test/
+.nf-test.log
