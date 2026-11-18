@@ -1,0 +1,161 @@
+nextflow_workflow {
+
+    name "Test Subworkflow TAXONOMY_ASSIGNMENT -stub"
+    script "../main.nf"
+    workflow "TAXONOMY_ASSIGNMENT"
+
+    tag "subworkflows"
+    tag "subworkflows_local"
+    tag "subworkflows/taxonomy_assignment"
+    tag "rename_fasta_for_catpack"
+    tag "subworkflows/fasta_classify_catpack"
+    tag "gtdbtk"
+    tag "gtdbtk/classifywf"
+    tag "gtdbtk/gtdbtoncbimajorityvote"
+    tag "untar"
+
+    test("two genomes - gtdbtk - stub") {
+
+        options "-stub"
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of(
+                    [
+                        [ id:'test_ecoli' ],
+                        file(params.modules_testdata_base_path + 'genomics/prokaryotes/escherichia_coli/genome/genome.fa', checkIfExists: true)
+                    ],
+                    [
+                        [ id:'test_bfragilis' ],
+                        file(params.modules_testdata_base_path + 'genomics/prokaryotes/bacteroides_fragilis/genome/genome.fna.gz', checkIfExists: true)
+                    ]
+                )
+                input[1] = 'gtdbtk'  // taxonomy_tool
+                input[2] = null      // cat_db - not used with gtdbtk
+                // stub GTDB-Tk database: only metadata/metadata.txt is needed to report the database version
+                input[3] = "${moduleDir}/tests/fixtures/gtdbtk_db"
+                input[4] = "${moduleDir}/tests/fixtures/ar53_metadata_stub.tsv"
+                input[5] = "${moduleDir}/tests/fixtures/bac120_metadata_stub.tsv"
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assertAll(
+                { assert snapshot(workflow.out.lineage).match() },
+                // one lineage per genome, null in -stub mode
+                { assert workflow.out.lineage.collect { it[0].id }.sort() == ['test_bfragilis', 'test_ecoli'] },
+                { assert workflow.out.lineage.every { it[1] == null } },
+                // all genomes are classified in a single GTDB-Tk job
+                { assert workflow.trace.tasks().count { it.name.contains('GTDBTK_CLASSIFYWF') } == 1 },
+                { assert workflow.trace.tasks().count { it.name.contains('GTDBTK_GTDBTONCBIMAJORITYVOTE') } == 1 },
+                { assert workflow.trace.tasks().count { it.name.contains('RENAME_FASTA_FOR_CATPACK') } == 2 },
+                // database is a directory - nothing to extract
+                { assert !workflow.trace.tasks().any { it.name.contains('GTDBTK_DB_UNTAR') } },
+                { assert !workflow.trace.tasks().any { it.name.contains('FASTA_CLASSIFY_CATPACK') } }
+            )
+        }
+
+    }
+
+    test("two genomes - catpack - stub") {
+
+        options "-stub"
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of(
+                    [
+                        [ id:'test_ecoli' ],
+                        file(params.modules_testdata_base_path + 'genomics/prokaryotes/escherichia_coli/genome/genome.fa', checkIfExists: true)
+                    ],
+                    [
+                        [ id:'test_bfragilis' ],
+                        file(params.modules_testdata_base_path + 'genomics/prokaryotes/bacteroides_fragilis/genome/genome.fna.gz', checkIfExists: true)
+                    ]
+                )
+                input[1] = 'catpack' // taxonomy_tool
+                input[2] = params.pipelines_testdata_base_path + 'test_data/small_cat_db/tax-db.tar.gz'
+                input[3] = null      // gtdbtk_db - not used with catpack
+                input[4] = null
+                input[5] = null
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assertAll(
+                { assert snapshot(workflow.out.lineage).match() },
+                { assert workflow.out.lineage.collect { it[0].id }.sort() == ['test_bfragilis', 'test_ecoli'] },
+                { assert workflow.out.lineage.every { it[1] == null } },
+                // CAT_pack classifies each genome separately
+                { assert workflow.trace.tasks().count { it.name.contains('CATPACK_BINS') } == 2 },
+                { assert workflow.trace.tasks().count { it.name.contains('CATPACK_ADDNAMES_BINS') } == 2 },
+                { assert !workflow.trace.tasks().any { it.name.contains('GTDBTK') } }
+            )
+        }
+
+    }
+
+    test("two genomes - gtdbtk - no gtdbtk_db - stub") {
+
+        options "-stub"
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of(
+                    [
+                        [ id:'test_ecoli' ],
+                        file(params.modules_testdata_base_path + 'genomics/prokaryotes/escherichia_coli/genome/genome.fa', checkIfExists: true)
+                    ]
+                )
+                input[1] = 'gtdbtk'
+                input[2] = null
+                input[3] = null      // gtdbtk_db missing while genomes need classification
+                input[4] = "${moduleDir}/tests/fixtures/ar53_metadata_stub.tsv"
+                input[5] = "${moduleDir}/tests/fixtures/bac120_metadata_stub.tsv"
+                """
+            }
+        }
+
+        then {
+            assert workflow.failed
+            assert workflow.stdout.any { it.contains('--gtdbtk_db is not provided') } ||
+                workflow.stderr.any { it.contains('--gtdbtk_db is not provided') }
+        }
+
+    }
+
+    test("no genomes - gtdbtk - stub") {
+
+        options "-stub"
+
+        when {
+            workflow {
+                """
+                input[0] = channel.empty()
+                input[1] = 'gtdbtk'
+                input[2] = null
+                input[3] = null      // gtdbtk_db is not required without genomes to classify
+                input[4] = "${moduleDir}/tests/fixtures/ar53_metadata_stub.tsv"
+                input[5] = "${moduleDir}/tests/fixtures/bac120_metadata_stub.tsv"
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assertAll(
+                { assert workflow.out.lineage.size() == 0 },
+                { assert !workflow.trace.tasks().any { it.name =~ /GTDBTK|FASTA_CLASSIFY_CATPACK|RENAME_FASTA_FOR_CATPACK/ } }
+            )
+        }
+
+    }
+
+}

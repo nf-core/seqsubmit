@@ -60,7 +60,8 @@ When `--mode mags` or `--mode bins` is used, results are written under `mags/` o
   - `<sample>/coverage/`: `coverm genome` output for samples where `genome_coverage` had to be computed.
   - `<sample>/rna/barrnap/`: `barrnap` output GFF for samples where `RNA_presence` had to be inferred (run with the kingdom matching the genome domain).
   - `<sample>/rna/trnascanse/`: `tRNAscan-SE` outputs for the same RNA inference step.
-  - `<sample>/taxonomy/`: CAT/BAT taxonomic classification for samples where `NCBI_lineage` was missing.
+  - `<sample>/taxonomy/`: CAT/BAT taxonomic classification for samples where `NCBI_lineage` was missing, only with `--taxonomy_tool catpack` (default).
+  - `taxonomy/gtdbtk/`: GTDB-Tk results for all samples where `NCBI_lineage` was missing, only with `--taxonomy_tool gtdbtk`: GTDB classification summaries (`gtdbtk.bac120.summary.tsv`, `gtdbtk.ar53.summary.tsv`), logs (`gtdbtk.log`, `gtdbtk.warnings.log`) and GTDB to NCBI taxonomy conversion (`gtdbtk.ncbi.tsv`).
   - `<sample>/checkm2/`: CheckM2 report (`<sample>_checkm2_report.tsv`) for prokaryotic (bacteria and archaea) samples where completeness/contamination metadata had to be computed.
   - `<sample>/eukcc/`: EukCC results (`<sample>_eukcc_results/eukcc.tsv`) for eukaryotic samples where completeness/contamination metadata had to be computed. Not created with `--eukaryotic_completeness_tool busco` if `contamination` was provided in the samplesheet.
   - `<sample>/busco/<domain>-<sample>/`: BUSCO short summaries (`.txt`, `.json`), batch summary and log for eukaryotic samples, only with `--eukaryotic_completeness_tool busco`.

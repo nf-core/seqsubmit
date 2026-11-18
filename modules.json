@@ -77,6 +77,16 @@
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/find/concatenate/find-concatenate.diff"
                     },
+                    "gtdbtk/classifywf": {
+                        "branch": "master",
+                        "git_sha": "7b3452a23773f687ededb4befd037920e5a51341",
+                        "installed_by": ["modules"]
+                    },
+                    "gtdbtk/gtdbtoncbimajorityvote": {
+                        "branch": "master",
+                        "git_sha": "7b3452a23773f687ededb4befd037920e5a51341",
+                        "installed_by": ["modules"]
+                    },
                     "gunzip": {
                         "branch": "master",
                         "git_sha": "0902eac3012baaf4f9ab6513c8c55acc9353c96c",

@@ -253,7 +253,8 @@ def toolCitationText() {
     ].join(' ').trim()
 
     def taxonomy_tools = [
-        params.mode == "bins" || params.mode == "mags" ? "Taxonomy was assigned by CAT_pack (Von Meijenfeldt et al. 2019)." : ""
+        (params.mode == "bins" || params.mode == "mags") && params.taxonomy_tool != "gtdbtk" ? "Taxonomy was assigned by CAT_pack (Von Meijenfeldt et al. 2019)." : "",
+        (params.mode == "bins" || params.mode == "mags") && params.taxonomy_tool == "gtdbtk" ? "Taxonomy was assigned by GTDB-Tk (Chaumeil et al. 2022) and converted to NCBI taxonomy with gtdb_to_ncbi_majority_vote.py." : ""
     ].join(' ').trim()
 
     def rna_tools = [
@@ -289,6 +290,7 @@ def toolBibliographyText() {
             '<li>Matsen, F. A., Kodner, R. B., & Armbrust, E. V. (2010). pplacer: linear time maximum-likelihood and Bayesian phylogenetic placement of sequences onto a fixed reference tree. BMC Bioinformatics, 11, 538. doi: <a href="https://doi.org/10.1186/1471-2105-11-538">10.1186/1471-2105-11-538</a></li>',
             params.eukaryotic_completeness_tool == "busco" ? '<li>Manni, M., Berkeley, M. R., Seppey, M., Simão, F. A., & Zdobnov, E. M. (2021). BUSCO Update: Novel and Streamlined Workflows along with Broader and Deeper Phylogenetic Coverage for Scoring of Eukaryotic, Prokaryotic, and Viral Genomes. Molecular Biology and Evolution, 38(10), 4647-4654. doi: <a href="https://doi.org/10.1093/molbev/msab199">10.1093/molbev/msab199</a></li>' : "",
             params.eukaryotic_completeness_tool == "busco" ? '<li>Tegenfeldt, F., Kuznetsov, D., Manni, M., Berkeley, M., Zdobnov, E. M., & Kriventseva, E. V. (2025). OrthoDB and BUSCO update: annotation of orthologs with wider sampling of genomes. Nucleic Acids Research, 53(D1), D516-D522. doi: <a href="https://doi.org/10.1093/nar/gkae987">10.1093/nar/gkae987</a></li>' : "",
+            params.taxonomy_tool == "gtdbtk" ? '<li>Chaumeil, P. A., Mussig, A. J., Hugenholtz, P., & Parks, D. H. (2022). GTDB-Tk v2: memory friendly classification with the genome taxonomy database. Bioinformatics, 38(23), 5315-5316. doi: <a href="https://doi.org/10.1093/bioinformatics/btac672">10.1093/bioinformatics/btac672</a></li>' : "",
             '<li>Von Meijenfeldt, F. B., Arkhipova, K., Cambuy, D. D., Coutinho, F. H., & Dutilh, B. E. (2019). Robust taxonomic classification of uncharted microbial sequences and bins with CAT and BAT. Genome biology, 20(1), 217. doi: <a href="https://doi.org/10.1038/s41467-024-47155-1">10.1038/s41467-024-47155-1</a></li>',
             '<li>Seemann, T. (2014). barrnap: Bacterial ribosomal RNA predictor. barrnap: Bacterial ribosomal RNA predictor. <a href="http://vicbioinformatics.com/">vicbioinformatics.com</a></li>',
             '<li>Chan, P. P., Lin, B. Y., Mak, A. J., & Lowe, T. M. (2021). tRNAscan-SE 2.0: improved detection and functional classification of transfer RNA genes. Nucleic acids research, 49(16), 9077-9096. doi: <a href="https://doi.org/10.1093/nar/gkab688">10.1093/nar/gkab688</a></li>',

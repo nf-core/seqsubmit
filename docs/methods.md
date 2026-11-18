@@ -70,15 +70,28 @@ Genome coverage values from `coverm genome` output TSV are parsed and merged int
 
 ### Taxonomy assignment
 
-If `NCBI_lineage` is already present in the input samplesheet, the value is retained. If it is missing, the workflow runs taxonomy classification using the `CAT_pack` tool.
+If `NCBI_lineage` is already present in the input samplesheet, the value is retained. If it is missing, the workflow runs taxonomy classification in the `TAXONOMY_ASSIGNMENT` subworkflow with the tool selected by `--taxonomy_tool`: `catpack` (default) or `gtdbtk`.
 
-Before classification, input FASTA files are normalized to a `.fasta` suffix by `RENAME_FASTA_FOR_CATPACK`. Classification is then run in bin mode (`CAT_pack bins`, followed by `CAT_pack add_names`).
+Before classification, input FASTA files are decompressed and normalized to a `.fasta` suffix by `RENAME_FASTA_FOR_CATPACK`.
 
-Database input is taken from `--cat_db` when provided; otherwise the workflow builds CAT_pack database from NCBI non-redundant protein database (`nr`). See [CAT_pack documentation](https://github.com/MGXlab/CAT_pack#downloading-preconstructed-database-files). There are two options available: `nr` - NCBI non-redundant protein database and `gtdb` (Genome Taxonomy Database (GTDB) proteins). We use NCBI proteins because ENA supports only NCBI format of taxonomy for submission. The resulting classification table is parsed, and the lineage field is written to `NCBI_lineage`.
+#### CAT_pack (default)
+
+Classification is run in bin mode for each genome separately (`CAT_pack bins`, followed by `CAT_pack add_names`).
+
+Database input is taken from `--cat_db` when provided; otherwise the workflow builds CAT_pack database from NCBI non-redundant protein database (`nr`). See [CAT_pack documentation](https://github.com/MGXlab/CAT_pack#downloading-preconstructed-database-files). There are two options available: `nr` - NCBI non-redundant protein database and `gtdb` (Genome Taxonomy Database (GTDB) proteins). We use NCBI proteins because ENA supports only NCBI format of taxonomy for submission. The resulting classification table is parsed, and the lineage field (NCBI taxonomy IDs) is written to `NCBI_lineage`.
+
+#### GTDB-Tk
+
+> [!WARNING]
+> GTDB-Tk classifies only bacteria and archaea. Use `--taxonomy_tool gtdbtk` only if you do not expect eukaryotes in your MAGs/bins. The pipeline fails if a genome cannot be classified by GTDB-Tk; in that case provide `NCBI_lineage` in the samplesheet or use `--taxonomy_tool catpack`.
+
+All genomes without `NCBI_lineage` are classified together in a single GTDB-Tk job (`gtdbtk classify_wf --skip_ani_screen`) against the database given with `--gtdbtk_db`. GTDB-Tk uses FASTA file names (without extension) as genome IDs, so file names must be unique.
+
+GTDB taxonomy is then converted to NCBI taxonomy, because ENA supports only NCBI taxonomy for submission. The conversion is done by `gtdb_to_ncbi_majority_vote.py` from GTDB-Tk with the GTDB metadata tables (`--gtdbtk_ar53_metadata`, `--gtdbtk_bac120_metadata`). The `Majority vote NCBI classification` column (NCBI names with rank prefixes, e.g. `d__Bacteria;p__Pseudomonadota;...`) is written to `NCBI_lineage`.
 
 ### Domain assignment
 
-After taxonomy assignment, the workflow decides the domain of each genome from `NCBI_lineage`, which is either provided in the samplesheet or assigned by `CAT_pack`:
+After taxonomy assignment, the workflow decides the domain of each genome from `NCBI_lineage`, which is either provided in the samplesheet or assigned by `CAT_pack` or `GTDB-Tk`:
 
 - `euk` (eukaryote) if the lineage contains `Eukaryota` or the NCBI taxonomy ID `2759`
 - `arc` (archaea) if the lineage contains `Archaea` or the NCBI taxonomy ID `2157`
