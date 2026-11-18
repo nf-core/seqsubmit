@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: "create_genome_metadata_tsv"
+description: Creates a tab-separated TSV file containing metadata for genome MAGs/bins submissions
+keywords:
+  - genomics
+  - metadata
+  - submission
+  - metagenomics
+  - MAG
+  - bins
+tools:
+  - bash:
+      description: GNU Bourne-Again SHell
+      homepage: https://www.gnu.org/software/bash/
+      documentation: https://www.gnu.org/software/bash/manual/
+      licence: ["GPL-3.0-or-later"]
+      identifier: ""
+
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing genome metadata. Required fields:
+            - id: Genome identifier
+            - accession: Sample accession
+            - assembly_software: Software used for assembly
+            - binning_software: Software used for binning
+            - binning_parameters: Parameters used for binning
+            - stats_generation_software: Software used for stats generation
+            - completeness: Genome completeness percentage
+            - contamination: Genome contamination percentage
+            - genome_coverage: Genome coverage value
+            - metagenome: Metagenome identifier
+            - co_assembly: Co-assembly status ("Yes" or other)
+            - broad_environment: Broad environmental context
+            - local_environment: Local environmental context
+            - environmental_medium: Environmental medium description
+            - RNA_presence: status of tRNA and rRNA genes presence ("Yes" or other)
+            - NCBI_lineage: NCBI taxonomic lineage
+    - fasta:
+        type: file
+        description: Genome FASTA file
+        pattern: "*.{fasta,fa,fna}"
+
+output:
+  - tsv:
+      - "*.tsv":
+          type: file
+          description: Tab-separated TSV file with genome metadata
+          pattern: "*.tsv"
+
+authors:
+  - "@ochkalova"
+maintainers:
+  - "@ochkalova"

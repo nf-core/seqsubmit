@@ -11,7 +11,6 @@
 include { UTILS_NFSCHEMA_PLUGIN     } from '../../nf-core/utils_nfschema_plugin'
 include { paramsSummaryMap          } from 'plugin/nf-schema'
 include { samplesheetToList         } from 'plugin/nf-schema'
-include { paramsHelp                } from 'plugin/nf-schema'
 include { completionEmail           } from '../../nf-core/utils_nfcore_pipeline'
 include { completionSummary         } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NFCORE_PIPELINE     } from '../../nf-core/utils_nfcore_pipeline'
@@ -32,9 +31,12 @@ workflow PIPELINE_INITIALISATION {
     nextflow_cli_args //   array: List of positional nextflow CLI args
     outdir            //  string: The output directory where the results will be saved
     input             //  string: Path to input samplesheet
+    mode              //  string: Type of input data (mags, bins, metagenomic_assemblies, reads)
     help              // boolean: Display help message and exit
     help_full         // boolean: Show the full help message
     show_hidden       // boolean: Show hidden parameters in the help message
+    submission_study  // val: ENA study accession for all reads in this run (optional).
+    study_metadata    // val: path to study metadata file for study creation (used if no submission_study provided)
 
     main:
 
@@ -103,25 +105,21 @@ workflow PIPELINE_INITIALISATION {
     // Create channel from input file provided through params.input
     //
 
-    channel
-        .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
-        .map {
-            meta, fastq_1, fastq_2 ->
-                if (!fastq_2) {
-                    return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
-                } else {
-                    return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
-                }
-        }
-        .groupTuple()
-        .map { samplesheet ->
-            validateInputSamplesheet(samplesheet)
-        }
-        .map {
-            meta, fastqs ->
-                return [ meta, fastqs.flatten() ]
-        }
-        .set { ch_samplesheet }
+    if ( mode == "mags" || mode == "bins" ) {
+        ch_samplesheet = channel
+            .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input_genome.json"))
+    } else if ( mode == "metagenomic_assemblies" ) {
+        ch_samplesheet = channel
+            .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input_assembly.json"))
+    } else if ( mode == "reads" ) {
+        ch_samplesheet = channel
+            .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input_reads.json"))
+    }
+
+    // check submission study and metadata presence/absence for REGISTER STUDY
+    if (!submission_study && !study_metadata) {
+        error("Either --submission_study or --study_metadata must be provided")
+    }
 
     emit:
     samplesheet = ch_samplesheet
@@ -194,27 +192,107 @@ def validateInputSamplesheet(input) {
     return [ metas[0], fastqs ]
 }
 //
+// Calculate co-assembly coverage from a `coverm contig --methods mean length` table.
+// Rows are contigs; each read set contributes one `<name> Mean` and one `<name> Length` column.
+// Per-contig depth is the sum of the `Mean` columns (reads from all runs were pooled for the
+// co-assembly). Assembly depth is the length-weighted mean of the per-contig depths:
+//     sum_c(L_c * sum_i(D_c,i)) / sum_c(L_c)
+//
+def calculateCoassemblyCoverage(coverage_file) {
+    double weighted_depth = 0d
+    double total_length   = 0d
+
+    coverage_file.splitCsv(sep: '\t', header: true).each { row ->
+        def mean_columns  = row.findAll { key, _value -> key.endsWith(' Mean') }
+        def length_column = row.find { key, _value -> key.endsWith(' Length') }
+        if (!mean_columns || !length_column) {
+            error("CoverM output ${coverage_file.name} must contain '<sample> Mean' and '<sample> Length' columns. Run 'coverm contig' with '--methods mean length'.")
+        }
+
+        def depth  = mean_columns.values().sum { value -> value as Double }
+        def length = length_column.value as Double
+
+        weighted_depth += depth * length
+        total_length   += length
+    }
+
+    if (total_length == 0) {
+        error("CoverM output ${coverage_file.name} has no contigs, so assembly coverage cannot be calculated.")
+    }
+    def coverage = weighted_depth / total_length
+    if (coverage == 0) {
+        error("Calculated coverage for ${coverage_file.name} is 0: no reads mapped to the assembly. Check that the reads in 'fastq_1'/'fastq_2' belong to this assembly.")
+    }
+    return coverage
+}
+
+//
 // Generate methods description for MultiQC
 //
 def toolCitationText() {
-    // TODO nf-core: Optionally add in-text citation tools to this list.
-    // Can use ternary operators to dynamically construct based conditions, e.g. params["run_xyz"] ? "Tool (Foo et al. 2023)" : "",
-    // Uncomment function in methodsDescriptionText to render in MultiQC report
+    def mgnify_tools = [
+        params.mode == "metagenomic_assemblies" ? "Manifests for metagenomic assemblies upload were created by assembly_uploader (Richardson et al. 2023)." : "",
+        params.mode == "bins" || params.mode == "mags" ? "Samples registration and upload manifests generation for bins/MAGs were done by genome_uploader (Gurbich et al. 2023).": ""
+    ].join(' ').trim()
+
+    def ena_tools = [
+        "Submission to ENA was done by webin-cli (David, Yuan, et al. 2025)."
+    ].join(' ').trim()
+
+    def preprocessing_tools = [
+        "Input FASTA validation was done by fa-lint (https://github.com/GallVp/fa-lint)."
+    ].join(' ').trim()
+
+    def stats_tools = [
+        params.mode == "bins" || params.mode == "mags" ? "Completeness and contamination metrics for prokaryotic genomes were calculated by CheckM2 (Chklovski et al. 2023)." : "",
+        params.mode == "bins" || params.mode == "mags" ? "Contamination metrics for eukaryotic genomes were calculated by EukCC (Saary et al. 2020), which uses MetaEuk (Levy Karin et al. 2020) and pplacer (Matsen et al. 2010)." : "",
+        (params.mode == "bins" || params.mode == "mags") && params.eukaryotic_completeness_tool == "busco" ? "Completeness metrics for eukaryotic genomes were calculated by BUSCO (Manni et al. 2021; Tegenfeldt et al. 2025)." : "",
+        (params.mode == "bins" || params.mode == "mags") && params.eukaryotic_completeness_tool != "busco" ? "Completeness metrics for eukaryotic genomes were calculated by EukCC (Saary et al. 2020)." : "",
+        params.mode == "metagenomic_assemblies" ? "Coverage calculation for metagenomic assemblies was done by CoverM contig (Aroney et el. 2025)." : "",
+        params.mode == "bins" || params.mode == "mags" ? "Coverage calculation for bins/MAGs was done by CoverM genome (Aroney et el. 2025)." : ""
+    ].join(' ').trim()
+
+    def taxonomy_tools = [
+        params.mode == "bins" || params.mode == "mags" ? "Taxonomy was assigned by CAT_pack (Von Meijenfeldt et al. 2019)." : ""
+    ].join(' ').trim()
+
+    def rna_tools = [
+        params.mode == "bins" || params.mode == "mags" ? "Ribosomal RNA prediction was performed by barrnap (Seemann T. 2013)." : "",
+        params.mode == "bins" || params.mode == "mags" ? "Transfer RNA genes were detected by tRNAscan-SE (Chan et al. 2021)." : ""
+    ].join(' ').trim()
+
+    def postprocessing_text = "Run statistics were reported using MultiQC (Ewels et al. 2016)."
+
     def citation_text = [
-            "Tools used in the workflow included:",
-            "MultiQC (Ewels et al. 2016)",
-            "."
+            preprocessing_tools,
+            stats_tools,
+            taxonomy_tools,
+            rna_tools,
+            mgnify_tools,
+            ena_tools,
+            postprocessing_text
         ].join(' ').trim()
 
     return citation_text
 }
 
 def toolBibliographyText() {
-    // TODO nf-core: Optionally add bibliographic entries to this list.
-    // Can use ternary operators to dynamically construct based conditions, e.g. params["run_xyz"] ? "<li>Author (2023) Pub name, Journal, DOI</li>" : "",
-    // Uncomment function in methodsDescriptionText to render in MultiQC report
     def reference_text = [
-            "<li>Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics , 32(19), 3047–3048. doi: /10.1093/bioinformatics/btw354</li>"
+            '<li>Richardson, L., Allen, B., Baldi, G., Beracochea, M., Bileschi, M. L., Burdett, T., ... & Finn, R. D. (2023). MGnify: the microbiome sequence data analysis resource in 2023. Nucleic acids research, 51(D1), D753-D759. doi: <a href="https://doi.org/10.1093/nar/gkac1080">10.1093/nar/gkac1080</a></li>',
+            '<li>Gurbich, T. A., Almeida, A., Beracochea, M., Burdett, T., Burgin, J., Cochrane, G., ... & Finn, R. D. (2023). MGnify genomes: a resource for biome-specific microbial genome catalogues. Journal of molecular biology, 435(14), 168016. doi: <a href="https://doi.org/10.1016/j.jmb.2023.168016">10.1016/j.jmb.2023.168016</a></li>',
+            '<li>David, Y., Alisha, A., Awais, A., Rajkumar, D., Dipayan, G., Muhammad, H., ... & Ugis, S. (2026). The European Nucleotide Archive in 2025. Nucleic Acids Research, 54(D1), D120-D127. doi: <a href="https://doi.org/10.1093/nar/gkaf1295">10.1093/nar/gkaf1295</a></li>',
+            '<li>Edwards, R. (2023). linsalrob/py_fasta_validator: Compressy. doi: <a href="https://doi.org/10.5281/zenodo.5002710">10.5281/zenodo.5002710</a></li>',
+            '<li>Chklovski, A., Parks, D. H., Woodcroft, B. J., & Tyson, G. W. (2023). CheckM2: a rapid, scalable and accurate tool for assessing microbial genome quality using machine learning. Nature Methods, 20(8), 1203-1212. doi: <a href="https://doi.org/10.1038/s41592-023-01940-w">10.1038/s41592-023-01940-w</a></li>',
+            '<li>Aroney, S. T., Newell, R. J., Nissen, J. N., Camargo, A. P., Tyson, G. W., & Woodcroft, B. J. (2025). CoverM: read alignment statistics for metagenomics. Bioinformatics, 41(4), btaf147. doi: <a href="https://doi.org/10.1093/bioinformatics/btaf147">10.1093/bioinformatics/btaf147</a></li>',
+            '<li>Saary, P., Mitchell, A. L., & Finn, R. D. (2020). Estimating the quality of eukaryotic genomes recovered from metagenomic analysis with EukCC. Genome Biology, 21(1), 244. doi: <a href="https://doi.org/10.1186/s13059-020-02155-4">10.1186/s13059-020-02155-4</a></li>',
+            '<li>Levy Karin, E., Mirdita, M., & Söding, J. (2020). MetaEuk—sensitive, high-throughput gene discovery, and annotation for large-scale eukaryotic metagenomics. Microbiome, 8(1), 48. doi: <a href="https://doi.org/10.1186/s40168-020-00808-x">10.1186/s40168-020-00808-x</a></li>',
+            '<li>Matsen, F. A., Kodner, R. B., & Armbrust, E. V. (2010). pplacer: linear time maximum-likelihood and Bayesian phylogenetic placement of sequences onto a fixed reference tree. BMC Bioinformatics, 11, 538. doi: <a href="https://doi.org/10.1186/1471-2105-11-538">10.1186/1471-2105-11-538</a></li>',
+            params.eukaryotic_completeness_tool == "busco" ? '<li>Manni, M., Berkeley, M. R., Seppey, M., Simão, F. A., & Zdobnov, E. M. (2021). BUSCO Update: Novel and Streamlined Workflows along with Broader and Deeper Phylogenetic Coverage for Scoring of Eukaryotic, Prokaryotic, and Viral Genomes. Molecular Biology and Evolution, 38(10), 4647-4654. doi: <a href="https://doi.org/10.1093/molbev/msab199">10.1093/molbev/msab199</a></li>' : "",
+            params.eukaryotic_completeness_tool == "busco" ? '<li>Tegenfeldt, F., Kuznetsov, D., Manni, M., Berkeley, M., Zdobnov, E. M., & Kriventseva, E. V. (2025). OrthoDB and BUSCO update: annotation of orthologs with wider sampling of genomes. Nucleic Acids Research, 53(D1), D516-D522. doi: <a href="https://doi.org/10.1093/nar/gkae987">10.1093/nar/gkae987</a></li>' : "",
+            '<li>Von Meijenfeldt, F. B., Arkhipova, K., Cambuy, D. D., Coutinho, F. H., & Dutilh, B. E. (2019). Robust taxonomic classification of uncharted microbial sequences and bins with CAT and BAT. Genome biology, 20(1), 217. doi: <a href="https://doi.org/10.1038/s41467-024-47155-1">10.1038/s41467-024-47155-1</a></li>',
+            '<li>Seemann, T. (2014). barrnap: Bacterial ribosomal RNA predictor. barrnap: Bacterial ribosomal RNA predictor. <a href="http://vicbioinformatics.com/">vicbioinformatics.com</a></li>',
+            '<li>Chan, P. P., Lin, B. Y., Mak, A. J., & Lowe, T. M. (2021). tRNAscan-SE 2.0: improved detection and functional classification of transfer RNA genes. Nucleic acids research, 49(16), 9077-9096. doi: <a href="https://doi.org/10.1093/nar/gkab688">10.1093/nar/gkab688</a></li>',
+            '<li>Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics , 32(19), 3047–3048. doi: <a href="https://doi.org/10.1093/bioinformatics/btw354">10.1093/bioinformatics/btw354</a></li>'
         ].join(' ').trim()
 
     return reference_text
@@ -244,9 +322,8 @@ def methodsDescriptionText(mqc_methods_yaml) {
     meta["tool_citations"] = ""
     meta["tool_bibliography"] = ""
 
-    // TODO nf-core: Only uncomment below if logic in toolCitationText/toolBibliographyText has been filled!
-    // meta["tool_citations"] = toolCitationText().replaceAll(", \\.", ".").replaceAll("\\. \\.", ".").replaceAll(", \\.", ".")
-    // meta["tool_bibliography"] = toolBibliographyText()
+    meta["tool_citations"] = toolCitationText().replaceAll(", \\.", ".").replaceAll("\\. \\.", ".").replaceAll(", \\.", ".")
+    meta["tool_bibliography"] = toolBibliographyText()
 
 
     def methods_text = mqc_methods_yaml.text
@@ -255,4 +332,37 @@ def methodsDescriptionText(mqc_methods_yaml) {
     def description_html = engine.createTemplate(methods_text).make(meta)
 
     return description_html.toString()
+}
+
+//
+// Read completeness and contamination from a CheckM2 quality_report.tsv or EukCC eukcc.tsv.
+// Both are tab-separated with a header and genome name, completeness, contamination as first three columns.
+// Empty or header-only tables (-stub mode, EukCC exit codes 201/204) give null values.
+//
+def parseStatsTable(meta, table, software) {
+    def lines  = table.readLines()
+    def values = lines.size() > 1 ? lines[1].split('\t') : null
+    return [
+        meta,
+        values ? values[1] : null,
+        values ? values[2] : null,
+        software
+    ]
+}
+
+//
+// Check if completeness or contamination value was not assigned by a tool: missing, empty or NA/NaN
+//
+def isNotAssigned(value) {
+    return value == null || value.toString().trim().toUpperCase() in ['', 'NA', 'NAN']
+}
+
+//
+// Join software names with ';', appending launched tools to the software given in the samplesheet.
+// Duplicates and empty values are removed, e.g. "CheckM2_v1.0.0;eukcc_v2.2.0"
+//
+def mergeSoftware(existing, tools) {
+    def existing_tools = existing ? existing.toString().tokenize(';').collect { tool -> tool.trim() } : []
+    def merged = (existing_tools + tools.findAll { tool -> tool }.collect { tool -> tool.toString() }).unique()
+    return merged ? merged.join(';') : null
 }

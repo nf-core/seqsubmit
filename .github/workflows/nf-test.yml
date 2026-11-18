@@ -17,6 +17,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  WEBIN_ACCOUNT: ${{ secrets.WEBIN_ACCOUNT }}
+  WEBIN_PASSWORD: ${{ secrets.WEBIN_PASSWORD }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   NFT_VER: "0.9.4"
   NFT_WORKDIR: "~"

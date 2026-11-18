@@ -1,0 +1,4 @@
+Contig	contigs.fasta/run1_1.fastq.gz Mean	contigs.fasta/run1_1.fastq.gz Length	contigs.fasta/run2_1.fastq.gz Mean	contigs.fasta/run2_1.fastq.gz Length	contigs.fasta/run3_1.fastq.gz Mean	contigs.fasta/run3_1.fastq.gz Length
+contig_1	4	1000	3	1000	3	1000
+contig_2	1	3000	1	3000	0	3000
+contig_3	0	500	0	500	0	500

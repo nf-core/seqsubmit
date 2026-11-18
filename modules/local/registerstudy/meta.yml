@@ -1,0 +1,68 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: "registerstudy"
+description: |
+  Submit a new study to ENA via via the Webin drop-box XML submission service.
+  Reads study metadata from a JSON, CSV, or TSV file,
+  builds SUBMISSION XML and PROJECT XML, and submits to ENA.
+  Credentials are read from the ENA_WEBIN and ENA_WEBIN_PASSWORD
+  env variables, which are mapped to ENA_WEBIN and ENA_WEBIN_PASSWORD
+  inside the process.
+keywords:
+  - ena
+  - submission
+  - study
+  - project
+  - webin
+tools:
+  - mgnify-pipelines-toolkit:
+      description: |
+        A toolkit of utilities used in MGnify metagenomics pipelines,
+        including click, requests, and other dependencies required by
+        the ENA submission scripts.
+      homepage: https://github.com/EBI-Metagenomics/mgnify-pipelines-toolkit
+      documentation: https://github.com/EBI-Metagenomics/mgnify-pipelines-toolkit
+      tool_dev_url: https://github.com/EBI-Metagenomics/mgnify-pipelines-toolkit
+      doi: ""
+      licence: ["Apache-2.0"]
+      identifier: null
+
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information.
+          e.g. `[ id:'sample1' ]`
+    - study_metadata:
+        type: file
+        description: |
+          Study metadata file in JSON, CSV, or TSV format.
+          JSON may be a plain list of dicts or a single dict of study records.
+          Required fields per record: study_title, alias.
+        pattern: "*.{json,csv,tsv}"
+  - - test_upload:
+        type: value
+        description: Whether to submit to the ENA test server (`true`) instead of production.
+  - - release_date:
+        type: value
+        description: Date when data should become public (YYYY-MM-DD, max 2 years from now).
+
+output:
+  - accessions:
+      - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information.
+            e.g. `[ id:'sample1' ]`
+      - "*_accessions.json":
+          type: file
+          description: |
+            JSON file containing the submission results with keys:
+            submitted (newly created accessions) and failed.
+          pattern: "*_accessions.json"
+
+authors:
+  - "@timrozday"
+  - "@ochkalova"
+maintainers:
+  - "@timrozday"
+  - "@ochkalova"

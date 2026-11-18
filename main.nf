@@ -15,7 +15,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { SEQSUBMIT  } from './workflows/seqsubmit'
+include { SEQSUBMIT               } from './workflows/seqsubmit'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_seqsubmit_pipeline'
 /*
@@ -43,7 +43,27 @@ workflow NFCORE_SEQSUBMIT {
         params.multiqc_logo,
         params.multiqc_methods_description,
         params.outdir,
+        params.mode,
+        params.submission_study,
+        params.study_metadata,
+        params.trna_limit,
+        params.rrna_limit,
+        params.checkm2_db,
+        params.checkm2_db_download_id,
+        params.cat_db,
+        params.center_name,
+        params.upload_tpa,
+        params.test_upload,
+        params.webincli_mode,
+        params.is_private,
+        params.release_date ? channel.value(params.release_date) : channel.value(false),
+        params.busco_db_lineage,
+        params.busco_db,
+        params.busco_clean,
+        params.eukaryotic_completeness_tool,
+        params.eukcc_db
     )
+
     emit:
     multiqc_report = SEQSUBMIT.out.multiqc_report // channel: /path/to/multiqc_report.html
 }
@@ -66,9 +86,12 @@ workflow {
         args,
         params.outdir,
         params.input,
+        params.mode,
         params.help,
         params.help_full,
-        params.show_hidden
+        params.show_hidden,
+        params.submission_study,
+        params.study_metadata
     )
 
     //

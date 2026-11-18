@@ -1,0 +1,81 @@
+{
+    "bacteroides_fragilis - bac - stub": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test_bac",
+                        "domain": "bac"
+                    },
+                    "test_bac_rna_decision.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                ]
+            ]
+        ],
+        "timestamp": "2026-10-14T15:01:52.546789",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    },
+    "homo_sapiens - euk": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test_euk",
+                        "domain": "euk"
+                    },
+                    "test_euk_rna_decision.tsv:md5,70447fb76ec179475ad2f4eca8ef9892"
+                ]
+            ]
+        ],
+        "timestamp": "2026-10-14T14:55:50.441162",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    },
+    "multiple genomes - mixed domains": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test_bac",
+                        "domain": "bac"
+                    },
+                    "test_bac_rna_decision.tsv:md5,99228ffd59107b1168a98f5c69d4e3e3"
+                ],
+                [
+                    {
+                        "id": "test_euk",
+                        "domain": "euk"
+                    },
+                    "test_euk_rna_decision.tsv:md5,70447fb76ec179475ad2f4eca8ef9892"
+                ]
+            ]
+        ],
+        "timestamp": "2026-10-14T16:46:52.104684",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    },
+    "bacteroides_fragilis - bac": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test_bac",
+                        "domain": "bac"
+                    },
+                    "test_bac_rna_decision.tsv:md5,99228ffd59107b1168a98f5c69d4e3e3"
+                ]
+            ]
+        ],
+        "timestamp": "2026-10-14T16:40:41.699153",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    }
+}

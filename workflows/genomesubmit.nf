@@ -1,0 +1,330 @@
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+include { GENOME_UPLOAD as CREATE_MANIFESTS     } from '../modules/local/genome_upload'
+include { ENA_WEBIN_CLI_WRAPPER as SUBMIT       } from '../modules/local/ena_webin_cli_wrapper'
+include { REGISTERSTUDY                         } from '../modules/local/registerstudy/main'
+include { RENAME_FASTA_FOR_CATPACK              } from '../modules/local/rename_fasta_for_catpack'
+include { CREATE_GENOME_METADATA_TSV            } from '../modules/local/create_genome_metadata_tsv/main'
+
+include { COVERM_GENOME                         } from '../modules/nf-core/coverm/genome'
+include { FIND_CONCATENATE as CONCAT_METADATA   } from '../modules/nf-core/find/concatenate/main'
+include { FIND_CONCATENATE as CONCAT_ACCESSIONS } from '../modules/nf-core/find/concatenate/main'
+
+include { FASTA_VALIDATION                      } from '../subworkflows/local/fasta_validation/main'
+include { EUKARYOTIC_GENOME_EVALUATION          } from '../subworkflows/local/eukaryotic_genome_evaluation/main'
+include { PROKARYOTIC_GENOME_EVALUATION         } from '../subworkflows/local/prokaryotic_genome_evaluation/main'
+include { RNA_DETECTION                         } from '../subworkflows/local/rna_detection/main'
+include { FASTA_CLASSIFY_CATPACK                } from '../subworkflows/nf-core/fasta_classify_catpack/main'
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    RUN MAIN WORKFLOW
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+workflow GENOMESUBMIT {
+
+    take:
+    ch_samplesheet               // channel: samplesheet read in from --input
+    mags_or_bins_flag            // val: submission mode (mags or bins)
+    submission_study             // val: accession of the study to submit to (optional)
+    study_metadata               // val: path to study metadata file for study creation (used if no submission_study provided)
+    trna_limit                   // val: tRNA count threshold
+    rrna_limit                   // val: rRNA length percentage threshold
+    checkm2_db                   // val: path to CheckM2 database
+    checkm2_db_download_id       // val: CheckM2 database download ID
+    cat_db                       // val: path to CAT database
+    center_name                  // val: submission centre name
+    upload_tpa                   // val: upload as TPA (Third Party Annotation)
+    test_upload                  // val: true for test upload mode
+    webincli_mode                // val: either 'validate' or 'submit' to specify WebinCLI mode of operation
+    is_private                   // val: fetch metadata from private/public account
+    release_date                 // val: keep submitted data private until given date
+    busco_db_lineage             // val: name of the busco supported lineage
+    busco_db                     // val: download URL or local tar.gz archive/directory
+    busco_clean                  // boolean: clean intermediate busco files
+    eukaryotic_completeness_tool // val: busco or eukcc
+    eukcc_db                     // val: EukCC database - local directory or .tar.gz/.tgz archive (path or URL)
+
+    main:
+
+    def ch_multiqc_files = channel.empty()
+
+    // --------- Create genomes channel with proper metadata structure
+    genome_fasta_and_reads = ch_samplesheet
+        .map { meta, fasta, reads_1, reads_2 ->
+            def new_meta = meta + [single_end: !reads_2]
+            def reads = new_meta.single_end
+                ? [reads_1]
+                : [reads_1, reads_2]
+            [new_meta, fasta, reads]
+        }
+
+    genome_fasta = genome_fasta_and_reads.map{meta, fasta, _fq1 -> [meta, fasta]}
+    genome_reads = genome_fasta_and_reads.map{meta, _fasta, reads -> [meta, reads]}
+
+    // --------- Check fasta files are properly formatted and filter out files with less than 2 contigs
+    FASTA_VALIDATION (
+        genome_fasta
+    )
+
+    // --------- Genome coverage calculation
+    branched_coverage_results = FASTA_VALIDATION.out.valid_fastas
+        .branch { meta, _fasta ->
+            genome_coverage_ref_input: !(meta.genome_coverage)
+            genome_coverage_present: true  // Everything else goes here
+        }
+
+    coverm_input = branched_coverage_results.genome_coverage_ref_input.join(genome_reads)
+        .multiMap { meta, fasta, fastq ->
+            genome: [ meta, fasta ]
+            raw_reads: [ meta, fastq ]
+        }
+
+    COVERM_GENOME (
+        coverm_input.raw_reads,
+        coverm_input.genome,
+        false,
+        false,
+        'file',
+        false
+    )
+
+    // Update metadata for records missing coverage
+    fasta_updated_with_coverage = COVERM_GENOME.out.coverage.join(branched_coverage_results.genome_coverage_ref_input)
+        .map{ meta, coverage_tsv, fasta ->
+              def lines = coverage_tsv.readLines()
+              // support for empty coverage files required for -stub mode
+              def coverage = lines ? lines[1].split('\t')[1] : null
+              def updated_meta = meta.clone()
+              updated_meta.genome_coverage = coverage
+              return [updated_meta, fasta]
+        }
+        .mix(branched_coverage_results.genome_coverage_present)
+
+    // --------- Taxonomy
+    branched_taxonomy_results = fasta_updated_with_coverage
+        .branch { meta, _fasta ->
+            taxonomy_absent: !(meta.NCBI_lineage)
+            taxonomy_present: true  // Everything else goes here
+        }
+
+    // Change extension for all files required taxonomy to .fasta because CATPACK requires suffix as input
+    RENAME_FASTA_FOR_CATPACK (
+        branched_taxonomy_results.taxonomy_absent
+    )
+
+    // build input structures for CAT_DB depending on what provided as input
+    def cat_db_input = cat_db
+        ? channel.of( [['id': 'CAT_DB'], file(cat_db)] )
+        : channel.empty()
+
+    cat_db_download_id = "nr"  // NCBI non-redundant protein database identifier
+    def cat_db_id_input = cat_db
+        ? channel.empty()
+        : channel.of( [['id': 'CAT_DB_id'], cat_db_download_id] )
+
+    FASTA_CLASSIFY_CATPACK (
+        RENAME_FASTA_FOR_CATPACK.out.renamed_fasta,  // ch_bins
+        channel.empty(),                             // ch_contigs - empty because we classify bins, not contigs
+        cat_db_input,
+        cat_db_id_input,
+        false,                                       // disable summary generation
+        '.fasta'                                     // bin_suffix - the suffix of the renamed fasta files
+    )
+
+    fasta_updated_with_taxonomy = FASTA_CLASSIFY_CATPACK.out.bat_classification
+        .join(branched_taxonomy_results.taxonomy_absent)
+        .map { meta, taxa_tsv, fasta ->
+            def lines = taxa_tsv.readLines()
+            def updated_meta = meta.clone()
+            // support for empty taxonomy files required for -stub mode
+            // skip header and take 4th column from table corresponding to lineage
+            updated_meta.NCBI_lineage = lines ? lines[1].split('\t')[3] : null
+            return [updated_meta, fasta]
+        }
+        .mix(branched_taxonomy_results.taxonomy_present)
+
+    // --------- Add meta.domain value for eukaryotes (euk) and prokaryotes (bac and arc)
+    domain_identification = fasta_updated_with_taxonomy
+        .map { meta, fasta ->
+            def lineage = meta.NCBI_lineage.toLowerCase()
+            def parts   = lineage.tokenize(';').collect { p -> p.trim() }
+            def is_euk  = lineage.contains('eukaryot') || parts.contains('2759')
+            def is_arc  = lineage.contains('archaea') || parts.contains('2157')
+            def is_bac  = lineage.contains('bacteria') || parts.contains('2')
+
+            if (!is_euk && !is_arc && !is_bac) {
+            throw new IllegalStateException(
+                "Unassigned or unrecognized taxonomic lineage for ${meta.id}: '${meta.NCBI_lineage}. \
+                Provide NCBI format taxonomy or remove it from MAG/bin submission'"
+                )
+            }
+
+            [ meta + [domain: is_euk ? 'euk' : (is_arc ? 'arc' : 'bac')], fasta ]
+        }
+
+    // --------- For genomes without RNA_presence info, calculate rRNA and tRNA
+    branched_rna_results = domain_identification
+        .branch { meta, _fasta ->
+            rna_prediction_input: meta.RNA_presence == null  // it might be True/False
+            rna_present: true  // Everything else goes here
+        }
+
+    RNA_DETECTION (
+        branched_rna_results.rna_prediction_input,
+        trna_limit,
+        rrna_limit
+    )
+
+    // Update metadata for records missing RNA
+    fasta_updated_with_rna = RNA_DETECTION.out.rna_detected.join(branched_rna_results.rna_prediction_input)
+        .map{ meta, rna_decision, fasta ->
+              def lines = rna_decision.readLines()
+              // support for empty decision files required for -stub mode
+              def decision = lines ? lines[0].split('\t')[1].toLowerCase() == 'true' : null
+              def updated_meta = meta.clone()
+              updated_meta.RNA_presence = decision
+              return [updated_meta, fasta]
+        }
+        .mix(branched_rna_results.rna_present)
+
+    // --------- Completeness and contamination calculation
+    branched_stats_results = fasta_updated_with_rna
+        .branch { meta, _fasta ->
+            genome_evaluation_input: meta.completeness == null || meta.contamination == null || meta.stats_generation_software == null
+            evaluation_present: true  // Everything else goes here
+        }
+
+    // Split genomes to evaluate into prokaryotes and eukaryotes
+    domain_split_stats = branched_stats_results.genome_evaluation_input
+        .branch { meta, _fasta ->
+            prokaryotes: meta.domain in ['arc', 'bac']
+            eukaryotes:  meta.domain == 'euk'
+        }
+
+    PROKARYOTIC_GENOME_EVALUATION (
+        domain_split_stats.prokaryotes,
+        checkm2_db,
+        checkm2_db_download_id
+    )
+
+    EUKARYOTIC_GENOME_EVALUATION (
+        domain_split_stats.eukaryotes,
+        busco_db_lineage,
+        busco_db,
+        busco_clean,
+        eukaryotic_completeness_tool,
+        eukcc_db
+    )
+
+    // Update metadata with completeness and contamination from CheckM2 (prokaryotes) or EukCC/BUSCO (eukaryotes)
+    // Eukaryotic genomes without completeness or contamination are filtered out in EUKARYOTIC_GENOME_EVALUATION
+    fasta_updated_with_stats = PROKARYOTIC_GENOME_EVALUATION.out.stats
+        .mix(EUKARYOTIC_GENOME_EVALUATION.out.stats)
+        .join(branched_stats_results.genome_evaluation_input)
+        .map { meta, completeness, contamination, stats_software, fasta ->
+            def updated_meta = meta + [
+                completeness: completeness,
+                contamination: contamination,
+                stats_generation_software: stats_software
+            ]
+            return [updated_meta, fasta]
+        }
+        .mix(branched_stats_results.evaluation_present)
+
+
+    // --------- Combine metadata into TSV using module
+    CREATE_GENOME_METADATA_TSV (
+        fasta_updated_with_stats
+    )
+
+    // Collect all TSV rows into a single file
+    CONCAT_METADATA (
+        CREATE_GENOME_METADATA_TSV.out.tsv.map { _meta, file -> file }.collect().map { files -> [ [id: "genomes_metadata"], files ] },
+        'true' // skip_header - we want to keep the header from the first file and skip it for the rest
+    )
+
+    // --------- Register study if accession not provided via --submission_study
+    def study_accession_ch
+    if (submission_study) {
+        study_accession_ch = channel.of(submission_study)
+    } else {
+        REGISTERSTUDY(
+            // Only register a study when at least one genome passed validation
+            FASTA_VALIDATION.out.valid_fastas.first().map { _it -> [[id: "study"], file(study_metadata)] },
+            test_upload,
+            release_date,
+            center_name
+        )
+
+        study_accession_ch = REGISTERSTUDY.out.accessions
+            .map { _meta, json ->
+                def data = new groovy.json.JsonSlurper().parse(json)
+                data.submitted[0]?.accession
+            }
+    }
+
+    // --------- Generate manifests
+    CREATE_MANIFESTS(
+        fasta_updated_with_stats.map{_meta, fasta -> fasta}.collect(),
+        CONCAT_METADATA.out.file_out.map { _meta, file -> file }.first(),
+        mags_or_bins_flag,     // mags or bins
+        study_accession_ch.first(),
+        center_name,
+        upload_tpa,
+        test_upload,
+        is_private
+    )
+
+    // All manifests were generated in one run
+    // Manifests should be separated into different channels using prefix as id
+    manifests_ch = CREATE_MANIFESTS.out.manifests.flatten()
+        .map { manifest ->
+            def prefix = test_upload ?
+                manifest.name.replaceAll(/_\d+\.manifest$/, '') :  // Remove extension and hash suffix appended in test mode
+                manifest.name.replaceAll(/\.manifest$/, '')        // Remove only extension in live mode
+            def meta = [id: prefix]
+            [ meta, manifest ]
+    }
+    // Combine fasta and manifests
+    ch_combined = fasta_updated_with_stats
+        .map { meta, fasta -> [meta.id, meta, fasta] }
+        .join(
+            manifests_ch.map { meta, manifest -> [meta.id, manifest] }  // Has only [id: prefix]
+        )
+        .map { _id, full_meta, fasta, manifest ->
+            [full_meta, fasta, manifest]
+        }
+
+    // --------- Upload data to ENA
+    SUBMIT (
+        ch_combined,
+        test_upload,
+        webincli_mode,
+        "genome"
+    )
+
+    // Concatenate accessions into single file to publish
+    CONCAT_ACCESSIONS (
+        SUBMIT.out.accessions.map { _meta, file -> file }.collect().map { files -> [ [id: "genomes_accessions"], files ] },
+        'true' // skip_header - we want to keep the header from the first file and skip it for the rest
+    )
+
+    // --------- Collect files for the MultiQC report
+    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_METADATA.out.file_out.map{_meta, file -> file})
+    ch_multiqc_files = ch_multiqc_files.mix(CREATE_MANIFESTS.out.upload_registered_mags)
+    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_ACCESSIONS.out.file_out.map{_meta, file -> file})
+
+    emit:
+    multiqc_files = ch_multiqc_files // channel: files to include in the MultiQC report
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    THE END
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
