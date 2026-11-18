@@ -1,5 +1,5 @@
 {
-    "-profile test_assembly_multiple_cases": {
+    "-profile test_assembly_multiple_cases_skip_submit": {
         "content": [
             19,
             {

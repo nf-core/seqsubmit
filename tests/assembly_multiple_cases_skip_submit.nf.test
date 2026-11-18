@@ -1,13 +1,13 @@
 nextflow_pipeline {
 
-    name "Test assembly submission workflow - multiple cases"
+    name "Test assembly submission workflow - multiple cases, skip SUBMIT"
     script "../main.nf"
     tag "pipeline"
     tag "mode_assembly"
-    tag "test_assembly_multiple_cases"
-    profile "test_assembly_multiple_cases"
+    tag "test_assembly_multiple_cases_skip_submit"
+    profile "test_assembly_multiple_cases_skip_submit"
 
-    test("-profile test_assembly_multiple_cases") {
+    test("-profile test_assembly_multiple_cases_skip_submit") {
 
         when {
             params {

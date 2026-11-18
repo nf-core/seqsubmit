@@ -19,10 +19,10 @@ When `--mode reads` is used, results are written under `reads/`.
 
 - `reads/`
   - `upload/reads_accessions.tsv`: experiment and run accessions assigned to submitted reads (also shown in the MultiQC report).
+  - `<sample>/upload/<sample>.manifest`: Webin-CLI reads manifest generated for the sample.
+  - `<sample>/upload/webin_cli/`: Webin-CLI wrapper output TSV with accessions for the submitted reads (`--webincli_mode submit` only).
 
 </details>
-
-Manifest generation and Webin-CLI submission are executed by the workflow, but their intermediate outputs are not currently published into `--outdir` by the pipeline.
 
 ## `metagenomic_assemblies` outputs
 

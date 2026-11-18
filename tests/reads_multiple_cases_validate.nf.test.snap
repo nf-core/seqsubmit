@@ -27,7 +27,14 @@
                 "multiqc/multiqc_data/multiqc_sources.txt",
                 "multiqc/multiqc_report.html",
                 "pipeline_info",
-                "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml"
+                "pipeline_info/nf_core_seqsubmit_software_mqc_versions.yml",
+                "reads",
+                "reads/bacteroides_fragilis",
+                "reads/bacteroides_fragilis/upload",
+                "reads/bacteroides_fragilis/upload/bacteroides_fragilis.manifest",
+                "reads/bacteroides_fragilis_ont_bam",
+                "reads/bacteroides_fragilis_ont_bam/upload",
+                "reads/bacteroides_fragilis_ont_bam/upload/bacteroides_fragilis_ont_bam.manifest"
             ],
             [
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"

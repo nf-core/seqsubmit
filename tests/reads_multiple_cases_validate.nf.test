@@ -34,11 +34,14 @@ nextflow_pipeline {
                     stable_path
                 ).match() },
                 {
-                    // CREATE_READS_MANIFEST output is not published, so look it up in the work dir
-                    // (skip symlinks staged into downstream tasks)
+                    // CREATE_READS_MANIFEST output is published to reads/<id>/upload/<id>.manifest
+                    // (excluded from md5 checks in tests/.nftignore: NAME has a timestamp suffix)
                     def manifests = [:]
-                    new File("$workDir").eachFileRecurse(groovy.io.FileType.FILES) { f ->
-                        if (f.name.endsWith(".manifest") && !java.nio.file.Files.isSymbolicLink(f.toPath())) {
+                    new File("$outputDir/reads").eachFileRecurse(groovy.io.FileType.FILES) { f ->
+                        if (f.name.endsWith(".manifest")) {
+                            // manifest is published to the folder of its own sample
+                            assert f.parentFile.name == "upload"
+                            assert f.parentFile.parentFile.name + ".manifest" == f.name
                             manifests[f.name] = f.readLines()
                         }
                     }
