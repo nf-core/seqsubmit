@@ -231,7 +231,26 @@ workflow ASSEMBLYSUBMIT {
 
     // --------- Collect files for the MultiQC report
     ch_multiqc_files = ch_multiqc_files.mix(CONCAT_ACCESSIONS.out.file_out.map{_meta, file -> file})
-    ch_multiqc_files = ch_multiqc_files.mix(CONCAT_METADATA.out.file_out.map{_meta, file -> file})
+    // Convert metadata CSVs to TSV for MultiQC: the Runs column of co-assemblies holds
+    // quoted comma-separated accessions (e.g. "SRR3183850,SRR3183951"), which MultiQC splits.
+    // MultiQC uses the first column as row key, so prepend the unique assembly ID
+    // (Runs alone is not unique and duplicate rows would be merged)
+    def ch_assembly_metadata_tsv = assembly_metadata_with_sample
+        .flatMap { meta, csv ->
+            csv.readLines().drop(1).findAll { line -> line.trim() }.collect { line ->
+                // split on commas outside double quotes, then strip the quotes
+                def fields = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/, -1)
+                    .collect { field -> field.trim().replaceAll(/^"|"$/, '') }
+                ([meta.id] + fields).join('\t')
+            }
+        }
+        .collectFile(
+            name: 'assemblies_metadata.tsv',
+            seed: "Assembly\tRuns\tCoverage\tAssembler\tVersion\tFilepath\tSample\tLibrary",
+            newLine: true,
+            sort: true
+        )
+    ch_multiqc_files = ch_multiqc_files.mix(ch_assembly_metadata_tsv)
 
     emit:
     multiqc_files = ch_multiqc_files // channel: files to include in the MultiQC report

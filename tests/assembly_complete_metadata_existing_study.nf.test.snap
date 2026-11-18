@@ -33,13 +33,11 @@
             },
             [
                 "metagenomic_assemblies",
-                "metagenomic_assemblies/complete_metadata",
-                "metagenomic_assemblies/complete_metadata/upload",
-                "metagenomic_assemblies/complete_metadata/upload/webin_cli",
-                "metagenomic_assemblies/complete_metadata/upload/webin_cli/complete_metadata_accessions.tsv",
                 "metagenomic_assemblies/upload",
                 "metagenomic_assemblies/upload/assemblies_accessions.tsv",
                 "metagenomic_assemblies/upload/assemblies_metadata.csv",
+                "metagenomic_assemblies/upload/manifests",
+                "metagenomic_assemblies/upload/manifests/complete_metadata.manifest",
                 "multiqc",
                 "multiqc/multiqc_data",
                 "multiqc/multiqc_data/llms-full.txt",
@@ -67,7 +65,7 @@
             ],
             [
                 "assemblies_metadata.csv:md5,98b1419c74815101cfacd3daf92a435a",
-                "multiqc_assembly_metadata.txt:md5,3187b2ddb3922a060b58f330c7609d0d",
+                "multiqc_assembly_metadata.txt:md5,99b2bfa0b2001b6a1e1525a37adc2d18",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
             ]
         ],

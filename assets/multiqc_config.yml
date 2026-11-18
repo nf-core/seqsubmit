@@ -25,7 +25,7 @@ custom_content:
 
 sp:
   assembly_metadata:
-    fn_re: ".*assemblies_metadata.csv$"
+    fn_re: 'assemblies_metadata\.tsv$'
   genome_metadata:
     fn_re: ".*genomes_metadata.tsv$"
   sample_registration:
@@ -43,11 +43,12 @@ custom_data:
     id: "assembly_metadata"
     section_name: "Assembly metadata"
     description: "Metadata for submitted assemblies"
-    file_format: "csv"
+    file_format: "tsv"
     plot_type: "table"
     pconfig:
       id: "assembly_metadata"
       title: "Assembly metadata table"
+      col1_header: "Assembly"
     headers:
       Runs:
         title: "Runs"
