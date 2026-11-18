@@ -39,8 +39,8 @@ nextflow_workflow {
             assertAll(
                 { assert snapshot(workflow.out.stats).match() },
                 { assert workflow.out.stats.size() == 1 },
-                { assert workflow.out.stats[0][1] == '90.0' },  // fake values assigned by eukcc in -stub
-                { assert workflow.out.stats[0][2] == '1.0' },   // fake values assigned by eukcc in -stub
+                { assert workflow.out.stats[0][1] == null },  // eukcc -stub writes a header-only table
+                { assert workflow.out.stats[0][2] == null },
                 { assert workflow.out.stats[0][3].startsWith('eukcc_v') },
                 { assert !workflow.trace.tasks().any { it.name.contains('BUSCO') } }
             )
@@ -76,7 +76,7 @@ nextflow_workflow {
                 // completeness is taken from BUSCO - stub writes no short summary json, so it is empty
                 { assert workflow.out.stats[0][1] == null },
                 // contamination is always taken from EukCC
-                { assert workflow.out.stats[0][2] == '1.0' },
+                { assert workflow.out.stats[0][2] == null },
                 { assert workflow.out.stats[0][3] ==~ /busco_v[^;]+;eukcc_v[^;]+/ },
                 { assert workflow.trace.tasks().any { it.name.contains('BUSCO_BUSCO') } }
             )
@@ -147,7 +147,7 @@ nextflow_workflow {
                 { assert snapshot(workflow.out.stats).match() },
                 { assert workflow.out.stats.size() == 1 },
                 // completeness from EukCC, contamination kept from samplesheet
-                { assert workflow.out.stats[0][1] == '90.0' },
+                { assert workflow.out.stats[0][1] == null },
                 { assert workflow.out.stats[0][2] == 2.5 },
                 { assert workflow.out.stats[0][3] ==~ /CustomTool_v1\.0;eukcc_v[^;]+/ },
                 { assert workflow.trace.tasks().any { it.name.contains('EUKCC_SINGLE') } }

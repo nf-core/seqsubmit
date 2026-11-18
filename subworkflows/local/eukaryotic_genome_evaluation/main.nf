@@ -7,7 +7,7 @@
     IMPORT FUNCTIONS / MODULES / SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { EUKCC_SINGLE             } from '../../../modules/local/eukcc/single/main'
+include { EUKCC_SINGLE             } from '../../../modules/nf-core/eukcc/single/main'
 
 include { BUSCO_BUSCO              } from '../../../modules/nf-core/busco/busco/main'
 include { UNTAR as DB_UNTAR        } from '../../../modules/nf-core/untar/main'
@@ -91,7 +91,9 @@ workflow EUKARYOTIC_GENOME_EVALUATION {
 
     EUKCC_SINGLE (
        GUNZIP_FASTA.out.gunzip,
-       eukcc_database
+       eukcc_database,
+       [],  // genomes
+       []   // use_placement
     )
 
     // ------ Combine completeness and contamination from all tools into one channel
@@ -104,7 +106,7 @@ workflow EUKARYOTIC_GENOME_EVALUATION {
         .first()
 
     // [ meta, completeness, contamination, software ], contamination from the samplesheet is kept if present
-    ch_eukcc_stats = EUKCC_SINGLE.out.eukcc_tsv
+    ch_eukcc_stats = EUKCC_SINGLE.out.tsv
         .combine(eukcc_software)
         .map { meta, table, software -> parseStatsTable(meta, table, software) }
         .map { meta, completeness, contamination, software ->

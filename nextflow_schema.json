@@ -132,7 +132,7 @@
                     "description": "EukCC database as an uncompressed folder or a `.tar.gz`/`.tgz` archive (local path or URL). Used to calculate completeness and contamination of eukaryotic MAGs/bins if those values were not provided in the samplesheet. URLs are downloaded and archives are extracted by the pipeline in every run, so we recommend downloading and extracting the database once and providing the folder.",
                     "format": "path",
                     "exists": true,
-                    "default": "http://ftp.ebi.ac.uk/pub/databases/metagenomics/eukcc/eukcc2_db_ver_1.1.tar.gz"
+                    "default": "http://ftp.ebi.ac.uk/pub/databases/metagenomics/eukcc/eukcc2_db_ver_2026-11.tar.gz"
                 },
                 "eukaryotic_completeness_tool": {
                     "type": "string",
